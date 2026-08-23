@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>S01_LP2_Equipo05_CalisayaHelio</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #1e293b; padding: 40px; max-width: 900px; margin: auto; }
+        h1 { color: #0f172a; border-bottom: 3px solid #eab308; padding-bottom: 10px; text-align: center; }
+        h2 { color: #1e3a8a; border-bottom: 2px solid #cbd5e1; padding-bottom: 5px; margin-top: 30px; }
+        h3 { color: #0f766e; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
+        th { background-color: #f1f5f9; color: #0f172a; }
+        pre { background-color: #0f172a; color: #f8fafc; padding: 15px; border-radius: 6px; overflow-x: auto; font-family: 'Consolas', monospace; font-size: 13px; }
+        code { background-color: #f1f5f9; color: #0f172a; padding: 2px 5px; border-radius: 4px; font-family: 'Consolas', monospace; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .badge-success { background-color: #dcfce7; color: #166534; }
+        .box { background-color: #f8fafc; border-left: 4px solid #eab308; padding: 15px; margin: 15px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <h1>INFORME DE EVIDENCIA INDIVIDUAL - SESIÓN S01</h1>
+    <p style="text-align: center; font-weight: bold;">CURSO: LENGUAJE DE PROGRAMACIÓN II (LP2)</p>
+    <p style="text-align: center; color: #64748b;">Archivo entregable: <code>S01_LP2_Equipo05_CalisayaHelio.pdf</code></p>
+
+    <div class="box">
+        <h2>📌 DATOS DEL ESTUDIANTE</h2>
+        <ul>
+            <li><strong>Nombre:</strong> Helio Calisaya</li>
+            <li><strong>Equipo:</strong> Equipo 05 - Proyecto <code>bomerp-acopio-oro</code></li>
+            <li><strong>Sesión:</strong> S01 - Arquitectura Backend REST Profesional</li>
+            <li><strong>Rol o Aporte Realizado:</strong> Desarrollador Backend & Arquitecto de Base de Datos</li>
+            <li><strong>Link de GitHub del Proyecto:</strong> <a href="https://github.com/helionelio900-hub/SysProyec_Acopus" target="_blank">https://github.com/helionelio900-hub/SysProyec_Acopus</a></li>
+        </ul>
+    </div>
+
+    <h2>1. EVIDENCIA TÉCNICA (EVALUADA SOBRE RÚBRICA 4.6)</h2>
+
+    <h3>Bloque 1: Ejecución y Configuración Reproducible (20%)</h3>
+    <p>El backend fue ejecutado utilizando Java 21 y el Maven Wrapper del proyecto (<code>.\mvnw.cmd spring-boot:run</code>).</p>
+    <p><span class="badge badge-success">BUILD SUCCESS</span> Compilación exitosa en 23.5 segundos sin errores.</p>
+    <p>El endpoint de verificación responde correctamente en <code>http://localhost:8080/actuator/health</code> con estado <code>{"status":"UP"}</code>.</p>
+    <p><strong>Configuración por ambiente sin secretos expuestos:</strong> Las credenciales pertenecen al entorno de desarrollo local (<code>BOMERP_APP / 123456</code>) en <code>application-dev.yml</code>.</p>
+
+    <h3>Bloque 2: Conexión a Base de Datos Verificada (20%)</h3>
+    <p>Se ejecutaron los scripts DDL en Oracle XE/23ai:</p>
+    <ul>
+        <li><code>bd2/S01_01_esquemas.sql</code>: Creación del esquema <code>BOM_ACOPIO</code> y el usuario de la aplicación <code>BOMERP_APP</code>.</li>
+        <li><code>bd2/S01_02_tablas.sql</code>: Creación de las 4 tablas principales (<code>PARAMETROS_SISTEMA</code>, <code>MINEROS</code>, <code>TRANSACCIONES_G2</code>, <code>LIQUIDACIONES_G1</code>) con restricción <code>CHECK (TIPO_ORO IN ('ROJO', 'VERDE'))</code>.</li>
+    </ul>
+
+    <h3>Bloque 3: Recursos, Endpoints y DTO Coherentes (20%)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Módulo</th>
+                <th>Método</th>
+                <th>Endpoint HTTP</th>
+                <th>DTO Request</th>
+                <th>DTO Response</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Módulo 1: Seguridad</td>
+                <td>POST</td>
+                <td><code>/api/v1/auth/login</code></td>
+                <td>AuthRequest</td>
+                <td>AuthResponse</td>
+            </tr>
+            <tr>
+                <td>Módulo 2: Cotizador</td>
+                <td>GET</td>
+                <td><code>/api/v1/cotizador/estimar</code></td>
+                <td>pesoBrutoGramos (Query)</td>
+                <td>CotizacionEstimadaResponse</td>
+            </tr>
+            <tr>
+                <td>Módulo 3: Acopio G2</td>
+                <td>POST</td>
+                <td><code>/api/v1/acopio/transacciones</code></td>
+                <td>TransaccionG2Request</td>
+                <td>TransaccionG2Response</td>
+            </tr>
+            <tr>
+                <td>Módulo 3: Acopio G2</td>
+                <td>GET</td>
+                <td><code>/api/v1/acopio/acumulados-semanales</code></td>
+                <td>—</td>
+                <td>AcumuladosG2Response</td>
+            </tr>
+            <tr>
+                <td>Módulo 4: Mayorista G1</td>
+                <td>POST</td>
+                <td><code>/api/v1/mayorista/liquidaciones</code></td>
+                <td>LiquidacionG1Request</td>
+                <td>LiquidacionG1Response</td>
+            </tr>
+            <tr>
+                <td>Módulo 5: Dashboard</td>
+                <td>GET</td>
+                <td><code>/api/v1/dashboard/consolidado</code></td>
+                <td>—</td>
+                <td>DashboardResponse</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p><strong>Ejemplo de Respuesta JSON DTO (Cotizador Minero):</strong></p>
+<pre>{
+  "pesoBrutoGramos": 20.0,
+  "porcentajeMermaEstimada": 5.00,
+  "pesoNetoEstimadoGramos": 19.000,
+  "precioGramoDiaPen": 280.00,
+  "montoEstimadoTotalPen": 5320.00,
+  "mensaje": "Cotización estimativa rápida sin registro en BD."
+}</pre>
+
+    <h3>Bloque 4: Documentación OpenAPI y Versionado (20%)</h3>
+    <p>La documentación interactiva de OpenAPI / Swagger UI está disponible en <code>http://localhost:8080/swagger-ui.html</code>. Todos los endpoints utilizan el prefijo de versionado <code>/api/v1/...</code>.</p>
+
+    <h3>Bloque 5: Estructura Modular Verificada con Spring Modulith (20%)</h3>
+    <p>El proyecto se organiza bajo el paquete <code>pe.edu.upeu.bomerp.acopio</code> en 5 módulos de negocio independientes. La verificación con <code>ModularityTests</code> obtuvo resultado en <strong>VERDE</strong>.</p>
+
+    <h2>2. RESPUESTAS A LAS PREGUNTAS DE DEFENSA (4.5)</h2>
+    <ol>
+        <li><strong>¿Cómo se reproduce la ejecución del backend en otro equipo?</strong> Clonando el repositorio y ejecutando <code>.\mvnw.cmd spring-boot:run</code> con Java 21. El wrapper instala Maven automáticamente.</li>
+        <li><strong>¿Cómo se configura la conexión sin publicar credenciales?</strong> Mediante perfiles <code>application-dev.yml</code> e inyección de variables de entorno en producción.</li>
+        <li><strong>¿Qué comprueba el endpoint de verificación?</strong> Comprueba que la JVM esté activa y la conexión al pool de base de datos HikariCP funcione correctamente.</li>
+        <li><strong>¿Qué diferencia hay entre DTO y entidad persistente?</strong> La entidad representa la tabla en Oracle; el DTO desacopla los datos expuestos a la API REST evitando N+1.</li>
+        <li><strong>¿Por qué /api/v1/... cuenta como versionado?</strong> Porque establece el contrato explícito permitiendo migrar a <code>/api/v2/</code> en el futuro sin romper aplicaciones existentes.</li>
+        <li><strong>¿Qué pasaría si mayorista importara el Repository de acopiador?</strong> Rompería la encapsulación. Lo impide Spring Modulith haciendo fallar <code>ModularityTests</code>.</li>
+    </ol>
+
+    <h2>3. ERROR O HALLAZGO TÉCNICO DIAGNOSTICADO</h2>
+    <div class="box">
+        <p><strong>Hallazgo:</strong> Riesgo de pérdida de precisión decimal en cálculos financieros si se utilizaba <code>double</code>.</p>
+        <p><strong>Solución:</strong> Se implementó <code>BigDecimal</code> con <code>RoundingMode.HALF_UP</code> a 4 decimales en operaciones intermedias y 2 decimales en desembolsos finales.</p>
+    </div>
+
+    <h2>4. REFLEXIÓN TÉCNICA BREVE</h2>
+    <p>La ejecución reproducible en diferentes ambientes se logra mediante la estandarización del entorno de ejecución con Java 21 y el uso obligatorio del Maven Wrapper (<code>mvnw</code>), el cual garantiza que todos los desarrolladores compilen exactamente con la misma versión de herramientas sin depender de configuraciones globales del sistema operativo. Además, la separación de la configuración en perfiles (<code>application-dev.yml</code>) inyectando variables de entorno permite migrar el backend entre entornos de desarrollo, pruebas y producción sin modificar una sola línea de código fuente. Finalmente, la verificación estricta de modularidad con Spring Modulith asegura que la arquitectura se mantenga limpia a medida que el proyecto escala.</p>
+
+    <h2>5. ANEXO: FEEDBACK DE LA SESIÓN</h2>
+    <ul>
+        <li><strong>Aprendizaje principal:</strong> Uso de Spring Modulith para verificar automáticamente los límites entre módulos.</li>
+        <li><strong>Punto confuso:</strong> Gestión de permisos entre el usuario dueño <code>BOM_ACOPIO</code> y el usuario app <code>BOMERP_APP</code>.</li>
+        <li><strong>Nivel de comprensión:</strong> ¡Entendido! - Lo domino y podría explicarlo.</li>
+        <li><strong>Autoevaluación:</strong> Muy Comprometido/a: Me esforcé al máximo.</li>
+        <li><strong>Calificación de satisfacción:</strong> 10 / 10</li>
+    </ul>
+
+</body>
+</html>
