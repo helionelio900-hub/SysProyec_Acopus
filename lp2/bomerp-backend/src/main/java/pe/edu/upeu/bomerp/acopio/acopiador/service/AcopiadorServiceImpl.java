@@ -1,0 +1,93 @@
+package pe.edu.upeu.bomerp.acopio.acopiador.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import pe.edu.upeu.bomerp.acopio.acopiador.dto.AcumuladosG2Response;
+import pe.edu.upeu.bomerp.acopio.acopiador.dto.TransaccionG2Request;
+import pe.edu.upeu.bomerp.acopio.acopiador.dto.TransaccionG2Response;
+import pe.edu.upeu.bomerp.acopio.acopiador.entity.TransaccionG2;
+import pe.edu.upeu.bomerp.acopio.acopiador.repository.TransaccionG2Repository;
+import pe.edu.upeu.bomerp.acopio.parametros.entity.ParametrosSistema;
+import pe.edu.upeu.bomerp.acopio.parametros.repository.ParametrosSistemaRepository;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class AcopiadorServiceImpl implements AcopiadorService {
+
+    private final TransaccionG2Repository transaccionG2Repository;
+    private final ParametrosSistemaRepository parametrosSistemaRepository;
+
+    @Override
+    @Transactional
+    public TransaccionG2Response registrarCompraDirecta(TransaccionG2Request request) {
+        BigDecimal precioAplicado = request.precioAplicadoPen();
+        if (precioAplicado == null) {
+            ParametrosSistema params = parametrosSistemaRepository.findFirstByEstadoOrderByFechaDesc("ACTIVO").orElse(null);
+            precioAplicado = (params != null && params.getPrecioDiarioGramoPen() != null) 
+                    ? params.getPrecioDiarioGramoPen() 
+                    : new BigDecimal("280.00");
+        }
+
+        // Pago = Peso Fundido Neto * Precio Aplicado
+        BigDecimal totalPagado = request.pesoFundidoNetoG().multiply(precioAplicado).setScale(2, RoundingMode.HALF_UP);
+
+        String tipoOroNormalizado = request.tipoOro().trim().toUpperCase();
+        if (!"ROJO".equals(tipoOroNormalizado) && !"VERDE".equals(tipoOroNormalizado)) {
+            throw new IllegalArgumentException("El tipo de oro debe ser 'ROJO' o 'VERDE'");
+        }
+
+        TransaccionG2 tx = TransaccionG2.builder()
+                .idMinero(request.idMinero())
+                .pesoSinFundirG(request.pesoSinFundirG())
+                .pesoFundidoNetoG(request.pesoFundidoNetoG())
+                .tipoOro(tipoOroNormalizado)
+                .precioAplicadoPen(precioAplicado)
+                .totalPagadoPen(totalPagado)
+                .build();
+
+        TransaccionG2 saved = transaccionG2Repository.save(tx);
+
+        return new TransaccionG2Response(
+                saved.getIdTransaccionG2(),
+                saved.getIdMinero(),
+                saved.getPesoSinFundirG(),
+                saved.getPesoFundidoNetoG(),
+                saved.getTipoOro(),
+                saved.getPrecioAplicadoPen(),
+                saved.getTotalPagadoPen(),
+                saved.getFechaTransaccion()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TransaccionG2Response> listarTransacciones() {
+        return transaccionG2Repository.findAll().stream()
+                .map(tx -> new TransaccionG2Response(
+                        tx.getIdTransaccionG2(),
+                        tx.getIdMinero(),
+                        tx.getPesoSinFundirG(),
+                        tx.getPesoFundidoNetoG(),
+                        tx.getTipoOro(),
+                        tx.getPrecioAplicadoPen(),
+                        tx.getTotalPagadoPen(),
+                        tx.getFechaTransaccion()
+                )).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AcumuladosG2Response obtenerAcumuladosSemanalesPorColor() {
+        BigDecimal gRojo = transaccionG2Repository.sumPesoFundidoByTipoOro("ROJO");
+        BigDecimal dRojo = transaccionG2Repository.sumTotalPagadoByTipoOro("ROJO");
+        BigDecimal gVerde = transaccionG2Repository.sumPesoFundidoByTipoOro("VERDE");
+        BigDecimal dVerde = transaccionG2Repository.sumTotalPagadoByTipoOro("VERDE");
+
+        return new AcumuladosG2Response(gRojo, dRojo, gVerde, dVerde);
+    }
+}
