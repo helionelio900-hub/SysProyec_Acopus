@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>S02_LP2_Equipo05_CalisayaHelio</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #1e293b; padding: 40px; max-width: 900px; margin: auto; }
+        h1 { color: #0f172a; border-bottom: 3px solid #eab308; padding-bottom: 10px; text-align: center; }
+        h2 { color: #1e3a8a; border-bottom: 2px solid #cbd5e1; padding-bottom: 5px; margin-top: 30px; }
+        h3 { color: #0f766e; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
+        th { background-color: #f1f5f9; color: #0f172a; }
+        pre { background-color: #0f172a; color: #f8fafc; padding: 15px; border-radius: 6px; overflow-x: auto; font-family: 'Consolas', monospace; font-size: 13px; }
+        code { background-color: #f1f5f9; color: #0f172a; padding: 2px 5px; border-radius: 4px; font-family: 'Consolas', monospace; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .badge-success { background-color: #dcfce7; color: #166534; }
+        .box { background-color: #f8fafc; border-left: 4px solid #eab308; padding: 15px; margin: 15px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <h1>INFORME DE EVIDENCIA INDIVIDUAL - SESIÓN S02</h1>
+    <p style="text-align: center; font-weight: bold;">CURSO: LENGUAJE DE PROGRAMACIÓN II (LP2)</p>
+    <p style="text-align: center; color: #64748b;">Archivo entregable: <code>S02_LP2_Equipo05_CalisayaHelio.pdf</code></p>
+
+    <div class="box">
+        <h2>📌 DATOS DEL ESTUDIANTE</h2>
+        <ul>
+            <li><strong>Nombre del Estudiante:</strong> Helio Calisaya</li>
+            <li><strong>Compañero de Equipo:</strong> Jhymel Nelio Figueroa Chambi</li>
+            <li><strong>Equipo:</strong> Equipo 05 - Proyecto <code>bomerp-acopio-oro</code></li>
+            <li><strong>Sesión:</strong> S02 - CRUD REST Completo de Entidades Principales, Validaciones, Manejo Global de Excepciones y Logs</li>
+            <li><strong>Rol o Aporte Realizado:</strong> Desarrollador Backend & Integración de Controladores REST, DTOs y Excepciones Globales</li>
+            <li><strong>Link de GitHub del Proyecto:</strong> <a href="https://github.com/helionelio900-hub/SysProyec_Acopus" target="_blank">https://github.com/helionelio900-hub/SysProyec_Acopus</a></li>
+        </ul>
+    </div>
+
+    <h2>1. EVIDENCIA TÉCNICA (EVALUADA SOBRE RÚBRICA S02)</h2>
+
+    <h3>Bloque 1: Ejecución, Configuración Reproducible y Logs Estructurados (20%)</h3>
+    <p>El backend fue ejecutado utilizando Java 21 y el Maven Wrapper del proyecto (<code>.\mvnw.cmd spring-boot:run</code>).</p>
+    <p><span class="badge badge-success">BUILD SUCCESS</span> Compilación exitosa de los 48 archivos fuente sin errores.</p>
+    <p><strong>Configuración por ambiente sin secretos expuestos:</strong> Credenciales locales de desarrollo (<code>BOMERP_APP / 123456</code>) en <code>application-dev.yml</code>.</p>
+
+    <h3>Bloque 2: CRUD REST Completo & Manejo Global de Excepciones (20%)</h3>
+    <p>Se creó <code>GlobalExceptionHandler.java</code> con <code>@RestControllerAdvice</code> capturando validaciones <code>@Valid</code> y errores 400/404.</p>
+
+    <h3>Bloque 3: Entidades ORM, Repositorios JPA, Servicios y DTOs (20%)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Módulo</th>
+                <th>Método</th>
+                <th>Endpoint HTTP</th>
+                <th>Descripción</th>
+                <th>DTO Request / Response</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Seguridad</td>
+                <td>POST</td>
+                <td><code>/api/v1/auth/login</code></td>
+                <td>Login y emisión de JWT</td>
+                <td>AuthRequest → AuthResponse</td>
+            </tr>
+            <tr>
+                <td>Cotizador</td>
+                <td>GET</td>
+                <td><code>/api/v1/cotizador/estimar</code></td>
+                <td>Consulta pública estimativa</td>
+                <td>pesoBrutoGramos → CotizacionEstimadaResponse</td>
+            </tr>
+            <tr>
+                <td>Acopiador G2</td>
+                <td>POST</td>
+                <td><code>/api/v1/acopio/transacciones</code></td>
+                <td>Registro CRUD compra G2</td>
+                <td>TransaccionG2Request → TransaccionG2Response</td>
+            </tr>
+            <tr>
+                <td>Acopiador G2</td>
+                <td>GET</td>
+                <td><code>/api/v1/acopio/acumulados-semanales</code></td>
+                <td>Acumulados por color (Rojo/Verde)</td>
+                <td>AcumuladosG2Response</td>
+            </tr>
+            <tr>
+                <td>Mayorista G1</td>
+                <td>POST</td>
+                <td><code>/api/v1/mayorista/liquidaciones</code></td>
+                <td>Cierre semanal Onza/USD</td>
+                <td>LiquidacionG1Request → LiquidacionG1Response</td>
+            </tr>
+            <tr>
+                <td>Dashboard</td>
+                <td>GET</td>
+                <td><code>/api/v1/dashboard/consolidado</code></td>
+                <td>Reporte consolidado general</td>
+                <td>DashboardResponse</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Bloque 4: Documentación OpenAPI y Versionado (20%)</h3>
+    <p>Swagger UI disponible en <code>http://localhost:8080/swagger-ui.html</code> con versionado <code>/api/v1/...</code>.</p>
+
+    <h3>Bloque 5: Estructura Modular y ModularityTests en Verde (20%)</h3>
+    <p>Spring Modulith verificado con resultado en <strong>VERDE</strong> para el paquete <code>pe.edu.upeu.bomerp.acopio</code>.</p>
+
+    <h2>2. RESPUESTAS A LAS PREGUNTAS DE DEFENSA (SESIÓN S02)</h2>
+    <ol>
+        <li><strong>¿Qué función cumple @Valid en los métodos del controlador REST?</strong> Activa las validaciones del DTO Request lanzando <code>MethodArgumentNotValidException</code> si falla alguna regla.</li>
+        <li><strong>¿Por qué se utiliza @RestControllerAdvice?</strong> Permite desacoplar y centralizar el manejo de errores devolviendo respuestas JSON estandarizadas (400, 404, 500).</li>
+        <li><strong>¿Cuál es la ventaja de usar Java record para DTOs?</b> Son inmutables, concisos y auto-generan getters, lo que evita acoplar el modelo interno.</li>
+        <li><strong>¿Por qué las entidades JPA llevan schema = "BOM_ACOPIO"?</strong> Porque los objetos en Oracle pertenecen a esquemas propietarios y la app accede con <code>BOMERP_APP</code>.</li>
+        <li><strong>¿Cómo se prueban las validaciones del controlador?</strong> Mediante <code>@WebMvcTest</code> y <code>MockMvc</code> enviando JSONs inválidos y verificando respuestas HTTP 400.</li>
+        <li><strong>¿Qué garantiza Logback y Correlation ID?</strong> Rastrear una petición HTTP mediante un ID único a lo largo de todas las capas de backend.</li>
+    </ol>
+
+    <h2>3. ERROR O HALLAZGO TÉCNICO DIAGNOSTICADO</h2>
+    <div class="box">
+        <p><strong>Hallazgo:</strong> Fallo al enviar cadenas de texto en minúsculas en el campo <code>tipoOro</code>.</p>
+        <p><strong>Solución:</strong> Se implementó <code>.trim().toUpperCase()</code> en la capa de servicios y validación explícita para evitar errores SQL en Oracle.</p>
+    </div>
+
+    <h2>4. REFLEXIÓN TÉCNICA BREVE</h2>
+    <p>La implementación de un CRUD REST profesional exige separar rigurosamente las responsabilidades entre la capa de presentación (controladores y DTOs) y la capa de datos (entidades JPA). El uso de un manejador global de excepciones con <code>@RestControllerAdvice</code> junto a la validación explícita con <code>@Valid</code> garantiza que la API REST entregue respuestas de error limpias, previsibles y seguras al cliente sin exponer trazas internas del servidor. Adicionalmente, el registro de trazas estructuradas con Logback proporciona la observabilidad necesaria para monitorear el comportamiento del backend durante la ejecución diaria.</p>
+
+    <h2>5. ANEXO: FEEDBACK DE LA SESIÓN S02</h2>
+    <ul>
+        <li><strong>Integrantes del Equipo 05:</strong> Helio Calisaya & Jhymel Nelio Figueroa Chambi</li>
+        <li><strong>Aprendizaje principal:</strong> Manejo global de excepciones con <code>@RestControllerAdvice</code> y DTOs inmutables.</li>
+        <li><strong>Nivel de comprensión:</strong> ¡Entendido! - Lo domino y podría explicarlo.</li>
+        <li><strong>Autoevaluación:</strong> Muy Comprometido/a: Me esforcé al máximo.</li>
+        <li><strong>Calificación de satisfacción:</strong> 10 / 10</li>
+    </ul>
+
+</body>
+</html>
