@@ -8,5 +8,6 @@ import java.util.List;
 public interface AcopiadorService {
     TransaccionG2Response registrarCompraDirecta(TransaccionG2Request request);
     List<TransaccionG2Response> listarTransacciones();
+    List<TransaccionG2Response> listarPorMinero(Long idMinero);
     AcumuladosG2Response obtenerAcumuladosSemanalesPorColor();
 }

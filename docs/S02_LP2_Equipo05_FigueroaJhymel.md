@@ -5,146 +5,203 @@
 
 ---
 
-## DATOS DEL ESTUDIANTE
+## 1. DATOS DEL ESTUDIANTE
 
 * **Nombre del Estudiante:** Jhymel Nelio Figueroa Chambi
 * **Compañero de Equipo:** Helio Calisaya
 * **Equipo:** Equipo 05 - Proyecto `bomerp-acopio-oro`
-* **Sesión:** S02 - CRUD REST Completo de Entidades Principales, Validaciones, Manejo Global de Excepciones y Logs
-* **Rol o Aporte Realizado:** Desarrollador Backend & Integración de Servicios, DTOs y Pruebas de API
+* **Sesión:** S02 - CRUD REST Completo de Producto / Entidad Principal de Dominio
+* **Rol o Aporte Realizado:** Desarrollador Backend & Integración de Servicios, DTOs, Mappers, Validaciones, Pruebas `@WebMvcTest` y Conexión Oracle 21c XE.
 * **Link de GitHub del Proyecto:** [https://github.com/helionelio900-hub/SysProyec_Acopus](https://github.com/helionelio900-hub/SysProyec_Acopus)
 
 ---
 
-## EVIDENCIA TÉCNICA (EVALUADA SOBRE RÚBRICA S02)
+## 2. EVIDENCIA TÉCNICA (EVALUADA SOBRE RÚBRICA S02)
 
-### BLOQUE 1: Ejecución, Configuración Reproducible y Logs Estructurados (Peso: 20%)
+### 2.1 DTO, Mapeo y Validación (`ProductoRequest` / `ProductoResponse` y `ProductoMapper`)
 
-1. **Ejecución del Backend (Java 21 + Spring Boot 4.0.7):**
-   * Ejecutado mediante el Maven Wrapper oficial del proyecto (`.\mvnw.cmd spring-boot:run`).
-   * **Compilación:** `BUILD SUCCESS` (0 errores de compilación en 48 archivos fuente Java).
-   * **Logs Estructurados:** Se configuró Logback (`logback-spring.xml`) guardando trazas en `logs/bomerp.log` con Correlation ID para trazabilidad HTTP.
+1. **DTO de Entrada (`ProductoRequest.java`):**
+   Valida dos o más reglas de forma explícitas mediante `@NotBlank`, `@Size`, `@NotNull` y `@Positive`:
 
-2. **Configuración por Ambiente sin Secretos Expuestos:**
-   * Archivo de perfil local: `application-dev.yml` con credenciales de desarrollo en laptop (`BOMERP_APP` / `123456`).
+   ```java
+   public record ProductoRequest(
+       @NotBlank(message = "El nombre del producto no puede estar vacío")
+       @Size(min = 2, max = 120, message = "El nombre debe tener entre 2 y 120 caracteres")
+       String nombre,
+
+       @NotNull(message = "El precio es obligatorio")
+       @Positive(message = "El precio debe ser un valor positivo mayor a cero")
+       BigDecimal precio,
+
+       @NotNull(message = "El stock es obligatorio")
+       @Min(value = 0, message = "El stock no puede ser negativo")
+       Integer stock
+   ) {}
+   ```
+
+2. **DTO de Salida (`ProductoResponse.java`):**
+   ```java
+   public class ProductoResponse {
+       private Long id;
+       private String nombre;
+       private BigDecimal precio;
+       private Integer stock;
+       // Getters, Setters y Constructores
+   }
+   ```
+
+3. **Mapper Dedicado (`ProductoMapper.java`):**
+   Separación limpia de mapeo entre Entidad JPA (`Producto`) y DTOs:
+
+   ```java
+   @Component
+   public class ProductoMapper {
+       public Producto toEntity(ProductoRequest request) {
+           Producto entity = new Producto();
+           entity.setNombre(request.nombre().trim());
+           entity.setPrecio(request.precio());
+           entity.setStock(request.stock());
+           return entity;
+       }
+
+       public ProductoResponse toResponse(Producto entity) {
+           ProductoResponse response = new ProductoResponse();
+           response.setId(entity.getId());
+           response.setNombre(entity.getNombre());
+           response.setPrecio(entity.getPrecio());
+           response.setStock(entity.getStock());
+           return response;
+       }
+   }
+   ```
+
+4. **Evidencia de Caso Inválido (HTTP 400 Bad Request):**
+   * **Petición POST:** `http://localhost:8081/api/v1/productos` enviando JSON inválido `{"nombre":"","precio":-10,"stock":-5}`.
+   * **Respuesta HTTP:** `400 Bad Request` capturada por `GlobalExceptionHandler`.
 
 ---
 
-### BLOQUE 2: CRUD REST Completo & Manejo Global de Excepciones (Peso: 20%)
+### 2.2 Operaciones CRUD Funcionales y Pruebas Automatizadas (@WebMvcTest) en Verde
 
-1. **Controlador Global de Excepciones (`@RestControllerAdvice`):**
-   * Se creó `GlobalExceptionHandler.java` para capturar errores de validación `@Valid` y excepciones de recursos no encontrados.
+1. **Tabla de Operaciones CRUD en `ProductoController.java`:**
 
-```java
-@RestControllerAdvice
-public class GlobalExceptionHandler {
+| Operación | Método HTTP | Endpoint | Código HTTP Esperado | Descripción |
+|---|:---:|---|:---:|---|
+| **Crear** | `POST` | `/api/v1/productos` | `201 Created` | Registra nuevo producto en catálogo |
+| **Buscar por ID** | `GET` | `/api/v1/productos/{id}` | `200 OK` | Devuelve producto por su identificador |
+| **Actualizar** | `PUT` | `/api/v1/productos/{id}` | `200 OK` | Actualiza atributos del producto |
+| **Eliminar** | `DELETE` | `/api/v1/productos/{id}` | `204 No Content` | Elimina producto del sistema |
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> 
-            errors.put(error.getField(), error.getDefaultMessage())
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-    }
+2. **Prueba Automatizada del Controller (`@WebMvcTest`) en Verde:**
+   * Archivo de Prueba: `ProductoControllerTest.java`
+   * Resultado de Maven (`.\mvnw.cmd test`):
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
-    }
-}
+   ```text
+   [INFO] Running pe.edu.upeu.bomerp.catalogo.producto.controller.ProductoControllerTest
+   [INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.837 s -- in pe.edu.upeu.bomerp.catalogo.producto.controller.ProductoControllerTest
+   [INFO] Results:
+   [INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
+   [INFO] BUILD SUCCESS
+   ```
+
+---
+
+### 2.3 Manejo de Errores y Trazabilidad
+
+1. **Caso de ID Inexistente (HTTP 404 Not Found):**
+   * **Petición GET:** `http://localhost:8081/api/v1/productos/999999`
+   * **Respuesta HTTP:** `404 Not Found` lanzado vía `ResourceNotFoundException("Producto no encontrado con el ID: 999999")` y capturado en `GlobalExceptionHandler`.
+
+2. **Log de Petición con Trazabilidad (Correlation ID / Trace ID):**
+   * Implementado mediante `CorrelationIdFilter.java` y configurado en `logback-spring.xml`.
+   * **Registro en Log (`logs/bomerp.log`):**
+     `2026-08-23 21:59:52.610 [traceId=req-4a8b-9f12] DEBUG p.e.u.b.filter.CorrelationIdFilter - Filter 'correlationIdFilter' configured for use`
+
+3. **Conexión a Base de Datos Oracle Nativa Integrada:**
+   * Instancia: **Oracle 21c XE**
+   - URL JDBC: `jdbc:oracle:thin:@localhost:1521/XEPDB1`
+   - Esquemas Creados: `BOM_CATALOGO`, `BOM_ACOPIO` y `BOMERP_APP`.
+   - Servidor HTTP Backend: Ejecutándose en puerto `8081` de Tomcat.
+
+---
+
+### 2.4 Separación de Responsabilidades (Estructura de Paquetes)
+
+La arquitectura sigue una separación estricta en capas dentro del módulo de catálogo:
+
+```text
+pe.edu.upeu.bomerp.catalogo.producto/
+├── controller/
+│   └── ProductoController.java      <-- Exposición de Endpoints REST
+├── dto/
+│   ├── ProductoRequest.java          <-- DTO de Entrada con Validaciones
+│   └── ProductoResponse.java         <-- DTO de Salida
+├── entity/
+│   └── Producto.java                 <-- Entidad JPA (@Table(schema = "BOM_CATALOGO"))
+├── mapper/
+│   └── ProductoMapper.java           <-- Mapeo Entidad <-> DTO
+├── repository/
+│   └── ProductoRepository.java       <-- Interfaz JPA Repository
+└── service/
+    ├── ProductoService.java          <-- Interfaz de Servicio
+    └── ProductoServiceImpl.java      <-- Lógica de Negocio CRUD
 ```
 
 ---
 
-### BLOQUE 3: Entidades ORM, Repositorios JPA, Servicios y DTOs (`record`) (Peso: 20%)
+## 3. ERROR O HALLAZGO TÉCNICO DIAGNOSTICADO
 
-1. **Entidades Principales Implementadas:**
-   * `Minero` (`@Table(name = "MINEROS", schema = "BOM_ACOPIO")`)
-   * `TransaccionG2` (`@Table(name = "TRANSACCIONES_G2", schema = "BOM_ACOPIO")`)
-   * `LiquidacionG1` (`@Table(name = "LIQUIDACIONES_G1", schema = "BOM_ACOPIO")`)
-   * `ParametrosSistema` (`@Table(name = "PARAMETROS_SISTEMA", schema = "BOM_ACOPIO")`)
-
-2. **Tabla de Endpoints CRUD REST del Dominio `bomerp-acopio-oro`:**
-
-| Módulo | Método | Endpoint HTTP | Descripción | DTO Request / Response |
-|---|:---:|---|---|---|
-| **Seguridad** | `POST` | `/api/v1/auth/login` | Login y emisión de JWT | `AuthRequest` $\rightarrow$ `AuthResponse` |
-| **Cotizador** | `GET` | `/api/v1/cotizador/estimar` | Consulta pública estimativa | `pesoBrutoGramos` $\rightarrow$ `CotizacionEstimadaResponse` |
-| **Acopiador G2** | `POST` | `/api/v1/acopio/transacciones` | Registro CRUD compra G2 | `TransaccionG2Request` $\rightarrow$ `TransaccionG2Response` |
-| **Acopiador G2** | `GET` | `/api/v1/acopio/transacciones` | Listar compras presenciales | List<`TransaccionG2Response`> |
-| **Acopiador G2** | `GET` | `/api/v1/acopio/acumulados-semanales` | Acumulados por color | `AcumuladosG2Response` |
-| **Mayorista G1** | `POST` | `/api/v1/mayorista/liquidaciones` | Cierre semanal Onza/USD | `LiquidacionG1Request` $\rightarrow$ `LiquidacionG1Response` |
-| **Dashboard** | `GET` | `/api/v1/dashboard/consolidado` | Reporte consolidado general | `DashboardResponse` |
+* **Descripción del Problema:** Al ejecutar el test automatizado `mvnw test` e iniciar la aplicación en el perfil `dev`, se presentó la excepción `org.h2.jdbc.JdbcSQLSyntaxErrorException: Schema "BOM_CATALOGO" no encontrado` y posteriormente en Oracle `ORA-01950: no existen privilegios en tablespace 'USERS'`.
+* **Causa Raíz:** La entidad `Producto` especifica `@Table(name = "PRODUCTO", schema = "BOM_CATALOGO")`. En la base de datos Oracle nativa (`XEPDB1`), la tabla debía existir en el esquema propietario `BOM_CATALOGO` y el usuario ejecutor `BOMERP_APP` requería cuota de almacenamiento (`QUOTA UNLIMITED ON USERS`) y permisos DML.
+* **Solución Aplicada:** Se creó el script SQL [S01_04_catalogo.sql](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/bd2/S01_04_catalogo.sql), se otorgaron privilegios de tablespace a `BOMERP_APP` y se crearon las tablas correspondientes en `XEPDB1`, logrando que la suite completa de 7 pruebas en Maven pasara a estado **BUILD SUCCESS**.
 
 ---
 
-### BLOQUE 4: Documentación OpenAPI y Versionado (Peso: 20%)
+## 4. REFLEXIÓN TÉCNICA BREVE (5 A 8 LÍNEAS)
 
-* Documentación OpenAPI navegable mediante Swagger UI en `http://localhost:8080/swagger-ui.html`.
-* Todos los controladores CRUD utilizan la ruta base versionada `/api/v1/...`.
-
----
-
-### BLOQUE 5: Estructura Modular y ModularityTests en Verde (Peso: 20%)
-
-* Paquetes de negocio agrupados en `pe.edu.upeu.bomerp.acopio` (`seguridad`, `cotizador`, `acopiador`, `mayorista`, `parametros`).
-* `ModularityTests` de Spring Modulith ejecutado con resultado **VERDE** (PASS).
+Separar el mapeo entre entidad JPA y DTOs en una clase Mapper dedicada (`ProductoMapper`) es fundamental para mantener el principio de responsabilidad única (SRP). Al desacoplar la conversión de datos del controlador y del servicio, evitamos la duplicación de código de transformación y protegemos las entidades de persistencia frente a cambios en la interfaz de la API. Además, esta separación facilita la construcción de pruebas unitarias aisladas tanto para los servicios como para el controlador mediante `@WebMvcTest`. Por último, permite evolucionar los contratos DTOs sin alterar la estructura interna de la base de datos.
 
 ---
 
-## RESPUESTAS A LAS PREGUNTAS DE DEFENSA (SESIÓN S02)
+## 5. RESPUESTAS A LAS PREGUNTAS DE DEFENSA (SESIÓN S02)
 
-1. **¿Qué función cumple `@Valid` en los métodos del controlador REST?**
-   * Activa las anotaciones de validación (`@NotNull`, `@Positive`, `@NotBlank`) definidas en el DTO Request antes de ejecutar el código del método. Si falla alguna validación, Spring lanza automáticamente `MethodArgumentNotValidException`.
+1. **¿Por qué `ProductoResponse` pasó de record a clase en esta sesión?**
+   * Para permitir mayor flexibilidad en la serialización/deserialización de librerías como Jackson o MapStruct en respuestas complejas que requieran herencia o referencias cíclicas gestionadas con setters.
 
-2. **¿Por qué se utiliza `@RestControllerAdvice` para el manejo de excepciones?**
-   * Permite desacoplar el tratamiento de errores de los controladores, capturando excepciones de forma centralizada y devolviendo respuestas JSON estandarizadas con códigos HTTP adecuados (400, 404, 500).
+2. **¿Qué diferencia hay entre la validación de forma (`@Valid`) y una regla de negocio?**
+   * La validación de forma (`@Valid`) comprueba restricciones sintácticas o de formato en el DTO (ej. campos no nulos, tamaños de cadena), mientras que una regla de negocio valida condiciones lógicas avanzadas en el Service (ej. verificar que un producto tenga stock disponible antes de vender).
 
-3. **¿Cuál es la ventaja de usar Java `record` para los DTOs?**
-   * Los `record` son inmutables, concisos y auto-generan getters, `equals()`, `hashCode()` y `toString()`, lo que evita código redundante y garantiza que los DTOs de salida no sufran modificaciones accidentales.
+3. **¿Qué código HTTP corresponde a "recurso no encontrado" y quién lo genera en tu backend?**
+   * Corresponde el código `404 Not Found`. En nuestro backend lo genera `GlobalExceptionHandler` al capturar `ResourceNotFoundException`, la cual es lanzada por el `ProductoServiceImpl` cuando `repository.findById(id)` retorna `Optional.empty()`.
 
-4. **¿Por qué las entidades JPA llevan `schema = "BOM_ACOPIO"` en `@Table`?**
-   * Porque en Oracle los objetos pertenecen a esquemas propietarios por módulo (`BOM_ACOPIO`), y la aplicación se conecta a través del usuario ejecutor `BOMERP_APP`.
+4. **¿Qué pasaría si el controller construyera la entidad directamente, sin pasar por el Mapper?**
+   * Se violaría la separación de capas, acoplando fuertemente el controlador HTTP a los detalles internos de persistencia JPA. Esto provocaría duplicación de código en múltiples endpoints y expondría atributos sensibles o internos de la base de datos al cliente.
 
-5. **¿Cómo se prueban las validaciones del controlador mediante pruebas de API?**
-   * Se utiliza `@WebMvcTest` junto con `MockMvc` para simular peticiones HTTP POST enviando JSONs con campos vacíos o inválidos, verificando que la API responda HTTP 400 Bad Request.
-
-6. **¿Qué garantiza el uso de Logback y Correlation ID en las peticiones HTTP?**
-   * Permite rastrear una petición desde que entra al controlador hasta que consulta la base de datos mediante un identificador único, facilitando el diagnóstico rápido de errores en entornos distribuidos.
+5. **¿Por qué tu prueba de controller usa `@WebMvcTest` y no `@SpringBootTest`?**
+   * Porque `@WebMvcTest` carga únicamente la capa Web (controlador, filtros, mappers, manejo de excepciones), ofreciendo pruebas unitarias ultra rápidas y enfocadas sin necesidad de inicializar todo el contexto de Spring Data JPA ni levantar la base de datos real.
 
 ---
 
-## ERROR O HALLAZGO TÉCNICO DIAGNOSTICADO
+## 6. ANEXO: FEEDBACK DE LA SESIÓN S02
 
-* **Hallazgo:** Se detectó que si se enviaba un JSON con `tipoOro` en minúsculas o con espacios (`" rojo "`), la consulta SQL en Oracle fallaba al buscar por la clave `ROJO`.
-* **Solución:** En `AcopiadorServiceImpl.java` y `MayoristaServiceImpl.java` se implementó la normalización `.trim().toUpperCase()` y se agregó validación explícita para aceptar únicamente los valores `"ROJO"` y `"VERDE"`, respondiendo un mensaje descriptivo de error HTTP 400 en lugar de un fallo en la BD.
-
----
-
-## REFLEXIÓN TÉCNICA BREVE (5 A 8 LÍNEAS)
-
-La implementación de un CRUD REST profesional exige separar rigurosamente las responsabilidades entre la capa de presentación (controladores y DTOs) y la capa de datos (entidades JPA). El uso de un manejador global de excepciones con `@RestControllerAdvice` junto a la validación explícita con `@Valid` garantiza que la API REST entregue respuestas de error limpias, previsibles y seguras al cliente sin exponer trazas internas del servidor. Adicionalmente, el registro de trazas estructuradas con Logback proporciona la observabilidad necesaria para monitorear el comportamiento del backend durante la ejecución diaria.
-
----
-
-## ANEXO: FEEDBACK DE LA SESIÓN S02
-
-1. ** Integrantes del Equipo 05:**
+1. **Integrantes del Equipo 05:**
    * Jhymel Nelio Figueroa Chambi (Presentador de este informe)
    * Helio Calisaya
 
 2. **¿Cuál es el aprendizaje más importante que te llevas de la clase de hoy?**
-   * La estructuración de controladores CRUD REST acoplados a repositorios Spring Data JPA y manejo de DTOs inmutables con `record`.
+   * La estructuración de controladores CRUD REST acoplados a repositorios Spring Data JPA y el manejo de DTOs con validaciones explícitas (`@Valid`).
 
 3. **¿Qué punto de la clase te resultó más confuso o te dejó con dudas?**
-   * La configuración de logs estructurados con Logback y Correlation ID.
+   * Las diferencias de ejecución entre pruebas `@WebMvcTest` de la capa controller y pruebas `@SpringBootTest` con contexto completo.
 
-4. **Nivel de comprensión de la clase de hoy:**
+4. **¿Tienes alguna pregunta que te gustaría que sea respondida la siguiente clase?**
+   * ¿Cómo manejar relaciones de entidades M:N eficientemente mediante DTOs sin causar peticiones N+1 en Hibernate?
+
+5. **Sobre tu nivel de comprensión de la clase de hoy, marca una opción:**
    * [X] **¡Entendido! - Lo domino y podría explicarlo.**
 
-5. **Autoevaluación de participación y esfuerzo:**
+6. **Pensando en tu participación y esfuerzo en la clase de hoy, ¿cómo te autoevaluarías?:**
    * [X] **Muy Comprometido/a: Me esforcé al máximo.**
 
-6. **Calificación de satisfacción con la clase (1 a 10):**
-   * **10**
+7. **Mi satisfacción con la clase fue:**
+   * **10** (Muy satisfecho)

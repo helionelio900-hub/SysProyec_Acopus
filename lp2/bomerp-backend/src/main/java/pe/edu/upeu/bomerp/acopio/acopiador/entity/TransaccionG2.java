@@ -2,6 +2,7 @@ package pe.edu.upeu.bomerp.acopio.acopiador.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import pe.edu.upeu.bomerp.acopio.parametros.entity.Minero;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -19,8 +20,9 @@ public class TransaccionG2 {
     @Column(name = "ID_TRANSACCION_G2")
     private Long idTransaccionG2;
 
-    @Column(name = "ID_MINERO", nullable = false)
-    private Long idMinero;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_MINERO", nullable = false)
+    private Minero minero;
 
     @Column(name = "PESO_SIN_FUNDIR_G", nullable = false, precision = 10, scale = 3)
     private BigDecimal pesoSinFundirG;

@@ -7,7 +7,7 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #1e293b; padding: 40px; max-width: 900px; margin: auto; }
         h1 { color: #0f172a; border-bottom: 3px solid #eab308; padding-bottom: 10px; text-align: center; }
         h2 { color: #1e3a8a; border-bottom: 2px solid #cbd5e1; padding-bottom: 5px; margin-top: 30px; }
-        h3 { color: #0f766e; }
+        h3 { color: #0f766e; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
         th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
         th { background-color: #f1f5f9; color: #0f172a; }
@@ -16,6 +16,7 @@
         .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
         .badge-success { background-color: #dcfce7; color: #166534; }
         .box { background-color: #f8fafc; border-left: 4px solid #eab308; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        .footer-box { background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px; margin: 20px 0; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -25,117 +26,122 @@
     <p style="text-align: center; color: #64748b;">Archivo entregable: <code>S02_LP2_Equipo05_FigueroaJhymel.pdf</code></p>
 
     <div class="box">
-        <h2>📌 DATOS DEL ESTUDIANTE</h2>
+        <h2>📌 1. DATOS DEL ESTUDIANTE</h2>
         <ul>
             <li><strong>Nombre del Estudiante:</strong> Jhymel Nelio Figueroa Chambi</li>
             <li><strong>Compañero de Equipo:</strong> Helio Calisaya</li>
             <li><strong>Equipo:</strong> Equipo 05 - Proyecto <code>bomerp-acopio-oro</code></li>
-            <li><strong>Sesión:</strong> S02 - CRUD REST Completo de Entidades Principales, Validaciones, Manejo Global de Excepciones y Logs</li>
-            <li><strong>Rol o Aporte Realizado:</strong> Desarrollador Backend & Integración de Servicios, DTOs y Pruebas de API</li>
+            <li><strong>Sesión:</strong> S02 - CRUD REST Completo de Producto / Entidad Principal de Dominio</li>
+            <li><strong>Rol o Aporte Realizado:</strong> Desarrollador Backend & Integración de Servicios, DTOs, Mappers, Validaciones, Pruebas <code>@WebMvcTest</code> y Conexión Oracle 21c XE.</li>
             <li><strong>Link de GitHub del Proyecto:</strong> <a href="https://github.com/helionelio900-hub/SysProyec_Acopus" target="_blank">https://github.com/helionelio900-hub/SysProyec_Acopus</a></li>
         </ul>
     </div>
 
-    <h2>1. EVIDENCIA TÉCNICA (EVALUADA SOBRE RÚBRICA S02)</h2>
+    <h2>2. EVIDENCIA TÉCNICA (EVALUADA SOBRE RÚBRICA S02)</h2>
 
-    <h3>Bloque 1: Ejecución, Configuración Reproducible y Logs Estructurados (20%)</h3>
-    <p>El backend fue ejecutado utilizando Java 21 y el Maven Wrapper del proyecto (<code>.\mvnw.cmd spring-boot:run</code>).</p>
-    <p><span class="badge badge-success">BUILD SUCCESS</span> Compilación exitosa de los 48 archivos fuente sin errores.</p>
-    <p><strong>Configuración por ambiente sin secretos expuestos:</strong> Credenciales locales de desarrollo (<code>BOMERP_APP / 123456</code>) en <code>application-dev.yml</code>.</p>
+    <h3>2.1 DTO, Mapeo y Validación (ProductoRequest / ProductoResponse y ProductoMapper)</h3>
+    <p><strong>DTO de Entrada (<code>ProductoRequest.java</code>):</strong> Valida reglas sintácticas mediante <code>@NotBlank</code>, <code>@Size</code>, <code>@NotNull</code> y <code>@Positive</code>.</p>
+    <pre><code>public record ProductoRequest(
+    @NotBlank(message = "El nombre del producto no puede estar vacío")
+    @Size(min = 2, max = 120, message = "El nombre debe tener entre 2 y 120 caracteres")
+    String nombre,
 
-    <h3>Bloque 2: CRUD REST Completo & Manejo Global de Excepciones (20%)</h3>
-    <p>Se creó <code>GlobalExceptionHandler.java</code> con <code>@RestControllerAdvice</code> capturando validaciones <code>@Valid</code> y errores 400/404.</p>
+    @NotNull(message = "El precio es obligatorio")
+    @Positive(message = "El precio debe ser un valor positivo mayor a cero")
+    BigDecimal precio,
 
-    <h3>Bloque 3: Entidades ORM, Repositorios JPA, Servicios y DTOs (20%)</h3>
+    @NotNull(message = "El stock es obligatorio")
+    @Min(value = 0, message = "El stock no puede ser negativo")
+    Integer stock
+) {}</code></pre>
+
+    <p><strong>Mapper Dedicado (<code>ProductoMapper.java</code>):</strong> Desacopla la entidad JPA de los contratos DTO.</p>
+    <pre><code>@Component
+public class ProductoMapper {
+    public Producto toEntity(ProductoRequest request) {
+        Producto entity = new Producto();
+        entity.setNombre(request.nombre().trim());
+        entity.setPrecio(request.precio());
+        entity.setStock(request.stock());
+        return entity;
+    }
+
+    public ProductoResponse toResponse(Producto entity) {
+        ProductoResponse response = new ProductoResponse();
+        response.setId(entity.getId());
+        response.setNombre(entity.getNombre());
+        response.setPrecio(entity.getPrecio());
+        response.setStock(entity.getStock());
+        return response;
+    }
+}</code></pre>
+    <p><strong>Evidencia de Caso Inválido (400 Bad Request):</strong> Solicitud POST enviando JSON con campos vacíos/negativos responde <code>400 Bad Request</code>.</p>
+
+    <h3>2.2 Operaciones CRUD Funcionales y Pruebas Automatizadas (@WebMvcTest) en Verde</h3>
     <table>
         <thead>
             <tr>
-                <th>Módulo</th>
-                <th>Método</th>
-                <th>Endpoint HTTP</th>
+                <th>Operación</th>
+                <th>Método HTTP</th>
+                <th>Endpoint</th>
+                <th>Código HTTP</th>
                 <th>Descripción</th>
-                <th>DTO Request / Response</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>Seguridad</td>
-                <td>POST</td>
-                <td><code>/api/v1/auth/login</code></td>
-                <td>Login y emisión de JWT</td>
-                <td>AuthRequest → AuthResponse</td>
-            </tr>
-            <tr>
-                <td>Cotizador</td>
-                <td>GET</td>
-                <td><code>/api/v1/cotizador/estimar</code></td>
-                <td>Consulta pública estimativa</td>
-                <td>pesoBrutoGramos → CotizacionEstimadaResponse</td>
-            </tr>
-            <tr>
-                <td>Acopiador G2</td>
-                <td>POST</td>
-                <td><code>/api/v1/acopio/transacciones</code></td>
-                <td>Registro CRUD compra G2</td>
-                <td>TransaccionG2Request → TransaccionG2Response</td>
-            </tr>
-            <tr>
-                <td>Acopiador G2</td>
-                <td>GET</td>
-                <td><code>/api/v1/acopio/acumulados-semanales</code></td>
-                <td>Acumulados por color (Rojo/Verde)</td>
-                <td>AcumuladosG2Response</td>
-            </tr>
-            <tr>
-                <td>Mayorista G1</td>
-                <td>POST</td>
-                <td><code>/api/v1/mayorista/liquidaciones</code></td>
-                <td>Cierre semanal Onza/USD</td>
-                <td>LiquidacionG1Request → LiquidacionG1Response</td>
-            </tr>
-            <tr>
-                <td>Dashboard</td>
-                <td>GET</td>
-                <td><code>/api/v1/dashboard/consolidado</code></td>
-                <td>Reporte consolidado general</td>
-                <td>DashboardResponse</td>
-            </tr>
+            <tr><td>Crear</td><td><code>POST</code></td><td><code>/api/v1/productos</code></td><td>201 Created</td><td>Registra nuevo producto en catálogo</td></tr>
+            <tr><td>Buscar por ID</td><td><code>GET</code></td><td><code>/api/v1/productos/{id}</code></td><td>200 OK</td><td>Devuelve producto por ID</td></tr>
+            <tr><td>Actualizar</td><td><code>PUT</code></td><td><code>/api/v1/productos/{id}</code></td><td>200 OK</td><td>Actualiza datos del producto</td></tr>
+            <tr><td>Eliminar</td><td><code>DELETE</code></td><td><code>/api/v1/productos/{id}</code></td><td>204 No Content</td><td>Elimina el producto del sistema</td></tr>
         </tbody>
     </table>
 
-    <h3>Bloque 4: Documentación OpenAPI y Versionado (20%)</h3>
-    <p>Swagger UI disponible en <code>http://localhost:8080/swagger-ui.html</code> con versionado <code>/api/v1/...</code>.</p>
+    <p><span class="badge badge-success">BUILD SUCCESS</span> <strong>Prueba Automatizada (@WebMvcTest):</strong> <code>ProductoControllerTest.java</code> pasó 100% en verde (7 unit tests ejecutados sin fallos ni errores).</p>
 
-    <h3>Bloque 5: Estructura Modular y ModularityTests en Verde (20%)</h3>
-    <p>Spring Modulith verificado con resultado en <strong>VERDE</strong> para el paquete <code>pe.edu.upeu.bomerp.acopio</code>.</p>
+    <h3>2.3 Manejo de Errores y Trazabilidad</h3>
+    <ul>
+        <li><strong>Caso 404 Not Found:</strong> Solicitud <code>GET /api/v1/productos/999999</code> responde <code>404 Not Found</code> mediante <code>ResourceNotFoundException</code> en <code>GlobalExceptionHandler</code>.</li>
+        <li><strong>Logs con Trace ID:</strong> Filtro <code>CorrelationIdFilter</code> registra identificador único por petición en <code>logs/bomerp.log</code>.</li>
+        <li><strong>Conexión a Oracle 21c XE (XEPDB1):</strong> Conexión nativa verificada en puerto 1521 con usuario <code>BOMERP_APP</code> y servidor web Tomcat en puerto 8081.</li>
+    </ul>
 
-    <h2>2. RESPUESTAS A LAS PREGUNTAS DE DEFENSA (SESIÓN S02)</h2>
-    <ol>
-        <li><strong>¿Qué función cumple @Valid en los métodos del controlador REST?</strong> Activa las validaciones del DTO Request lanzando <code>MethodArgumentNotValidException</code> si falla alguna regla.</li>
-        <li><strong>¿Por qué se utiliza @RestControllerAdvice?</strong> Permite desacoplar y centralizar el manejo de errores devolviendo respuestas JSON estandarizadas (400, 404, 500).</li>
-        <li><strong>¿Cuál es la ventaja de usar Java record para DTOs?</b> Son inmutables, concisos y auto-generan getters, lo que evita acoplar el modelo interno.</li>
-        <li><strong>¿Por qué las entidades JPA llevan schema = "BOM_ACOPIO"?</strong> Porque los objetos en Oracle pertenecen a esquemas propietarios y la app accede con <code>BOMERP_APP</code>.</li>
-        <li><strong>¿Cómo se prueban las validaciones del controlador?</strong> Mediante <code>@WebMvcTest</code> y <code>MockMvc</code> enviando JSONs inválidos y verificando respuestas HTTP 400.</li>
-        <li><strong>¿Qué garantiza Logback y Correlation ID?</strong> Rastrear una petición HTTP mediante un ID único a lo largo de todas las capas de backend.</li>
-    </ol>
+    <h3>2.4 Separación de Responsabilidades (Estructura de Paquetes)</h3>
+    <pre><code>pe.edu.upeu.bomerp.catalogo.producto/
+├── controller/ -> ProductoController.java
+├── dto/        -> ProductoRequest.java, ProductoResponse.java
+├── entity/     -> Producto.java
+├── mapper/     -> ProductoMapper.java
+├── repository/ -> ProductoRepository.java
+└── service/    -> ProductoService.java, ProductoServiceImpl.java</code></pre>
 
     <h2>3. ERROR O HALLAZGO TÉCNICO DIAGNOSTICADO</h2>
     <div class="box">
-        <p><strong>Hallazgo:</strong> Fallo al enviar cadenas de texto en minúsculas en el campo <code>tipoOro</code>.</p>
-        <p><strong>Solución:</strong> Se implementó <code>.trim().toUpperCase()</code> en la capa de servicios y validación explícita para evitar errores SQL en Oracle.</p>
+        <p><strong>Hallazgo:</strong> Error <code>Schema "BOM_CATALOGO" no encontrado</code> y <code>ORA-01950: no existen privilegios en tablespace USERS</code> durante la primera inicialización contra Oracle 21c XE.</p>
+        <p><strong>Solución:</strong> Se creó el script <code>bd2/S01_04_catalogo.sql</code>, se asignó cuota de almacenamiento a <code>BOMERP_APP</code> y se ejecutaron los DDLs correspondientes, logrando que el backend compile y ejecute las 7 pruebas unitarias con resultado <strong>BUILD SUCCESS</strong>.</p>
     </div>
 
-    <h2>4. REFLEXIÓN TÉCNICA BREVE</h2>
-    <p>La implementación de un CRUD REST profesional exige separar rigurosamente las responsabilidades entre la capa de presentación (controladores y DTOs) y la capa de datos (entidades JPA). El uso de un manejador global de excepciones con <code>@RestControllerAdvice</code> junto a la validación explícita con <code>@Valid</code> garantiza que la API REST entregue respuestas de error limpias, previsibles y seguras al cliente sin exponer trazas internas del servidor. Adicionalmente, el registro de trazas estructuradas con Logback proporciona la observabilidad necesaria para monitorear el comportamiento del backend durante la ejecución diaria.</p>
+    <h2>4. REFLEXIÓN TÉCNICA BREVE (5 A 8 LÍNEAS)</h2>
+    <p>Separar el mapeo entre entidad JPA y DTOs en una clase Mapper dedicada (<code>ProductoMapper</code>) es fundamental para mantener el principio de responsabilidad única (SRP). Al desacoplar la conversión de datos del controlador y del servicio, evitamos la duplicación de código de transformación y protegemos las entidades de persistencia frente a cambios en la interfaz de la API. Además, esta separación facilita la construcción de pruebas unitarias aisladas tanto para los servicios como para el controlador mediante <code>@WebMvcTest</code>. Por último, permite evolucionar los contratos DTOs sin alterar la estructura interna de la base de datos.</p>
 
-    <h2>5. ANEXO: FEEDBACK DE LA SESIÓN S02</h2>
-    <ul>
-        <li><strong>Integrantes del Equipo 05:</strong> Jhymel Nelio Figueroa Chambi & Helio Calisaya</li>
-        <li><strong>Aprendizaje principal:</strong> Estructuración de controladores CRUD REST acoplados a repositorios JPA y DTOs con <code>record</code>.</li>
-        <li><strong>Nivel de comprensión:</strong> ¡Entendido! - Lo domino y podría explicarlo.</li>
-        <li><strong>Autoevaluación:</strong> Muy Comprometido/a: Me esforcé al máximo.</li>
-        <li><strong>Calificación de satisfacción:</strong> 10 / 10</li>
-    </ul>
+    <h2>5. RESPUESTAS A LAS PREGUNTAS DE DEFENSA (SESIÓN S02)</h2>
+    <ol>
+        <li><strong>¿Por qué ProductoResponse pasó de record a clase en esta sesión?</strong><br>Para brindar flexibilidad en serialización/deserialización con librerías como Jackson o MapStruct en respuestas complejas que requieran getters/setters explícitos.</li>
+        <li><strong>¿Qué diferencia hay entre la validación de forma (@Valid) y una regla de negocio?</strong><br>La validación <code>@Valid</code> comprueba formato/sintaxis en el DTO; las reglas de negocio comprueban condiciones lógicas de dominio en la capa Service.</li>
+        <li><strong>¿Qué código HTTP corresponde a "recurso no encontrado" y quién lo genera en tu backend?</strong><br>El código <code>404 Not Found</code>, generado por <code>GlobalExceptionHandler</code> al capturar <code>ResourceNotFoundException</code> desde el Service.</li>
+        <li><strong>¿Qué pasaría si el controller construyera la entidad directamente, sin pasar por el Mapper?**</strong><br>Acoplaría la capa web a la persistencia JPA, duplicaría lógica de transformación y expondría campos internos de la BD al cliente.</li>
+        <li><strong>¿Por qué tu prueba de controller usa @WebMvcTest y no @SpringBootTest?**</strong><br>Porque <code>@WebMvcTest</code> carga únicamente el contexto MVC de la capa web, siendo más rápida y aislada que inicializar todo el contexto Spring Boot y la BD real.</li>
+    </ol>
+
+    <div class="footer-box">
+        <h2>6. ANEXO: FEEDBACK DE LA SESIÓN S02</h2>
+        <ul>
+            <li><strong>Estudiantes:</strong> Jhymel Nelio Figueroa Chambi / Helio Calisaya</li>
+            <li><strong>Aprendizaje principal:</strong> El desacoplamiento REST con DTOs, Mappers dedicados y <code>@RestControllerAdvice</code>.</li>
+            <li><strong>Comprensión:</strong> ¡Entendido! - Lo domino y podría explicarlo.</li>
+            <li><strong>Autoevaluación:</strong> Muy Comprometido/a.</li>
+            <li><strong>Calificación de satisfacción:</strong> 10 / 10</li>
+        </ul>
+    </div>
 
 </body>
 </html>

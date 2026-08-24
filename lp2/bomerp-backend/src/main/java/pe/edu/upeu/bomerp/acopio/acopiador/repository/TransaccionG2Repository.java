@@ -13,6 +13,8 @@ public interface TransaccionG2Repository extends JpaRepository<TransaccionG2, Lo
 
     List<TransaccionG2> findByTipoOro(String tipoOro);
 
+    List<TransaccionG2> findByMineroIdMinero(Long idMinero);
+
     @Query("SELECT COALESCE(SUM(t.pesoFundidoNetoG), 0) FROM TransaccionG2 t WHERE t.tipoOro = :tipoOro")
     BigDecimal sumPesoFundidoByTipoOro(@Param("tipoOro") String tipoOro);
 

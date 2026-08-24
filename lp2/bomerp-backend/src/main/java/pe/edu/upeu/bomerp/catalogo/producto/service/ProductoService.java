@@ -11,4 +11,5 @@ public interface ProductoService {
     ProductoResponse crear(ProductoRequest request);
     ProductoResponse actualizar(Long id, ProductoRequest request);
     void eliminar(Long id);
+    List<ProductoResponse> listarPorCategoria(Long categoriaId);
 }
