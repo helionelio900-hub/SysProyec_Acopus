@@ -11,7 +11,7 @@
 * **Compañero de Equipo:** Helio Calisaya
 * **Equipo:** Equipo 05 - Proyecto `bomerp-acopio-oro`
 * **Sesión:** S03 - Diseño Estructural y Principios SOLID
-* **Rol o Aporte Realizado:** Evaluación Arquitectónica y Análisis SOLID, Cohesión, Acoplamiento, Modularidad y Abstracción sobre las clases reales del backend de Acopio de Oro.
+* **Rol o Aporte Realizado:** Evaluación Arquitectónica, Análisis SOLID e Implementación de Refactorización SOLID (`CalculadorPrecioOroService`) sobre el backend de Acopio de Oro.
 * **Link de GitHub del Proyecto:** [https://github.com/helionelio900-hub/SysProyec_Acopus](https://github.com/helionelio900-hub/SysProyec_Acopus)
 
 ---
@@ -27,7 +27,9 @@
 | `MineroRepository` | Abstracción de acceso a datos de la tabla `MINEROS` vía Spring Data JPA. | **Sí** | Interface pura sin lógica propia. |
 | `MineroMapper` | Mapeo bidireccional entre `MineroRequest`, `Minero`, `MineroResponse` y `MineroResumen`. | **Sí** | Generado por MapStruct, libre de lógica de negocio. |
 | `Minero` (Entidad JPA) | Representar el modelo de datos persistente en Oracle (`BOM_ACOPIO.MINEROS`). | **Sí** | Clase `@Entity` con campos, getters/setters y `@PrePersist`. |
-| `AcopiadorServiceImpl` | Orquestar la regla de compra directa de oro (`TransaccionG2`), cálculo de montos y validación de minero. | **Sí** | Se enfoca exclusivamente en la transacción de acopio de oro. |
+| `AcopiadorServiceImpl` | Orquestar el registro de compra directa de oro (`TransaccionG2`) y desembolsos. | **Sí** | Delega la determinación de precios a `CalculadorPrecioOroService`. |
+| `CalculadorPrecioOroService` | Interfaz de estrategia para determinar el precio por gramo de oro. | **Sí** | Aísla la regla de cálculo de precios del resto del flujo transaccional. |
+| `CalculadorPrecioOficialImpl` | Estrategia de determinación de precios desde `PARAMETROS_SISTEMA` u oficial. | **Sí** | Implementación concreta de la estrategia de precios. |
 | `TransaccionG2Repository` | Acceso a datos de `TRANSACCIONES_G2` y agregaciones SQL por tipo de oro (Rojo/Verde). | **Sí** | Interface de persistencia Spring Data JPA. |
 | `TransaccionG2Mapper` | Mapeo de `TransaccionG2Request` y `Minero` $\rightarrow$ `TransaccionG2` $\rightarrow$ `TransaccionG2Response`. | **Sí** | Interface MapStruct delegando mapeos de minero a `MineroMapper`. |
 | `TransaccionG2` (Entidad) | Representar el modelo de datos de compras de oro en Oracle (`BOM_ACOPIO.TRANSACCIONES_G2`). | **Sí** | Mapeo ORM JPA con `@ManyToOne` unidireccional. |
@@ -37,14 +39,14 @@
 ### 2.2 Abierto/Cerrado (O), Liskov (L) e Interfaces (I)
 
 1. **Open/Closed Principle (O)**:
-   - `MineroService` y `AcopiadorService` son interfaces Java.
-   - Permiten extender el comportamiento agregando nuevas implementaciones (ejemplo: `MineroServiceCacheImpl` o `MineroServiceAuditDecorator`) sin modificar `MineroController` ni romper código existente.
+   - `MineroService`, `AcopiadorService` y `CalculadorPrecioOroService` son interfaces Java.
+   - Permiten extender el comportamiento agregando nuevas implementaciones (ej. `CalculadorPrecioAPIInternacionalImpl` para cotizaciones internacionales en tiempo real) sin modificar `AcopiadorServiceImpl` ni romper código existente.
 
 2. **Liskov Substitution Principle (L)**:
-   - Cualquier implementación alternativa de `MineroService` sustituye a `MineroServiceImpl` manteniendo exactamente el mismo contrato (mismo lanzamiento de `ResourceNotFoundException` ante IDs inexistentes) sin alterar el comportamiento de `MineroController`.
+   - Cualquier implementación alternativa de `CalculadorPrecioOroService` sustituye a `CalculadorPrecioOficialImpl` garantizando un retorno `BigDecimal` válido $> 0$, sin alterar el comportamiento esperado del controlador.
 
 3. **Interface Segregation Principle (I)**:
-   - Las interfaces `MineroService` y `AcopiadorService` declaran únicamente los métodos específicos consumidos por sus controladores (`listar`, `obtener`, `crear`, `actualizar`, `eliminar`, `listarPorMinero`). No existen métodos inflados ni forzados.
+   - Las interfaces `MineroService`, `AcopiadorService` y `CalculadorPrecioOroService` declaran únicamente los métodos específicos consumidos por sus clientes. No existen métodos inflados ni forzados.
 
 ---
 
@@ -53,21 +55,12 @@
 Todas las dependencias en los controladores y servicios del módulo de acopio se inyectan como **interfaces** mediante `@RequiredArgsConstructor` (Constructor Injection). En ningún punto se utiliza la palabra clave `new` para instanciar repositorios, mappers o servicios concretos:
 
 ```java
-@RestController
-@RequestMapping("/api/v1/acopio/mineros")
-@RequiredArgsConstructor
-public class MineroController {
-    private final MineroService mineroService; // Interfaz, no MineroServiceImpl
-    private final AcopiadorService acopiadorService; // Interfaz, no AcopiadorServiceImpl
-}
-```
-
-```java
 @Service
 @RequiredArgsConstructor
 public class AcopiadorServiceImpl implements AcopiadorService {
     private final TransaccionG2Repository transaccionG2Repository; // Interfaz Spring Data JPA
     private final MineroRepository mineroRepository; // Interfaz Spring Data JPA
+    private final CalculadorPrecioOroService calculadorPrecioOroService; // Interfaz de estrategia de precios
     private final TransaccionG2Mapper transaccionG2Mapper; // Interfaz MapStruct
 }
 ```
@@ -78,7 +71,7 @@ public class AcopiadorServiceImpl implements AcopiadorService {
 
 1. **Cohesión por Paquete (Alta Cohesión)**:
    - `pe.edu.upeu.bomerp.acopio.parametros`: Contiene únicamente las clases de la entidad `Minero` y parámetros del sistema. Alta cohesión temática.
-   - `pe.edu.upeu.bomerp.acopio.acopiador`: Contiene únicamente la lógica de registro de transacciones de compra directa de oro (`TransaccionG2`).
+   - `pe.edu.upeu.bomerp.acopio.acopiador`: Contiene únicamente la lógica de registro de transacciones de compra directa de oro (`TransaccionG2`) y la estrategia de precios.
 
 2. **Acoplamiento entre Paquetes (Tensión de Diseño Identificada)**:
    - `AcopiadorServiceImpl` depende de `MineroRepository` para validar que el `idMinero` referenciado exista. Puesto que ambos paquetes pertenecen al mismo módulo funcional (`acopio`), este acoplamiento interno es aceptable.
@@ -90,11 +83,10 @@ public class AcopiadorServiceImpl implements AcopiadorService {
 
 ---
 
-### 2.5 Hallazgo Real Identificado
+### 2.5 Refactorización SOLID Realizada
 
-* **Descripción del Hallazgo:** En `AcopiadorServiceImpl`, la validación de la existencia del minero se realiza accediendo directamente a `mineroRepository.findById(idMinero)` en lugar de invocar `mineroService.obtener(idMinero)`.
-* **Análisis de Impacto:** Esta decisión crea un acoplamiento directo desde el servicio de transacciones de acopio hacia la capa de persistencia de parámetros.
-* **Propuesta de Corrección:** Inyectar `MineroService` en `AcopiadorServiceImpl` para invocar `mineroService.obtener(idMinero)`, promoviendo el acoplamiento hacia interfaces públicas estables.
+* **Descripción**: Se aplicó una refactorización basada en el patrón Strategy aislando la lógica de precios mediante la interfaz `CalculadorPrecioOroService` y su implementación `CalculadorPrecioOficialImpl`.
+* **Impacto**: Se fortalecieron los principios **S**, **O** y **D** en el módulo transaccional de acopio.
 
 ---
 
@@ -107,13 +99,13 @@ El acoplamiento entre dos paquetes del mismo módulo no es automáticamente una 
 ## 4. RESPUESTAS A LAS PREGUNTAS DE DEFENSA (SESIÓN S03 ADS)
 
 1. **¿Qué diferencia hay entre una violación real de SOLID y una tensión de diseño aceptable?**
-   * Una violación real degrada la mantenibilidad y rompe principios esenciales (como instanciar clases concretas con `new` o mezclar persistencia y lógica de negocio). Una tensión de diseño es un acoplamiento intencional y justificado dentro del mismo módulo funcional para simplificar la arquitectura sin violar límites modulares.
+   * Una violación real degrada la mantenibilidad. Una tensión de diseño es un acoplamiento intencional y justificado dentro del mismo módulo funcional para simplificar la arquitectura sin violar límites modulares.
 
-2. **¿Por qué `ProductoController` o `MineroController` dependen de la interfaz y no de la implementación directamente?**
-   * Para cumplir con la Inversión de Dependencias (D). Permite cambiar o extender la implementación de la capa de servicio sin modificar una sola línea del controlador HTTP.
+2. **¿Por qué `MineroController` o `AcopiadorServiceImpl` dependen de interfaces y no de clases concretas?**
+   * Para cumplir con la Inversión de Dependencias (D). Permite cambiar o extender la implementación sin modificar una sola línea de código en el cliente consumidor.
 
 3. **¿Qué significa que un Service esté "abierto a extensión, cerrado a modificación"?**
-   * Significa que se pueden agregar nuevas funcionalidades o comportamientos (como almacenamiento en caché o auditoría) mediante nuevas clases que implementen la interfaz, sin alterar el código fuente existente.
+   * Significa que se pueden agregar nuevas funcionalidades o estrategias (como `CalculadorPrecioAPIInternacionalImpl`) mediante nuevas clases que implementen la interfaz, sin alterar el código fuente existente.
 
 4. **¿Por qué la relación entre transacciones y minero no es una violación de `ModularityTests`?**
    * Porque ambos paquetes (`acopiador` y `parametros`) pertenecen al mismo módulo funcional de negocio (`pe.edu.upeu.bomerp.acopio`). Spring Modulith verifica fronteras entre módulos distintos, no dentro de paquetes internos del mismo módulo.
@@ -130,10 +122,10 @@ El acoplamiento entre dos paquetes del mismo módulo no es automáticamente una 
    * Helio Calisaya
 
 2. **¿Cuál es el aprendizaje más importante que te llevas de la clase de hoy?**
-   * Evaluar objetivamente el código real del backend utilizando los principios SOLID y distinguir acoplamientos aceptables de violaciones arquitectónicas reales.
+   * Evaluar e implementar activamente los principios SOLID sobre el código real del backend mediante refactorización basada en interfaces.
 
 3. **¿Qué punto de la clase te resultó más confuso o te dejó con dudas?**
-   * La diferencia entre acoplamiento entre clases vs acoplamiento entre contratos de DTOs.
+   * La aplicación de patrones de estrategia (Open/Closed) en servicios transaccionales.
 
 4. **¿Tienes alguna pregunta que te gustaría que sea respondida la siguiente clase?**
    * ¿Cómo se reflejan estos principios SOLID al migrar de un monolito modular a una arquitectura hexagonal o microservicios en S4?

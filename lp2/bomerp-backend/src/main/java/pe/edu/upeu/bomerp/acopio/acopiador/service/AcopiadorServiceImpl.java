@@ -10,9 +10,7 @@ import pe.edu.upeu.bomerp.acopio.acopiador.entity.TransaccionG2;
 import pe.edu.upeu.bomerp.acopio.acopiador.mapper.TransaccionG2Mapper;
 import pe.edu.upeu.bomerp.acopio.acopiador.repository.TransaccionG2Repository;
 import pe.edu.upeu.bomerp.acopio.parametros.entity.Minero;
-import pe.edu.upeu.bomerp.acopio.parametros.entity.ParametrosSistema;
 import pe.edu.upeu.bomerp.acopio.parametros.repository.MineroRepository;
-import pe.edu.upeu.bomerp.acopio.parametros.repository.ParametrosSistemaRepository;
 import pe.edu.upeu.bomerp.exception.ResourceNotFoundException;
 
 import java.math.BigDecimal;
@@ -25,7 +23,7 @@ public class AcopiadorServiceImpl implements AcopiadorService {
 
     private final TransaccionG2Repository transaccionG2Repository;
     private final MineroRepository mineroRepository;
-    private final ParametrosSistemaRepository parametrosSistemaRepository;
+    private final CalculadorPrecioOroService calculadorPrecioOroService;
     private final TransaccionG2Mapper transaccionG2Mapper;
 
     @Override
@@ -33,13 +31,7 @@ public class AcopiadorServiceImpl implements AcopiadorService {
     public TransaccionG2Response registrarCompraDirecta(TransaccionG2Request request) {
         Minero minero = buscarMineroOFallar(request.idMinero());
 
-        BigDecimal precioAplicado = request.precioAplicadoPen();
-        if (precioAplicado == null) {
-            ParametrosSistema params = parametrosSistemaRepository.findFirstByEstadoOrderByFechaDesc("ACTIVO").orElse(null);
-            precioAplicado = (params != null && params.getPrecioDiarioGramoPen() != null) 
-                    ? params.getPrecioDiarioGramoPen() 
-                    : new BigDecimal("280.00");
-        }
+        BigDecimal precioAplicado = calculadorPrecioOroService.determinarPrecioAplicado(request.precioAplicadoPen());
 
         BigDecimal totalPagado = request.pesoFundidoNetoG().multiply(precioAplicado).setScale(2, RoundingMode.HALF_UP);
 
