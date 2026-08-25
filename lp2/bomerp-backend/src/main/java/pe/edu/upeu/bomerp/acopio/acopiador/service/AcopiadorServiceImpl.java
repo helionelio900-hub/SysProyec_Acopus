@@ -17,13 +17,32 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+/*
+ ===================================================================================
+ ❌ FORMA INCORRECTA (VIOLACIÓN PRINCIPIOS S Y D - ANTES DE OPTIMIZAR):
+ -----------------------------------------------------------------------------------
+ public class AcopiadorServiceImpl {
+     // Violación D: Instanciación directa con 'new' de una clase concreta
+     private CalculadorPrecioOficialImpl calculador = new CalculadorPrecioOficialImpl();
+
+     // Violación S: Mezclaba la lógica de obtención de precios dentro del registro
+     public TransaccionG2Response registrarCompraDirecta(TransaccionG2Request request) {
+         BigDecimal precio = (request.precioAplicadoPen() != null) ? request.precioAplicadoPen() : new BigDecimal("280.00");
+         ...
+     }
+ }
+ ===================================================================================
+ ✅ FORMA CORRECTA (PATRÓN SOLID S Y D - CÓDIGO REAL EN PRODUCCIÓN):
+ ===================================================================================
+*/
+
 @Service
 @RequiredArgsConstructor
 public class AcopiadorServiceImpl implements AcopiadorService {
 
     private final TransaccionG2Repository transaccionG2Repository;
     private final MineroRepository mineroRepository;
-    private final CalculadorPrecioOroService calculadorPrecioOroService;
+    private final CalculadorPrecioOroService calculadorPrecioOroService; // Cumple D: Inyección de la Interfaz
     private final TransaccionG2Mapper transaccionG2Mapper;
 
     @Override
@@ -31,6 +50,7 @@ public class AcopiadorServiceImpl implements AcopiadorService {
     public TransaccionG2Response registrarCompraDirecta(TransaccionG2Request request) {
         Minero minero = buscarMineroOFallar(request.idMinero());
 
+        // Cumple S y O: Delega la determinación de precios a la estrategia del servicio
         BigDecimal precioAplicado = calculadorPrecioOroService.determinarPrecioAplicado(request.precioAplicadoPen());
 
         BigDecimal totalPagado = request.pesoFundidoNetoG().multiply(precioAplicado).setScale(2, RoundingMode.HALF_UP);

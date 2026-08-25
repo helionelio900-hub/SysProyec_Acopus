@@ -15,14 +15,34 @@ import pe.edu.upeu.bomerp.acopio.parametros.service.MineroService;
 
 import java.util.List;
 
+/*
+ ===================================================================================
+ ❌ FORMA INCORRECTA (VIOLACIÓN PRINCIPIOS S Y D - ANTES DE OPTIMIZAR):
+ -----------------------------------------------------------------------------------
+ @RestController
+ public class MineroController {
+     // Violación de D: Dependencia directa de la clase concreta e instanciación con 'new'
+     private MineroServiceImpl mineroService = new MineroServiceImpl();
+
+     // Violación de S: El controlador ejecutaba lógica de acceso a datos directamente
+     @PostMapping("/mineros")
+     public Minero crearMinero(@RequestBody Minero minero) {
+         return mineroRepository.save(minero); // Guardaba directamente en BD sin Service ni DTOs
+     }
+ }
+ ===================================================================================
+ ✅ FORMA CORRECTA (PATRÓN SOLID S Y D - CÓDIGO REAL EN PRODUCCIÓN):
+ ===================================================================================
+*/
+
 @Tag(name = "Mineros")
 @RestController
 @RequestMapping("/api/v1/acopio/mineros")
 @RequiredArgsConstructor
 public class MineroController {
 
-    private final MineroService mineroService;
-    private final AcopiadorService acopiadorService;
+    private final MineroService mineroService; // Cumple D: Inyección de la Interfaz
+    private final AcopiadorService acopiadorService; // Cumple D: Inyección de la Interfaz
 
     @Operation(summary = "Lista todos los mineros de acopio")
     @GetMapping
