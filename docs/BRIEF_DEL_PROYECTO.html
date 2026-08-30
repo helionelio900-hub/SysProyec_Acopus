@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brief del Proyecto - BomERP Acopio de Oro</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #222;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px 40px;
+            background: #fdfdfd;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+            border-radius: 8px;
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #b7791f;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        h2 {
+            color: #2b6cb0;
+            margin-top: 30px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 6px;
+        }
+        h3 {
+            color: #2d3748;
+            margin-top: 20px;
+        }
+        .meta-card {
+            background: #ebf8ff;
+            border-left: 5px solid #3182ce;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .meta-card p {
+            margin: 5px 0;
+        }
+        .module-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+        .module-transversal { border-left: 5px solid #805ad5; }
+        .module-transaccional { border-left: 5px solid #dd6b20; }
+        .module-notransaccional { border-left: 5px solid #319795; }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 0.85em;
+            font-weight: bold;
+            border-radius: 4px;
+            color: #fff;
+        }
+        .badge-transversal { background: #805ad5; }
+        .badge-transaccional { background: #dd6b20; }
+        .badge-notransaccional { background: #319795; }
+        ul {
+            margin-top: 8px;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.95em;
+        }
+        th, td {
+            border: 1px solid #cbd5e0;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #2b6cb0;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+        .footer-note {
+            font-style: italic;
+            color: #718096;
+            margin-top: 30px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        @media print {
+            body { box-shadow: none; margin: 0; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>BRIEF DEL PROYECTO</h1>
+
+    <div class="meta-card">
+        <p><strong>Nombre del proyecto:</strong> BomERP - Sistema de Control y Acopio de Oro (<code>bomerp-acopio-oro</code>)</p>
+        <p><strong>Institución:</strong> Universidad Peruana Unión (UPeU) - Campus Juliaca</p>
+        <p><strong>Ciclo y Semestre:</strong> Ciclo IV — Semestre 2026-II</p>
+        <p><strong>Cursos Articulados:</strong> ADS | BD2 | LP2</p>
+        <p><strong>Equipo de Desarrollo (Equipo 05):</strong> Faijo Calisaya Helio Paul & Figueroa Chambi Jhymel Nelio</p>
+    </div>
+
+    <h2>1. Descripción General del Proyecto</h2>
+    <p>
+        <strong>BomERP - Acopio de Oro</strong> es una solución empresarial full-stack desarrollada para modernizar, estandarizar y digitalizar las operaciones de compra, fundición, pesaje, cotización y liquidación financiera en centros de acopio de oro artesanal.
+    </p>
+    <p>
+        El sistema reemplaza los cálculos manuales mediante un flujo transaccional seguro, garantizando la trazabilidad precisa del mineral desde su pesaje bruto inicial, la determinación de la merma tras la fundición física y su separación estricta por calidad (<strong>Oro Rojo</strong> vs. <strong>Oro Verde</strong>), hasta la liquidación final con compradores mayoristas basada en precios internacionales (Onza Troy USD) y tipo de cambio oficial.
+    </p>
+
+    <h2>2. Especificación Modular del Sistema</h2>
+
+    <div class="module-card module-transversal">
+        <h3>1. Seguridad y Control de Acceso (<code>seguridad</code>) <span class="badge badge-transversal">Transversal</span></h3>
+        <p><strong>Descripción:</strong> Módulo encargado de garantizar la protección del sistema, autenticación de usuarios, gestión de sesiones sin estado con JWT y control de acceso basado en roles.</p>
+        <strong>Requerimientos Funcionales:</strong>
+        <ul>
+            <li><strong>RF-SEG-01:</strong> Registrar usuarios internos con contraseñas encriptadas (BCrypt).</li>
+            <li><strong>RF-SEG-02:</strong> Autenticar usuarios con usuario/correo y contraseña.</li>
+            <li><strong>RF-SEG-03:</strong> Emitir y validar tokens criptográficos JSON Web Tokens (JWT).</li>
+            <li><strong>RF-SEG-04:</strong> Restringir accesos a vistas y endpoints según roles (<code>ROLE_G2_ACOPIADOR</code>, <code>ROLE_G1_MAYORISTA</code>).</li>
+            <li><strong>RF-SEG-05:</strong> Proveer mecanismo de cierre de sesión seguro.</li>
+        </ul>
+        <p><strong>Programadores Responsables:</strong> Faijo Calisaya Helio Paul & Figueroa Chambi Jhymel Nelio</p>
+    </div>
+
+    <div class="module-card module-transaccional">
+        <h3>2. Compras y Acopio Presencial (<code>acopiador</code>) <span class="badge badge-transaccional">Transaccional 1</span></h3>
+        <p><strong>Descripción:</strong> Módulo transaccional principal para el operador de acopio (G2). Gestiona la recepción física del oro, pesaje bruto, fundición real con merma, clasificación por color y liquidación en efectivo.</p>
+        <strong>Requerimientos Funcionales:</strong>
+        <ul>
+            <li><strong>RF-ACO-01:</strong> Registrar nueva transacción de compra vinculando al minero artesanal.</li>
+            <li><strong>RF-ACO-02:</strong> Capturar peso bruto inicial (sin fundir) y peso neto real (fundido).</li>
+            <li><strong>RF-ACO-03:</strong> Calcular automáticamente la bajada/merma de fundición.</li>
+            <li><strong>RF-ACO-04:</strong> Clasificar obligatoriamente el mineral en <strong>Oro Rojo</strong> o <strong>Oro Verde</strong>.</li>
+            <li><strong>RF-ACO-05:</strong> Calcular el pago total en Soles (PEN) según tarifa del día.</li>
+            <li><strong>RF-ACO-06:</strong> Consolidar en tiempo real los acumulados del día/semana manteniendo estrictamente separados los totales de Oro Rojo y Verde.</li>
+            <li><strong>RF-ACO-07:</strong> Permitir anulación controlada de compra con reversión automática de saldos.</li>
+        </ul>
+        <p><strong>Programador Responsable:</strong> Faijo Calisaya Helio Paul</p>
+    </div>
+
+    <div class="module-card module-transaccional">
+        <h3>3. Liquidaciones y Cierres Mayoristas (<code>mayorista</code>) <span class="badge badge-transaccional">Transaccional 2</span></h3>
+        <p><strong>Descripción:</strong> Módulo transaccional de consolidación para el comprador mayorista (G1). Procesa el cierre y compra del lote semanal de G2 aplicando la Cotización de Onza Troy en USD y Tipo de Cambio a Soles.</p>
+        <strong>Requerimientos Funcionales:</strong>
+        <ul>
+            <li><strong>RF-MAY-01:</strong> Consolidar el lote semanal de gramos acumulados entregados por G2.</li>
+            <li><strong>RF-MAY-02:</strong> Registrar valor internacional de la Onza Troy USD y Tipo de Cambio (USD a PEN).</li>
+            <li><strong>RF-MAY-03:</strong> Determinar el precio unitario por gramo resultante diferenciado por color (Rojo/Verde).</li>
+            <li><strong>RF-MAY-04:</strong> Emitir liquidación y comprobante marcando los lotes como cerrados/transferidos.</li>
+            <li><strong>RF-MAY-05:</strong> Registrar el desembolso financiero total efectuado hacia el acopiador G2.</li>
+            <li><strong>RF-MAY-06:</strong> Consultar el histórico detallado de liquidaciones y comprobantes de cierre.</li>
+        </ul>
+        <p><strong>Programador Responsable:</strong> Figueroa Chambi Jhymel Nelio</p>
+    </div>
+
+    <div class="module-card module-notransaccional">
+        <h3>4. Cotizador y Simulación Pública (<code>cotizador</code>) <span class="badge badge-notransaccional">No Transaccional 1</span></h3>
+        <p><strong>Descripción:</strong> Módulo informativo y consultivo de acceso público sin autenticación para que los mineros simulen el valor aproximado de su mineral antes de ir al centro de acopio.</p>
+        <strong>Requerimientos Funcionales:</strong>
+        <ul>
+            <li><strong>RF-COT-01:</strong> Ingreso de cantidad estimada de gramos brutos a cotizar.</li>
+            <li><strong>RF-COT-02:</strong> Cálculo automático de merma proyectada referencial.</li>
+            <li><strong>RF-COT-03:</strong> Mostrar importe estimado en Soles (PEN) según precio del día.</li>
+            <li><strong>RF-COT-04:</strong> Mostrar tabla referencial de escalas de peso y valor proyectado.</li>
+            <li><strong>RF-COT-05:</strong> Operación volátil en memoria sin persistencia en BD ni requerir login.</li>
+        </ul>
+        <p><strong>Programador Responsable:</strong> Faijo Calisaya Helio Paul</p>
+    </div>
+
+    <div class="module-card module-notransaccional">
+        <h3>5. Parámetros Maestros y Dashboard (<code>parametros</code>) <span class="badge badge-notransaccional">No Transaccional 2</span></h3>
+        <p><strong>Descripción:</strong> Módulo administrativo para gestión de tarifas base del oro, catálogo de mineros y visualización de indicadores (KPIs) en el Dashboard.</p>
+        <strong>Requerimientos Funcionales:</strong>
+        <ul>
+            <li><strong>RF-PAR-01:</strong> Consultar precio oficial vigente del gramo de oro del día.</li>
+            <li><strong>RF-PAR-02:</strong> Actualizar tarifa diaria del gramo de oro (exclusivo para <code>ROLE_G1_MAYORISTA</code>).</li>
+            <li><strong>RF-PAR-03:</strong> Administrar catálogo maestro de mineros recurrentes (DNI, nombres, procedencia).</li>
+            <li><strong>RF-PAR-04:</strong> Visualizar histórico de variaciones del precio del oro.</li>
+            <li><strong>RF-PAR-05:</strong> Generar Dashboard con métricas de gramos acopiados (Rojo vs. Verde), dinero desembolsado y total de transacciones.</li>
+        </ul>
+        <p><strong>Programador Responsable:</strong> Figueroa Chambi Jhymel Nelio</p>
+    </div>
+
+    <h2>3. Resumen y Asignación de Responsabilidades</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>Nombre del Módulo</th>
+                <th>Tipo Arquitectónico</th>
+                <th>Programador Responsable</th>
+                <th>Aporte en Línea Curricular</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1</strong></td>
+                <td><strong>Seguridad</strong> (<code>seguridad</code>)</td>
+                <td><span class="badge badge-transversal">Transversal</span></td>
+                <td><strong>Faijo Calisaya Helio Paul</strong> &<br><strong>Figueroa Chambi Jhymel Nelio</strong></td>
+                <td>JWT, BCrypt, Security Filter Chain, UserDetails</td>
+            </tr>
+            <tr>
+                <td><strong>2</strong></td>
+                <td><strong>Acopiador</strong> (<code>acopiador</code>)</td>
+                <td><span class="badge badge-transaccional">Transaccional 1</span></td>
+                <td><strong>Faijo Calisaya Helio Paul</strong></td>
+                <td>Compras G2, Fundición Real, Oro Rojo/Verde</td>
+            </tr>
+            <tr>
+                <td><strong>3</strong></td>
+                <td><strong>Mayorista</strong> (<code>mayorista</code>)</td>
+                <td><span class="badge badge-transaccional">Transaccional 2</span></td>
+                <td><strong>Figueroa Chambi Jhymel Nelio</strong></td>
+                <td>Cierres G1, Onza Troy USD, Tipo de Cambio</td>
+            </tr>
+            <tr>
+                <td><strong>4</strong></td>
+                <td><strong>Cotizador</strong> (<code>cotizador</code>)</td>
+                <td><span class="badge badge-notransaccional">No Transaccional 1</span></td>
+                <td><strong>Faijo Calisaya Helio Paul</strong></td>
+                <td>Simulador Minero, Merma, Cálculo en Memoria</td>
+            </tr>
+            <tr>
+                <td><strong>5</strong></td>
+                <td><strong>Parámetros</strong> (<code>parametros</code>)</td>
+                <td><span class="badge badge-notransaccional">No Transaccional 2</span></td>
+                <td><strong>Figueroa Chambi Jhymel Nelio</strong></td>
+                <td>Precios Diarios, Mineros, Dashboard KPIs</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p class="footer-note">
+        Proyecto Integrador Ciclo IV — BomERP Acopio de Oro &copy; 2026 UPeU Juliaca
+    </p>
+
+</body>
+</html>

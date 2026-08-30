@@ -1,95 +1,138 @@
-# INFORME DE EVIDENCIA INDIVIDUAL - SESIÓN S03 (DOMINIO ACOPIO DE ORO)
-## CURSO: LENGUAJE DE PROGRAMACIÓN II (LP2)
-
-**Nombre del Archivo Entregable:** `S03_LP2_Equipo05_CalisayaHelio.pdf`
+# INFORME DE EVIDENCIA DE APRENDIZAJE
+## SESIÓN S03: ASOCIACIÓN ORM Y DTO RELACIONADO (MINERO — TRANSACCIÓN ACOPIO ORO)
 
 ---
 
-## 1. DATOS DEL ESTUDIANTE
+### Datos Generales del Estudiante
 
-* **Nombre del Estudiante:** Helio Calisaya
-* **Compañero de Equipo:** Jhymel Nelio Figueroa Chambi
-* **Equipo:** Equipo 05 - Proyecto `bomerp-acopio-oro`
-* **Sesión:** S03 - Objetos Relacionados en el Dominio Principal (`TransaccionG2` - `Minero`)
-* **Rol o Aporte Realizado:** Desarrollador Backend & Integración de Asociación ORM `@ManyToOne`, DTO Relacionado `MineroResumen`, Validación de Referencia en Acopio, Navegación Controlada y Pruebas `@WebMvcTest`.
-* **Link de GitHub del Proyecto:** [https://github.com/helionelio900-hub/SysProyec_Acopus](https://github.com/helionelio900-hub/SysProyec_Acopus)
-
----
-
-## 2. EVIDENCIA TÉCNICA (EVALUADA SOBRE RÚBRICA S03)
-
-### 2.1 Asociación ORM y DTO Relacionado (`@ManyToOne` y `MineroResumen`)
-
-1. **Asociación ORM Unidireccional en Entidad Principal de Dominio (`TransaccionG2.java`):**
-   ```java
-   @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "ID_MINERO", nullable = false)
-   private Minero minero;
-   ```
-   * Mapeada a la llave foránea física `FK_G2_MINERO` sobre `ID_MINERO` en el esquema Oracle `BOM_ACOPIO`.
-
-2. **DTO Relacionado Embebido (`MineroResumen.java`):**
-   ```java
-   public record MineroResumen(
-       Long idMinero,
-       String documentoIdentidad,
-       String nombresApellidos
-   ) {}
-   ```
-   * DTO de salida liviano embebido en `TransaccionG2Response` para evitar sobre-exponer datos sensibles o campos innecesarios del cliente minero.
-
-3. **Mapeo Compuesto con MapStruct (`TransaccionG2Mapper.java`):**
-   ```java
-   @Mapper(componentModel = "spring", uses = MineroMapper.class)
-   public interface TransaccionG2Mapper {
-       @Mapping(target = "idTransaccionG2", ignore = true)
-       @Mapping(target = "fechaTransaccion", ignore = true)
-       @Mapping(target = "minero", source = "minero")
-       TransaccionG2 toEntity(TransaccionG2Request request, Minero minero);
-
-       TransaccionG2Response toResponse(TransaccionG2 transaccionG2);
-   }
-   ```
+* **Estudiante:** Faijo Calisaya Helio Paul
+* **Equipo de Desarrollo:** Equipo 05 — BomERP Acopio de Oro (`bomerp-acopio-oro`)
+* **Proyecto de Dominio:** Sistema de Control y Acopio de Oro (`bomerp-acopio-oro`)
+* **Curso / Ciclo:** Lenguaje de Programación II (LP2) — Ciclo IV (Semestre 2026-II)
+* **Institución:** Universidad Peruana Unión (UPeU) — Campus Juliaca
+* **Rol / Aporte realizado:** Mapeo ORM `@ManyToOne` TransaccionG2-Minero, DTO `MineroResumen`, validación 404, navegación por filtro y CRUD `Minero`.
+* **Repositorio GitHub:** https://github.com/helionelio900-hub/SysProyec_Acopus.git
 
 ---
 
-### 2.2 Validación de Referencias en Acopio (`idMinero`)
+## 1. Evidencia Técnica por Bloques de Evaluación
 
-* **Validación Sintáctica en DTO (`TransaccionG2Request.java`):**
-  `@NotNull(message = "El ID del minero es obligatorio") Long idMinero;`
-* **Validación de Existencia Real en Service (`AcopiadorServiceImpl.java`):**
-  ```java
-  private Minero buscarMineroOFallar(Long idMinero) {
-      return mineroRepository.findById(idMinero)
-              .orElseThrow(() -> new ResourceNotFoundException("Minero no encontrado: " + idMinero));
+### Bloque 1: Asociación ORM y DTO Relacionado en Dominio Acopio (25%)
+
+En el dominio de Acopio de Oro, la entidad principal `TransaccionG2` (compra presencial de oro fundido) se asoció mediante `@ManyToOne` con carga perezosa (`LAZY`) y `@JoinColumn(name = "ID_MINERO")` hacia la entidad `Minero` (catálogo maestro). En la respuesta JSON, `TransaccionG2Response` embebe el DTO `MineroResumen` (`idMinero`, `documentoIdentidad`, `nombresApellidos`) sin exponer atributos internos ni provocar recursión infinita.
+
+```java
+// Entidad TransaccionG2.java
+@Entity
+@Table(name = "TRANSACCIONES_G2", schema = "BOM_ACOPIO")
+public class TransaccionG2 {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_TRANSACCION_G2")
+    private Long idTransaccionG2;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_MINERO", nullable = false)
+    private Minero minero;
+
+    @Column(name = "PESO_SIN_FUNDIR_G", nullable = false, precision = 10, scale = 3)
+    private BigDecimal pesoSinFundirG;
+
+    @Column(name = "PESO_FUNDIDO_NETO_G", nullable = false, precision = 10, scale = 3)
+    private BigDecimal pesoFundidoNetoG;
+
+    @Column(name = "TIPO_ORO", nullable = false, length = 10)
+    private String tipoOro; // "ROJO" o "VERDE"
+    // ...
+}
+```
+
+> 📷 **[ ESPACIO PARA CAPTURA 1: CÓDIGO DE TRANSACCIONG2.JAVA CON @MANYTOONE Y @JOINCOLUMN ]**  
+> *(Pegar captura de VS Code mostrando la entidad `TransaccionG2` y su relación hacia `Minero` con reloj de Windows y usuario visible).*
+
+*Explicación técnica 1:* La entidad `TransaccionG2` mapea la clave foránea `ID_MINERO` de la tabla `BOM_ACOPIO.TRANSACCIONES_G2` mediante `@ManyToOne(fetch = FetchType.LAZY)`, manteniendo la integridad referencial con la tabla `BOM_ACOPIO.MINEROS`.
+
+---
+
+```json
+// Respuesta GET /api/v1/acopio/transacciones
+[
+  {
+    "idTransaccionG2": 1,
+    "minero": {
+      "idMinero": 1,
+      "documentoIdentidad": "70123456",
+      "nombresApellidos": "Juan Quispe Mamani"
+    },
+    "pesoSinFundirG": 25.500,
+    "pesoFundidoNetoG": 24.200,
+    "tipoOro": "ROJO",
+    "precioAplicadoPen": 285.50,
+    "totalPagadoPen": 6909.10,
+    "fechaTransaccion": "2026-08-30T01:43:09.100"
   }
-  ```
-* **Caso Inválido Probado (HTTP 404 Not Found):**
-  * Solicitud `POST /api/v1/acopio/transacciones` enviando `idMinero: 999999` responde `404 Not Found` capturado por `GlobalExceptionHandler`.
+]
+```
+
+> 📷 **[ ESPACIO PARA CAPTURA 2: RESPUESTA GET /API/V1/ACOPIO/TRANSACCIONES CON MINERORESUMEN EMBEBIDO ]**  
+> *(Pegar captura de consola o cliente REST mostrando el JSON con `minero` anidado con reloj de Windows y usuario visible).*
+
+*Explicación técnica 2:* La consulta de transacciones de compra de oro retorna HTTP 200 OK incluyendo la clasificación de oro (Rojo / Verde), peso neto, total pagado y el DTO anidado `MineroResumen`.
 
 ---
 
-### 2.3 Navegación Controlada y Prevención de Ciclos de Serialización
+### Bloque 2: Validación de Referencias (Respuesta 404 Not Found) (25%)
 
-1. **Endpoint de Navegación Controlada en `MineroController.java`:**
-   ```java
-   @Operation(summary = "Lista las transacciones de acopio de un minero (Navegación Controlada)")
-   @GetMapping("/{id}/transacciones")
-   public ResponseEntity<List<TransaccionG2Response>> listarTransaccionesPorMinero(@PathVariable Long id) {
-       return ResponseEntity.ok(acopiadorService.listarPorMinero(id));
-   }
-   ```
-   * Consulta explícita bajo demanda sin cargar colecciones `@OneToMany` automáticas en la entidad `Minero`.
+Al intentar registrar una compra de oro presencial con un `idMinero` que no existe en el sistema, `AcopiadorServiceImpl` valida la referencia mediante `mineroRepository.findById(request.idMinero())`. Al no encontrarlo, lanza `ResourceNotFoundException` y `GlobalExceptionHandler` responde de forma controlada HTTP 404 Not Found sin registrar compras huérfanas.
 
-2. **Prevención de Ciclos de Serialización:**
-   * La relación se mantiene **unidireccional** (`TransaccionG2` $\rightarrow$ `Minero`), por lo que la entidad `Minero` no contiene ningún campo `List<TransaccionG2>`.
-   * Jackson serializa exclusivamente DTOs (`TransaccionG2Response` embebiendo `MineroResumen`), eliminando cualquier riesgo de recursión infinita o `StackOverflowError`.
+```java
+// AcopiadorServiceImpl.java
+private Minero buscarMineroOFallar(Long idMinero) {
+    return mineroRepository.findById(idMinero)
+            .orElseThrow(() -> new ResourceNotFoundException("Minero no encontrado: " + idMinero));
+}
+```
+
+> 📷 **[ ESPACIO PARA CAPTURA 3: POST /API/V1/ACOPIO/TRANSACCIONES CON IDMINERO INEXISTENTE (404 NOT FOUND) ]**  
+> *(Pegar captura ejecutando compra con `idMinero: 999` recibiendo 404 Not Found con mensaje "Minero no encontrado: 999" con reloj y usuario visible).*
+
+*Explicación técnica 3:* La API rechaza la transacción con HTTP 404 Not Found: `{"error": "Not Found", "message": "Minero no encontrado: 999"}`, impidiendo inconsistencias financieras en el módulo de compras de oro G2.
 
 ---
 
-### 2.4 CRUD Completo de la Entidad Relacionada del Dominio (`Minero`)
+### Bloque 3: Navegación Controlada por Minero (25%)
 
-| Operación | Método HTTP | Endpoint | Código HTTP Esperado | Descripción |
+Se implementó la navegación controlada a través del endpoint `GET /api/v1/acopio/mineros/{id}/transacciones` para listar el historial completo de compras de oro realizadas a un minero específico. Valida la existencia del minero respondiendo 404 si el identificador no existe.
+
+```java
+// MineroController.java
+@Operation(summary = "Lista las transacciones de acopio de un minero (Navegación Controlada)")
+@GetMapping("/{id}/transacciones")
+public ResponseEntity<List<TransaccionG2Response>> listarTransaccionesPorMinero(@PathVariable Long id) {
+    return ResponseEntity.ok(acopiadorService.listarPorMinero(id));
+}
+```
+
+> 📷 **[ ESPACIO PARA CAPTURA 4: NAVEGACIÓN CASO VÁLIDO: GET /API/V1/ACOPIO/MINEROS/1/TRANSACCIONES (200 OK) ]**  
+> *(Pegar captura mostrando el historial de compras de oro asociadas al minero ID 1 con reloj y usuario visible).*
+
+*Explicación técnica 4:* Petición exitosa que lista las transacciones de oro rojo y verde efectuadas al minero artesanal con ID 1.
+
+---
+
+> 📷 **[ ESPACIO PARA CAPTURA 5: NAVEGACIÓN CASO INVÁLIDO: GET /API/V1/ACOPIO/MINEROS/999/TRANSACCIONES (404 NOT FOUND) ]**  
+> *(Pegar captura mostrando la respuesta 404 Not Found al consultar el historial de un minero inexistente con reloj y usuario visible).*
+
+*Explicación técnica 5:* Consulta con minero inexistente (`id=999`) respondiendo 404 Not Found tras la verificación previa en base de datos.
+
+---
+
+### Bloque 4: CRUD de Mineros y Verificación de Límites Modulares (25%)
+
+El módulo de Parámetros/Maestros gestiona el CRUD completo del catálogo de Mineros (`/api/v1/acopio/mineros`: POST, GET, PUT, DELETE) con DTOs inmutables de tipo record, inyección de dependencias por interfaz y separación modular verificada con Spring Modulith.
+
+| Operación | Método HTTP | Endpoint | Código HTTP | Descripción |
 |---|:---:|---|:---:|---|
 | **Listar** | `GET` | `/api/v1/acopio/mineros` | `200 OK` | Devuelve lista de mineros registrados |
 | **Buscar por ID** | `GET` | `/api/v1/acopio/mineros/{id}` | `200 OK` | Devuelve minero por ID |
@@ -98,75 +141,59 @@
 | **Eliminar** | `DELETE` | `/api/v1/acopio/mineros/{id}` | `204 No Content` | Elimina minero del sistema |
 | **Navegación** | `GET` | `/api/v1/acopio/mineros/{id}/transacciones` | `200 OK` / `404` | Lista compras de oro del minero |
 
----
+> 📷 **[ ESPACIO PARA CAPTURA 6: CRUD DE MINERO: REGISTRO (POST) Y LISTADO GENERAL (GET) ]**  
+> *(Pegar captura ejecutando POST /api/v1/acopio/mineros (201 Created) y GET /api/v1/acopio/mineros (200 OK) con reloj y usuario visible).*
 
-### 2.5 Cobertura con Pruebas Automatizadas (@WebMvcTest) en Verde
-
-1. **Pruebas en `MineroControllerTest.java`:**
-   - `crear_conDatosValidos_respondeCreated` ✅
-   - `crear_conDocumentoVacio_respondeBadRequest` ✅
-   - `obtener_conIdInexistente_respondeNotFound` ✅
-   - `listarTransaccionesPorMinero_conMineroExistente_respondeOkConSusTransacciones` ✅
-   - `listarTransaccionesPorMinero_conMineroInexistente_respondeNotFound` ✅
-
-2. **Resultado de Ejecución de Pruebas Automatizadas (Maven):**
-   `[INFO] Results: Tests run: 18, Failures: 0, Errors: 0, Skipped: 0` $\rightarrow$ `BUILD SUCCESS`.
+*Explicación técnica 6:* Operaciones CRUD en `MineroController` con validación de documento de identidad único y zona de procedencia minera.
 
 ---
 
-## 3. ERROR O HALLAZGO TÉCNICO DIAGNOSTICADO
+> 📷 **[ ESPACIO PARA CAPTURA 7: PRUEBAS AUTOMATIZADAS Y MODULARITYTESTS EN VERDE (BUILD SUCCESS) ]**  
+> *(Pegar captura de la consola ejecutando mvnw test con todas las pruebas del proyecto bomerp-acopio-oro en verde con reloj y usuario visible).*
 
-* **Descripción del Problema:** Al mapear la relación entre `TransaccionG2` y `Minero` en `TransaccionG2Mapper`, MapStruct generó un error por ambigüedad de fuentes al intentar resolver atributos compartidos.
-* **Causa Raíz:** El mapper de MapStruct al recibir múltiples objetos de entrada requería la calificación explícita del parámetro origen.
-* **Solución Aplicada:** Se agregó la anotación `@Mapping(target = "minero", source = "minero")` especificando el parámetro `Minero minero` resuelto previamente en el Service.
-
----
-
-## 4. REFLEXIÓN TÉCNICA BREVE (5 A 8 LÍNEAS)
-
-Mantener la relación ORM unidireccional entre la transacción de acopio (`TransaccionG2`) y el cliente (`Minero`) evita declarar colecciones `@OneToMany` innecesarias. Esta decisión elimina la posibilidad de ciclos infinitos de serialización JSON y evita cargar listas pesadas de transacciones al consultar datos de un minero. La navegación entre el minero y sus entregas de oro se resuelve mediante un endpoint explícito bajo demanda (`GET /api/v1/acopio/mineros/{id}/transacciones`), manteniendo la API REST modular, limpia y eficiente.
+*Explicación técnica 7:* Ejecución exitosa de `ModularityTests` y pruebas unitarias confirmando que `AcopiadorService` consume `MineroService` respetando los límites de paquete y las reglas de arquitectura modular.
 
 ---
 
-## 5. RESPUESTAS A LAS PREGUNTAS DE DEFENSA (SESIÓN S03)
+## 2. Error o Hallazgo Técnico Diagnosticado
 
-1. **¿Por qué `TransaccionG2Response` embebe un `MineroResumen` y no la entidad `Minero` completa?**
-   * Para desacoplar los contratos de la API. `MineroResumen` expone únicamente los datos indispensables del minero (`idMinero`, `documentoIdentidad`, `nombresApellidos`), protegiendo otros campos internos.
-
-2. **¿Qué garantiza que esta sesión nunca produzca un ciclo de serialización?**
-   * Que la relación ORM es estrictamente unidireccional y que se serializan únicamente DTOs inmutables (`TransaccionG2Response` y `MineroResumen`), nunca entidades JPA.
-
-3. **¿Por qué el mapper no consulta la base de datos para resolver `idMinero`?**
-   * Porque los mappers son clases puras de transformación. La consulta y validación de existencia en la base de datos Oracle es responsabilidad del `AcopiadorServiceImpl`.
-
-4. **¿Qué significa "navegación controlada" y en qué se diferencia de un `@OneToMany` automático?**
-   * Significa consultar los datos asociados bajo demanda mediante un endpoint dedicado. Se diferencia en que no carga la lista de transacciones en memoria cada vez que se busca un minero.
-
-5. **¿Por qué `ModularityTests` sigue pasando aunque `minero` y `transaccionG2` se conocen entre sí?**
-   * Porque ambas entidades pertenecen al mismo módulo funcional de negocio (`pe.edu.upeu.bomerp.acopio`). Spring Modulith verifica dependencias entre módulos distintos, no dentro de un mismo módulo.
+* **Hallazgo:** En la Asociación `@ManyToOne` entre Módulos y Carga Perezosa (`LazyLoading`).
+* **Diagnóstico:** Durante el modelado de la relación entre `TransaccionG2` (módulo acopiador) y `Minero` (módulo parametros), al serializar inicialmente la entidad completa en la respuesta JSON se producía `LazyInitializationException` o serialización de proxies de Hibernate debido a la carga perezosa (`FetchType.LAZY`). 
+* **Solución:** Se diagnosticó y resolvió introduciendo el DTO intermedio `MineroResumen` dentro de `TransaccionG2Response` y mapeando los datos explícitamente en `TransaccionG2Mapper`. Esto garantizó que la transacción no exponga detalles innecesarios del minero y desacopló completamente la serialización JSON del ciclo de vida de la sesión JPA.
 
 ---
 
-## 6. ANEXO: FEEDBACK DE LA SESIÓN S03
+## 3. Reflexión Técnica Breve (5 a 8 líneas)
 
-1. **Integrantes del Equipo 05:**
-   * Helio Calisaya (Presentador de este informe)
-   * Jhymel Nelio Figueroa Chambi
+> **¿Por qué la relación entre TransaccionG2 y Minero es unidireccional, y qué problema evita esa decisión?**
+>
+> En el sistema `bomerp-acopio-oro`, la relación entre `TransaccionG2` y `Minero` se diseñó de forma estrictamente unidireccional (`@ManyToOne` en `TransaccionG2` sin `@OneToMany` en `Minero`) para evitar la sobrecarga de memoria y el clásico ciclo de serialización recursiva infinita. Un minero en el centro de acopio puede acumular cientos de transacciones a lo largo de los meses; si `Minero` tuviera una colección `@OneToMany` cargada por defecto, consultar un simple dato maestro traería innecesariamente miles de registros financieros a la memoria. Mantener la relación unidireccional y resolver la navegación mediante un endpoint filtrado bajo demanda (`GET /mineros/{id}/transacciones`) asegura alta eficiencia y bajo acoplamiento arquitectónico.
 
-2. **¿Cuál es el aprendizaje más importante que te llevas de la clase de hoy?**
-   * Aplicar la asociación ORM `@ManyToOne`, DTOs de resumen embebidos y navegación controlada sobre el dominio real de acopio de oro.
+---
 
-3. **¿Qué punto de la clase te resultó más confuso o te dejó con dudas?**
-   * La desambiguación en mappers con múltiples parámetros en MapStruct.
+## 4. Anexo: Feedback de la Sesión S03
 
-4. **¿Tienes alguna pregunta que te gustaría que sea respondida la siguiente clase?**
-   * ¿Cómo manejar operaciones transaccionales complejas de cabecera-detalle en S4?
+1. **¿Cuál es el aprendizaje más importante que te llevas de la clase de hoy?**  
+   Comprender cómo desacoplar el modelo relacional de base de datos de la API REST usando DTOs relacionados (`MineroResumen` embebido en `TransaccionG2Response`) y cómo implementar navegación controlada eficiente.
 
-5. **Sobre tu nivel de comprensión de la clase de hoy, marca una opción:**
+2. **¿Qué punto de la clase te resultó más confuso o te dejó con dudas?**  
+   El impacto del tipo de Fetch (`LAZY` vs `EAGER`) al mapear entidades JPA con MapStruct cuando se cruzan límites de paquetes.
+
+3. **¿Tienes alguna pregunta que te gustaría que sea respondida la siguiente clase?**  
+   ¿Cómo se articulan las transacciones atómicas (`@Transactional`) cuando una operación de compra actualiza acumulados y stock en diferentes módulos?
+
+4. **Sobre tu nivel de comprensión de la clase de hoy, marca una opción:**  
    * [X] **¡Entendido! - Lo domino y podría explicarlo.**
+   * [ ] Más o menos. - Entendí la idea general, pero tengo dudas.
+   * [ ] Necesito ayuda. - Me siento perdido/a con este tema.
 
-6. **Pensando en tu participación y esfuerzo en la clase de hoy, ¿cómo te autoevaluarías?:**
+5. **¿Cómo puedo ayudarte a comprender mejor el tema?**  
+   Continuar mostrando ejemplos prácticos de cómo los principios de diseño de software (bajo acoplamiento y DTOs) evitan problemas de rendimiento en bases de datos reales.
+
+6. **Pensando en tu participación y esfuerzo en la clase de hoy, ¿cómo te autoevaluarías?**  
    * [X] **Muy Comprometido/a: Me esforcé al máximo.**
+   * [ ] Comprometido/a: Sé que podría haberme esforzado un poco más.
+   * [ ] Poco Comprometido/a: Hoy no di mi mejor esfuerzo.
 
-7. **Mi satisfacción con la clase fue:**
-   * **10** (Muy satisfecho)
+7. **Mi satisfacción con la clase fue... (califica del 1 al 10):**  
+   **10 / 10** — Excelente clase práctica y aplicable a nuestro proyecto integrador.

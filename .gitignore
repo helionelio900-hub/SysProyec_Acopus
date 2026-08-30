@@ -1,0 +1,31 @@
+# Maven
+target/
+*.class
+
+# Logs
+*.log
+logs/
+lp2/bomerp-backend/logs/
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+# Temporary / Lock files (Office / Windows)
+~$*
+~*.tmp
+*.tmp
+Thumbs.db
+.DS_Store
+
+# Large media files (exceeding GitHub limit)
+*.mp4
+*.mkv
+*.avi
+*.mov
