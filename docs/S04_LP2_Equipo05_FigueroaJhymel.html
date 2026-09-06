@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>S04_LP2_Equipo05_FigueroaJhymel</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #1e293b; padding: 40px; max-width: 900px; margin: auto; }
+        h1 { color: #0f172a; border-bottom: 3px solid #eab308; padding-bottom: 10px; text-align: center; }
+        h2 { color: #1e3a8a; border-bottom: 2px solid #cbd5e1; padding-bottom: 5px; margin-top: 30px; }
+        h3 { color: #0f766e; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
+        th { background-color: #f1f5f9; color: #0f172a; }
+        pre { background-color: #0f172a; color: #f8fafc; padding: 15px; border-radius: 6px; overflow-x: auto; font-family: 'Consolas', monospace; font-size: 13px; }
+        code { background-color: #f1f5f9; color: #0f172a; padding: 2px 5px; border-radius: 4px; font-family: 'Consolas', monospace; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .badge-success { background-color: #dcfce7; color: #166534; }
+        .box { background-color: #f8fafc; border-left: 4px solid #eab308; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        .footer-box { background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .capture-box { background-color: #fffbeb; border: 2px dashed #f59e0b; padding: 12px; margin: 12px 0; border-radius: 6px; font-size: 13px; color: #92400e; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>INFORME DE EVIDENCIA INDIVIDUAL - SESIÓN S04 (SITRA-ORO ACOPIO)</h1>
+    <p style="text-align: center; font-weight: bold;">CURSO: LENGUAJE DE PROGRAMACIÓN II (LP2) - CICLO IV</p>
+    <p style="text-align: center; color: #64748b;">Archivo entregable: <code>S04_LP2_Equipo05_FigueroaJhymel.pdf</code></p>
+
+    <div class="box">
+        <h2>📌 1. DATOS DEL ESTUDIANTE</h2>
+        <ul>
+            <li><strong>Nombre del Estudiante:</strong> Jhymel Nelio Figueroa Chambi</li>
+            <li><strong>Compañero de Equipo:</strong> Faijo Calisaya Helio Paul</li>
+            <li><strong>Equipo:</strong> Equipo 05 — SITRA-ORO Acopio de Oro (<code>sitra-oro</code>)</li>
+            <li><strong>Sesión:</strong> S04 - Operación Cabecera-Detalle, Transacción Atómica y Observabilidad (Prometheus & Loki)</li>
+            <li><strong>Rol o Aporte Realizado:</strong> Construcción de controladores y DTOs compuestos para la operación cabecera-detalle, configuración de pruebas unitarias transaccionales (<code>@WebMvcTest</code>), manejo global 409 Conflict, exposición de métricas Prometheus y validación de logs en Loki/Promtail.</li>
+            <li><strong>Link de GitHub del Proyecto:</strong> <a href="https://github.com/helionelio900-hub/SysProyec_Acopus" target="_blank">https://github.com/helionelio900-hub/SysProyec_Acopus</a></li>
+        </ul>
+    </div>
+
+    <h2>2. EVIDENCIA TÉCNICA (EVALUADA SOBRE RÚBRICA S04)</h2>
+
+    <h3>Bloque 1: Modelo Cabecera-Detalle y DTOs Compuestos (Peso: 25%)</h3>
+    <p>Se estructuraron los DTOs compuestos de entrada y salida con validación recursiva mediante <code>@Valid</code> y <code>@NotEmpty</code> sobre colecciones embebidas, evitando que se omitan campos en las líneas de detalle.</p>
+
+    <pre><code>// LiquidacionG1Request.java
+public record LiquidacionG1Request(
+    @NotBlank(message = "El nombre del acopiador G2 es obligatorio")
+    String nombreAcopiadorG2,
+    @NotNull(message = "La cotización de la onza en USD es obligatoria")
+    @Positive(message = "La cotización de la onza debe ser mayor a cero")
+    BigDecimal cotizacionOnzaUsd,
+    @NotNull(message = "El tipo de cambio del dólar es obligatorio")
+    @Positive(message = "El tipo de cambio debe ser mayor a cero")
+    BigDecimal tipoCambioUsdPen,
+    @NotEmpty(message = "La lista de detalles no puede estar vacía")
+    @Valid
+    List&lt;DetalleLiquidacionRequest&gt; detalles
+) {}</code></pre>
+
+    <div class="capture-box">
+        📷 [ CAPTURA 1: DTO COMPUESTO LIQUIDACIONG1REQUEST CON ANOTACIONES @VALID Y @NOTEMPTY ]
+    </div>
+
+    <hr>
+
+    <h3>Bloque 2: Regla de Negocio Real y Excepción 409 Conflict (Peso: 25%)</h3>
+    <p>La validación de existencias en el centro de acopio previene liquidaciones en descubierto. Al detectar balance insuficiente, <code>AcopiadorService</code> lanza <code>StockInsuficienteException</code>, la cual genera una respuesta controlada <strong>HTTP 409 Conflict</strong> con detalle semántico.</p>
+
+    <div class="capture-box">
+        📷 [ CAPTURA 2: CÓDIGO DE DESCONTARSTOCKORO Y GLOBALEXCEPTIONHANDLER (409 CONFLICT) ]
+    </div>
+
+    <hr>
+
+    <h3>Bloque 3: Transacción Atómica y Evidencia de Rollback (Peso: 25%)</h3>
+    <p>Se probó la atomicidad bajo <code>@Transactional</code> comprobando que el fallo en una línea intermedia anula todas las mutaciones previas de la misma transacción.</p>
+
+    <div class="capture-box">
+        📷 [ CAPTURA 3: PETICIÓN EXITOSA (201 CREATED) CON DETALLES DE LIQUIDACIÓN PERSISTIDOS ]
+    </div>
+
+    <div class="capture-box">
+        📷 [ CAPTURA 4: CASO DE ROLLBACK (409 CONFLICT) COMPROBANDO QUE NO HAY MODIFICACIÓN DE STOCK EN BD ]
+    </div>
+
+    <hr>
+
+    <h3>Bloque 4: Límites de Módulo y Observabilidad (Prometheus 3.13 y Loki 3.14) (Peso: 25%)</h3>
+    <p>1. <strong>Pruebas Automatizadas y Modulith:</strong> 20 pruebas unitarias y <code>ModularityTests</code> ejecutadas con éxito con <code>BUILD SUCCESS</code>.</p>
+    <p>2. <strong>Prometheus (3.13):</strong> Métricas de peticiones HTTP (<code>http_server_requests_seconds_count</code>) expuestas en <code>/actuator/prometheus</code>.</p>
+    <p>3. <strong>Loki y Promtail (3.14 - Sección Crítica):</strong> Ingesta de logs en tiempo real con <code>[traceId]</code> y consultas en puerto 33100 para verificación de inicio del sistema, HikariPool, excepciones de stock y rastreo por <code>traceId</code>.</p>
+
+    <div class="capture-box">
+        📷 [ CAPTURA 5: CONSOLA DE PRUEBAS AUTOMATIZADAS (20 TESTS EN VERDE) Y MODULARITYTESTS ]
+    </div>
+
+    <div class="capture-box">
+        📷 [ CAPTURA 6: MÉTRICAS EN PROMETHEUS PUERTO 39090 Y HEALTH ACTUATOR ]
+    </div>
+
+    <div class="capture-box">
+        📷 [ CAPTURA 7: CONSULTAS EN LOKI EN PUERTO 33100 Y RASTREO POR TRACEID ]
+    </div>
+
+    <h2>3. ERROR O HALLAZGO TÉCNICO DIAGNOSTICADO</h2>
+    <div class="box">
+        <p><strong>Hallazgo:</strong> Omisión de <code>@Valid</code> en Colecciones Anidadas en DTOs.</p>
+        <p><strong>Diagnóstico:</strong> Al aplicar solo <code>@NotEmpty</code> sobre <code>List&lt;DetalleLiquidacionRequest&gt;</code>, Bean Validation no validaba los atributos internos (como peso negativo o tipo de oro nulo) de cada línea individual.</p>
+        <p><strong>Solución:</strong> Se agregó la anotación <code>@Valid</code> junto a <code>@NotEmpty</code> en el DTO compuesto, asegurando la validación en cascada de cada detalle.</p>
+    </div>
+
+    <h2>4. REFLEXIÓN TÉCNICA BREVE</h2>
+    <div class="box">
+        <p><strong>¿Por qué una regla como "hay stock suficiente" no se puede expresar con Bean Validation, y qué capa sí puede validarla?</strong></p>
+        <p>Las validaciones de Bean Validation (como <code>@NotNull</code> o <code>@Positive</code>) operan sobre la sintaxis y los tipos de datos del objeto recibido en memoria de forma estática, sin acceso al estado dinámico de la base de datos. La regla "hay stock suficiente" depende directamente de los registros persistidos y del balance disponible en el momento exacto de la transacción. Por consiguiente, solo la capa de Servicio (<code>@Service</code>) puede ejecutar esta validación mediante consultas en tiempo de ejecución, asegurando la atomicidad dentro de la transacción <code>@Transactional</code> y disparando excepciones de negocio semánticas.</p>
+    </div>
+
+    <h2>5. ANEXO: FEEDBACK DE LA SESIÓN S04</h2>
+    <div class="footer-box">
+        <ol>
+            <li><strong>¿Cuál es el aprendizaje más importante que te llevas de la clase de hoy?</strong><br>Implementar operaciones transaccionales cabecera-detalle con validación en cascada y correlación de logs mediante traceId en Loki.</li>
+            <li><strong>¿Qué punto de la clase te resultó más confuso o te dejó con dudas?</strong><br>La coordinación entre proxies transaccionales cuando se invocan múltiples métodos con `@Transactional`.</li>
+            <li><strong>¿Tienes alguna pregunta para la siguiente clase?</strong><br>¿Cómo se estructuran consultas dinámicas con Criteria API para reportes de liquidación?</li>
+            <li><strong>Nivel de comprensión:</strong> [X] <strong>¡Entendido! - Lo domino y podría explicarlo.</strong></li>
+            <li><strong>Autoevaluación:</strong> [X] <strong>Muy Comprometido/a: Me esforcé al máximo.</strong></li>
+            <li><strong>Satisfacción con la clase:</strong> <strong>10 / 10</strong>.</li>
+        </ol>
+    </div>
+
+</body>
+</html>
