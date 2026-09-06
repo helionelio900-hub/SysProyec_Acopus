@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "TRANSACCIONES_G2", schema = "BOM_ACOPIO")
+@Table(name = "TRANSACCIONES_G2")
 @Getter
 @Setter
 @NoArgsConstructor

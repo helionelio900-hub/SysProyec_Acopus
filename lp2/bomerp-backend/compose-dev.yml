@@ -1,7 +1,8 @@
 name: bomerp-backend-dev
 services:
   oracle:
-    image: gvenzl/oracle-free:23-slim
+    # Oracle XE 21c: la PDB se llama XEPDB1, igual que en application-dev.yml.
+    image: gvenzl/oracle-xe:21-slim
     container_name: bomerp-oracle
     restart: unless-stopped
     ports:

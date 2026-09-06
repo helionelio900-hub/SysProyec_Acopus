@@ -1,0 +1,5 @@
+# Scripts que se ejecutan dentro de contenedores Linux (Oracle, Docker): siempre LF
+*.sql   text eol=lf
+*.sh    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
