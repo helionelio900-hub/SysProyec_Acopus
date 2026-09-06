@@ -29,3 +29,6 @@ Thumbs.db
 *.mkv
 *.avi
 *.mov
+
+# Local scratch / test payloads
+sample_mayorista.json
