@@ -1,5 +1,5 @@
 spring:
   application:
-    name: bomerp-backend
+    name: sitra-oro-backend
   profiles:
     active: dev

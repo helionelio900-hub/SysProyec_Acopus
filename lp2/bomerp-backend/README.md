@@ -1,9 +1,6 @@
-# bomerp-backend
+# sitra-oro-backend
 
-Backend único de LP2 (BomERP): Spring Boot 4.0.7 + Spring Modulith, sin
-reactor multi-módulo. Ver [`../CLAUDE.md`](../CLAUDE.md) para las
-convenciones de arquitectura completas y [`../../docs/lp2/adr/`](../../docs/lp2/adr/)
-para las decisiones registradas (ADR-001 a ADR-003).
+Backend de **SITRA-ORO** (*Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro*): Spring Boot 4.0.7 + Spring Modulith.
 
 **Estado actual:** Backend implementado con los módulos del dominio de Acopio de Oro (`seguridad`, `acopiador`, `mayorista`, `cotizador`, `parametros`) y pruebas de modularidad (`ModularityTests`).
 

@@ -1,10 +1,10 @@
-# LP2 - Lenguaje de Programación II (`bomerp-acopio-oro`)
+# LP2 - Lenguaje de Programación II (`sitra-oro`)
 
-Carpeta del curso **Lenguaje de Programación II** para la implementación del **Sistema de Control y Acopio de Oro**.
+Carpeta del curso **Lenguaje de Programación II** para la implementación del backend y frontend de **SITRA-ORO** (*Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro*).
 
-## Alcance del Backend: 5 Módulos (`bomerp-acopio-oro`)
+## Alcance del Backend: 5 Módulos (`sitra-oro`)
 
-El backend está desarrollado en **Java Spring Boot + Spring Modulith**, conectándose a la base de datos Oracle (`BOM_ACOPIO`). Se organiza en **1 Módulo de Seguridad, 2 Módulos Transaccionales y 2 Módulos No Transaccionales**:
+El backend está desarrollado en **Java 21 + Spring Boot 4 + Spring Modulith**, conectándose a la base de datos Oracle (`SITRA_ACOPIO` / `BOM_ACOPIO`). Se organiza en **1 Módulo de Seguridad, 2 Módulos Transaccionales y 2 Módulos No Transaccionales**:
 
 ### 🔐 1. Módulo de Seguridad (1 Módulo)
 1. **`seguridad` (Auth & RBAC):**

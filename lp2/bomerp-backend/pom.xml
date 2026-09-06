@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>pe.edu.upeu</groupId>
-	<artifactId>bomerp-backend</artifactId>
+	<artifactId>sitra-oro-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>bomerp-backend</name>
-	<description/>
+	<name>sitra-oro-backend</name>
+	<description>SITRA-ORO - Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -56,7 +56,11 @@
 			<groupId>org.springframework.modulith</groupId>
 			<artifactId>spring-modulith-starter-core</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
