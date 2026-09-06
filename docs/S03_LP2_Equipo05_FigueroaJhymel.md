@@ -9,7 +9,7 @@
 
 * **Nombre del Estudiante:** Jhymel Nelio Figueroa Chambi
 * **Compañero de Equipo:** Helio Calisaya
-* **Equipo:** Equipo 05 - Proyecto `bomerp-acopio-oro`
+* **Equipo:** Equipo 05 - Proyecto `sitra-oro`
 * **Sesión:** S03 - Objetos Relacionados en el Dominio Principal (`TransaccionG2` - `Minero`)
 * **Rol o Aporte Realizado:** Desarrollador Backend & Integración de Asociación ORM `@ManyToOne`, DTO Relacionado `MineroResumen`, Validación de Referencia en Acopio, Navegación Controlada y Pruebas `@WebMvcTest`.
 * **Link de GitHub del Proyecto:** [https://github.com/helionelio900-hub/SysProyec_Acopus](https://github.com/helionelio900-hub/SysProyec_Acopus)
@@ -143,7 +143,7 @@ Mantener la relación ORM unidireccional entre la transacción de acopio (`Trans
    * Significa consultar los datos asociados bajo demanda mediante un endpoint dedicado. Se diferencia en que no carga la lista de transacciones en memoria cada vez que se busca un minero.
 
 5. **¿Por qué `ModularityTests` sigue pasando aunque `minero` y `transaccionG2` se conocen entre sí?**
-   * Porque ambas entidades pertenecen al mismo módulo funcional de negocio (`pe.edu.upeu.bomerp.acopio`). Spring Modulith verifica dependencias entre módulos distintos, no dentro de un mismo módulo.
+   * Porque ambas entidades pertenecen al mismo módulo funcional de negocio (`pe.edu.upeu.sitraoro.acopio`). Spring Modulith verifica dependencias entre módulos distintos, no dentro de un mismo módulo.
 
 ---
 

@@ -9,7 +9,7 @@
 
 * **Nombre del Estudiante:** Jhymel Nelio Figueroa Chambi
 * **Compañero de Equipo:** Helio Calisaya
-* **Equipo:** Equipo 05 - Proyecto `bomerp-acopio-oro`
+* **Equipo:** Equipo 05 - Proyecto `sitra-oro`
 * **Sesión:** S03 - Diseño Estructural y Principios SOLID
 * **Rol o Aporte Realizado:** Evaluación Arquitectónica, Análisis SOLID e Implementación de Refactorización SOLID (`CalculadorPrecioOroService`) sobre el backend de Acopio de Oro.
 * **Link de GitHub del Proyecto:** [https://github.com/helionelio900-hub/SysProyec_Acopus](https://github.com/helionelio900-hub/SysProyec_Acopus)
@@ -70,8 +70,8 @@ public class AcopiadorServiceImpl implements AcopiadorService {
 ### 2.4 Cohesión, Acoplamiento, Modularidad y Abstracción
 
 1. **Cohesión por Paquete (Alta Cohesión)**:
-   - `pe.edu.upeu.bomerp.acopio.parametros`: Contiene únicamente las clases de la entidad `Minero` y parámetros del sistema. Alta cohesión temática.
-   - `pe.edu.upeu.bomerp.acopio.acopiador`: Contiene únicamente la lógica de registro de transacciones de compra directa de oro (`TransaccionG2`) y la estrategia de precios.
+   - `pe.edu.upeu.sitraoro.acopio.parametros`: Contiene únicamente las clases de la entidad `Minero` y parámetros del sistema. Alta cohesión temática.
+   - `pe.edu.upeu.sitraoro.acopio.acopiador`: Contiene únicamente la lógica de registro de transacciones de compra directa de oro (`TransaccionG2`) y la estrategia de precios.
 
 2. **Acoplamiento entre Paquetes (Tensión de Diseño Identificada)**:
    - `AcopiadorServiceImpl` depende de `MineroRepository` para validar que el `idMinero` referenciado exista. Puesto que ambos paquetes pertenecen al mismo módulo funcional (`acopio`), este acoplamiento interno es aceptable.
@@ -108,7 +108,7 @@ El acoplamiento entre dos paquetes del mismo módulo no es automáticamente una 
    * Significa que se pueden agregar nuevas funcionalidades o estrategias (como `CalculadorPrecioAPIInternacionalImpl`) mediante nuevas clases que implementen la interfaz, sin alterar el código fuente existente.
 
 4. **¿Por qué la relación entre transacciones y minero no es una violación de `ModularityTests`?**
-   * Porque ambos paquetes (`acopiador` y `parametros`) pertenecen al mismo módulo funcional de negocio (`pe.edu.upeu.bomerp.acopio`). Spring Modulith verifica fronteras entre módulos distintos, no dentro de paquetes internos del mismo módulo.
+   * Porque ambos paquetes (`acopiador` y `parametros`) pertenecen al mismo módulo funcional de negocio (`pe.edu.upeu.sitraoro.acopio`). Spring Modulith verifica fronteras entre módulos distintos, no dentro de paquetes internos del mismo módulo.
 
 5. **¿Qué diferencia hay entre exponer una entidad JPA directamente y exponer un DTO?**
    * Exponer la entidad JPA acopla la API a la base de datos, arriesga la fuga de datos sensibles y puede causar ciclos de serialización infinita. Un DTO abstrae y expone únicamente los campos requeridos por el contrato REST.

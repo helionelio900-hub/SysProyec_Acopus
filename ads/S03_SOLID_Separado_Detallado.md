@@ -1,5 +1,5 @@
 # EVALUACIÓN Y EJEMPLOS SEPARADOS DE PRINCIPIOS SOLID (S, O, L, I, D)
-## Proyecto: `bomerp-acopio-oro` | Equipo 05
+## Proyecto: `sitra-oro` | Equipo 05
 
 ---
 
@@ -9,7 +9,7 @@
 
 ### ❌ Forma INCORRECTA (Debería optimizarse / Violación S):
 ```java
-package pe.edu.upeu.bomerp.acopio;
+package pe.edu.upeu.sitraoro.acopio;
 
 // Monolito que viola S al tener 3 responsabilidades distintas en una sola clase
 public class AcopioOroMonolitoService {
@@ -29,10 +29,10 @@ public class AcopioOroMonolitoService {
 
 ### ✅ Forma CORRECTA (Código Real del Proyecto):
 Separación estricta de responsabilidades en componentes independientes:
-- **Catálogo de Mineros**: [`MineroServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/parametros/service/MineroServiceImpl.java)
-- **Registro de Compras de Oro**: [`AcopiadorServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorServiceImpl.java)
-- **Cálculo de Precios del Día**: [`CalculadorPrecioOficialImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOficialImpl.java)
-- **Atención de Peticiones HTTP**: [`MineroController.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/parametros/controller/MineroController.java)
+- **Catálogo de Mineros**: [`MineroServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/parametros/service/MineroServiceImpl.java)
+- **Registro de Compras de Oro**: [`AcopiadorServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorServiceImpl.java)
+- **Cálculo de Precios del Día**: [`CalculadorPrecioOficialImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOficialImpl.java)
+- **Atención de Peticiones HTTP**: [`MineroController.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/parametros/controller/MineroController.java)
 
 ---
 
@@ -42,7 +42,7 @@ Separación estricta de responsabilidades en componentes independientes:
 
 ### ❌ Forma INCORRECTA (Debería optimizarse / Violación O):
 ```java
-package pe.edu.upeu.bomerp.acopio.acopiador.service;
+package pe.edu.upeu.sitraoro.acopio.acopiador.service;
 
 public class CalculadorPrecioOroRigido {
     // Usar 'if/else' obliga a EDITAR este código cada vez que nace una nueva cotización
@@ -60,8 +60,8 @@ public class CalculadorPrecioOroRigido {
 
 ### ✅ Forma CORRECTA (Código Real del Proyecto):
 Aplicación del patrón Strategy con una interfaz abstracta:
-- **Interfaz (Abierta a extensión)**: [`CalculadorPrecioOroService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOroService.java)
-- **Implementación Concreta**: [`CalculadorPrecioOficialImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOficialImpl.java)
+- **Interfaz (Abierta a extensión)**: [`CalculadorPrecioOroService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOroService.java)
+- **Implementación Concreta**: [`CalculadorPrecioOficialImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOficialImpl.java)
 
 *Si en el futuro se necesita cotizar con una API internacional en tiempo real, solo se crea `CalculadorPrecioAPIImpl implements CalculadorPrecioOroService` sin tocar `AcopiadorServiceImpl`.*
 
@@ -73,7 +73,7 @@ Aplicación del patrón Strategy con una interfaz abstracta:
 
 ### ❌ Forma INCORRECTA (Debería optimizarse / Violación L):
 ```java
-package pe.edu.upeu.bomerp.acopio.acopiador.service;
+package pe.edu.upeu.sitraoro.acopio.acopiador.service;
 
 public class CalculadorPrecioModoPruebasImpl implements CalculadorPrecioOroService {
     @Override
@@ -95,7 +95,7 @@ Cualquier implementación de `CalculadorPrecioOroService` (`CalculadorPrecioOfic
 
 ### ❌ Forma INCORRECTA (Debería optimizarse / Violación I):
 ```java
-package pe.edu.upeu.bomerp.acopio;
+package pe.edu.upeu.sitraoro.acopio;
 
 // Interfaz inflada gigante que obliga a implementar métodos que el cliente no necesita
 public interface AcopioSuperInterface {
@@ -109,9 +109,9 @@ public interface AcopioSuperInterface {
 
 ### ✅ Forma CORRECTA (Código Real del Proyecto):
 Interfaces pequeñas, segregadas y especializadas para cada contexto del sistema:
-- [`MineroService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/parametros/service/MineroService.java) $\rightarrow$ Solo operaciones CRUD de mineros.
-- [`AcopiadorService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorService.java) $\rightarrow$ Solo compras directas de oro.
-- [`CalculadorPrecioOroService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOroService.java) $\rightarrow$ Solo cálculo de precios del gramo.
+- [`MineroService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/parametros/service/MineroService.java) $\rightarrow$ Solo operaciones CRUD de mineros.
+- [`AcopiadorService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorService.java) $\rightarrow$ Solo compras directas de oro.
+- [`CalculadorPrecioOroService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOroService.java) $\rightarrow$ Solo cálculo de precios del gramo.
 
 ---
 
@@ -121,7 +121,7 @@ Interfaces pequeñas, segregadas y especializadas para cada contexto del sistema
 
 ### ❌ Forma INCORRECTA (Debería optimizarse / Violación D):
 ```java
-package pe.edu.upeu.bomerp.acopio.acopiador.service;
+package pe.edu.upeu.sitraoro.acopio.acopiador.service;
 
 public class AcopiadorServiceImpl {
     // Violación de D: Dependencia directa de una clase concreta mediante 'new'
@@ -130,7 +130,7 @@ public class AcopiadorServiceImpl {
 ```
 
 ### ✅ Forma CORRECTA (Código Real del Proyecto):
-En [`AcopiadorServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorServiceImpl.java), se depende únicamente de la interfaz abstracta `CalculadorPrecioOroService` inyectada por Spring mediante constructor:
+En [`AcopiadorServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorServiceImpl.java), se depende únicamente de la interfaz abstracta `CalculadorPrecioOroService` inyectada por Spring mediante constructor:
 
 ```java
 @Service

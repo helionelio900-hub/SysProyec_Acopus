@@ -1,6 +1,6 @@
 -- =============================================================================
--- BOM ERP: bomerp-acopio-oro
--- BD2 - Tablas en esquema ejecutor BOMERP_APP
+-- SITRA-ORO: Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro
+-- BD2 - Tablas en esquema ejecutor
 -- =============================================================================
 
 CREATE TABLE PARAMETROS_SISTEMA (

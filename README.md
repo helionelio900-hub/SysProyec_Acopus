@@ -1,8 +1,8 @@
-# BOM ERP - Acopio de Oro (`bomerp-acopio-oro`)
+# SITRA-ORO (`sitra-oro`)
 
-**Sistema de Control, Acopio y Liquidación de Oro**
+**Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro**
 
-BOM ERP (`bomerp-acopio-oro`) es el proyecto integrador del grupo para gestionar la trazabilidad, cotización y liquidación financiera en el proceso de acopio de oro.
+**SITRA-ORO** (`sitra-oro`) es el proyecto integrador del grupo para gestionar la trazabilidad, cotización y liquidación financiera en el proceso de acopio de oro artesanal.
 
 El proyecto articula la línea curricular:
 
@@ -10,10 +10,10 @@ El proyecto articula la línea curricular:
 ADS -> BD2 -> LP2
 ```
 
-## Alcance del Proyecto: 5 Módulos (`bomerp-acopio-oro`)
+## Alcance del Proyecto: 5 Módulos (`sitra-oro`)
 
 ```text
-BOM ERP - Acopio de Oro (5 Módulos)
+SITRA-ORO - Acopio de Oro (5 Módulos)
 |
 |-- 🔐 [Módulo 1: SEGURIDAD]
 |   `-- Autenticación JWT, Encriptación BCrypt y Roles RBAC (Minero, G2, G1)
@@ -30,10 +30,10 @@ BOM ERP - Acopio de Oro (5 Módulos)
 ## Estructura del Repositorio del Grupo
 
 ```text
-bomerp-acopio-oro/
-|-- ads/     - Entregables e informe de requerimientos (ADS)
-|-- bd2/     - Scripts SQL DDL de la base Oracle BOM_ACOPIO (BD2)
+sitra-oro/
+|-- ads/     - Entregables e informe de requerimientos y diseño (ADS)
+|-- bd2/     - Scripts SQL DDL de la base Oracle SITRA_ACOPIO (BD2)
 |-- lp2/     - Backend Java Spring Boot y Frontend SPA (LP2)
-|-- docs/    - Documentación MkDocs (ADS, BD2, LP2)
+|-- docs/    - Documentación e informes de sesiones (ADS, BD2, LP2)
 `-- README.md - Onboarding del proyecto del grupo
 ```

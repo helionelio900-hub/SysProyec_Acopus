@@ -6,8 +6,8 @@
 ### Datos Generales del Estudiante
 
 * **Estudiante:** Faijo Calisaya Helio Paul
-* **Equipo de Desarrollo:** Equipo 05 — BomERP Acopio de Oro (`bomerp-acopio-oro`)
-* **Proyecto de Dominio:** Sistema de Control y Acopio de Oro (`bomerp-acopio-oro`)
+* **Equipo de Desarrollo:** Equipo 05 — SITRA-ORO Acopio de Oro (`sitra-oro`)
+* **Proyecto de Dominio:** Sistema de Control y Acopio de Oro (`sitra-oro`)
 * **Curso / Ciclo:** Lenguaje de Programación II (LP2) — Ciclo IV (Semestre 2026-II)
 * **Institución:** Universidad Peruana Unión (UPeU) — Campus Juliaca
 * **Rol / Aporte realizado:** Mapeo ORM `@ManyToOne` TransaccionG2-Minero, DTO `MineroResumen`, validación 404, navegación por filtro y CRUD `Minero`.
@@ -149,7 +149,7 @@ El módulo de Parámetros/Maestros gestiona el CRUD completo del catálogo de Mi
 ---
 
 > 📷 **[ ESPACIO PARA CAPTURA 7: PRUEBAS AUTOMATIZADAS Y MODULARITYTESTS EN VERDE (BUILD SUCCESS) ]**  
-> *(Pegar captura de la consola ejecutando mvnw test con todas las pruebas del proyecto bomerp-acopio-oro en verde con reloj y usuario visible).*
+> *(Pegar captura de la consola ejecutando mvnw test con todas las pruebas del proyecto sitra-oro en verde con reloj y usuario visible).*
 
 *Explicación técnica 7:* Ejecución exitosa de `ModularityTests` y pruebas unitarias confirmando que `AcopiadorService` consume `MineroService` respetando los límites de paquete y las reglas de arquitectura modular.
 
@@ -167,7 +167,7 @@ El módulo de Parámetros/Maestros gestiona el CRUD completo del catálogo de Mi
 
 > **¿Por qué la relación entre TransaccionG2 y Minero es unidireccional, y qué problema evita esa decisión?**
 >
-> En el sistema `bomerp-acopio-oro`, la relación entre `TransaccionG2` y `Minero` se diseñó de forma estrictamente unidireccional (`@ManyToOne` en `TransaccionG2` sin `@OneToMany` en `Minero`) para evitar la sobrecarga de memoria y el clásico ciclo de serialización recursiva infinita. Un minero en el centro de acopio puede acumular cientos de transacciones a lo largo de los meses; si `Minero` tuviera una colección `@OneToMany` cargada por defecto, consultar un simple dato maestro traería innecesariamente miles de registros financieros a la memoria. Mantener la relación unidireccional y resolver la navegación mediante un endpoint filtrado bajo demanda (`GET /mineros/{id}/transacciones`) asegura alta eficiencia y bajo acoplamiento arquitectónico.
+> En el sistema `sitra-oro`, la relación entre `TransaccionG2` y `Minero` se diseñó de forma estrictamente unidireccional (`@ManyToOne` en `TransaccionG2` sin `@OneToMany` en `Minero`) para evitar la sobrecarga de memoria y el clásico ciclo de serialización recursiva infinita. Un minero en el centro de acopio puede acumular cientos de transacciones a lo largo de los meses; si `Minero` tuviera una colección `@OneToMany` cargada por defecto, consultar un simple dato maestro traería innecesariamente miles de registros financieros a la memoria. Mantener la relación unidireccional y resolver la navegación mediante un endpoint filtrado bajo demanda (`GET /mineros/{id}/transacciones`) asegura alta eficiencia y bajo acoplamiento arquitectónico.
 
 ---
 

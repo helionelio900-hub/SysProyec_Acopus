@@ -9,7 +9,7 @@
 
 * **Nombre del Estudiante:** Jhymel Nelio Figueroa Chambi
 * **Compañero de Equipo:** Helio Calisaya
-* **Equipo:** Equipo 05 - Proyecto `bomerp-acopio-oro`
+* **Equipo:** Equipo 05 - Proyecto `sitra-oro`
 * **Sesión:** S02 - CRUD REST Completo de Producto / Entidad Principal de Dominio
 * **Rol o Aporte Realizado:** Desarrollador Backend & Integración de Servicios, DTOs, Mappers, Validaciones, Pruebas `@WebMvcTest` y Conexión Oracle 21c XE.
 * **Link de GitHub del Proyecto:** [https://github.com/helionelio900-hub/SysProyec_Acopus](https://github.com/helionelio900-hub/SysProyec_Acopus)
@@ -97,8 +97,8 @@
    * Resultado de Maven (`.\mvnw.cmd test`):
 
    ```text
-   [INFO] Running pe.edu.upeu.bomerp.catalogo.producto.controller.ProductoControllerTest
-   [INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.837 s -- in pe.edu.upeu.bomerp.catalogo.producto.controller.ProductoControllerTest
+   [INFO] Running pe.edu.upeu.sitraoro.catalogo.producto.controller.ProductoControllerTest
+   [INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.837 s -- in pe.edu.upeu.sitraoro.catalogo.producto.controller.ProductoControllerTest
    [INFO] Results:
    [INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
    [INFO] BUILD SUCCESS
@@ -130,7 +130,7 @@
 La arquitectura sigue una separación estricta en capas dentro del módulo de catálogo:
 
 ```text
-pe.edu.upeu.bomerp.catalogo.producto/
+pe.edu.upeu.sitraoro.catalogo.producto/
 ├── controller/
 │   └── ProductoController.java      <-- Exposición de Endpoints REST
 ├── dto/
@@ -153,7 +153,7 @@ pe.edu.upeu.bomerp.catalogo.producto/
 
 * **Descripción del Problema:** Al ejecutar el test automatizado `mvnw test` e iniciar la aplicación en el perfil `dev`, se presentó la excepción `org.h2.jdbc.JdbcSQLSyntaxErrorException: Schema "BOM_CATALOGO" no encontrado` y posteriormente en Oracle `ORA-01950: no existen privilegios en tablespace 'USERS'`.
 * **Causa Raíz:** La entidad `Producto` especifica `@Table(name = "PRODUCTO", schema = "BOM_CATALOGO")`. En la base de datos Oracle nativa (`XEPDB1`), la tabla debía existir en el esquema propietario `BOM_CATALOGO` y el usuario ejecutor `BOMERP_APP` requería cuota de almacenamiento (`QUOTA UNLIMITED ON USERS`) y permisos DML.
-* **Solución Aplicada:** Se creó el script SQL [S01_04_catalogo.sql](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/bd2/S01_04_catalogo.sql), se otorgaron privilegios de tablespace a `BOMERP_APP` y se crearon las tablas correspondientes en `XEPDB1`, logrando que la suite completa de 7 pruebas en Maven pasara a estado **BUILD SUCCESS**.
+* **Solución Aplicada:** Se creó el script SQL [S01_04_catalogo.sql](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/bd2/S01_04_catalogo.sql), se otorgaron privilegios de tablespace a `BOMERP_APP` y se crearon las tablas correspondientes en `XEPDB1`, logrando que la suite completa de 7 pruebas en Maven pasara a estado **BUILD SUCCESS**.
 
 ---
 

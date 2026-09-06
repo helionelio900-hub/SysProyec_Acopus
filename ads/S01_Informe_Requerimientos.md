@@ -1,11 +1,11 @@
 # INFORME DE INGENIERÍA DE REQUERIMIENTOS Y ARQUITECTURA DE SOFTWARE
-## PROYECTO: BOM ERP - SISTEMA DE CONTROL Y ACOPIO DE ORO (`bomerp-acopio-oro`)
+## PROYECTO: SITRA-ORO - SISTEMA DE INFORMACIÓN, TRAZABILIDAD Y LIQUIDACIÓN EN ACOPIO DE ORO (`sitra-oro`)
 
 ---
 
 ## 1. RESUMEN EJECUTIVO
 
-El proyecto **`bomerp-acopio-oro`** es un sistema automatizado empresarial desarrollado para digitalizar, controlar y liquidar financieramente el acopio de oro. El sistema reemplaza los cálculos manuales por un flujo digital transparente y trazable entre los tres actores principales de la cadena: **Minero**, **Acopiador (G2)** y **Administrador Mayorista (G1)**.
+El proyecto **`sitra-oro`** (**SITRA-ORO**) es un sistema automatizado empresarial desarrollado para digitalizar, controlar, garantizar la trazabilidad y liquidar financieramente el acopio de oro artesanal. El sistema reemplaza los cálculos manuales por un flujo digital transparente y trazable entre los tres actores principales de la cadena: **Minero**, **Acopiador (G2)** y **Administrador Mayorista (G1)**.
 
 ---
 
@@ -25,7 +25,7 @@ El sistema se divide en **1 Módulo de Seguridad, 2 Módulos Transaccionales y 2
 
 ## 3. ESQUEMA DE BASE DE DATOS Y TABLAS (ORACLE - BD2)
 
-El esquema `BOM_ACOPIO` implementa las siguientes tablas en Oracle:
+El esquema de base de datos implementa las siguientes tablas en Oracle:
 
 1. **`PARAMETROS_SISTEMA`:** Mantiene la cotización del día, porcentaje de merma estimado, precio Onza USD y Tipo de Cambio.
 2. **`MINEROS`:** Catálogo maestro de mineros registrados.

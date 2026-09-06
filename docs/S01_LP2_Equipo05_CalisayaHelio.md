@@ -8,7 +8,7 @@
 ## DATOS DEL ESTUDIANTE
 
 * **Nombre:** Helio Calisaya
-* **Equipo:** Equipo 05 - Proyecto `bomerp-acopio-oro`
+* **Equipo:** Equipo 05 - Proyecto `sitra-oro`
 * **Sesión:** S01 - Arquitectura Backend REST Profesional
 * **Rol o Aporte Realizado:** Desarrollador Backend & Arquitecto de Base de Datos
 * **Link de GitHub del Proyecto:** [https://github.com/helionelio900-hub/SysProyec_Acopus](https://github.com/helionelio900-hub/SysProyec_Acopus)
@@ -110,7 +110,7 @@ spring:
 
 ### BLOQUE 5: Estructura Modular Verificada con Spring Modulith (Peso: 20%)
 
-1. **Organización por Responsabilidades (`pe.edu.upeu.bomerp.acopio`):**
+1. **Organización por Responsabilidades (`pe.edu.upeu.sitraoro.acopio`):**
    * Cada módulo funcional se encuentra encapsulado en su propio paquete:
      - `seguridad`: Autenticación, JWT, Roles.
      - `cotizador`: Consultas estimativas públicas.
@@ -123,7 +123,7 @@ spring:
    ```java
    @Test
    void verifyModularity() {
-       ApplicationModules.of(BomerpBackendApplication.class).verify();
+       ApplicationModules.of(SitraOroBackendApplication.class).verify();
    }
    ```
 

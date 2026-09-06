@@ -4,7 +4,7 @@
 
 ### Datos Generales del Proyecto
 
-* **Nombre del proyecto:** `BomERP - Sistema de Control y Acopio de Oro (bomerp-acopio-oro)`
+* **Nombre del proyecto:** `SITRA-ORO - Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro (sitra-oro)`
 * **Institución:** Universidad Peruana Unión (UPeU) - Campus Juliaca
 * **Ciclo / Semestre:** Ciclo IV - Semestre 2026-II
 * **Cursos articulados:** 
@@ -19,7 +19,7 @@
 
 ### Descripción General del Proyecto
 
-**BomERP - Acopio de Oro** es una solución empresarial full-stack desarrollada para modernizar, estandarizar y digitalizar las operaciones de compra, fundición, pesaje, cotización y liquidación financiera en centros de acopio de oro artesanal. 
+**SITRA-ORO** es una solución empresarial full-stack desarrollada para modernizar, estandarizar y digitalizar las operaciones de compra, fundición, pesaje, cotización, trazabilidad y liquidación financiera en centros de acopio de oro artesanal. 
 
 El sistema reemplaza los cálculos manuales y cuadernos físicos de apuntes mediante un flujo transaccional seguro y confiable, garantizando la trazabilidad precisa del mineral desde su pesaje bruto inicial, pasando por la merma tras la fundición física y su separación estricta por color/calidad (**Oro Rojo** vs. **Oro Verde**), hasta la liquidación final con compradores mayoristas basada en precios internacionales (Onza Troy USD) y tipo de cambio.
 
@@ -30,7 +30,7 @@ El sistema reemplaza los cálculos manuales y cuadernos físicos de apuntes medi
 El sistema está compuesto por **5 módulos arquitectónicos** estructurados bajo el estándar de monolito modular con límites explícitos de dominio:
 
 ```text
-com.bomerp.acopio/
+pe.edu.upeu.sitraoro.acopio/
 ├── 🔐 seguridad/    (Módulo Transversal: Autenticación, JWT, Encriptación BCrypt, Roles RBAC)
 ├── 🔄 acopiador/    (Módulo Transaccional 1: Compras G2, Fundición real, Separación Rojo/Verde)
 ├── 🔄 mayorista/    (Módulo Transaccional 2: Liquidaciones G1, Cierres Semanales, Onza Troy/USD)

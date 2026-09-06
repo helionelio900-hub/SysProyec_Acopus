@@ -1,5 +1,5 @@
 # GUÍA COMPLETA: UNIONES SOLID MAESTRAS (S + D, O + L, S + O, S + L)
-## Proyecto: `bomerp-acopio-oro` | Equipo 05
+## Proyecto: `sitra-oro` | Equipo 05
 
 Este documento contiene las **uniones maestras de principios SOLID** listas para consultar, estudiar o proyectar durante la sustentación de ADS y LP2.
 
@@ -132,7 +132,7 @@ public class CajaAcopioService {
 
 ## 🌟 4. LA GRAN FUSIÓN FINAL: [ S + O + L + I + D ] EN PRODUCCIÓN
 
-Ubicación en el backend: [`pe.edu.upeu.bomerp.acopio.acopiador.service.AcopiadorServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/bomerp-acopio-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorServiceImpl.java)
+Ubicación en el backend: [`pe.edu.upeu.sitraoro.acopio.acopiador.service.AcopiadorServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/bomerp-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorServiceImpl.java)
 
 ```java
 @Service

@@ -1,5 +1,5 @@
 -- =============================================================================
--- BOM ERP: bomerp-acopio-oro
+-- SITRA-ORO: Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro
 -- BD2 - Sesion 01: Creación de Tablas del Sistema de Acopio y Liquidación de Oro
 -- Propietario: BOM_ACOPIO | Usuario App Backend: BOMERP_APP
 -- =============================================================================

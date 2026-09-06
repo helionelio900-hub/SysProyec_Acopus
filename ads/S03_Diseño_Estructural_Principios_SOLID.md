@@ -1,5 +1,5 @@
 # S03 - Diseño Estructural y Principios SOLID
-## Módulo `bomerp-acopio-oro` | Equipo 05
+## Módulo `sitra-oro` | Equipo 05
 
 ---
 
@@ -57,8 +57,8 @@ public class AcopiadorServiceImpl implements AcopiadorService {
 ## 2. Cohesión y Acoplamiento
 
 ### 2.1 Cohesión por Paquete (Alta Cohesión)
-- **`pe.edu.upeu.bomerp.acopio.parametros`**: Contiene únicamente las clases de la entidad `Minero` y parámetros del sistema. Alta cohesión temática.
-- **`pe.edu.upeu.bomerp.acopio.acopiador`**: Contiene únicamente la lógica de registro de transacciones de compra directa de oro (`TransaccionG2`) y estrategia de precios.
+- **`pe.edu.upeu.sitraoro.acopio.parametros`**: Contiene únicamente las clases de la entidad `Minero` y parámetros del sistema. Alta cohesión temática.
+- **`pe.edu.upeu.sitraoro.acopio.acopiador`**: Contiene únicamente la lógica de registro de transacciones de compra directa de oro (`TransaccionG2`) y estrategia de precios.
 
 ### 2.2 Acoplamiento entre Paquetes (Tensión de Diseño Identificada)
 - **Acoplamiento de Clases**: `AcopiadorServiceImpl` depende de `MineroRepository` para recuperar la entidad `Minero`. Puesto que ambos paquetes pertenecen al mismo módulo funcional (`acopio`), este acoplamiento interno es aceptable y controlado.

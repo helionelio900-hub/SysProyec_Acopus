@@ -1,6 +1,6 @@
 -- =============================================================================
--- BOM ERP: bomerp-acopio-oro
--- BD2 - Sesion 01: Creación de Esquemas (Siguiendo patrón de arquitectura de la clase)
+-- SITRA-ORO: Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro
+-- BD2 - Sesion 01: Creación de Esquemas (Oracle 23c / 21c)
 -- =============================================================================
 
 -- 1. Esquema Propietario del Dominio de Acopio de Oro
