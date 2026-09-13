@@ -1,0 +1,20 @@
+site_name: SITRA-ORO · Unidad I
+site_description: Evidencia técnica y sustentación del backend REST
+site_url: https://helionelio900-hub.github.io/SysProyec_Acopus/
+docs_dir: docs/proyecto-integrador/u1
+site_dir: site
+theme:
+  name: mkdocs
+  locale: es
+plugins:
+  - search
+  - redirects:
+      redirect_maps:
+        index.md: lp2-demo.md
+nav:
+  - Producto y contrato REST: lp2-demo.md
+  - Comunicación entre módulos: lp2-comunicacion-modulos.md
+  - Verificación: verificacion-u1.md
+exclude_docs: |
+  guion-sustentacion.md
+  sustentacion-helio.md

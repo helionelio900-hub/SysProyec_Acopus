@@ -3,14 +3,15 @@
 -- =============================================================================
 -- LP2 S5 agrego a GET /api/v1/mayorista/liquidaciones filtros combinados por
 -- ESTADO y rango de FECHA_LIQUIDACION, con ordenamiento configurable, y el
--- reporte GET /liquidaciones/resumen. Sin estos indices Oracle resuelve cada
--- consulta con FULL TABLE SCAN + SORT.
+-- reporte GET /liquidaciones/resumen. Estos indices ofrecen rutas de acceso;
+-- Oracle elige el plan segun estadisticas, filtros y volumen. No se garantiza
+-- el uso de un indice ni se descarta un FULL TABLE SCAN.
 --
 -- Tambien se indexan las columnas FK que Oracle NO indexa por si solo
 -- (a diferencia de las PK), usadas por joins y por SIZE(l.detalles).
 --
 -- Ejecutar conectado como el dueno del esquema:
---   sqlplus BOMERP_APP/123456@localhost:1521/XEPDB1  @bd2/S05_indices.sql
+--   sqlplus BOMERP_APP@localhost:1521/XEPDB1  @bd2/S05_indices.sql
 -- Requiere haber corrido antes S05_00_parche_estado.sql (columna ESTADO).
 --
 -- Si un indice ya existe, Oracle devuelve ORA-00955: puede ignorarse.
@@ -20,7 +21,8 @@
 --    Cubre:  WHERE (:estado IS NULL OR estado = :estado)
 --              AND fecha_liquidacion BETWEEN :desde AND :hasta
 --            ORDER BY fecha_liquidacion
---    Columna mas selectiva primero (ESTADO), luego el rango de fecha.
+--    Igualdad por ESTADO seguida del rango de fecha; su selectividad depende
+--    de los datos (ESTADO solo tiene dos valores posibles).
 CREATE INDEX IX_LIQ_G1_ESTADO_FECHA
     ON LIQUIDACIONES_G1 (ESTADO, FECHA_LIQUIDACION);
 

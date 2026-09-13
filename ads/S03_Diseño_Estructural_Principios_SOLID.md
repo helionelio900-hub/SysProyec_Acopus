@@ -61,7 +61,7 @@ public class AcopiadorServiceImpl implements AcopiadorService {
 - **`pe.edu.upeu.sitraoro.acopio.acopiador`**: Contiene únicamente la lógica de registro de transacciones de compra directa de oro (`TransaccionG2`) y estrategia de precios.
 
 ### 2.2 Acoplamiento entre Paquetes (Tensión de Diseño Identificada)
-- **Acoplamiento de Clases**: `AcopiadorServiceImpl` depende de `MineroRepository` para recuperar la entidad `Minero`. Puesto que ambos paquetes pertenecen al mismo módulo funcional (`acopio`), este acoplamiento interno es aceptable y controlado.
+- **Acoplamiento de Clases**: `AcopiadorServiceImpl` depende del contrato público `MineroService` para recuperar `Minero`. No accede a `MineroRepository`, que permanece dentro de `parametros`. La entidad compartida se expone expresamente mediante la interfaz nombrada `parametros-model` para la asociación ORM.
 - **Acoplamiento entre Contratos**: `TransaccionG2Response` embebe `MineroResumen` (DTO liviano con `idMinero`, `documentoIdentidad`, `nombresApellidos`), evitando depender del DTO completo `MineroResponse`.
 
 ---
@@ -69,7 +69,7 @@ public class AcopiadorServiceImpl implements AcopiadorService {
 ## 3. Modularidad y Abstracción
 
 ### 3.1 Modularidad (Spring Modulith)
-El sistema se organiza en módulos de negocio desacoplados. La prueba automatizada `ModularityTests.java` verifica de forma estricta que ningún módulo externo pueda acceder directamente a entidades o repositorios internos de otro módulo sin pasar por su Service público.
+El sistema se organiza en módulos de negocio. `ModularityTests.java` verifica sus límites: los repositorios permanecen internos y los contratos compartidos se declaran con `@NamedInterface`. Los servicios se consumen mediante interfaces públicas; `Minero` también se expone expresamente como modelo para la asociación ORM. Esto no autoriza el acceso a su repositorio.
 
 ### 3.2 Abstracción (DTOs vs Entidades)
 - Las entidades JPA (`Minero`, `TransaccionG2`) nunca se exponen en los controladores HTTP REST.

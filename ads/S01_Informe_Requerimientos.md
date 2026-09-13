@@ -44,3 +44,50 @@ El esquema de base de datos implementa las siguientes tablas en Oracle:
 | **Ingresar Onza USD / Tipo Cambio** | ❌ | ❌ | ✔️ |
 | **Liquidación Semanal G1** | ❌ | ❌ | ✔️ |
 | **Dashboard Consolidado General** | ❌ | ❌ | ✔️ |
+
+## 5. Corte arquitectónico U1 y trazabilidad LP2–BD2
+
+Este documento es la referencia de alcance del proyecto (brief funcional). En U1
+hay cuatro módulos implementados: parametros, cotizador, acopiador y mayorista.
+Seguridad y la matriz RBAC de la sección 4 son diseño previsto para U2/S10;
+no describen permisos ya aplicados por el backend actual.
+
+La vista de componentes C3 del monolito es:
+
+```text
+Cliente REST / Swagger
+        |
+        v
+SitraOroBackendApplication (una JVM, un proyecto Maven)
+  parametros: MineroController -> MineroService -> MineroRepository
+  cotizador:  CotizadorController -> CotizadorService
+  acopiador:  AcopiadorController -> AcopiadorService -> TransaccionG2Repository
+  mayorista:  MayoristaController -> MayoristaService -> LiquidacionG1Repository
+        |
+        v
+Un DataSource -> Oracle XEPDB1
+```
+
+Dependencias entre módulos: cotizador y acopiador consumen contratos públicos de
+parametros; mayorista consume AcopiadorService. Los repositorios no cruzan módulos.
+El puerto DashboardAcopioPort se define en parametros y lo implementa acopiador.
+La relación ORM usa Minero, exportado por parametros-model.
+
+La liquidación contiene `LiquidacionG1` y `DetalleLiquidacionG1`; por ello, el modelo
+actual tiene cinco tablas, incluyendo DETALLE_LIQUIDACIONES_G1 además de las cuatro
+listadas en el diseño inicial de la sección 3. Cada color aparece una vez por cierre.
+Un cierre válido incluye todo el stock pendiente del color y registra estado REGISTRADA.
+El precio usa 31.1035 g/onza y un diferencial de 5 % para VERDE. El cierre es atómico:
+si falla un detalle, no se conservan cabecera, detalles ni descuentos parciales.
+
+Para la ejecución LP2 actual se usa `bd2/S01_03_tablas_bomerp_app.sql`, que crea
+las cinco tablas en el usuario conectado, seguido de `bd2/S05_indices.sql`.
+Las entidades JPA no fijan schema. El esquema BOM_ACOPIO de los scripts S01_02 y
+S04_02 es una alternativa de propiedad física documentada para BD2, no una segunda
+base que se deba mezclar con las tablas del usuario ejecutor. El monolito mantiene
+propiedad funcional por módulo aunque use un solo esquema físico.
+
+Las reglas de cálculo y stock se implementan en los servicios Java; BD2 aporta
+PK, FK, unicidad, CHECK de tipos/estado e índices. No se atribuyen a procedimientos
+PL/SQL de negocio inexistentes. La verificación Oracle instala el DDL de BD2 y
+arranca Hibernate en modo validate antes de probar commit, rollback y consultas.

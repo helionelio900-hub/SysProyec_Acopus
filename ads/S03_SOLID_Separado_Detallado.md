@@ -29,10 +29,10 @@ public class AcopioOroMonolitoService {
 
 ### ✅ Forma CORRECTA (Código Real del Proyecto):
 Separación estricta de responsabilidades en componentes independientes:
-- **Catálogo de Mineros**: [`MineroServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/bomerp/acopio/parametros/service/MineroServiceImpl.java)
-- **Registro de Compras de Oro**: [`AcopiadorServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorServiceImpl.java)
-- **Cálculo de Precios del Día**: [`CalculadorPrecioOficialImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOficialImpl.java)
-- **Atención de Peticiones HTTP**: [`MineroController.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/bomerp/acopio/parametros/controller/MineroController.java)
+- **Catálogo de Mineros**: [`MineroServiceImpl.java`](../lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/parametros/service/MineroServiceImpl.java)
+- **Registro de Compras de Oro**: [`AcopiadorServiceImpl.java`](../lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/acopiador/service/AcopiadorServiceImpl.java)
+- **Cálculo de Precios del Día**: [`CalculadorPrecioOficialImpl.java`](../lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/acopiador/service/CalculadorPrecioOficialImpl.java)
+- **Atención de Peticiones HTTP**: [`MineroController.java`](../lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/parametros/controller/MineroController.java)
 
 ---
 
@@ -60,8 +60,8 @@ public class CalculadorPrecioOroRigido {
 
 ### ✅ Forma CORRECTA (Código Real del Proyecto):
 Aplicación del patrón Strategy con una interfaz abstracta:
-- **Interfaz (Abierta a extensión)**: [`CalculadorPrecioOroService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOroService.java)
-- **Implementación Concreta**: [`CalculadorPrecioOficialImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOficialImpl.java)
+- **Interfaz (Abierta a extensión)**: [`CalculadorPrecioOroService.java`](../lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/acopiador/service/CalculadorPrecioOroService.java)
+- **Implementación Concreta**: [`CalculadorPrecioOficialImpl.java`](../lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/acopiador/service/CalculadorPrecioOficialImpl.java)
 
 *Si en el futuro se necesita cotizar con una API internacional en tiempo real, solo se crea `CalculadorPrecioAPIImpl implements CalculadorPrecioOroService` sin tocar `AcopiadorServiceImpl`.*
 
@@ -109,9 +109,9 @@ public interface AcopioSuperInterface {
 
 ### ✅ Forma CORRECTA (Código Real del Proyecto):
 Interfaces pequeñas, segregadas y especializadas para cada contexto del sistema:
-- [`MineroService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/bomerp/acopio/parametros/service/MineroService.java) $\rightarrow$ Solo operaciones CRUD de mineros.
-- [`AcopiadorService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorService.java) $\rightarrow$ Solo compras directas de oro.
-- [`CalculadorPrecioOroService.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/CalculadorPrecioOroService.java) $\rightarrow$ Solo cálculo de precios del gramo.
+- [`MineroService.java`](../lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/parametros/service/MineroService.java) $\rightarrow$ Solo operaciones CRUD de mineros.
+- [`AcopiadorService.java`](../lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/acopiador/service/AcopiadorService.java) $\rightarrow$ Solo compras directas de oro.
+- [`CalculadorPrecioOroService.java`](../lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/acopiador/service/CalculadorPrecioOroService.java) $\rightarrow$ Solo cálculo de precios del gramo.
 
 ---
 
@@ -130,7 +130,7 @@ public class AcopiadorServiceImpl {
 ```
 
 ### ✅ Forma CORRECTA (Código Real del Proyecto):
-En [`AcopiadorServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorServiceImpl.java), se depende únicamente de la interfaz abstracta `CalculadorPrecioOroService` inyectada por Spring mediante constructor:
+En [`AcopiadorServiceImpl.java`](../lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/acopiador/service/AcopiadorServiceImpl.java), se depende únicamente de la interfaz abstracta `CalculadorPrecioOroService` inyectada por Spring mediante constructor:
 
 ```java
 @Service

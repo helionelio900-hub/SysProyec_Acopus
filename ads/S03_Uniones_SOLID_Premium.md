@@ -132,7 +132,7 @@ public class CajaAcopioService {
 
 ## 🌟 4. LA GRAN FUSIÓN FINAL: [ S + O + L + I + D ] EN PRODUCCIÓN
 
-Ubicación en el backend: [`pe.edu.upeu.sitraoro.acopio.acopiador.service.AcopiadorServiceImpl.java`](file:///e:/Cursos_Ciclo_4/Lenguaje%20de%20Programaci%C3%B3n%20II/sitra-oro/lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/bomerp/acopio/acopiador/service/AcopiadorServiceImpl.java)
+Ubicación en el backend: [`pe.edu.upeu.sitraoro.acopio.acopiador.service.AcopiadorServiceImpl.java`](../lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/acopiador/service/AcopiadorServiceImpl.java)
 
 ```java
 @Service

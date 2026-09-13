@@ -1,5 +1,10 @@
 # Maven
 target/
+.env
+application-local.properties
+oracle-test-local.properties
+site/
+.venv-docs/
 *.class
 
 # Logs
@@ -37,3 +42,7 @@ sample_mayorista.json
 docs/capturas/
 docs/S04_LP2_Equipo05_*.pdf
 docs/S04_LP2_Equipo05_*.docx
+
+# Guias personales de sustentacion - solo locales
+docs/proyecto-integrador/u1/guion-sustentacion.md
+docs/proyecto-integrador/u1/sustentacion-helio.md
