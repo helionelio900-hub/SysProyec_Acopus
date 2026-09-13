@@ -28,7 +28,7 @@
 | `total` | `totalPagadoG2Pen` |
 | producto por línea | tipo de oro (`ROJO` / `VERDE`) + peso fundido |
 
-**Cabecera — `LiquidacionG1`** (`lp2/bomerp-backend/.../acopio/mayorista/entity/LiquidacionG1.java`):
+**Cabecera — `LiquidacionG1`** (`lp2/sitra-oro-backend/.../acopio/mayorista/entity/LiquidacionG1.java`):
 
 ```java
 @Entity
@@ -137,26 +137,29 @@ liquidacion.setTotalPagadoG2Pen(acumuladoTotal);
 
 ### Bloque 2 — Regla de negocio real
 
-**Regla:** *"no se puede liquidar más gramos de oro (por color) de los que el acopiador realmente tiene en stock sin liquidar."* No es una regla de forma: no depende del formato del JSON, sino del estado actual del inventario en la base de datos.
+**Regla:** *"el cierre semanal de cada color debe coincidir EXACTAMENTE con todo el lote de oro sin liquidar de ese color — ni de más, ni de menos."* No es una regla de forma: no depende del formato del JSON, sino del estado actual del inventario en la base de datos.
 
 Por cada línea del detalle, el service del módulo `mayorista` llama al módulo `acopiador`:
 
 ```java
 // MayoristaServiceImpl
-acopiadorService.descontarStockOro(tipoOro, detReq.pesoFundidoG());
+acopiadorService.descontarStockOro(tipoOro, detReq.pesoFundidoG(), saved.getIdLiquidacionG1());
 ```
 
 ```java
 // AcopiadorServiceImpl  (módulo acopiador)
 @Override
 @Transactional
-public void descontarStockOro(String tipoOro, BigDecimal pesoGramos) {
-    BigDecimal disponible = obtenerStockDisponibleGramos(tipoOro);   // SUM de TransaccionG2 no liquidadas
-    if (disponible == null || disponible.compareTo(pesoGramos) < 0) {
-        BigDecimal disp = (disponible != null) ? disponible : BigDecimal.ZERO;
+public void descontarStockOro(String tipoOro, BigDecimal pesoGramos, Long idLiquidacionG1) {
+    List<TransaccionG2> lotes = transaccionG2Repository.findStockDisponibleForUpdate(tipoOro);
+    BigDecimal disponible = lotes.stream()
+        .map(TransaccionG2::getPesoFundidoNetoG)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    if (disponible.compareTo(pesoGramos) != 0) {
         throw new StockInsuficienteException(
-            "Stock insuficiente para oro " + tipoOro + ": disponible " + disp + "g, solicitado " + pesoGramos + "g");
+            "El cierre semanal debe coincidir con todo el stock disponible");
     }
+    lotes.forEach(lote -> lote.setIdLiquidacionG1(idLiquidacionG1));
 }
 ```
 
@@ -236,7 +239,9 @@ SELECT COUNT(*) FROM DETALLE_LIQUIDACIONES_G1; -- 2   (se insertaron las 2 líne
 
 > 📷 **CAPTURA 3 — PowerShell / Thunder Client:** el POST exitoso con respuesta 201 y `totalPagadoG2Pen`, junto a los `COUNT(*)` antes (0/0) y después (1/2). Reloj y usuario visibles.
 
-#### Caso de ROLLBACK — `POST` con la 2.ª línea excedida
+#### Caso de ROLLBACK — `POST` con la 2.ª línea sin cerrar todo el lote
+
+La regla no es "no exceder el stock" — es **coincidir exactamente con todo el lote pendiente de ese color**. Aquí ROJO cierra bien (10 g de 10 g disponibles), pero VERDE deja 1 g sin cerrar (4 g de 5 g disponibles):
 
 ```json
 {
@@ -245,7 +250,7 @@ SELECT COUNT(*) FROM DETALLE_LIQUIDACIONES_G1; -- 2   (se insertaron las 2 líne
   "tipoCambioUsdPen": 3.7500,
   "detalles": [
     { "tipoOro": "ROJO",  "pesoFundidoG": 10.000 },
-    { "tipoOro": "VERDE", "pesoFundidoG": 999999.000 }
+    { "tipoOro": "VERDE", "pesoFundidoG": 4.000 }
   ]
 }
 ```
@@ -257,7 +262,7 @@ Respuesta **HTTP 409 Conflict**:
   "timestamp": "2026-09-08T...Z",
   "status": 409,
   "error": "Conflict",
-  "message": "Stock insuficiente para oro VERDE: disponible 0g, solicitado 999999.000g"
+  "message": "El cierre semanal de oro VERDE debe coincidir con todo el stock disponible: 5.000g disponibles, 4.000g solicitados"
 }
 ```
 
@@ -270,7 +275,7 @@ SELECT COUNT(*) FROM DETALLE_LIQUIDACIONES_G1; -- SIGUE en 2  (no se insertó ni
 
 > 📷 **CAPTURA 4 — PowerShell / Thunder Client:** el POST que devuelve 409, y los `COUNT(*)` idénticos a antes del intento. Reloj y usuario visibles.
 
-*Explicación:* La primera línea (ROJO 10 g) alcanzó a validarse, pero la segunda (VERDE 999999 g) lanzó `StockInsuficienteException`. Spring revierte **toda** la transacción: no queda ninguna fila de la liquidación fallida ni de sus detalles.
+*Explicación:* La primera línea (ROJO) cerró exactamente su lote, pero la segunda (VERDE) dejó 1 g pendiente y lanzó `StockInsuficienteException`. Spring revierte **toda** la transacción: no queda ninguna fila de la liquidación fallida, ni de sus detalles, ni el descuento ya aplicado a ROJO.
 
 ---
 
@@ -300,9 +305,9 @@ class ModularityTests {
 }
 ```
 
-> 📷 **CAPTURA 5 — consola:** `./mvnw.cmd test` → `Tests run: 16, Failures: 0, Errors: 0` con `ModularityTests` incluido. Reloj y usuario visibles.
+> 📷 **CAPTURA 5 — consola:** `./mvnw.cmd test` → `Tests run: 23, Failures: 0, Errors: 0` con `ModularityTests` incluido. Reloj y usuario visibles.
 
-**Aclaración honesta sobre el conteo de módulos:** Spring Modulith detecta `acopio` como **un** módulo de aplicación; `mayorista`, `acopiador`, `cotizador`, `parametros` y `seguridad` son sus sub-dominios, publicados con `@NamedInterface`. La operación no cruza dos *módulos raíz* de Modulith, pero sí cruza dos sub-dominios y **usa la interfaz `@NamedInterface` + `ModularityTests` en verde**, que es la evidencia que pide la rúbrica.
+**Aclaración honesta sobre el conteo de módulos:** Spring Modulith detecta como módulos anidados de U1 a `parametros`, `cotizador`, `acopiador` y `mayorista`. `seguridad` permanece planificado para S10 y no se presenta como implementado en S06.
 
 ---
 

@@ -1,15 +1,18 @@
 # LP2 - Lenguaje de Programación II (`sitra-oro`)
 
-Carpeta del curso **Lenguaje de Programación II** para la implementación del backend y frontend de **SITRA-ORO** (*Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro*).
+Carpeta del curso **Lenguaje de Programación II** para la implementación de **SITRA-ORO** (*Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro*).
+
+> **Corte actual:** Unidad I, sesiones S1–S5. Contiene el backend REST. La SPA y la
+> seguridad JWT pertenecen a sesiones posteriores y no forman parte de la evaluación S06.
 
 ## Alcance del Backend: 5 Módulos (`sitra-oro`)
 
 El backend está desarrollado en **Java 21 + Spring Boot 4 + Spring Modulith**, conectándose a la base de datos Oracle (`SITRA_ACOPIO` / `BOM_ACOPIO`). Se organiza en **1 Módulo de Seguridad, 2 Módulos Transaccionales y 2 Módulos No Transaccionales**:
 
-### 🔐 1. Módulo de Seguridad (1 Módulo)
+### 🔐 1. Módulo de Seguridad (planificado para S10)
 1. **`seguridad` (Auth & RBAC):**
-   * Autenticación con JWT (JSON Web Token) y BCrypt.
-   * Control de acceso basado en roles (`ROLE_MINERO`, `ROLE_G2_ACOPIADOR`, `ROLE_G1_MAYORISTA`).
+   * Diseñado en el brief, pero todavía no implementado en este corte.
+   * Su implementación futura usará JWT, BCrypt y roles.
 
 ### 🔄 2. Módulos Transaccionales (2 Módulos)
 2. **`acopiador` (Módulo Transaccional 1 - G2):**

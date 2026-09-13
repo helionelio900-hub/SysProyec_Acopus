@@ -1,5 +1,5 @@
 # INFORME DE EVIDENCIA DE APRENDIZAJE
-## SESIÓN S04: OPERACIÓN CABECERA-DETALLE, TRANSACCIÓN ATÓMICA Y OBSERVABILIDAD
+## SESIÓN S04: OPERACIÓN CABECERA-DETALLE Y TRANSACCIÓN ATÓMICA
 
 ---
 
@@ -10,7 +10,7 @@
 * **Proyecto de Dominio:** Sistema de Control, Trazabilidad y Liquidación en Acopio de Oro (`sitra-oro`)
 * **Curso / Ciclo:** Lenguaje de Programación II (LP2) — Ciclo IV (Semestre 2026-II)
 * **Institución:** Universidad Peruana Unión (UPeU) — Campus Juliaca
-* **Rol / Aporte realizado:** Construcción de controladores y DTOs compuestos para la operación cabecera-detalle, configuración de pruebas unitarias transaccionales (`@WebMvcTest`), manejo global 409 Conflict, exposición de métricas Prometheus y validación de logs en Loki/Promtail.
+* **Rol / Aporte realizado:** Construcción de controladores y DTOs compuestos para la operación cabecera-detalle, pruebas web y de integración, manejo global 409 Conflict y trazabilidad mediante `traceId` en logs locales.
 * **Repositorio GitHub:** https://github.com/helionelio900-hub/SysProyec_Acopus.git
 
 ---
@@ -62,15 +62,18 @@ El servicio `AcopiadorService` valida si el centro de acopio dispone de suficien
 // Fragmento de AcopiadorServiceImpl.java
 @Override
 @Transactional
-public void descontarStockOro(String tipoOro, BigDecimal pesoGramos) {
+public void descontarStockOro(String tipoOro, BigDecimal pesoGramos, Long idLiquidacionG1) {
     String normalizado = tipoOro.trim().toUpperCase();
-    BigDecimal disponible = obtenerStockDisponibleGramos(normalizado);
-    if (disponible == null || disponible.compareTo(pesoGramos) < 0) {
-        BigDecimal disp = (disponible != null) ? disponible : BigDecimal.ZERO;
+    List<TransaccionG2> lotes = transaccionG2Repository.findStockDisponibleForUpdate(normalizado);
+    BigDecimal disponible = lotes.stream()
+        .map(TransaccionG2::getPesoFundidoNetoG)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    if (disponible.compareTo(pesoGramos) != 0) {
         throw new StockInsuficienteException(
-            "Stock insuficiente para oro " + normalizado + ": disponible " + disp + "g, solicitado " + pesoGramos + "g"
+            "El cierre semanal debe coincidir con todo el stock disponible"
         );
     }
+    lotes.forEach(lote -> lote.setIdLiquidacionG1(idLiquidacionG1));
 }
 ```
 
@@ -86,7 +89,7 @@ public void descontarStockOro(String tipoOro, BigDecimal pesoGramos) {
 La atomicidad garantizada por `@Transactional` asegura que o se registran todos los cambios (cabecera, detalles y descuento de stock) o no se registra ninguno.
 
 1. **Caso de Éxito (HTTP 201 Created):** Se envían dos líneas con stock suficiente, resultando en la creación de la liquidación ID 1 y sus 2 detalles con subtotales correctos.
-2. **Caso de Rollback (HTTP 409 Conflict):** La segunda línea solicita `99999.000g` de oro verde. El método lanza `StockInsuficienteException` y Spring revierte toda la transacción, dejando intacto el stock de oro rojo de la primera línea y no guardando ninguna venta o liquidación en base de datos.
+2. **Caso de Rollback (HTTP 409 Conflict):** La regla no es "no exceder el stock": el cierre semanal debe coincidir EXACTAMENTE con todo el lote pendiente de cada color. La segunda línea solicita `4.000g` de oro verde cuando hay `5.000g` disponibles (deja 1g sin cerrar). El método lanza `StockInsuficienteException` y Spring revierte toda la transacción, dejando intacto el stock de oro rojo de la primera línea y no guardando ninguna venta o liquidación en base de datos.
 
 ```json
 // Respuesta del caso de Rollback (409 Conflict)
@@ -94,7 +97,7 @@ La atomicidad garantizada por `@Transactional` asegura que o se registran todos 
   "timestamp": "2026-09-05T02:04:48.254Z",
   "status": 409,
   "error": "Conflict",
-  "message": "Stock insuficiente para oro VERDE: disponible 15.000g, solicitado 99999.000g"
+  "message": "El cierre semanal de oro VERDE debe coincidir con todo el stock disponible: 5.000g disponibles, 4.000g solicitados"
 }
 ```
 
@@ -105,37 +108,21 @@ La atomicidad garantizada por `@Transactional` asegura que o se registran todos 
 
 ---
 
-### Bloque 4: Límites de Módulo y Observabilidad (Prometheus 3.13 y Loki 3.14) (25%)
+### Bloque 4: Límites de Módulo, logs y pruebas (25%)
 
 #### 1. Verificación Modular con Spring Modulith:
-Las dependencias intermodulares se definen mediante `@NamedInterface` en los paquetes de servicio y DTOs (`acopiador-service`, `acopiador-dto`, `producto-service`, `producto-dto`), cumpliendo las directrices de desacoplamiento de la ADR-002 y pasando `ModularityTests` al 100%.
+Las dependencias intermodulares se definen mediante `@ApplicationModule` y `@NamedInterface` en los paquetes públicos. Mayorista consume `AcopiadorService`, no su repositorio, y `ModularityTests` verifica cuatro módulos funcionales de U1.
 
-> 📷 **[ ESPACIO PARA CAPTURA 4: RESULTADO DE PRUEBAS AUTOMATIZADAS (20 TESTS PASSING) ]**  
-> *(Captura de consola ejecutando ./mvnw test con 20 pruebas exitosas en verde, reloj y usuario visible).*
+> 📷 **[ ESPACIO PARA CAPTURA 4: RESULTADO DE PRUEBAS AUTOMATIZADAS (23 TESTS PASSING) ]**
+> *(Captura de consola ejecutando ./mvnw test con 23 pruebas exitosas en verde, reloj y usuario visible).*
 
----
+#### 2. Trazabilidad local y rollback probado
 
-#### 2. Sección 3.13: Métricas del Backend en Prometheus
-* Endpoint activo en `http://localhost:8081/actuator/prometheus`.
-* Métrica `http_server_requests_seconds_count` evidenciando el tráfico atendido por `POST /api/v1/mayorista/liquidaciones` y `POST /api/v1/ventas`.
-* Contenedor de Prometheus configurado en puerto host `39090`.
+`CorrelationIdFilter` asigna un `traceId` por petición y lo devuelve en `X-Trace-ID`. Los eventos se
+consultan en `logs/bomerp.log`. La suite ejecuta 23 pruebas; las dos pruebas de integración de
+`MayoristaServiceIntegrationTest` comprueban persistencia exitosa y rollback del segundo detalle.
 
-> 📷 **[ ESPACIO PARA CAPTURA 5: MÉTRICAS EN PROMETHEUS PUERTO 39090 ]**  
-> *(Captura de Prometheus en el navegador mostrando el target bomerp-backend en estado UP con reloj y usuario visible).*
-
----
-
-#### 3. Sección 3.14: Centralización de Logs con Promtail y Loki
-* **Trace ID en MDC:** La clase `CorrelationIdFilter` inyecta un UUID en `[%X{traceId}]` en cada registro de log y lo devuelve en la cabecera `X-Trace-ID`.
-* **Configuración Promtail:** Lee `/var/log/bomerp-backend/*.log` mapeado desde `logs/bomerp.log`.
-* **Consultas Loki en Puerto 33100:**
-  1. `{application="bomerp-backend"} |= "Started SitraOroBackendApplication"`
-  2. `{application="bomerp-backend"} |= "HikariPool"`
-  3. `{application="bomerp-backend"} |= "StockInsuficienteException"`
-  4. `{application="bomerp-backend"} |= "<traceId>"`
-
-> 📷 **[ ESPACIO PARA CAPTURA 6: CONSULTAS EN LOKI EN PUERTO 33100 Y RASTREO POR TRACEID ]**  
-> *(Captura de consulta Loki mostrando los logs estructurados con traceId de las peticiones cabecera-detalle, reloj y usuario visible).*
+Prometheus, Loki y Promtail no se incluyen porque pertenecen a sesiones posteriores al corte U1.
 
 ---
 
@@ -158,7 +145,7 @@ Las dependencias intermodulares se definen mediante `@NamedInterface` en los paq
 ## 4. Anexo: Feedback de la Sesión S04
 
 1. **¿Cuál es el aprendizaje más importante que te llevas de la clase de hoy?**  
-   Aprender a implementar transacciones atómicas complejas con persistencia en cascada (`CascadeType.ALL`) y observabilidad integral con correlación de trazas (`traceId`) entre logs y métricas.
+   Aprender a implementar transacciones atómicas complejas con persistencia en cascada (`CascadeType.ALL`) y trazabilidad de peticiones con `traceId` en los logs (`CorrelationIdFilter`).
 
 2. **¿Qué punto de la clase te resultó más confuso o te dejó con dudas?**  
    El ciclo de vida del Rollback automático cuando intervienen múltiples servicios en una misma transacción compartida (`Propagation.REQUIRED`).

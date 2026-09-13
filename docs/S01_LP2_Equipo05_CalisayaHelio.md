@@ -100,8 +100,8 @@ spring:
 ### BLOQUE 4: Documentación OpenAPI y Versionado (Peso: 20%)
 
 1. **OpenAPI / Swagger UI Navegable:**
-   * Acceso disponible en: `http://localhost:8080/swagger-ui.html`
-   * Muestra la especificación interactiva de los 5 módulos etiquetados (`@Tag`).
+   * Acceso disponible en: `http://localhost:8081/swagger-ui.html`
+   * Muestra la especificación interactiva del alcance implementado en U1.
 
 2. **Versionado de la API (`/api/v1/...`):**
    * Todos los endpoints incluyen el prefijo de versión `/api/v1/`. Esto garantiza que cambios futuros en los contratos de liquidación no rompan la compatibilidad con versiones anteriores de aplicaciones móviles o SPAs.
@@ -112,7 +112,7 @@ spring:
 
 1. **Organización por Responsabilidades (`pe.edu.upeu.sitraoro.acopio`):**
    * Cada módulo funcional se encuentra encapsulado en su propio paquete:
-     - `seguridad`: Autenticación, JWT, Roles.
+     - `seguridad`: módulo planificado; JWT se implementará en S10.
      - `cotizador`: Consultas estimativas públicas.
      - `acopiador`: Transacciones presenciales de compra G2.
      - `mayorista`: Cierres y liquidaciones semanales G1.

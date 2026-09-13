@@ -1,0 +1,39 @@
+package pe.edu.upeu.sitraoro.acopio.acopiador.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import pe.edu.upeu.sitraoro.acopio.acopiador.entity.TransaccionG2;
+import java.math.BigDecimal;
+import java.util.List;
+import jakarta.persistence.LockModeType;
+
+@Repository
+public interface TransaccionG2Repository extends JpaRepository<TransaccionG2, Long> {
+
+    List<TransaccionG2> findByTipoOro(String tipoOro);
+
+    List<TransaccionG2> findByMineroIdMinero(Long idMinero);
+
+    @Query("SELECT COALESCE(SUM(t.pesoFundidoNetoG), 0) FROM TransaccionG2 t WHERE t.tipoOro = :tipoOro")
+    BigDecimal sumPesoFundidoByTipoOro(@Param("tipoOro") String tipoOro);
+
+    @Query("SELECT COALESCE(SUM(t.totalPagadoPen), 0) FROM TransaccionG2 t WHERE t.tipoOro = :tipoOro")
+    BigDecimal sumTotalPagadoByTipoOro(@Param("tipoOro") String tipoOro);
+
+    @Query("SELECT COALESCE(SUM(t.pesoFundidoNetoG), 0) FROM TransaccionG2 t WHERE t.tipoOro = :tipoOro AND t.idLiquidacionG1 IS NULL")
+    BigDecimal sumStockDisponibleByTipoOro(@Param("tipoOro") String tipoOro);
+
+    @Query("SELECT COALESCE(SUM(t.totalPagadoPen), 0) FROM TransaccionG2 t WHERE t.tipoOro = :tipoOro AND t.idLiquidacionG1 IS NULL")
+    BigDecimal sumTotalPagadoDisponibleByTipoOro(@Param("tipoOro") String tipoOro);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT t FROM TransaccionG2 t
+        WHERE t.tipoOro = :tipoOro AND t.idLiquidacionG1 IS NULL
+        ORDER BY t.fechaTransaccion, t.idTransaccionG2
+        """)
+    List<TransaccionG2> findStockDisponibleForUpdate(@Param("tipoOro") String tipoOro);
+}

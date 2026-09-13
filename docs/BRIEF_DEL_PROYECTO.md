@@ -16,6 +16,8 @@ El sistema reemplaza los cálculos manuales y cuadernos físicos de apuntes medi
 
 # Tipo: [Transversal / Infraestructura de Acceso]
 
+**Estado de implementación:** diseñado en este brief desde el inicio del proyecto; su implementación real (JWT + BCrypt + RBAC) corresponde a la sesión **S10 (Unidad II)**. En la Unidad I (S1-S6) no existe endpoint de login funcional; los otros 4 módulos sí están implementados y verificados con Spring Modulith.
+
 **Descripción:**Módulo transversal encargado de garantizar la protección del sistema, autenticación de usuarios, gestión de sesiones sin estado mediante tokens JWT y autorización basada en roles (RBAC).
 
 # Requerimientos Funcionales:
@@ -75,5 +77,7 @@ El sistema reemplaza los cálculos manuales y cuadernos físicos de apuntes medi
 ## 3. Resumen y Asignación de Responsabilidades
 
 | **N°** | **Nombre del Módulo** | **Tipo Arquitectónico** | **Programador Responsable** | **Aporte en Línea Curricular** | | **1** | **Seguridad (seguridad)** | Transversal | Faijo Calisaya Helio Paul & Figueroa Chambi Jhymel Nelio | JWT, BCrypt, Security Filters, UserDetails | | **2** | **Acopiador (acopiador)** | Transaccional 1 | Faijo Calisaya Helio Paul | Compras G2, Fundición Real, Oro Rojo/Verde | | **3** | **Mayorista (mayorista)** | Transaccional 2 | Figueroa Chambi Jhymel Nelio | Cierres G1, Onza Troy USD, Tipo de Cambio | | **4** | **Cotizador (cotizador)** | No Transaccional 1 | Faijo Calisaya Helio Paul | Simulador Minero, Merma, Cálculo en Memoria | | **5** | **Parámetros (parametros)** | No Transaccional 2 | Figueroa Chambi Jhymel Nelio | Precios Diarios, Mineros, Dashboard KPIs |
+
+**Estado de implementación (Unidad I, S1-S6):** módulos 2 a 5 implementados y verificados con Spring Modulith (`ModularityTests`). El módulo 1 (Seguridad) está diseñado desde este brief; su implementación con JWT real se entrega en S10 (Unidad II).
 
 *Proyecto Integrador Ciclo IV – SITRA-ORO Acopio de Oro – 2026 UPeU Campus Juliaca*
