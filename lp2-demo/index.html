@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Producto y contrato REST - SITRA-ORO · Unidad I</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">SITRA-ORO · Unidad I</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="./" class="nav-link active" aria-current="page">Producto y contrato REST</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../lp2-comunicacion-modulos/" class="nav-link">Comunicación entre módulos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../guion-sustentacion/" class="nav-link">Guion de sustentación</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../sustentacion-helio/" class="nav-link">Sustentación individual de Helio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../verificacion-u1/" class="nav-link">Verificación</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" class="nav-link disabled">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../lp2-comunicacion-modulos/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#lp2-producto-de-unidad-i-sitra-oro" class="nav-link">LP2 · Producto de Unidad I — SITRA-ORO</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#1-alcance-arquitectonico-del-corte" class="nav-link">1. Alcance arquitectónico del corte</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#2-demo-ejecutable" class="nav-link">2. Demo ejecutable</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#3-contrato-rest" class="nav-link">3. Contrato REST</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#4-dto-principales" class="nav-link">4. DTO principales</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#5-arquitectura-backend-u1" class="nav-link">5. Arquitectura backend U1</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#6-casos-de-prueba" class="nav-link">6. Casos de prueba</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#7-trazabilidad-con-ads-y-bd2" class="nav-link">7. Trazabilidad con ADS y BD2</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="lp2-producto-de-unidad-i-sitra-oro">LP2 · Producto de Unidad I — SITRA-ORO</h1>
+<p>Equipo 05 · Backend REST de trazabilidad y liquidación de acopio de oro.
+Corte S1–S5, sustentado en S06. Se conserva la estructura 1–7 del docente y se
+adapta el dominio a Minero–TransaccionG2–LiquidacionG1–DetalleLiquidacionG1.</p>
+<h2 id="1-alcance-arquitectonico-del-corte">1. Alcance arquitectónico del corte</h2>
+<p>Un solo proyecto Maven (<code>lp2/sitra-oro-backend</code>), una JVM, un ejecutable
+<code>SitraOroBackendApplication</code> y un datasource Oracle. No hay reactor multimódulo,
+Feign ni HTTP interno. Los módulos funcionales son:</p>
+<pre><code class="language-text">pe.edu.upeu.sitraoro
+├── SitraOroBackendApplication
+└── acopio
+    ├── parametros   maestro Minero, parámetros y contrato de dashboard
+    ├── cotizador    estimación sin persistencia
+    ├── acopiador    compras G2, asociación con Minero y stock por color
+    └── mayorista    liquidación cabecera–detalle
+</code></pre>
+<p>Spring Modulith verifica límites con <code>ApplicationModules.verify()</code>. Los contratos
+compartidos se declaran mediante <code>@NamedInterface</code>; los repositorios son internos.
+<code>Minero</code> se exporta expresamente como modelo para la relación ORM.
+Seguridad/JWT, SPA e integración frontend corresponden a U2; no se presentan como
+funcionalidades de este corte. El brief funcional está en el informe de ADS,
+sección «Corte arquitectónico U1 y trazabilidad LP2–BD2».</p>
+<h2 id="2-demo-ejecutable">2. Demo ejecutable</h2>
+<p>Requiere Java 21 y Oracle XE. Desde <code>lp2/sitra-oro-backend</code>, copiar
+<code>application-local.properties.example</code> a <code>application-local.properties</code> y completar
+las credenciales locales. El archivo privado está ignorado por Git; también se
+admiten <code>DB_USERNAME</code>, <code>DB_PASSWORD</code> y <code>DB_URL</code>.</p>
+<pre><code class="language-powershell">.\mvnw.cmd spring-boot:run
+</code></pre>
+<ul>
+<li><a href="http://localhost:8081/swagger-ui.html">Abrir Swagger en el equipo local</a>.</li>
+<li><a href="http://localhost:8081/actuator/health">Comprobar salud y Oracle en el equipo local</a>.</li>
+<li><a href="http://localhost:8081/v3/api-docs">Consultar OpenAPI en el equipo local</a>.</li>
+</ul>
+<p>Los enlaces localhost requieren el backend en el equipo del visitante. La página
+publicada es documentación estática y no expone la base de datos ni aloja Spring Boot.
+Oracle XE instalado usa 1521/XEPDB1; la alternativa Compose del repositorio publica
+1522/XEPDB1 y exige ajustar DB_URL. El README del backend documenta ambos entornos.</p>
+<p>Para demostrar sin consumir lotes existentes:</p>
+<pre><code class="language-powershell">.\mvnw.cmd test
+.\scripts\probar_oracle.ps1
+</code></pre>
+<p>El segundo comando necesita SQL*Plus y acceso OS SYSDBA a Oracle XE local. Crea un
+esquema temporal, instala los scripts BD2, valida el mapeo JPA, ejecuta pruebas y
+elimina solo ese esquema. Los scripts de demo 201/409 sobre la API activa requieren
+stock inicial cero; no deben cerrar stock ajeno.</p>
+<h2 id="3-contrato-rest">3. Contrato REST</h2>
+<table>
+<thead>
+<tr>
+<th>Método</th>
+<th>Endpoint</th>
+<th>Propósito</th>
+<th>Sesión</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET/POST</td>
+<td><code>/api/v1/acopio/mineros</code></td>
+<td>Listado y alta del maestro</td>
+<td>S2</td>
+</tr>
+<tr>
+<td>GET/PUT/DELETE</td>
+<td><code>/api/v1/acopio/mineros/{id}</code></td>
+<td>Consulta, edición y eliminación</td>
+<td>S2</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/acopio/mineros/{id}/transacciones</code></td>
+<td>Navegación de asociación</td>
+<td>S3</td>
+</tr>
+<tr>
+<td>POST/GET</td>
+<td><code>/api/v1/acopio/transacciones</code></td>
+<td>Registrar y consultar compras G2</td>
+<td>S3</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/cotizador/estimar?pesoBrutoGramos=100</code></td>
+<td>Cotización sin persistencia</td>
+<td>S1–S3</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/acopio/acumulados-semanales</code></td>
+<td>Stock pendiente por color</td>
+<td>S4</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/mayorista/liquidaciones</code></td>
+<td>Registrar cabecera y detalles</td>
+<td>S4</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/mayorista/liquidaciones/{id}</code></td>
+<td>Cabecera con sus detalles</td>
+<td>S4</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/mayorista/liquidaciones</code></td>
+<td>Filtros combinados y orden</td>
+<td>S5</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/mayorista/liquidaciones/resumen</code></td>
+<td>Proyección y agregados</td>
+<td>S5</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/dashboard/consolidado</code></td>
+<td>Totales históricos por color</td>
+<td>S5</td>
+</tr>
+</tbody>
+</table>
+<p>Consultas: <code>estado</code>, <code>desde</code> y <code>hasta</code> opcionales; fechas inclusivas. El listado
+acepta <code>ordenarPor</code> de una lista permitida y <code>direccion=ASC|DESC</code>. Se rechazan
+rangos invertidos y parámetros inválidos con 400. El reporte suma en Java los
+montos de la proyección JPQL y calcula el promedio; si no hay filas, devuelve cero.</p>
+<h2 id="4-dto-principales">4. DTO principales</h2>
+<p>Solicitud de minero:</p>
+<pre><code class="language-json">{&quot;documentoIdentidad&quot;:&quot;12345678&quot;,&quot;nombresApellidos&quot;:&quot;Minero de demostración&quot;,&quot;telefono&quot;:&quot;900000000&quot;,&quot;zonaProcedencia&quot;:&quot;Puno&quot;}
+</code></pre>
+<p>Solicitud de liquidación:</p>
+<pre><code class="language-json">{&quot;nombreAcopiadorG2&quot;:&quot;Acopiador U1&quot;,&quot;cotizacionOnzaUsd&quot;:2650.00,&quot;tipoCambioUsdPen&quot;:3.7500,&quot;detalles&quot;:[{&quot;tipoOro&quot;:&quot;ROJO&quot;,&quot;pesoFundidoG&quot;:10.000},{&quot;tipoOro&quot;:&quot;VERDE&quot;,&quot;pesoFundidoG&quot;:5.000}]}
+</code></pre>
+<p>Respuesta de ejemplo: ID y fecha ilustrativos, requiere ese stock disponible.</p>
+<pre><code class="language-json">{&quot;idLiquidacionG1&quot;:1,&quot;nombreAcopiadorG2&quot;:&quot;Acopiador U1&quot;,&quot;estado&quot;:&quot;REGISTRADA&quot;,&quot;pesoTotalFundidoG&quot;:15.000,&quot;cotizacionOnzaUsd&quot;:2650.00,&quot;tipoCambioUsdPen&quot;:3.7500,&quot;totalPagadoG2Pen&quot;:4872.40,&quot;fechaLiquidacion&quot;:&quot;2026-09-13T10:00:00&quot;,&quot;detalles&quot;:[{&quot;idDetalleLiquidacion&quot;:1,&quot;tipoOro&quot;:&quot;ROJO&quot;,&quot;pesoFundidoG&quot;:10.000,&quot;precioGramoPen&quot;:319.50,&quot;subtotalPen&quot;:3195.00},{&quot;idDetalleLiquidacion&quot;:2,&quot;tipoOro&quot;:&quot;VERDE&quot;,&quot;pesoFundidoG&quot;:5.000,&quot;precioGramoPen&quot;:335.48,&quot;subtotalPen&quot;:1677.40}]}
+</code></pre>
+<p>El backend calcula total y estado. La validación rechaza detalles nulos, pesos
+cero, listas vacías y precisión no admitida. Los errores incluyen timestamp,
+status, error, message y traceId; la validación agrega campos. X-Trace-ID relaciona
+la respuesta con los logs de la petición y CORS permite leer esa cabecera.</p>
+<p>HTTP: 200 consulta/edición, 201 creación, 204 eliminación; 400 entrada incorrecta,
+404 recurso inexistente, 409 duplicado/referencia/stock en conflicto.</p>
+<h2 id="5-arquitectura-backend-u1">5. Arquitectura backend U1</h2>
+<pre><code class="language-text">Cliente REST / Swagger
+        |
+Controllers de cada módulo
+        |
+Servicios transaccionales / casos de uso
+        |                         |
+Repositorios internos        Interfaces públicas entre módulos
+        |
+JPA -&gt; un DataSource -&gt; Oracle XEPDB1
+</code></pre>
+<p>La propiedad funcional es: parametros → MINEROS/PARAMETROS_SISTEMA;
+acopiador → TRANSACCIONES_G2; mayorista → LIQUIDACIONES_G1/DETALLE_LIQUIDACIONES_G1.
+Cotizador no persiste. Los módulos usan un mismo esquema físico en el corte LP2.</p>
+<p><code>MayoristaServiceImpl.procesarLiquidacionSemanal()</code> abre la transacción, calcula
+el precio (onza / 31.1035 × cambio; VERDE aplica 5 %), guarda cabecera y detalles
+con saveAndFlush y llama al contrato AcopiadorService. Este bloquea lotes con
+PESSIMISTIC_WRITE y vincula la liquidación. Cada color aparece una sola vez y
+su peso coincide con todo su stock pendiente. Si el segundo color falla, la
+excepción revierte cabecera, detalles y el primer descuento. Flush no es commit.</p>
+<p><a href="../lp2-comunicacion-modulos/">Detalle de comunicación entre módulos</a>.</p>
+<h2 id="6-casos-de-prueba">6. Casos de prueba</h2>
+<table>
+<thead>
+<tr>
+<th>Caso</th>
+<th>Evidencia</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backend y Oracle</td>
+<td><code>/actuator/health</code></td>
+<td>Oracle y estado UP</td>
+</tr>
+<tr>
+<td>Límites</td>
+<td><code>ModularityTests</code></td>
+<td>Sin violaciones</td>
+</tr>
+<tr>
+<td>CRUD persistido</td>
+<td><code>ApiU1IntegrationTest</code></td>
+<td>Alta, lectura, edición persistida, eliminación y 404</td>
+</tr>
+<tr>
+<td>Asociación ORM</td>
+<td><code>relacionMineroCompraSeSerializaYProtegeReferencias</code></td>
+<td>DTO relacionado sin ciclos; FK impide borrar un minero con compras</td>
+</tr>
+<tr>
+<td>Entrada y trazabilidad</td>
+<td><code>erroresDeEntradaTienenDetalleYCorrelacion</code></td>
+<td>400, campos y traceId; formatos inválidos controlados</td>
+</tr>
+<tr>
+<td>Detalles inválidos</td>
+<td><code>detalleNuloYPesoCeroSeRechazanAntesDePersistir</code></td>
+<td>400 sin escritura</td>
+</tr>
+<tr>
+<td>Liquidación válida</td>
+<td><code>liquidacionExitosa_persisteCabeceraDetallesYMarcaLotes</code></td>
+<td>Dos detalles, REGISTRADA, total 4872.40 y lotes vinculados</td>
+</tr>
+<tr>
+<td>Rollback real</td>
+<td><code>errorEnSegundoDetalle_revierteCabeceraDetallesYPrimerDescuento</code></td>
+<td>Cero cabeceras/detalles; primer lote libre</td>
+</tr>
+<tr>
+<td>Consultas</td>
+<td><code>filtrosCombinadosOrdenYAgregadosUsanDatosPersistidos</code></td>
+<td>Filtros, orden 300/100, total 400, promedio 200; vacío en cero</td>
+</tr>
+<tr>
+<td>CORS por propiedad</td>
+<td><code>corsPermiteOrigenConfiguradoYExponeTraceId</code></td>
+<td>Permite 4200, rechaza 4300; expone X-Trace-ID</td>
+</tr>
+</tbody>
+</table>
+<p>Suite: 29 pruebas aprobadas. Los 9 casos de integración se ejecutan adicionalmente
+contra Oracle; no son 38 casos distintos. <a href="../verificacion-u1/">Resultados de verificación</a>.</p>
+<h2 id="7-trazabilidad-con-ads-y-bd2">7. Trazabilidad con ADS y BD2</h2>
+<table>
+<thead>
+<tr>
+<th>Elemento LP2</th>
+<th>Evidencia ADS</th>
+<th>Evidencia BD2</th>
+<th>Comprobación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alcance y un ejecutable</td>
+<td><code>ads/S01_Informe_Requerimientos.md</code>, sección 5: corte U1 y vista C3</td>
+<td>Un usuario ejecutor y datasource</td>
+<td>Contexto Spring y salud Oracle</td>
+</tr>
+<tr>
+<td>Límites de módulos</td>
+<td><code>ads/S03_Diseño_Estructural_Principios_SOLID.md</code>, secciones 2–3</td>
+<td>Propiedad funcional definida por tabla</td>
+<td>Modulith e interfaces nombradas</td>
+</tr>
+<tr>
+<td>Maestro y asociación</td>
+<td>ADS S01, módulos parametros/acopiador</td>
+<td><code>bd2/S01_03_tablas_bomerp_app.sql</code>: PK MINEROS, documento único y FK_G2_MINERO</td>
+<td>CRUD y relación probados en Oracle</td>
+</tr>
+<tr>
+<td>Cabecera–detalle</td>
+<td>ADS S01, módulo mayorista y reglas de cierre</td>
+<td>Mismo DDL: cinco tablas, FK_DET_LIQ_G1_CAB, UQ_DET_LIQ_G1_COLOR, FK_G2_LIQUIDACION_G1</td>
+<td>Commit y rollback reales</td>
+</tr>
+<tr>
+<td>Total, estado y stock</td>
+<td>ADS S01 sección 5: reglas de cálculo y atomicidad</td>
+<td>CHECK de estado/tipos y FK; cálculos y stock en servicios Java</td>
+<td>Total 4872.40 y reversión de cambios</td>
+</tr>
+<tr>
+<td>Filtros y reporte</td>
+<td>Vista C3, consultas de mayorista</td>
+<td><code>bd2/S05_indices.sql</code>: IX_LIQ_G1_ESTADO_FECHA, IX_LIQ_G1_FECHA e índices FK</td>
+<td>Filtros y agregados con datos persistidos</td>
+</tr>
+<tr>
+<td>Entorno reproducible</td>
+<td>Configuración externa del ejecutable</td>
+<td>Script Oracle instala DDL e índices BD2 en esquema aislado</td>
+<td>Hibernate validate y suite de integración</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Alineación de esquemas:</strong> el DDL ejecutable U1 es S01_03, sin esquema fijo;
+S01_02 + S04_02 documentan la alternativa BOM_ACOPIO y no se ejecutan encima de
+S01_03. El parche S05_00 es para bases anteriores, no necesario sobre el DDL
+actual. Los índices ofrecen rutas al optimizador; no se afirma que siempre se usen
+ni se inventan planes de ejecución. No existen procedimientos PL/SQL de negocio
+para los cálculos de LP2: esa regla reside en los servicios Java.</p>
+<p><a href="../sustentacion-helio/">Guion individual de Helio</a> · <a href="../guion-sustentacion/">Guion general</a>.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
