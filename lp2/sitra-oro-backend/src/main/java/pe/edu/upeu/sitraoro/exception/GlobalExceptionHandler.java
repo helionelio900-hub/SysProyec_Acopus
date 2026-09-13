@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.MDC;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
@@ -22,6 +25,7 @@ public class GlobalExceptionHandler {
         log.warn("Recurso no encontrado (404): {}", ex.getMessage());
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", Instant.now().toString());
+        body.put("traceId", MDC.get("traceId"));
         body.put("status", HttpStatus.NOT_FOUND.value());
         body.put("error", "Not Found");
         body.put("message", ex.getMessage());
@@ -33,6 +37,7 @@ public class GlobalExceptionHandler {
         log.warn("StockInsuficienteException provocando Rollback (409 Conflict): {}", ex.getMessage());
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", Instant.now().toString());
+        body.put("traceId", MDC.get("traceId"));
         body.put("status", HttpStatus.CONFLICT.value());
         body.put("error", "Conflict");
         body.put("message", ex.getMessage());
@@ -44,9 +49,14 @@ public class GlobalExceptionHandler {
         log.warn("Error de validación sintáctica de datos (400 Bad Request)");
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", Instant.now().toString());
+        body.put("traceId", MDC.get("traceId"));
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Bad Request");
         body.put("message", "Error de validación en los datos enviados");
+        Map<String, String> campos = new java.util.TreeMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                campos.putIfAbsent(error.getField(), error.getDefaultMessage()));
+        body.put("campos", campos);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
@@ -55,6 +65,7 @@ public class GlobalExceptionHandler {
         log.warn("Regla de entrada inválida (400): {}", ex.getMessage());
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", Instant.now().toString());
+        body.put("traceId", MDC.get("traceId"));
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Bad Request");
         body.put("message", ex.getMessage());
@@ -66,6 +77,7 @@ public class GlobalExceptionHandler {
         log.warn("Error de validación en parámetros (400): {}", ex.getMessage());
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", Instant.now().toString());
+        body.put("traceId", MDC.get("traceId"));
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Bad Request");
         body.put("message", "Uno o más parámetros no son válidos");
@@ -74,12 +86,25 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
-        log.warn("Conflicto de integridad de datos (409): {}", ex.getMostSpecificCause().getMessage());
+        log.warn("Conflicto de integridad de datos (409)");
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", Instant.now().toString());
+        body.put("traceId", MDC.get("traceId"));
         body.put("status", HttpStatus.CONFLICT.value());
         body.put("error", "Conflict");
         body.put("message", "La operación entra en conflicto con datos existentes o relacionados");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<Map<String, Object>> handleFormato(Exception ex) {
+        log.warn("Formato de solicitud inválido (400)");
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", Instant.now().toString());
+        body.put("traceId", MDC.get("traceId"));
+        body.put("status", 400);
+        body.put("error", "Bad Request");
+        body.put("message", "Revise el JSON, los tipos de datos, las fechas y los valores enumerados");
+        return ResponseEntity.badRequest().body(body);
     }
 }

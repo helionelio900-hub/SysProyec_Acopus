@@ -8,9 +8,9 @@ services:
     ports:
       - "1522:1521"
     environment:
-      ORACLE_PASSWORD: 123456
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:?Defina ORACLE_PASSWORD en .env}
       APP_USER: BOMERP_APP
-      APP_USER_PASSWORD: 123456
+      APP_USER_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD en .env}
     volumes:
       - oracle-data:/opt/oracle/oradata
     healthcheck:
@@ -21,4 +21,3 @@ services:
       start_period: 60s
 volumes:
   oracle-data:
-

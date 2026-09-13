@@ -8,11 +8,13 @@ if ([decimal]$stockInicial.totalGramosRojo -ne 0 -or [decimal]$stockInicial.tota
     throw "La demo requiere una BD sin stock abierto. Hay ROJO=$($stockInicial.totalGramosRojo)g y VERDE=$($stockInicial.totalGramosVerde)g; no se modificaron datos."
 }
 
-$mineros = @(Invoke-RestMethod "$apiBase/api/v1/acopio/mineros")
-if ($mineros.Count -eq 0) {
+$minero = Invoke-RestMethod "$apiBase/api/v1/acopio/mineros" |
+    Where-Object { $null -ne $_.idMinero } |
+    Select-Object -First 1
+if ($null -eq $minero) {
     throw "Primero registre un minero o ejecute probar_exito_201.ps1."
 }
-$idMinero = $mineros[0].idMinero
+$idMinero = $minero.idMinero
 
 function Registrar-Lote([string]$tipo, [decimal]$bruto, [decimal]$neto) {
     $body = @{
@@ -20,6 +22,7 @@ function Registrar-Lote([string]$tipo, [decimal]$bruto, [decimal]$neto) {
         pesoSinFundirG = $bruto
         pesoFundidoNetoG = $neto
         tipoOro = $tipo
+        precioAplicadoPen = 285.50
     } | ConvertTo-Json
     Invoke-RestMethod -Method Post "$apiBase/api/v1/acopio/transacciones" -ContentType "application/json" -Body $body
 }
@@ -65,6 +68,9 @@ if ($liquidacionesAntes -ne $liquidacionesDespues) {
 }
 if ([decimal]$stockAntes.totalGramosRojo -ne [decimal]$stockDespues.totalGramosRojo) {
     throw "El rollback fallo: el primer color quedo liquidado."
+}
+if ([decimal]$stockAntes.totalGramosVerde -ne [decimal]$stockDespues.totalGramosVerde) {
+    throw "El rollback fallo: cambio el stock VERDE."
 }
 
 Write-Host "ROLLBACK verificado: no quedo cabecera y el primer color sigue disponible." -ForegroundColor Green

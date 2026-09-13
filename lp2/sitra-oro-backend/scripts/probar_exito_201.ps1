@@ -8,8 +8,10 @@ if ([decimal]$stockInicial.totalGramosRojo -ne 0 -or [decimal]$stockInicial.tota
     throw "La demo requiere una BD sin stock abierto. Hay ROJO=$($stockInicial.totalGramosRojo)g y VERDE=$($stockInicial.totalGramosVerde)g; no se modificaron datos."
 }
 
-$mineros = @(Invoke-RestMethod "$apiBase/api/v1/acopio/mineros")
-if ($mineros.Count -eq 0) {
+$minero = Invoke-RestMethod "$apiBase/api/v1/acopio/mineros" |
+    Where-Object { $null -ne $_.idMinero } |
+    Select-Object -First 1
+if ($null -eq $minero) {
     $documento = (Get-Random -Minimum 10000000 -Maximum 99999999).ToString()
     $nuevoMinero = @{
         documentoIdentidad = $documento
@@ -18,8 +20,6 @@ if ($mineros.Count -eq 0) {
         zonaProcedencia = "Puno"
     } | ConvertTo-Json
     $minero = Invoke-RestMethod -Method Post "$apiBase/api/v1/acopio/mineros" -ContentType "application/json" -Body $nuevoMinero
-} else {
-    $minero = $mineros[0]
 }
 
 foreach ($lote in @(
@@ -31,6 +31,7 @@ foreach ($lote in @(
         pesoSinFundirG = $lote.bruto
         pesoFundidoNetoG = $lote.neto
         tipoOro = $lote.tipo
+        precioAplicadoPen = 285.50
     } | ConvertTo-Json
     Invoke-RestMethod -Method Post "$apiBase/api/v1/acopio/transacciones" -ContentType "application/json" -Body $compra | Out-Null
 }
@@ -47,7 +48,15 @@ $payload = @{
     )
 } | ConvertTo-Json -Depth 5
 
-$respuesta = Invoke-RestMethod -Method Post "$apiBase/api/v1/mayorista/liquidaciones" -ContentType "application/json" -Body $payload
+$http = Invoke-WebRequest -Method Post "$apiBase/api/v1/mayorista/liquidaciones" -ContentType "application/json" -Body $payload
+if ([int]$http.StatusCode -ne 201) { throw "Se esperaba HTTP 201 y se obtuvo $($http.StatusCode)." }
+$respuesta = $http.Content | ConvertFrom-Json
+if ($respuesta.estado -ne 'REGISTRADA' -or @($respuesta.detalles).Count -ne 2) {
+    throw 'La respuesta no contiene una liquidacion REGISTRADA con dos detalles.'
+}
+$sumaDetalles = [decimal]0
+foreach ($detalle in $respuesta.detalles) { $sumaDetalles += [decimal]$detalle.subtotalPen }
+if ($sumaDetalles -ne [decimal]$respuesta.totalPagadoG2Pen) { throw 'El total no coincide con la suma de los detalles.' }
 $despues = Invoke-RestMethod "$apiBase/api/v1/acopio/acumulados-semanales"
 
 $respuesta | ConvertTo-Json -Depth 6

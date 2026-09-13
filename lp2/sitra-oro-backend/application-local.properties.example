@@ -1,0 +1,5 @@
+# Copiar como application-local.properties (ignorado por Git).
+spring.datasource.username=SU_USUARIO_ORACLE
+spring.datasource.password=SU_CLAVE_LOCAL
+# Oracle XE instalado: 1521. Compose de este repositorio: 1522.
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521/XEPDB1
