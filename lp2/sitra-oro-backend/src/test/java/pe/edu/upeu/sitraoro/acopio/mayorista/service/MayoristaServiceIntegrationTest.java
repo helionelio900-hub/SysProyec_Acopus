@@ -17,6 +17,10 @@ import pe.edu.upeu.sitraoro.exception.StockInsuficienteException;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.time.LocalDateTime;
+import pe.edu.upeu.sitraoro.acopio.mayorista.entity.LiquidacionG1;
+import pe.edu.upeu.sitraoro.acopio.mayorista.entity.EstadoLiquidacion;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -41,10 +45,13 @@ class MayoristaServiceIntegrationTest {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private JdbcTemplate jdbc;
+
     @BeforeEach
     void limpiarBase() {
-        liquidacionG1Repository.deleteAll();
         transaccionG2Repository.deleteAll();
+        liquidacionG1Repository.deleteAll();
         mineroRepository.deleteAll();
     }
 
@@ -63,6 +70,9 @@ class MayoristaServiceIntegrationTest {
 
         assertNotNull(response.idLiquidacionG1());
         assertEquals(2, response.detalles().size());
+        assertEquals(0, new BigDecimal("4872.40").compareTo(response.totalPagadoG2Pen()));
+        assertEquals("REGISTRADA", response.estado());
+        assertEquals(2, jdbc.queryForObject("select count(*) from DETALLE_LIQUIDACIONES_G1", Integer.class));
         assertEquals(1, liquidacionG1Repository.count());
         assertEquals(response.idLiquidacionG1(),
                 transaccionG2Repository.findById(rojo.getIdTransaccionG2()).orElseThrow().getIdLiquidacionG1());
@@ -90,6 +100,7 @@ class MayoristaServiceIntegrationTest {
 
         entityManager.clear();
         assertEquals(0, liquidacionG1Repository.count());
+        assertEquals(0, jdbc.queryForObject("select count(*) from DETALLE_LIQUIDACIONES_G1", Integer.class));
         assertNull(transaccionG2Repository.findById(rojo.getIdTransaccionG2()).orElseThrow().getIdLiquidacionG1());
     }
 
@@ -99,6 +110,38 @@ class MayoristaServiceIntegrationTest {
                 () -> mayoristaService.buscar(null, null, null, "campoInventado", "ASC"));
 
         assertEquals("Campo de ordenamiento no permitido: campoInventado", error.getMessage());
+    }
+
+    @Test
+    void filtrosCombinadosOrdenYAgregadosUsanDatosPersistidos() {
+        guardarLiquidacion("2026-09-01T10:00:00", EstadoLiquidacion.REGISTRADA, "100.00");
+        guardarLiquidacion("2026-09-02T10:00:00", EstadoLiquidacion.REGISTRADA, "300.00");
+        guardarLiquidacion("2026-09-02T10:00:00", EstadoLiquidacion.ANULADA, "900.00");
+        guardarLiquidacion("2026-08-01T10:00:00", EstadoLiquidacion.REGISTRADA, "800.00");
+        LocalDateTime desde = LocalDateTime.parse("2026-09-01T10:00:00");
+        LocalDateTime hasta = LocalDateTime.parse("2026-09-02T10:00:00");
+        var filas = mayoristaService.buscar(EstadoLiquidacion.REGISTRADA, desde, hasta, "totalPagadoG2Pen", "DESC");
+        assertEquals(2, filas.size());
+        assertEquals(0, new BigDecimal("300.00").compareTo(filas.get(0).totalPagadoG2Pen()));
+        assertEquals(0, new BigDecimal("100.00").compareTo(filas.get(1).totalPagadoG2Pen()));
+        var reporte = mayoristaService.reporte(EstadoLiquidacion.REGISTRADA, desde, hasta);
+        assertEquals(2, reporte.agregado().totalLiquidaciones());
+        assertEquals(0, new BigDecimal("400.00").compareTo(reporte.agregado().montoTotal()));
+        assertEquals(0, new BigDecimal("200.00").compareTo(reporte.agregado().ticketPromedio()));
+        var vacio = mayoristaService.reporte(null, hasta.plusYears(1), null);
+        assertEquals(0, vacio.agregado().totalLiquidaciones());
+        assertEquals(0, vacio.agregado().montoTotal().signum());
+        assertEquals(0, vacio.agregado().ticketPromedio().signum());
+        assertThrows(IllegalArgumentException.class, () -> mayoristaService.reporte(null, hasta, desde));
+        assertThrows(IllegalArgumentException.class, () -> mayoristaService.buscar(null, null, null, "fechaLiquidacion", "INVALIDO"));
+    }
+
+    private void guardarLiquidacion(String fecha, EstadoLiquidacion estado, String monto) {
+        liquidacionG1Repository.saveAndFlush(LiquidacionG1.builder()
+                .nombreAcopiadorG2("Consulta U1").fechaLiquidacion(LocalDateTime.parse(fecha))
+                .estado(estado).pesoTotalFundidoG(BigDecimal.ONE)
+                .cotizacionOnzaUsd(new BigDecimal("2650.00")).tipoCambioUsdPen(new BigDecimal("3.7500"))
+                .totalPagadoG2Pen(new BigDecimal(monto)).build());
     }
 
     private LiquidacionG1Request solicitud(DetalleLiquidacionRequest... detalles) {
