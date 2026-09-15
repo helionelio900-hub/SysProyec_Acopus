@@ -1,6 +1,10 @@
 package pe.edu.upeu.sitraoro.acopio.parametros.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.sitraoro.acopio.parametros.dto.MineroRequest;
 import pe.edu.upeu.sitraoro.acopio.parametros.dto.MineroResponse;
 import pe.edu.upeu.sitraoro.acopio.parametros.service.MineroService;
+import pe.edu.upeu.sitraoro.exception.ApiErrorResponse;
 
 import java.util.List;
 
@@ -33,7 +38,7 @@ import java.util.List;
  ===================================================================================
 */
 
-@Tag(name = "Mineros")
+@Tag(name = "Módulo 5: Parámetros y Dashboard")
 @RestController
 @RequestMapping("/api/v1/acopio/mineros")
 @RequiredArgsConstructor
@@ -48,12 +53,26 @@ public class MineroController {
     }
 
     @Operation(summary = "Consulta un minero por id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Minero encontrado",
+                    content = @Content(schema = @Schema(implementation = MineroResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Minero no encontrado",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
     @GetMapping("/{id}")
     public ResponseEntity<MineroResponse> obtener(@PathVariable Long id) {
         return ResponseEntity.ok(mineroService.obtener(id));
     }
 
     @Operation(summary = "Registra un minero nuevo")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Minero registrado",
+                    content = @Content(schema = @Schema(implementation = MineroResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Datos del minero inválidos",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Documento de identidad duplicado",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MineroResponse crear(@Valid @RequestBody MineroRequest request) {
@@ -61,12 +80,29 @@ public class MineroController {
     }
 
     @Operation(summary = "Actualiza datos de un minero existente")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Minero actualizado",
+                    content = @Content(schema = @Schema(implementation = MineroResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Datos del minero inválidos",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Minero no encontrado",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Documento de identidad duplicado",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
     @PutMapping("/{id}")
     public ResponseEntity<MineroResponse> actualizar(@PathVariable Long id, @Valid @RequestBody MineroRequest request) {
         return ResponseEntity.ok(mineroService.actualizar(id, request));
     }
 
     @Operation(summary = "Elimina un minero")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Minero eliminado"),
+            @ApiResponse(responseCode = "404", description = "Minero no encontrado",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "El minero tiene transacciones relacionadas",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminar(@PathVariable Long id) {

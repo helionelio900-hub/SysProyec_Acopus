@@ -11,7 +11,7 @@ import pe.edu.upeu.sitraoro.acopio.parametros.service.DashboardAcopioPort;
 @RestController
 @RequestMapping("/api/v1/dashboard")
 @RequiredArgsConstructor
-@Tag(name = "Módulo 5: Dashboard y Consolidado General (No Transaccional 2)", description = "Reporte consolidado final con sumatorias de gramos (Rojo/Verde) y montos totales desembolsados")
+@Tag(name = "Módulo 5: Parámetros y Dashboard")
 public class DashboardController {
 
     private final DashboardAcopioPort dashboardAcopioPort;
