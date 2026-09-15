@@ -5,7 +5,12 @@
     "portada_s6.html",
     "propuesta_01_contexto.html",
     "diapositiva-03-crud-mineros.html",
-    "diapositiva-04-acopio-g2.html"
+    "diapositiva-04-acopio-g2.html",
+    "diapositiva-05-cierre-g1.html",
+    "diapositiva-06-regla-cierre.html",
+    "diapositiva-07-evidencias.html",
+    "diapositiva-08-prometheus.html",
+    "diapositiva-09-despedida.html"
   ];
 
   const frame = document.getElementById("slideFrame");

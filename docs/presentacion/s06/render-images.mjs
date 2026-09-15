@@ -10,6 +10,11 @@ const slideCatalog = [
   ["propuesta_01_contexto.html", "02_alcance_arquitectura.png"],
   ["diapositiva-03-crud-mineros.html", "03_crud_mineros.png"],
   ["diapositiva-04-acopio-g2.html", "04_acopio_g2.png"],
+  ["diapositiva-05-cierre-g1.html", "05_cierre_g1.png"],
+  ["diapositiva-06-regla-cierre.html", "06_regla_cierre.png"],
+  ["diapositiva-07-evidencias.html", "07_evidencias.png"],
+  ["diapositiva-08-prometheus.html", "08_prometheus.png"],
+  ["diapositiva-09-despedida.html", "09_despedida.png"],
 ];
 const requested = new Set(process.argv.slice(2));
 const slides = requested.size === 0

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SITRA-ORO · Despedida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#020b19;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f7f9fc;--dim:#b7c5d8;--line:rgba(139,178,225,.22)}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);color:var(--text);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:var(--navy)}
+  .photo{position:absolute;inset:90px 0 56px;background:url('assets/contexto-andino-horizontal.png') center/cover no-repeat;transform:scale(1.015)}
+  .veil{position:absolute;inset:90px 0 56px;background:linear-gradient(90deg,rgba(2,11,25,.98) 0%,rgba(2,11,25,.91) 32%,rgba(2,11,25,.54) 58%,rgba(2,11,25,.23) 100%),linear-gradient(0deg,rgba(2,11,25,.66),transparent 45%,rgba(2,11,25,.28))}
+  header{position:absolute;z-index:5;top:0;left:0;right:0;height:90px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.86);border-bottom:1px solid rgba(139,178,225,.13)}
+  .upeu{height:51px;filter:brightness(0) invert(1)}.career{display:flex;align-items:center;gap:12px}.career img{width:52px;height:52px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:5px;font-size:15px;letter-spacing:-.02em}
+  main{position:absolute;z-index:3;inset:90px 0 56px;display:grid;grid-template-columns:1.15fr .85fr;align-items:center;padding:60px 6.2vw 58px;gap:70px}.content{max-width:860px}.eyebrow{display:flex;align-items:center;gap:16px;color:var(--gold);font:700 12px/1 'IBM Plex Mono',monospace;letter-spacing:.29em;text-transform:uppercase}.eyebrow:before{content:"";width:48px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{margin:24px 0 0;font-size:clamp(60px,5.1vw,94px);line-height:.98;letter-spacing:-.055em}.gold{color:var(--gold)}.project{margin:28px 0 0;max-width:760px;color:#e2eaf5;font-size:23px;line-height:1.5}.project b{color:#fff}
+  .team{display:grid;grid-template-columns:130px 1fr;gap:22px;margin-top:47px;padding-top:23px;border-top:1px solid var(--line)}.team-label{color:var(--gold-soft);font:700 11px/1.3 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase}.names{display:grid;gap:7px;color:#e6edf7;font-size:15px}.names span{display:block}
+  .question{justify-self:end;width:min(440px,100%);padding:30px 32px;border:1px solid rgba(242,183,54,.48);border-top:3px solid var(--gold);border-radius:14px;background:linear-gradient(145deg,rgba(7,25,47,.88),rgba(2,11,25,.78));box-shadow:0 32px 70px -38px #000,0 0 45px -30px rgba(242,183,54,.8);backdrop-filter:blur(8px)}.question small{display:block;color:var(--gold-soft);font:700 10px/1 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase}.question h2{margin:13px 0 12px;font-size:38px;letter-spacing:-.04em}.question p{margin:0;color:#cad7e7;font-size:15px;line-height:1.55}.question .line{display:block;width:74px;height:3px;margin-top:24px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}
+  @keyframes photo-in{0%{opacity:.6;transform:scale(1.08)}100%{opacity:1;transform:scale(1.015)}}
+  @keyframes rise{0%{opacity:0;filter:blur(6px);transform:translateY(18px)}100%{opacity:1;filter:blur(0);transform:translateY(0)}}
+  @keyframes slide-in{0%{opacity:0;filter:blur(6px);transform:translateX(24px) scale(.98)}100%{opacity:1;filter:blur(0);transform:translateX(0) scale(1)}}
+  @keyframes glow{0%,100%{box-shadow:0 32px 70px -38px #000,0 0 45px -30px rgba(242,183,54,.8)}50%{box-shadow:0 32px 70px -38px #000,0 0 55px -19px rgba(242,183,54,.72)}}
+  .architecture-motion .photo{animation:photo-in 1.35s cubic-bezier(.2,.75,.15,1) both}.architecture-motion .eyebrow{animation:rise .45s ease-out .25s both}.architecture-motion h1{animation:rise .68s cubic-bezier(.2,.8,.2,1) .58s both}.architecture-motion .project{animation:rise .52s ease-out 1.06s both}.architecture-motion .team{animation:rise .5s ease-out 1.38s both}.architecture-motion .question{animation:slide-in .65s cubic-bezier(.2,.8,.2,1) 1.76s both,glow 1.6s ease-in-out 2.55s both}
+  @media(prefers-reduced-motion:reduce){.architecture-motion .photo,.architecture-motion .eyebrow,.architecture-motion h1,.architecture-motion .project,.architecture-motion .team,.architecture-motion .question{animation:none!important;opacity:1!important;filter:none!important;transform:none!important}.architecture-motion .photo{transform:scale(1.015)!important}}
+  footer{position:absolute;z-index:5;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(139,178,225,.14);background:rgba(2,11,25,.9)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(139,178,225,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<section class="slide">
+  <div class="photo" aria-hidden="true"></div><div class="veil" aria-hidden="true"></div>
+  <header><img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión"><div class="career"><img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas"><div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div></div></header>
+  <main>
+    <section class="content">
+      <div class="eyebrow">Cierre de sustentación</div>
+      <h1>Gracias por<br><span class="gold">su atención</span></h1>
+      <p class="project"><b>SITRA-ORO</b><br>Backend REST para la trazabilidad del acopio y la liquidación de oro.</p>
+      <div class="team"><span class="team-label">Equipo 05</span><div class="names"><span>Faijo Calisaya Helio Paul</span><span>Figueroa Chambi Jhymel Nelio</span></div></div>
+    </section>
+    <aside class="question"><small>Espacio de diálogo</small><h2>Preguntas</h2><p>Podemos revisar la arquitectura, el contrato REST y las evidencias de funcionamiento.</p><span class="line" aria-hidden="true"></span></aside>
+  </main>
+  <footer><span class="count">09 / 09</span><span class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i></span><span class="brand">SITRA-ORO · UPeU Juliaca</span></footer>
+</section>
+<script src="animacion-arquitectura.js"></script>
+</body>
+</html>

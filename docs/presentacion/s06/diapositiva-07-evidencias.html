@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SITRA-ORO · Consultas y evidencias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#020b19;--navy2:#071426;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f7f9fc;--dim:#a8b8cf;--line:rgba(139,178,225,.22);--blue:#5ea2e5;--green:#49b879;--cyan:#50c5c9}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);color:var(--text);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:radial-gradient(48rem 31rem at 86% 43%,rgba(32,88,126,.2),transparent 67%),radial-gradient(29rem 25rem at 7% 91%,rgba(242,183,54,.05),transparent 65%),var(--navy)}
+  .grid{position:absolute;inset:90px 0 56px;opacity:.45;background-image:linear-gradient(rgba(115,161,216,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(115,161,216,.04) 1px,transparent 1px);background-size:45px 45px;mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.28) 55%,transparent)}
+  header{position:absolute;z-index:3;top:0;left:0;right:0;height:90px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.68);border-bottom:1px solid rgba(139,178,225,.12)}
+  .upeu{height:51px;filter:brightness(0) invert(1)}.career{display:flex;align-items:center;gap:12px}.career img{width:52px;height:52px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:5px;font-size:15px;letter-spacing:-.02em}
+  main{position:absolute;z-index:2;inset:90px 0 56px;padding:48px 5.1vw 28px;display:grid;grid-template-columns:35.5% 1fr;gap:58px}
+  .left{display:flex;min-width:0;flex-direction:column;justify-content:center}.eyebrow{display:flex;align-items:center;gap:15px;color:var(--gold);font:700 12px/1 'IBM Plex Mono',monospace;letter-spacing:.28em;text-transform:uppercase}.eyebrow:before{content:"";width:44px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{margin:19px 0 13px;font-size:clamp(42px,3.32vw,62px);line-height:1.02;letter-spacing:-.046em}.gold{color:var(--gold)}.lead{margin:0;max-width:590px;color:#e1e9f4;font-size:18px;line-height:1.5}
+  .endpoints{display:grid;gap:8px;margin:23px 0 22px}.endpoint{display:flex;align-items:center;gap:10px;color:#dfeafa;font:600 11px/1.3 'IBM Plex Mono',monospace}.endpoint b{min-width:43px;padding:5px 7px;border-radius:3px;background:#3288d8;color:#eff8ff;text-align:center;font-size:9px;letter-spacing:.08em}.endpoint code{color:#e7eef8}
+  .facts{border-top:1px solid var(--line)}.fact{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}.fact .num{color:var(--gold-soft);font:700 12px/1.25 'IBM Plex Mono',monospace}.fact h2{margin:0 0 4px;font-size:16px}.fact p{margin:0;color:var(--dim);font-size:14px;line-height:1.42}.fact code{color:#dcecff;font:600 11px/1.3 'IBM Plex Mono',monospace}
+  .rule{margin-top:18px;padding:13px 15px;border-left:3px solid var(--gold);background:rgba(242,183,54,.07);color:#eaf2fb;font-size:14px;line-height:1.44}.rule b{display:block;margin-bottom:4px;color:var(--gold-soft);font:700 11px/1 'IBM Plex Mono',monospace;letter-spacing:.11em;text-transform:uppercase}
+  .evidence-panel{position:relative;min-width:0;display:grid;grid-template-rows:auto 402px 116px 112px;gap:18px;align-content:center;padding:27px 6px 5px}.evidence-panel:before{content:"EVIDENCIA DE EJECUCIÓN";position:absolute;top:0;right:6px;color:#8ea4c1;font:700 10px/1 'IBM Plex Mono',monospace;letter-spacing:.16em}
+  .proof-heading{display:flex;align-items:end;justify-content:space-between;gap:20px}.proof-heading div small{display:block;color:#8fb8e1;font:700 9px/1 'IBM Plex Mono',monospace;letter-spacing:.13em;text-transform:uppercase}.proof-heading h2{margin:7px 0 0;font-size:24px;letter-spacing:-.03em}.proof-tags{display:flex;gap:7px;align-items:center}.proof-tags span{padding:6px 9px;border:1px solid var(--line);border-radius:5px;color:#bfd2e8;font:600 9px/1 'IBM Plex Mono',monospace}.proof-tags .ok{border-color:rgba(73,184,121,.45);color:#80dda7}
+  .screenshot{position:relative;overflow:hidden;border:1px solid rgba(94,162,229,.38);border-top:3px solid var(--blue);border-radius:12px;background:#151a1e;box-shadow:0 30px 60px -38px #000}.screenshot img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top}.screenshot:after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),inset 0 -45px 60px -55px #000}.focus{position:absolute;z-index:2;left:1.7%;right:1.7%;bottom:2.4%;height:36%;border:2px solid rgba(242,183,54,.9);border-radius:7px;box-shadow:0 0 0 999px rgba(2,11,25,.12),0 0 24px -7px rgba(242,183,54,.66);pointer-events:none}.focus-label{position:absolute;z-index:3;right:2.4%;bottom:34.5%;padding:6px 9px;border-radius:4px;background:var(--gold);color:#142032;font:800 9px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase}
+  .metrics{display:grid;grid-template-columns:1fr 1.15fr 1.15fr;gap:14px}.metric{position:relative;padding:15px 17px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(145deg,rgba(11,31,57,.95),rgba(4,16,31,.9));box-shadow:0 22px 42px -34px #000}.metric small{display:block;color:#91a8c3;font:700 9px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase}.metric strong{display:block;margin-top:8px;color:#fff;font-size:22px;letter-spacing:-.025em}.metric strong em{color:var(--gold);font-style:normal}.metric span{display:block;margin-top:4px;color:var(--dim);font-size:10px}.metric:first-child{border-top:3px solid var(--blue)}.metric:nth-child(2){border-top:3px solid var(--gold)}.metric:nth-child(3){border-top:3px solid var(--cyan)}
+  .checks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.check{position:relative;padding:17px 17px 14px 38px}.check+.check{border-left:1px solid var(--line)}.check:before{content:"✓";position:absolute;left:12px;top:17px;color:#75d6a0;font:800 15px/1 'IBM Plex Mono',monospace}.check b{display:block;font-size:13px}.check span{display:block;margin-top:6px;color:var(--dim);font-size:11px;line-height:1.35}.demo{position:absolute;right:6px;bottom:-18px;color:#8fa8c5;font:600 9px/1 'IBM Plex Mono',monospace;letter-spacing:.05em}.demo b{color:var(--gold-soft)}
+  @keyframes rise{0%{opacity:0;filter:blur(5px);transform:translateY(14px) scale(.985)}100%{opacity:1;filter:blur(0);transform:translateY(0) scale(1)}}
+  @keyframes reveal{0%{opacity:0;clip-path:inset(0 100% 0 0)}100%{opacity:1;clip-path:inset(0 0 0 0)}}
+  @keyframes focus-pulse{0%{opacity:0;transform:scale(.985)}55%{opacity:1;transform:scale(1.01)}100%{opacity:1;transform:scale(1)}}
+  @keyframes metric-pulse{0%,100%{box-shadow:0 22px 42px -34px #000}50%{box-shadow:0 0 28px -8px rgba(242,183,54,.46)}}
+  .architecture-motion .proof-heading{animation:rise .46s ease-out .12s both}.architecture-motion .screenshot{animation:reveal .9s cubic-bezier(.2,.75,.15,1) .52s both}.architecture-motion .focus,.architecture-motion .focus-label{animation:focus-pulse .52s ease-out 1.46s both}.architecture-motion .metric:nth-child(1){animation:rise .46s ease-out 2.02s both}.architecture-motion .metric:nth-child(2){animation:rise .46s ease-out 2.16s both,metric-pulse .85s ease-out 2.72s both}.architecture-motion .metric:nth-child(3){animation:rise .46s ease-out 2.3s both}.architecture-motion .check:nth-child(1){animation:rise .4s ease-out 2.86s both}.architecture-motion .check:nth-child(2){animation:rise .4s ease-out 3.02s both}.architecture-motion .check:nth-child(3){animation:rise .4s ease-out 3.18s both}.architecture-motion .demo{animation:rise .35s ease-out 3.5s both}
+  @media(prefers-reduced-motion:reduce){.architecture-motion .proof-heading,.architecture-motion .screenshot,.architecture-motion .focus,.architecture-motion .focus-label,.architecture-motion .metric,.architecture-motion .check,.architecture-motion .demo{animation:none!important;opacity:1!important;filter:none!important;transform:none!important;clip-path:none!important}}
+  footer{position:absolute;z-index:3;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(139,178,225,.14);background:rgba(2,11,25,.68)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(139,178,225,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<section class="slide">
+  <div class="grid" aria-hidden="true"></div>
+  <header><img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión"><div class="career"><img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas"><div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div></div></header>
+  <main>
+    <section class="left">
+      <div class="eyebrow">06 · Verificación funcional</div>
+      <h1>Consultas, reportes y<br><span class="gold">evidencia de ejecución</span></h1>
+      <p class="lead">El backend consulta liquidaciones persistidas, combina filtros y entrega un resumen preparado para consumo empresarial.</p>
+      <div class="endpoints">
+        <div class="endpoint"><b>GET</b><code>/api/v1/mayorista/liquidaciones</code></div>
+        <div class="endpoint"><b>GET</b><code>/api/v1/mayorista/liquidaciones/resumen</code></div>
+      </div>
+      <section class="facts">
+        <article class="fact"><span class="num">01</span><div><h2>Consulta flexible</h2><p>Combina estado, rango de fechas y ordenamiento dentro del mismo recurso.</p></div></article>
+        <article class="fact"><span class="num">02</span><div><h2>Reporte resumido</h2><p>Devuelve conteo, monto total y ticket promedio junto con un DTO ligero por liquidación.</p></div></article>
+        <article class="fact"><span class="num">03</span><div><h2>Integración web controlada</h2><p>CORS permite el origen configurado para la SPA y expone la API bajo <code>/api/**</code>.</p></div></article>
+      </section>
+      <div class="rule"><b>Resultado</b>La demostración conecta el contrato REST con datos persistidos y respuestas que el equipo puede explicar y repetir.</div>
+    </section>
+    <section class="evidence-panel" aria-label="Evidencias de consultas, reporte, Oracle, pruebas y CORS">
+      <div class="proof-heading"><div><small>Captura real · Swagger UI</small><h2>Filtros combinados con respuesta del servidor</h2></div><div class="proof-tags"><span>REGISTRADA</span><span>fecha DESC</span><span class="ok">200 OK</span></div></div>
+      <figure class="screenshot"><img src="assets/evidencia-consultas-filtros.png" alt="Consulta real de liquidaciones con estado, fechas y ordenamiento"><span class="focus" aria-hidden="true"></span><figcaption class="focus-label">Respuesta persistida</figcaption></figure>
+      <section class="metrics" aria-label="Resultados reales del reporte agregado">
+        <article class="metric"><small>Total de liquidaciones</small><strong><em>4</em></strong><span>Registros del intervalo consultado</span></article>
+        <article class="metric"><small>Monto total</small><strong>S/ <em>81 313.80</em></strong><span>Suma con BigDecimal</span></article>
+        <article class="metric"><small>Ticket promedio</small><strong>S/ <em>20 328.45</em></strong><span>Cero cuando no existen filas</span></article>
+      </section>
+      <section class="checks" aria-label="Comprobaciones técnicas">
+        <article class="check"><b>Oracle XE 21</b><span>Perfil dev y esquema funcional del proyecto.</span></article>
+        <article class="check"><b>29 pruebas correctas</b><span>Sin fallos ni errores en la verificación Maven.</span></article>
+        <article class="check"><b>CORS configurable</b><span>Origen permitido: localhost:4200.</span></article>
+      </section>
+      <div class="demo"><b>DEMO:</b> localhost:8081/swagger-ui/index.html</div>
+    </section>
+  </main>
+  <footer><span class="count">07 / 09</span><span class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></span><span class="brand">SITRA-ORO · UPeU Juliaca</span></footer>
+</section>
+<script src="animacion-arquitectura.js"></script>
+</body>
+</html>
