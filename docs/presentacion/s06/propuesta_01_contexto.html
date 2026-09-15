@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SITRA-ORO · Alcance del dominio y arquitectura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#020b19;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f8fafc;--dim:#afbed2;--line:rgba(157,188,226,.23)}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif;color:var(--text)}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:var(--navy)}
+  .background{position:absolute;inset:0;background:url('assets/contexto-andino-diapositiva-01-v1.png') center/cover no-repeat}
+  .background:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,11,25,.2),transparent 26%,rgba(2,11,25,.42) 100%)}
+  header{position:absolute;z-index:3;top:0;left:0;right:0;height:90px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.68);border-bottom:1px solid rgba(157,188,226,.12)}
+  .upeu{height:51px;filter:brightness(0) invert(1)}.career{display:flex;align-items:center;gap:12px}.career img{width:52px;height:52px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:5px;font-size:15px;letter-spacing:-.02em}
+  main{position:relative;z-index:2;width:54%;height:calc(100% - 146px);margin-top:90px;padding:70px 0 24px 8.4vw;display:flex;flex-direction:column;justify-content:center}
+  .eyebrow{display:flex;align-items:center;gap:15px;color:var(--gold);font:700 12px/1 'IBM Plex Mono',monospace;letter-spacing:.28em;text-transform:uppercase}.eyebrow:before{content:"";width:44px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{max-width:700px;margin:20px 0 13px;font-size:clamp(46px,4.05vw,70px);line-height:1.02;letter-spacing:-.045em}.gold{color:var(--gold)}
+  .lead{max-width:710px;margin:0;color:#e3e9f3;font-size:20px;line-height:1.5}
+  .items{width:710px;margin-top:36px;border-top:1px solid var(--line)}
+  .item{display:grid;grid-template-columns:174px 1fr;gap:20px;padding:17px 0;border-bottom:1px solid var(--line)}
+  .item h2{margin:0;color:var(--gold-soft);font:700 12px/1.35 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase}.item p{margin:0;color:#f2f6fb;font-size:16px;line-height:1.46}.item p span{color:var(--dim)}
+  .scope{width:710px;margin-top:20px;padding:15px 17px;border-left:4px solid var(--gold);background:rgba(2,11,25,.48);color:#eff5fd;font-size:15px;line-height:1.45}.scope b{color:var(--gold-soft);font:700 12px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase}
+  .visual{position:absolute;z-index:2;right:5.3vw;bottom:105px;width:298px;padding:14px 17px;text-align:right;border-right:2px solid var(--gold);background:linear-gradient(90deg,transparent,rgba(2,11,25,.5))}.visual b{display:block;color:var(--gold-soft);font:700 12px/1.2 'IBM Plex Mono',monospace;letter-spacing:.13em;text-transform:uppercase}.visual span{display:block;margin-top:5px;color:#f1f5fb;font-size:13px;line-height:1.35}
+  footer{position:absolute;z-index:3;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(157,188,226,.14);background:rgba(2,11,25,.68)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(157,188,226,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<section class="slide">
+  <div class="background" aria-hidden="true"></div>
+  <header><img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión"><div class="career"><img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas"><div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div></div></header>
+  <main>
+    <div class="eyebrow">01 · Arquitectura del sistema</div>
+    <h1>Alcance del dominio y <span class="gold">arquitectura</span></h1>
+    <p class="lead">SITRA-ORO concentra la cotización, el acopio y la liquidación semanal de oro en un backend REST conectado a Oracle.</p>
+    <section class="items" aria-label="Alcance técnico">
+      <article class="item"><h2>Monolito modular</h2><p>Una aplicación Spring Boot organizada por responsabilidades y verificada con Spring Modulith.</p></article>
+      <article class="item"><h2>Módulos funcionales</h2><p>Cotizador, Acopiador G2, Mayorista G1 y Parámetros <span>cubren el flujo operativo actual.</span></p></article>
+      <article class="item"><h2>Persistencia real</h2><p>Oracle de BD2 mediante un perfil de ejecución y configuración externalizada.</p></article>
+    </section>
+    <div class="scope"><b>Alcance actual</b><br>El backend cubre operación, transacciones, consultas, reportes y pruebas. Seguridad JWT: evolución posterior.</div>
+  </main>
+  <aside class="visual"><b>Acopio de oro</b><span>Contexto territorial de la operación</span></aside>
+  <footer><span class="count">02 / 07</span><span class="dots"><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></span><span class="brand">SITRA-ORO · UPeU Juliaca</span></footer>
+</section>
+</body>
+</html>
