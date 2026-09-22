@@ -1,0 +1,7 @@
+:root { color-scheme: dark; font-family: Inter, system-ui, sans-serif; background: #071426; color: #edf3fb; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; background: #071426; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.error { color: #ffb4ab; font-size: .88rem; margin: .4rem 0 0; }
+.notice { padding: .8rem 1rem; border-radius: .6rem; background: #142b48; color: #cfe4ff; }

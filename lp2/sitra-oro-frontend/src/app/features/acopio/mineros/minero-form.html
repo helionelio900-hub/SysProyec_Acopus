@@ -1,0 +1,7 @@
+<section class="page"><p class="eyebrow">Acopio · mineros</p><h1>{{ editando ? 'Editar minero' : 'Registrar minero' }}</h1><p class="lead">Los campos respetan las validaciones definidas por el backend.</p>
+@if (error()) { <p class="error notice">{{ error() }}</p> }
+<form [formGroup]="form" (ngSubmit)="guardar()"><label>Documento de identidad<input formControlName="documentoIdentidad" maxlength="15" /></label>@if (mensaje('documentoIdentidad'); as message) { <p class="error">{{ message }}</p> }
+<label>Nombres y apellidos<input formControlName="nombresApellidos" maxlength="150" /></label>@if (mensaje('nombresApellidos'); as message) { <p class="error">{{ message }}</p> }
+<label>Teléfono<input formControlName="telefono" maxlength="20" /></label>@if (mensaje('telefono'); as message) { <p class="error">{{ message }}</p> }
+<label>Zona de procedencia<input formControlName="zonaProcedencia" maxlength="100" /></label>@if (mensaje('zonaProcedencia'); as message) { <p class="error">{{ message }}</p> }
+<div class="actions"><button class="primary" type="submit" [disabled]="loading()">{{ loading() ? 'Guardando...' : 'Guardar' }}</button><button type="button" class="secondary" (click)="cancelar()">Cancelar</button></div></form></section>
