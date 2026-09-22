@@ -216,6 +216,7 @@ function generateHtml(withImages = true) {
       margin: 6px 0 8px 0;
       overflow-x: auto;
       color: #0f172a;
+      page-break-inside: avoid;
     }
 
     /* CAPTURE CONTAINERS */
@@ -357,6 +358,8 @@ function generateHtml(withImages = true) {
   <p>
     En todas las capturas debe verse la ventana completa, el reloj con fecha y hora y el usuario o perfil visible sin recortar. Las fechas deben ser coherentes con el historial de commits del repositorio.
   </p>
+
+  <div class="page-break"></div>
 
   <!-- 3. EVIDENCIA TÉCNICA -->
   <h2>3. Evidencia técnica</h2>
