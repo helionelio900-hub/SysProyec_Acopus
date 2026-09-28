@@ -1,0 +1,167 @@
+<section class="workspace acopio-workspace">
+  <header class="page-head acopio-head">
+    <div>
+      <span class="eyebrow">OPERACIONES · RECEPCIÓN DE ORO</span>
+      <h1>Registrar entrega</h1>
+      <p>Registra al minero, clasifica su oro y confirma el peso recibido en el centro de acopio.</p>
+    </div>
+    <button mat-stroked-button class="button-secondary" type="button" (click)="cargar()">
+      Actualizar datos
+    </button>
+  </header>
+
+  @if (error()) {
+    <p class="feedback error" role="alert">{{ error() }}</p>
+  }
+  @if (mensaje()) {
+    <p class="feedback success" role="status">{{ mensaje() }}</p>
+  }
+
+  <div class="purchase-layout">
+    <section class="panel purchase-panel" aria-labelledby="form-title">
+      <div class="panel-heading">
+        <div class="step-mark" aria-hidden="true">01</div>
+        <div>
+          <span class="panel-kicker">NUEVA OPERACIÓN</span>
+          <h2 id="form-title">Datos de la entrega</h2>
+        </div>
+      </div>
+
+      @if (!mineros().length) {
+        <p class="notice">Para registrar una compra, primero debe existir un minero en el padrón.</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="registrar()" class="form-grid">
+        <label class="field field-wide">
+          <span>Minero</span>
+          <select formControlName="idMinero">
+            <option [ngValue]="0">Selecciona al minero</option>
+            @for (minero of mineros(); track minero.idMinero) {
+              <option [ngValue]="minero.idMinero">
+                {{ minero.nombresApellidos }} · {{ minero.documentoIdentidad }}
+              </option>
+            }
+          </select>
+        </label>
+
+        <fieldset class="gold-choice field-wide">
+          <legend>Clasificación del oro</legend>
+          <div class="gold-options">
+            <label class="gold-option" [class.selected]="form.controls.tipoOro.value === 'ROJO'">
+              <input type="radio" value="ROJO" formControlName="tipoOro" />
+              <span class="gold-dot red-dot" aria-hidden="true"></span>
+              <span><strong>Oro rojo</strong><small>Según la clasificación del acopio</small></span>
+            </label>
+            <label class="gold-option" [class.selected]="form.controls.tipoOro.value === 'VERDE'">
+              <input type="radio" value="VERDE" formControlName="tipoOro" />
+              <span class="gold-dot green-dot" aria-hidden="true"></span>
+              <span><strong>Oro verde</strong><small>Según la clasificación del acopio</small></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <label class="field">
+          <span>Peso sin fundir <small>gramos</small></span>
+          <input type="number" min="0.001" step="0.001" formControlName="pesoSinFundirG" />
+        </label>
+        <label class="field">
+          <span>Peso fundido neto <small>gramos</small></span>
+          <input type="number" min="0.001" step="0.001" formControlName="pesoFundidoNetoG" />
+        </label>
+
+        <div class="exception-panel field-wide">
+          <label class="exception-toggle">
+            <input type="checkbox" formControlName="aplicarAjuste" />
+            <span class="switch-visual" aria-hidden="true"></span>
+            <span class="exception-copy">
+              <strong>El oro está fuera de los rangos rojo y verde</strong>
+              <small>Activa esta opción solo para ingresar un precio excepcional antes de registrar.</small>
+            </span>
+          </label>
+          @if (form.controls.aplicarAjuste.value) {
+            <label class="field adjustment-field">
+              <span>Precio excepcional <small>S/ por gramo</small></span>
+              <input type="number" min="0.01" step="0.01" formControlName="precioAjustePen" />
+              <small>El precio ingresado se enviará al backend para esta operación.</small>
+            </label>
+          } @else {
+            <p class="system-price-note">Se aplicará la tarifa vigente configurada para el sistema.</p>
+          }
+        </div>
+
+        <div class="submit-row field-wide">
+          <span class="secure-note"><span aria-hidden="true">●</span> El cálculo se confirma al guardar</span>
+          <button mat-flat-button class="button-primary" [disabled]="guardando() || !mineros().length">
+            {{ guardando() ? 'Registrando…' : 'Registrar entrega' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <aside class="panel summary-panel" aria-labelledby="summary-title" aria-live="polite">
+      <div class="summary-topline"><span class="summary-icon" aria-hidden="true">S/</span><span>RESUMEN DE PAGO</span></div>
+      <h2 id="summary-title">Liquidación de esta entrega</h2>
+      @if (ultimoResultado(); as resultado) {
+        <div class="summary-confirmed">
+          <span class="confirmed-label">Compra #{{ resultado.idTransaccionG2 }} confirmada</span>
+          <div class="summary-line"><span>Precio aplicado / gramo</span><strong>{{ dinero(resultado.precioAplicadoPen) }}</strong></div>
+          <div class="summary-line"><span>Peso fundido neto</span><strong>{{ gramos(resultado.pesoFundidoNetoG) }}</strong></div>
+          <div class="summary-total"><span>Total pagado al minero</span><strong>{{ dinero(resultado.totalPagadoPen) }}</strong></div>
+          <p class="summary-footnote">Importes calculados y devueltos por el sistema.</p>
+        </div>
+      } @else {
+        <div class="summary-pending" aria-live="polite">
+          <span class="pending-icon" aria-hidden="true">⌁</span>
+          <strong>El importe aparecerá aquí</strong>
+          <p>Completa los datos y registra la entrega. El precio y el total se mostrarán cuando el sistema confirme la operación.</p>
+        </div>
+        <div class="summary-line"><span>Tarifa por gramo</span><strong>Por confirmar</strong></div>
+        <div class="summary-line"><span>Total para el minero</span><strong>Por confirmar</strong></div>
+      }
+      <div class="summary-divider"></div>
+      <p class="summary-policy"><span aria-hidden="true">ⓘ</span> El resumen es informativo. El importe definitivo corresponde al cálculo confirmado por el sistema.</p>
+    </aside>
+  </div>
+
+  @if (acumulados(); as stock) {
+    <section class="stock-section" aria-label="Stock acumulado pendiente">
+      <div class="section-heading"><div><span class="panel-kicker">CONTROL DE EXISTENCIAS</span><h2>Stock pendiente de liquidación</h2></div></div>
+      <div class="stock-grid">
+        <article class="stock-card stock-red"><span class="stock-dot" aria-hidden="true"></span><div><span>Oro rojo</span><strong>{{ gramos(stock.totalGramosRojo) }}</strong><small>{{ dinero(stock.totalDineroRojoPen) }} registrado</small></div></article>
+        <article class="stock-card stock-green"><span class="stock-dot" aria-hidden="true"></span><div><span>Oro verde</span><strong>{{ gramos(stock.totalGramosVerde) }}</strong><small>{{ dinero(stock.totalDineroVerdePen) }} registrado</small></div></article>
+      </div>
+    </section>
+  }
+
+  <section class="recent-section" aria-labelledby="recent-title">
+    <div class="section-heading recent-heading">
+      <div><span class="panel-kicker">MOVIMIENTOS DEL CENTRO</span><h2 id="recent-title">Entregas recientes</h2></div>
+      <span class="record-count">{{ operaciones().length }} registros</span>
+    </div>
+    @if (cargando()) {
+      <p class="loading-state" role="status">Cargando compras…</p>
+    }
+    @if (!cargando() && operaciones().length) {
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Entregas de oro registradas en el centro de acopio</caption>
+          <thead><tr><th>Fecha</th><th>Minero</th><th>Tipo de oro</th><th>Peso neto</th><th>Precio / g</th><th>Total pagado</th></tr></thead>
+          <tbody>
+            @for (item of operaciones(); track item.idTransaccionG2) {
+              <tr>
+                <td>{{ item.fechaTransaccion | date: 'short' }}</td>
+                <td><strong>{{ item.minero.nombresApellidos }}</strong><small>{{ item.minero.documentoIdentidad }}</small></td>
+                <td><span class="type-badge" [class.type-red]="item.tipoOro === 'ROJO'" [class.type-green]="item.tipoOro === 'VERDE'">{{ item.tipoOro === 'ROJO' ? 'Rojo' : 'Verde' }}</span></td>
+                <td>{{ gramos(item.pesoFundidoNetoG) }}</td>
+                <td>{{ dinero(item.precioAplicadoPen) }}</td>
+                <td class="amount-cell">{{ dinero(item.totalPagadoPen) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else if (!cargando()) {
+      <div class="empty-state"><span aria-hidden="true">◷</span><strong>Aún no hay entregas registradas</strong><p>Cuando registres una operación, aparecerá aquí.</p></div>
+    }
+  </section>
+</section>

@@ -1,8 +1,9 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, isDevMode, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -35,9 +36,10 @@ export class MineroForm implements OnInit {
   });
 
   protected readonly cambiosNombres = this.form.controls.nombresApellidos.valueChanges
+    .pipe(debounceTime(350), distinctUntilChanged())
     .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe((nombresApellidos) => {
-      console.log('[MineroForm] Nombres o apellidos modificados:', nombresApellidos);
+    .subscribe(() => {
+      if (isDevMode()) console.info('[MineroForm] Se detectó un cambio en el campo de nombre.');
     });
   get editando(): boolean {
     return this.id() !== null;

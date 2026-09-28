@@ -1,1 +1,80 @@
-<section class="hero"><p class="eyebrow">Unidad II · SPA modular</p><h1>Operación de acopio con una interfaz clara.</h1><p>Administra los mineros registrados y consulta la información desde el backend real de SITRA-ORO.</p><a routerLink="/acopio/mineros">Gestionar mineros</a></section>
+<a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+<main id="main-content" tabindex="-1">
+  <header class="public-header">
+    <a class="public-brand" href="#inicio"><img src="/images/logo-sitra-oro.jpg" alt="" width="40" height="40" /><span>SITRA<span>-ORO</span></span></a>
+    <nav aria-label="Navegación principal"><a href="#como-funciona">Cómo funciona</a><a href="#acopios">Centros de acopio</a></nav>
+    <div class="header-actions"><a class="header-login" routerLink="/minero/ingresar">Ingresar</a><a class="header-register" routerLink="/minero/registro">Crear cuenta</a></div>
+  </header>
+  <section class="hero" id="inicio">
+    <div class="hero-image" aria-hidden="true"></div>
+    <div class="hero-shade" aria-hidden="true"></div>
+    <div class="hero-content">
+      <span class="eyebrow"><span class="live-dot"></span> Información clara para tu próxima entrega</span>
+      <h1>Tu oro.<br /><em>Tu decisión.</em></h1>
+      <p class="hero-copy">Antes de salir de casa, conoce un estimado y encuentra un centro de acopio para cuando decidas entregar.</p>
+      <div class="hero-actions">
+        <a class="button button-gold" href="#cotizar">Consultar mi estimado <span aria-hidden="true">↗</span></a>
+        <a class="button button-glass" href="#como-funciona">Conoce cómo funciona</a>
+      </div>
+      <div class="hero-proof"><span class="proof-icon">Au</span><span>Consulta libre, sin crear una cuenta</span><span class="proof-divider"></span><span>Sin compromiso de venta</span></div>
+    </div>
+    <div class="hero-caption"><span>LA RINCONADA</span><span>PUNO · PERÚ</span></div>
+    <a class="scroll-cue" href="#cotizar" aria-label="Desplazarse a la cotización">↓</a>
+  </section>
+
+  <section class="quote-section" id="cotizar">
+    <div class="section-intro">
+      <span class="eyebrow eyebrow-dark">COTIZACIÓN REFERENCIAL</span>
+      <h2>¿Cuánto podría valer<br />lo que tienes?</h2>
+      <p>Ingresa el peso aproximado y consulta el cálculo con el precio vigente del sistema.</p>
+      <p class="honesty-note"><span aria-hidden="true">ⓘ</span> Es solo una referencia. El monto final se determina en el acopio al pesar y evaluar el mineral.</p>
+    </div>
+    <div class="quote-card">
+      <div class="quote-card-top"><span class="quote-icon">Au</span><div><strong>Haz tu cálculo</strong><small>No necesitas registrarte</small></div><span class="estimate-label">ESTIMADO</span></div>
+      <label for="weight">¿Cuánto pesa aproximadamente?</label>
+      <div class="weight-input"><input id="weight" name="pesoBrutoGramos" type="number" min="0.01" step="0.01" inputmode="decimal" autocomplete="off" placeholder="Ej. 25.0…" [ngModel]="peso()" (ngModelChange)="peso.set($event)" (keydown.enter)="consultarPrecio()" /><span>gramos</span></div>
+      <button class="button button-dark" type="button" (click)="consultarPrecio()" [disabled]="cotizando()">{{ cotizando() ? 'Calculando…' : 'Ver mi estimado' }} <span aria-hidden="true">→</span></button>
+      @if (errorCotizacion()) { <p class="form-error" role="alert">{{ errorCotizacion() }}</p> }
+      @if (cotizacion(); as resultado) {
+        <div class="quote-result" aria-live="polite">
+          <div><span>Estimado referencial</span><strong>{{ resultado.montoEstimadoTotalPen | currency:'PEN':'symbol':'1.2-2' }}</strong></div>
+          <div class="result-details"><span>Precio del día <b>{{ resultado.precioGramoDiaPen | currency:'PEN':'symbol':'1.2-2' }}/g</b></span><span>Peso neto estimado <b>{{ resultado.pesoNetoEstimadoGramos | number:'1.2-2' }} g</b></span></div>
+          <small>{{ resultado.mensaje }}</small>
+        </div>
+      }
+      <div class="quote-foot"><span class="secure-mark">✓</span> Tu consulta no registra una venta ni congela el precio.</div>
+    </div>
+  </section>
+
+  <section class="steps-section" id="como-funciona">
+    <div class="section-heading"><div><span class="eyebrow">ASÍ DE SIMPLE</span><h2>Primero te informas.<br /><em>Luego tú decides.</em></h2></div><p>No necesitas saber términos técnicos. Empieza con lo que conoces: el peso aproximado de tu oro.</p></div>
+    <div class="steps-grid">
+      <article class="step-card"><span class="step-number">01</span><div class="step-symbol">⌕</div><h3>Consulta</h3><p>Ingresa el peso aproximado y mira cuánto sería el estimado de hoy.</p><span class="step-tag">SIN REGISTRO</span></article>
+      <article class="step-card"><span class="step-number">02</span><div class="step-symbol">⌖</div><h3>Encuentra un acopio</h3><p>Revisa los centros disponibles y elige a cuál te gustaría llevar tu mineral.</p><span class="step-tag">TÚ ELIGES</span></article>
+      <article class="step-card"><span class="step-number">03</span><div class="step-symbol">↗</div><h3>Si quieres, crea tu cuenta</h3><p>Guarda tu centro preferido y vuelve a ingresar desde otro celular cuando lo necesites.</p><span class="step-tag">OPCIONAL</span></article>
+    </div>
+    <div class="price-note"><span class="price-note-icon">i</span><p><strong>El precio puede cambiar.</strong> Tu consulta es una referencia del momento. No te obliga a vender y no reserva ese precio para más tarde. La entrega y el monto final se confirman en el centro de acopio.</p></div>
+  </section>
+
+  <section class="centers-section" id="acopios">
+    <div class="centers-heading"><div><span class="eyebrow eyebrow-dark">CERCA DE TU RUTA</span><h2>Elige dónde<br />te queda mejor.</h2></div><p>Cuando quieras entregar, podrás acercarte al centro que te resulte conveniente.</p></div>
+    @if (cargandoCentros()) { <div class="centers-state" aria-live="polite">Buscando centros disponibles…</div> }
+    @if (errorCentros()) { <div class="centers-state" role="status">Por ahora no pudimos cargar los centros. Puedes consultar nuevamente más tarde. <button class="retry-link" type="button" (click)="cargarCentros()">Intentar otra vez</button></div> }
+    @if (!cargandoCentros() && !errorCentros() && centros().length === 0) { <div class="centers-state">Todavía no hay centros publicados. Vuelve pronto para consultar los puntos disponibles.</div> }
+    @if (centros().length > 0) {
+      <div class="centers-list">
+        @for (centro of centros(); track centro.idCentroAcopio) {
+          <article class="center-card"><div class="center-pin">⌖</div><div class="center-info"><span class="center-zone">{{ centro.zona }}</span><h3>{{ centro.nombre }}</h3><p>{{ centro.direccion || 'Dirección por confirmar' }}</p></div><span class="center-status"><i></i> Disponible</span></article>
+        }
+      </div>
+    }
+    <a class="text-link" href="#registro">¿Ya tienes cuenta? Elige tu centro preferido <span aria-hidden="true">→</span></a>
+  </section>
+
+  <section class="account-section" id="registro">
+    <div class="account-copy"><span class="eyebrow">TU CUENTA, A TU MANERA</span><h2>¿Quieres tener<br />todo a la mano?</h2><p>Con una cuenta puedes volver cuando quieras, incluso si cambiaste de celular. Inicia sesión con tu documento y la clave que elegiste.</p><div class="account-actions"><a class="button button-gold" routerLink="/minero/registro">Crear mi cuenta <span aria-hidden="true">→</span></a><a class="login-link" routerLink="/minero/ingresar">Ya tengo cuenta <span aria-hidden="true">↗</span></a></div></div>
+    <div class="account-visual" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="account-medallion"><span>Au</span><small>Tu acceso<br />desde donde estés</small></div><span class="visual-star star-one">✳</span><span class="visual-star star-two">✧</span><span class="visual-line"></span></div>
+  </section>
+
+  <footer class="footer"><a class="footer-brand" routerLink="/"><img src="/images/logo-sitra-oro.jpg" alt="" width="38" height="38" /><span>SITRA<span>-ORO</span></span></a><p>Información para que tomes tu decisión con claridad.</p><nav aria-label="Enlaces del pie"><a href="#inicio">Inicio</a><a href="#cotizar">Consultar precio</a><a href="#acopios">Centros de acopio</a><a routerLink="/minero/ingresar">Iniciar sesión</a></nav><small>© 2026 SITRA-ORO · La cotización mostrada es referencial.</small></footer>
+</main>

@@ -1,0 +1,153 @@
+<section class="workspace mayorista-workspace export-workspace">
+  <header class="page-head export-head">
+    <div>
+      <span class="eyebrow">MAYORISTA · REGISTRO DE LOTES</span>
+      <h1>Lotes para exportación</h1>
+      <p>El peso fundido rojo y verde se reúne en el lote; aquí ya no se separa por color.</p>
+    </div>
+  </header>
+
+  @if (vistaPrevia) {
+    <p class="major-notice info export-notice" role="status">
+      <span aria-hidden="true">ⓘ</span>
+      <span>Vista de demostración: los cambios son temporales y no se guardan ni se envían.</span>
+    </p>
+  } @else {
+    <p class="major-notice info export-notice" role="status">
+      <span aria-hidden="true">ⓘ</span>
+      <span
+        >La pantalla está integrada. El backend aún no cuenta con el CRUD para guardar o enviar
+        estos lotes.</span
+      >
+    </p>
+  }
+
+  <div class="export-date-row">
+    <label class="field export-date-field">
+      Fecha
+      <input
+        type="date"
+        [value]="fecha()"
+        [disabled]="!vistaPrevia"
+        (change)="cambiarFecha($event)"
+      />
+    </label>
+    @if (vistaPrevia) {
+      <button mat-stroked-button class="button-secondary" type="button" (click)="agregarLote()">
+        + Agregar lote
+      </button>
+    }
+  </div>
+
+  <div class="export-layout">
+    <section class="panel export-lot-panel" aria-label="Registros de lotes">
+      @if (lotes().length) {
+        <div class="table-wrap export-table-wrap">
+          <table class="export-table">
+            <caption class="major-visually-hidden">
+              Lotes y lecturas preparados para exportación
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Lote #</th>
+                <th scope="col">Peso fundido (g)</th>
+                <th scope="col">Lectura (decimal)</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (lote of lotes(); track lote.id) {
+                <tr>
+                  <td>
+                    <input
+                      class="table-input lot-number"
+                      type="text"
+                      [value]="lote.numero"
+                      disabled
+                    />
+                  </td>
+                  <td>
+                    <input
+                      class="table-input numeric-input"
+                      type="number"
+                      min="0"
+                      step="0.001"
+                      placeholder="—"
+                      [value]="lote.pesoFundidoG ?? ''"
+                      [disabled]="!vistaPrevia || !lote.editando"
+                      (input)="cambiarPeso(lote.id, $event)"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      class="table-input"
+                      type="number"
+                      min="0"
+                      step="0.000001"
+                      placeholder="—"
+                      [value]="lote.lecturaDecimal"
+                      [disabled]="!vistaPrevia || !lote.editando"
+                      (input)="cambiarLectura(lote.id, $event)"
+                    />
+                  </td>
+                  <td class="export-actions">
+                    @if (vistaPrevia) {
+                      <button
+                        mat-stroked-button
+                        class="button-secondary"
+                        type="button"
+                        (click)="cambiarEdicion(lote.id)"
+                      >
+                        {{ lote.editando ? 'Listo' : 'Editar' }}
+                      </button>
+                      <button
+                        mat-stroked-button
+                        class="button-delete"
+                        type="button"
+                        [attr.aria-label]="'Eliminar ' + lote.numero"
+                        (click)="eliminarLote(lote.id)"
+                      >
+                        Eliminar
+                      </button>
+                    } @else {
+                      <span class="major-status pending">Pendiente de integración</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="3" scope="row">Total bruto</th>
+                <td class="export-total">{{ lotes().length ? gramos(pesoBruto()) : '—' }} g</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      } @else {
+        <p class="empty-state export-empty">
+          {{ vistaPrevia ? 'Aún no hay lotes. Usa “Agregar lote” para iniciar el registro.' : 'Todavía no hay lotes disponibles. Falta la conexión del CRUD con el backend.' }}
+        </p>
+      }
+    </section>
+
+    <aside class="panel export-destination" aria-labelledby="export-destination-title">
+      <span class="export-destination-icon" aria-hidden="true">➜</span>
+      <h2 id="export-destination-title">Enviar al exportador</h2>
+      <p>Este registro reúne el peso fundido y su lectura decimal para preparar el envío.</p>
+      <p>Completa el peso y la lectura de cada lote para habilitar la preparación.</p>
+      <button
+        mat-flat-button
+        class="button-primary"
+        type="button"
+        [disabled]="!puedePrepararEnvio()"
+        (click)="prepararEnvio()"
+      >
+        Preparar envío
+      </button>
+      @if (mensaje()) {
+        <p class="export-feedback" role="status">{{ mensaje() }}</p>
+      }
+    </aside>
+  </div>
+</section>

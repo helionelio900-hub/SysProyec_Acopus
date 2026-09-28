@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Prueba CORS: origen permitido</title>
+  <style>body{font-family:Arial,sans-serif;margin:40px;background:#101820;color:#f4f7fb}button{padding:12px 18px;font-size:16px;background:#287a45;color:white;border:0;border-radius:5px;cursor:pointer}code,pre{background:#1d2935;padding:12px;display:block;border-radius:5px}pre{white-space:pre-wrap;max-height:440px;overflow:auto}</style>
+</head>
+<body>
+  <h1>Captura 10: origen configurado permitido</h1>
+  <p>Origen actual: <code id="origin"></code></p>
+  <p>Este origen coincide con la configuración CORS de la API.</p>
+  <button id="run">Ejecutar fetch</button>
+  <pre id="result">Presiona el botón para mostrar la respuesta exitosa.</pre>
+  <script>
+    document.getElementById('origin').textContent = location.origin;
+    document.getElementById('run').addEventListener('click', async () => {
+      const result = document.getElementById('result');
+      result.textContent = 'Consultando API...';
+      try {
+        const response = await fetch('http://localhost:8081/api/v1/mayorista/liquidaciones?estado=REGISTRADA');
+        const body = await response.json();
+        result.textContent = JSON.stringify(body, null, 2);
+        console.log('Respuesta CORS permitida:', body);
+      } catch (error) {
+        console.error(error);
+        result.textContent = String(error);
+      }
+    });
+  </script>
+</body>
+</html>

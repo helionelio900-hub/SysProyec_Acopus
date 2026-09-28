@@ -11,6 +11,7 @@ import pe.edu.upeu.sitraoro.acopio.parametros.repository.MineroRepository;
 import pe.edu.upeu.sitraoro.exception.ResourceNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,12 @@ public class MineroServiceImpl implements MineroService {
     @Transactional(readOnly = true)
     public Minero obtenerEntidad(Long idMinero) {
         return buscarOFallar(idMinero);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Minero> obtenerEntidadPorDocumento(String documentoIdentidad) {
+        return mineroRepository.findByDocumentoIdentidad(documentoIdentidad.trim());
     }
 
     @Override

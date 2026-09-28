@@ -12,3 +12,11 @@ spring:
   sql:
     init:
       mode: never
+sitraoro:
+  security:
+    jwt:
+      secret: dGVzdC1vbmx5LXNpdHJhLW9yby1qd3Qta2V5LTMya2V5IQ==
+  bootstrap:
+    mayorista:
+      documento: ""
+      clave: ""

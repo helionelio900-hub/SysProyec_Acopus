@@ -1,0 +1,30 @@
+<div class="shell preview-shell">
+  <header class="header">
+    <a routerLink="/" class="brand"
+      ><img src="/images/logo-sitra-oro.jpg" alt="" width="38" height="38" /><span
+        >SITRA<span>-ORO</span></span
+      ></a
+    >
+    <div class="account">
+      <span class="role">Vista previa · Mayorista</span
+      ><a class="exit-preview" routerLink="/">Volver al inicio</a>
+    </div>
+  </header>
+  <aside class="sidebar" aria-label="Navegación de la vista previa">
+    <p class="section">Espacio mayorista</p>
+    <a routerLink="/vista-previa/mayorista/recepcion" routerLinkActive="active"
+      >Compra al acopiador</a
+    >
+    <a routerLink="/vista-previa/mayorista/consolidacion" routerLinkActive="active"
+      >Lotes para exportación</a
+    >
+    <a routerLink="/vista-previa/mayorista/centros" routerLinkActive="active">Centros y cuentas</a>
+  </aside>
+  <main class="content" id="main-content">
+    <p class="preview-banner" role="status">
+      Vista previa de desarrollo · Datos ficticios de demostración, no operaciones reales · Los
+      cambios desaparecen al recargar
+    </p>
+    <router-outlet />
+  </main>
+</div>

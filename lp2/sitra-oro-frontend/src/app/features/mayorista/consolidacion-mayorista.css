@@ -1,0 +1,200 @@
+@import './mayorista-ui.css';
+
+.export-workspace {
+  background: #f4f7fa;
+}
+.export-head {
+  margin-bottom: 0.6rem !important;
+}
+.export-head p {
+  max-width: 58rem;
+}
+.export-notice {
+  align-items: center;
+  margin: 0.75rem 0 1rem;
+}
+.export-date-row {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.export-date-field {
+  display: grid;
+  width: min(100%, 19rem);
+}
+.export-date-field input {
+  min-height: 2.7rem;
+  padding: 0.55rem 0.7rem;
+}
+.export-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.36fr);
+  align-items: center;
+  gap: 1.25rem;
+}
+.export-lot-panel {
+  min-width: 0;
+  padding: 1rem !important;
+}
+.export-table-wrap {
+  overflow-x: auto;
+}
+.export-table {
+  width: 100%;
+  min-width: 690px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.export-table th,
+.export-table td {
+  padding: 0.7rem 0.65rem;
+  border-bottom: 1px solid #e7edf3;
+  text-align: left;
+  vertical-align: middle;
+}
+.export-table thead th {
+  background: #123451;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+.export-table thead th:first-child {
+  border-top-left-radius: 0.55rem;
+}
+.export-table thead th:last-child {
+  border-top-right-radius: 0.55rem;
+}
+.export-table tbody tr:last-child td {
+  border-bottom-color: #d5a331;
+}
+.table-input {
+  width: 100%;
+  min-width: 6.5rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #d3dfeb;
+  border-radius: 0.48rem;
+  background: #fff;
+  color: #17314d;
+  font: inherit;
+  font-size: 0.83rem;
+}
+.table-input:disabled {
+  background: #f5f7f9;
+  color: #4f6278;
+  opacity: 1;
+}
+.table-input:focus {
+  outline: 3px solid #f6cf78a8;
+  border-color: #bd8412;
+}
+.lot-number {
+  min-width: 7.2rem;
+}
+.numeric-input {
+  text-align: right;
+}
+.export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.export-actions .button-secondary,
+.export-actions .button-delete {
+  min-width: 0;
+  padding-inline: 0.6rem;
+}
+.export-actions .button-delete {
+  border-color: #efd4d1;
+  color: #a33a32;
+}
+.export-table tfoot th,
+.export-table tfoot td {
+  border: 0;
+  background: #fff4d8;
+  color: #573b08;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+.export-table tfoot th {
+  border-bottom-left-radius: 0.55rem;
+  text-align: left;
+}
+.export-table tfoot td {
+  border-bottom-right-radius: 0.55rem;
+  text-align: right;
+  white-space: nowrap;
+}
+.export-total {
+  font-variant-numeric: tabular-nums;
+}
+.export-empty {
+  margin: 0;
+}
+.export-destination {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: 1.5rem !important;
+  border-color: #ecd69f !important;
+  background: #fffaf0 !important;
+  text-align: center;
+}
+.export-destination-icon {
+  display: grid;
+  width: 3.4rem;
+  height: 3.4rem;
+  place-items: center;
+  border-radius: 1rem;
+  background: #fff0c9;
+  color: #9b6b0c;
+  font-size: 2rem;
+  font-weight: 800;
+}
+.export-destination h2 {
+  margin: 0 !important;
+}
+.export-destination p {
+  margin: 0;
+  color: #64758a;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.export-destination .button-primary {
+  width: 100%;
+  min-height: 2.8rem;
+  margin-top: 0.4rem;
+}
+.export-feedback {
+  color: #345a80 !important;
+}
+@media (max-width: 900px) {
+  .export-layout {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+  .export-destination {
+    justify-items: start;
+    text-align: left;
+  }
+}
+@media (max-width: 560px) {
+  .export-date-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .export-date-field {
+    width: 100%;
+  }
+  .export-date-row button {
+    width: 100%;
+  }
+  .export-lot-panel {
+    padding: 0.65rem !important;
+  }
+  .export-table {
+    min-width: 620px;
+  }
+}

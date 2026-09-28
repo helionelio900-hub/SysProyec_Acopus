@@ -1,0 +1,159 @@
+<section class="workspace mayorista-workspace">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">MAYORISTA · PAGO AL ACOPIADOR</span>
+      <h1>Liquidación al acopiador</h1>
+      <p>La operación financiera parte del peso verificado y de la ley ya registrados en planta.</p>
+    </div>
+    <span class="major-status pending">Nuevo cálculo pendiente</span>
+  </header>
+  <div class="major-notice">
+    <span aria-hidden="true">ⓘ</span>
+    <p>
+      La fórmula exacta de liquidación y el criterio de descuento siguen pendientes de definición.
+      Por ahora puedes consultar el historial, pero no registrar una liquidación con el flujo nuevo.
+    </p>
+  </div>
+  @if (error()) {
+    <p class="feedback error" role="alert">{{ error() }}</p>
+  }
+
+  <div class="major-grid liquidation-layout">
+    <section class="panel" aria-labelledby="base-title">
+      <div class="major-card-head">
+        <span class="major-number">01</span>
+        <div>
+          <h2 id="base-title">Base técnica</h2>
+          <p>
+            Se tomará de la recepción y del análisis de ley; no se ingresará de nuevo en esta
+            pantalla.
+          </p>
+        </div>
+      </div>
+      <div class="technical-source">
+        <span>Registro técnico asociado</span><strong>Aún no disponible</strong>
+        <p>
+          Cuando exista una recepción guardada, aquí se vinculará su peso verificado y la ley
+          certificada.
+        </p>
+        <a
+          class="major-view-link"
+          [routerLink]="vistaPrevia ? '/vista-previa/mayorista/recepcion' : '/mayorista/recepcion'"
+          >Ver recepción y proceso →</a
+        >
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="mercado-title">
+      <div class="major-card-head">
+        <span class="major-number">02</span>
+        <div>
+          <h2 id="mercado-title">Variables económicas</h2>
+          <p>Se aplican al registro técnico seleccionado para obtener la liquidación.</p>
+        </div>
+      </div>
+      <form [formGroup]="form" class="market-fields">
+        <label class="field"
+          >Cotización de onza Troy <small>USD / oz</small
+          ><input type="number" min="0.01" step="0.01" formControlName="cotizacionOnzaUsd"
+        /></label>
+        <label class="field"
+          >Tipo de cambio <small>PEN por USD</small
+          ><input type="number" min="0.0001" step="0.0001" formControlName="tipoCambioUsdPen"
+        /></label>
+        <div class="major-readonly">
+          <span>Descuento comercial aplicable</span><strong>Pendiente de criterio oficial</strong>
+        </div>
+      </form>
+    </section>
+    <section class="panel major-span" aria-labelledby="resultado-title">
+      <div class="major-card-head">
+        <span class="major-number">03</span>
+        <div>
+          <h2 id="resultado-title">Resultado y pago al acopiador</h2>
+          <p>Se mostrará únicamente después de aplicar la regla de negocio homologada.</p>
+        </div>
+      </div>
+      <div class="major-grid major-grid-three result-grid">
+        <div class="major-result">
+          <span>Subtotal en dólares</span><strong>—</strong><span>USD</span>
+        </div>
+        <div class="major-result">
+          <span>Subtotal en soles</span><strong>—</strong><span>PEN</span>
+        </div>
+        <div class="major-result">
+          <span>Total liquidado al acopiador</span><strong>—</strong><span>PEN</span>
+        </div>
+      </div>
+      <div class="major-action-row">
+        <span class="major-action-hint"
+          >El pago también debe quedar asentado como operación independiente del pago al
+          minero.</span
+        ><button mat-flat-button class="button-primary" type="button" disabled>
+          Registrar liquidación
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <section class="major-section" aria-labelledby="historial-title">
+    <div class="major-section-head">
+      <div>
+        <span class="major-kicker">REGISTROS EXISTENTES</span>
+        <h2 id="historial-title">Historial actual</h2>
+        <p>
+          @if (vistaPrevia) {
+            Importes ficticios para demostrar el historial; no representan una fórmula aprobada.
+          } @else {
+            Estos registros no incluyen ley certificada ni descuento en la respuesta disponible.
+          }
+        </p>
+      </div>
+      <button mat-stroked-button class="button-secondary" type="button" (click)="cargar()">
+        Actualizar historial
+      </button>
+    </div>
+    @if (cargando()) {
+      <p class="loading-state" role="status">Cargando liquidaciones…</p>
+    } @else if (liquidaciones().length) {
+      <div class="table-wrap">
+        <table>
+          <caption class="major-visually-hidden">
+            Liquidaciones existentes
+          </caption>
+          <thead>
+            <tr>
+              <th>N.º</th>
+              <th>Fecha</th>
+              <th>Acopiador</th>
+              <th>Estado</th>
+              <th>Peso registrado</th>
+              <th>Total registrado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of liquidaciones(); track item.idLiquidacionG1) {
+              <tr>
+                <td>
+                  <strong>#{{ item.idLiquidacionG1 }}</strong>
+                </td>
+                <td>{{ item.fechaLiquidacion | date: 'short' }}</td>
+                <td>{{ item.nombreAcopiadorG2 }}</td>
+                <td>{{ item.estado }}</td>
+                <td>{{ gramos(item.pesoTotalFundidoG) }}</td>
+                <td>{{ dinero(item.totalPagadoG2Pen) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="empty-state">
+        {{
+          vistaPrevia
+            ? 'Vista previa sin datos de liquidaciones.'
+            : 'Aún no hay liquidaciones registradas.'
+        }}
+      </p>
+    }
+  </section>
+</section>

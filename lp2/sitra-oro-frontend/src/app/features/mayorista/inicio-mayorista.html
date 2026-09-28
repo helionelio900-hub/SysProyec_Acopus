@@ -1,0 +1,205 @@
+<section class="workspace mayorista-workspace">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">MÓDULO MAYORISTA · CONTROL DE PLANTA</span>
+      <h1>Operación mayorista</h1>
+      <p>
+        Consulta la red de acopio y sigue el recorrido del oro desde su recepción hasta la
+        preparación de lotes.
+      </p>
+    </div>
+  </header>
+
+  <section aria-labelledby="resumen-titulo">
+    <div class="major-section-head">
+      <div>
+        <span class="major-kicker">DATOS DISPONIBLES</span>
+        <h2 id="resumen-titulo">Resumen actual</h2>
+      </div>
+    </div>
+    <div class="major-grid major-grid-three">
+      <article class="major-card major-metric">
+        <span>Centros activos</span>
+        <strong>{{
+          cargandoCentros()
+              ? '…'
+              : centrosActivos() === null
+                ? '—'
+                : centrosActivos()
+        }}</strong>
+        <small>Centros registrados en la red</small>
+      </article>
+      <article class="major-card major-metric">
+        <span>Liquidaciones registradas</span>
+        <strong>{{
+          cargandoReporte()
+              ? '…'
+              : (reporte()?.agregado?.totalLiquidaciones ?? '—')
+        }}</strong>
+        <small>Historial disponible</small>
+      </article>
+      <article class="major-card major-metric">
+        <span>Total de liquidaciones registradas</span>
+        <strong>{{
+          cargandoReporte()
+              ? '…'
+              : reporte()
+                ? dinero(reporte()!.agregado.montoTotal)
+                : '—'
+        }}</strong>
+        <small>Importe histórico en soles</small>
+      </article>
+    </div>
+    @if (errorCentros()) {
+      <p class="feedback error" role="alert">{{ errorCentros() }}</p>
+    }
+    @if (errorReporte()) {
+      <p class="feedback error" role="alert">{{ errorReporte() }}</p>
+    }
+  </section>
+
+  <section class="major-section" aria-labelledby="flujo-titulo">
+    <div class="major-section-head">
+      <div>
+        <span class="major-kicker">RECORRIDO OPERATIVO</span>
+        <h2 id="flujo-titulo">Áreas de trabajo</h2>
+        <p>Cada etapa conserva su propia información dentro del proceso mayorista.</p>
+      </div>
+    </div>
+    <div class="major-grid workflow-grid">
+      <article class="major-card workflow-card">
+        <div class="major-card-head">
+          <span class="major-number">01</span>
+          <div>
+            <h2>Centros y accesos</h2>
+            <p>Registra el centro y crea la cuenta inicial de su acopiador.</p>
+          </div>
+        </div>
+        <div class="workflow-footer">
+          <span class="major-status ready">{{
+            vistaPrevia ? 'Solo visualización' : 'Disponible'
+          }}</span
+          ><a
+            class="major-view-link"
+            [routerLink]="vistaPrevia ? '/vista-previa/mayorista/centros' : '/mayorista/centros'"
+            >Abrir centros →</a
+          >
+        </div>
+      </article>
+      <article class="major-card workflow-card">
+        <div class="major-card-head">
+          <span class="major-number">02</span>
+          <div>
+            <h2>Recepción y proceso</h2>
+            <p>Pesaje propio rojo y verde, fundición, limpieza y análisis de ley.</p>
+          </div>
+        </div>
+        <div class="workflow-footer">
+          <span class="major-status pending">Registro pendiente</span
+          ><a
+            class="major-view-link"
+            [routerLink]="
+              vistaPrevia ? '/vista-previa/mayorista/recepcion' : '/mayorista/recepcion'
+            "
+            >Ver pantalla →</a
+          >
+        </div>
+      </article>
+      <article class="major-card workflow-card">
+        <div class="major-card-head">
+          <span class="major-number">03</span>
+          <div>
+            <h2>Liquidación al acopiador</h2>
+            <p>Consulta el historial y revisa las variables económicas del pago.</p>
+          </div>
+        </div>
+        <div class="workflow-footer">
+          <span class="major-status pending">Nuevo cálculo pendiente</span
+          ><a
+            class="major-view-link"
+            [routerLink]="
+              vistaPrevia ? '/vista-previa/mayorista/liquidaciones' : '/mayorista/liquidaciones'
+            "
+            >Ver liquidaciones →</a
+          >
+        </div>
+      </article>
+      <article class="major-card workflow-card">
+        <div class="major-card-head">
+          <span class="major-number">04</span>
+          <div>
+            <h2>Lotes para exportación</h2>
+            <p>Registra el peso fundido y la lectura decimal de cada lote.</p>
+          </div>
+        </div>
+        <div class="workflow-footer">
+          <span class="major-status pending">Ficha pendiente</span
+          ><a
+            class="major-view-link"
+            [routerLink]="
+              vistaPrevia ? '/vista-previa/mayorista/consolidacion' : '/mayorista/consolidacion'
+            "
+            >Ver lotes →</a
+          >
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="major-section" aria-labelledby="historial-titulo">
+    <div class="major-section-head">
+      <div>
+        <span class="major-kicker">HISTORIAL DISPONIBLE</span>
+        <h2 id="historial-titulo">Últimas liquidaciones registradas</h2>
+      </div>
+      <a
+        class="major-view-link"
+        [routerLink]="
+          vistaPrevia ? '/vista-previa/mayorista/liquidaciones' : '/mayorista/liquidaciones'
+        "
+        >Ver historial completo →</a
+      >
+    </div>
+    @if (cargandoReporte()) {
+      <p class="loading-state" role="status">Cargando historial…</p>
+    } @else if (reporte(); as datos) {
+      @if (datos.liquidaciones.length) {
+        <div class="table-wrap">
+          <table>
+            <caption class="major-visually-hidden">
+              Últimas liquidaciones registradas
+            </caption>
+            <thead>
+              <tr>
+                <th>N.º</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Detalles</th>
+                <th>Total registrado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of datos.liquidaciones.slice(0, 5); track item.idLiquidacionG1) {
+                <tr>
+                  <td>
+                    <strong>#{{ item.idLiquidacionG1 }}</strong>
+                  </td>
+                  <td>{{ item.fechaLiquidacion | date: 'short' }}</td>
+                  <td>{{ item.estado }}</td>
+                  <td>{{ item.cantidadDetalles }}</td>
+                  <td>{{ dinero(item.totalPagadoG2Pen) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="empty-state">
+          {{
+            vistaPrevia ? 'Vista previa sin datos.' : 'Todavía no hay liquidaciones registradas.'
+          }}
+        </p>
+      }
+    }
+  </section>
+</section>

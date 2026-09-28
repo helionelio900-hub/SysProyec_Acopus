@@ -1,0 +1,187 @@
+<a class="skip-link" href="#main-content">Saltar al formulario</a>
+<main class="account-page" id="main-content" tabindex="-1">
+  <a class="back-home" routerLink="/">← <span>Volver al inicio</span></a>
+  <section class="account-card">
+    <a class="brand" routerLink="/"
+      ><img src="/images/logo-sitra-oro.jpg" alt="" width="34" height="34" /><span
+        >SITRA<span>-ORO</span></span
+      ></a
+    >
+    <span class="eyebrow">{{
+      modo === 'registro' ? 'EMPIEZA CUANDO TÚ QUIERAS' : 'ACCESO A SITRA-ORO'
+    }}</span>
+    <h1>{{ modo === 'registro' ? 'Crea tu cuenta.' : 'Ingresa a tu cuenta.' }}</h1>
+    <p class="intro">
+      {{
+        modo === 'registro'
+          ? 'Guarda tu centro preferido y vuelve a consultar cuando lo necesites.'
+          : 'Ingresa con el documento y la clave de tu cuenta para abrir tu espacio de trabajo.'
+      }}
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+      <label for="document">Documento de identidad</label>
+      <input
+        id="document"
+        name="documentoIdentidad"
+        type="text"
+        inputmode="numeric"
+        required
+        formControlName="documentoIdentidad"
+        autocomplete="username"
+        aria-describedby="document-hint"
+        [attr.aria-invalid]="
+          form.controls.documentoIdentidad.touched && form.controls.documentoIdentidad.invalid
+            ? 'true'
+            : null
+        "
+        placeholder="Ej. 12345678…"
+      />
+      <small id="document-hint" class="field-hint">{{
+        modo === 'registro'
+          ? 'Debe tener entre 8 y 15 caracteres.'
+          : 'Ingresa el documento de tu cuenta.'
+      }}</small>
+      @if (form.controls.documentoIdentidad.touched && form.controls.documentoIdentidad.invalid) {
+        <small class="field-error">Ingresa un documento válido (8 a 15 caracteres).</small>
+      }
+
+      @if (modo === 'registro') {
+        <label for="full-name">Nombres y apellidos</label>
+        <input
+          id="full-name"
+          name="nombresApellidos"
+          type="text"
+          required
+          formControlName="nombresApellidos"
+          autocomplete="name"
+          [attr.aria-invalid]="
+            form.controls.nombresApellidos.touched && form.controls.nombresApellidos.invalid
+              ? 'true'
+              : null
+          "
+          placeholder="Nombres y apellidos…"
+        />
+        @if (form.controls.nombresApellidos.touched && form.controls.nombresApellidos.invalid) {
+          <small class="field-error">Escribe tus nombres y apellidos para crear la cuenta.</small>
+        }
+        <label for="phone">Teléfono</label>
+        <input
+          id="phone"
+          name="telefono"
+          type="tel"
+          required
+          formControlName="telefono"
+          autocomplete="tel"
+          [attr.aria-invalid]="
+            form.controls.telefono.touched && form.controls.telefono.invalid ? 'true' : null
+          "
+          placeholder="Ej. 987 654 321…"
+        />
+        @if (form.controls.telefono.touched && form.controls.telefono.invalid) {
+          <small class="field-error">Ingresa un teléfono de contacto.</small>
+        }
+        <label for="zone">Zona donde trabajas <span>(opcional)</span></label>
+        <input
+          id="zone"
+          name="zonaProcedencia"
+          type="text"
+          formControlName="zonaProcedencia"
+          autocomplete="off"
+          placeholder="Ej. La Rinconada…"
+        />
+        <label for="center">¿A qué acopio te gustaría ir?</label>
+        <select
+          id="center"
+          name="idCentroAcopioPreferido"
+          required
+          formControlName="idCentroAcopioPreferido"
+          [attr.aria-invalid]="
+            form.controls.idCentroAcopioPreferido.touched &&
+            form.controls.idCentroAcopioPreferido.invalid
+              ? 'true'
+              : null
+          "
+        >
+          <option value="">
+            {{ cargandoCentros() ? 'Cargando centros…' : 'Elige un centro' }}
+          </option>
+          @for (centro of centros(); track centro.idCentroAcopio) {
+            <option [value]="centro.idCentroAcopio">{{ centro.nombre }} · {{ centro.zona }}</option>
+          }
+        </select>
+        @if (
+          form.controls.idCentroAcopioPreferido.touched &&
+          form.controls.idCentroAcopioPreferido.invalid
+        ) {
+          <small class="field-error">Elige el centro al que te gustaría ir.</small>
+        }
+        @if (!cargandoCentros() && centros().length === 0) {
+          <small class="field-hint">No hay centros disponibles para seleccionar por ahora.</small>
+        }
+        @if (error() && !cargandoCentros() && centros().length === 0) {
+          <button class="retry-centers" type="button" (click)="cargarCentros()">
+            Cargar centros otra vez
+          </button>
+        }
+      }
+
+      <label for="password">Clave</label>
+      <div class="password-control">
+        <input
+          id="password"
+          name="clave"
+          [type]="mostrarClave() ? 'text' : 'password'"
+          required
+          formControlName="clave"
+          [autocomplete]="modo === 'registro' ? 'new-password' : 'current-password'"
+          [attr.aria-invalid]="
+            form.controls.clave.touched && form.controls.clave.invalid ? 'true' : null
+          "
+          placeholder="{{
+            modo === 'registro' ? 'Al menos 10 caracteres…' : 'Tu clave de acceso…'
+          }}"
+        /><button
+          class="password-toggle"
+          type="button"
+          [attr.aria-label]="mostrarClave() ? 'Ocultar clave' : 'Mostrar clave'"
+          (click)="mostrarClave.set(!mostrarClave())"
+        >
+          {{ mostrarClave() ? 'Ocultar' : 'Mostrar' }}
+        </button>
+      </div>
+      @if (modo === 'registro' && form.controls.clave.touched && form.controls.clave.invalid) {
+        <small class="field-error">La clave debe tener al menos 10 caracteres.</small>
+      }
+
+      @if (error()) {
+        <p class="alert error" role="alert">{{ error() }}</p>
+      }
+      @if (resultado()) {
+        <p class="alert success" role="status">{{ resultado() }}</p>
+      }
+      <button
+        type="submit"
+        [disabled]="enviando() || (modo === 'registro' && centros().length === 0)"
+      >
+        {{
+          enviando() ? 'Un momento…' : modo === 'registro' ? 'Crear mi cuenta' : 'Iniciar sesión'
+        }}
+        <span aria-hidden="true">→</span>
+      </button>
+    </form>
+
+    <p class="switch-mode">
+      {{ modo === 'registro' ? '¿Ya tienes cuenta?' : '¿Eres minero y aún no tienes cuenta?' }}
+      <a [routerLink]="modo === 'registro' ? '/ingresar' : '/minero/registro'">{{
+        modo === 'registro' ? 'Inicia sesión' : 'Crear cuenta de minero'
+      }}</a>
+    </p>
+    @if (modo === 'registro') {
+      <p class="privacy-note">
+        Tu cotización seguirá siendo referencial. Crear una cuenta no significa que hayas vendido tu
+        oro.
+      </p>
+    }
+  </section>
+</main>

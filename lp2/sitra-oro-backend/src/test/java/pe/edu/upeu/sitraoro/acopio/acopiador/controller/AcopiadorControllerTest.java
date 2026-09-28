@@ -6,6 +6,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.AcumuladosG2Response;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.TransaccionG2Request;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.TransaccionG2Response;
@@ -26,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AcopiadorController.class)
+@WithMockUser(roles = "G2_ACOPIADOR")
 class AcopiadorControllerTest {
 
     @Autowired

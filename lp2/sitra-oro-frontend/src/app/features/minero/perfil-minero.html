@@ -1,0 +1,78 @@
+<a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+<main class="profile-page">
+  <header class="profile-header">
+    <a class="brand" routerLink="/"
+      ><img src="/images/logo-sitra-oro.jpg" alt="" width="38" height="38" /><span
+        >SITRA<span>-ORO</span></span
+      ></a
+    >
+    <div>
+      <a routerLink="/">Volver al inicio</a
+      ><button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </header>
+  <section class="profile-content" id="main-content" tabindex="-1">
+    <span class="eyebrow">TU ESPACIO PERSONAL</span>
+    @if (cargando()) {
+      <p class="state">Cargando tu cuenta…</p>
+    }
+    @if (perfil(); as usuario) {
+      <h1>Hola, {{ usuario.nombresApellidos.split(' ')[0] }}.</h1>
+      <p class="intro">
+        Aquí puedes revisar tus datos y elegir el centro al que te gustaría ir cuando decidas
+        entregar tu oro.
+      </p>
+      <div class="profile-grid">
+        <article class="info-card">
+          <span class="card-kicker">TUS DATOS</span>
+          <h2>Tu información</h2>
+          <dl>
+            <div>
+              <dt>Documento</dt>
+              <dd>{{ usuario.documentoIdentidad }}</dd>
+            </div>
+            <div>
+              <dt>Teléfono</dt>
+              <dd>{{ usuario.telefono }}</dd>
+            </div>
+            <div>
+              <dt>Zona</dt>
+              <dd>{{ usuario.zonaProcedencia || 'Sin especificar' }}</dd>
+            </div>
+          </dl>
+        </article>
+        <article class="info-card center-card">
+          <span class="card-kicker">TU PRÓXIMA RUTA</span>
+          <h2>Elige tu acopio</h2>
+          <p>
+            Es una preferencia para tu próxima visita, no una compra ni un compromiso de entrega.
+          </p>
+          <form [formGroup]="form" (ngSubmit)="guardarCentro()">
+            <label for="preferred-center">Centro que prefieres</label
+            ><select id="preferred-center" formControlName="idCentroAcopio">
+              <option [ngValue]="0">Elige un centro</option>
+              @for (centro of centros(); track centro.idCentroAcopio) {
+                <option [ngValue]="centro.idCentroAcopio">
+                  {{ centro.nombre }} · {{ centro.zona }}
+                </option>
+              }</select
+            ><button class="save-button" type="submit" [disabled]="guardando() || form.invalid">
+              {{ guardando() ? 'Guardando…' : 'Guardar mi preferencia' }} <span>→</span>
+            </button>
+          </form>
+        </article>
+      </div>
+      <a class="quote-link" routerLink="/">Consultar un estimado de mi oro <span>↗</span></a>
+    }
+    @if (error()) {
+      <p class="alert" role="alert">{{ error() }} <a routerLink="/ingresar">Iniciar sesión</a></p>
+    }
+    @if (mensaje()) {
+      <p class="success" role="status">{{ mensaje() }}</p>
+    }
+  </section>
+  <footer>
+    La cotización pública es referencial. El precio final se confirma cuando el acopio registra la
+    entrega.
+  </footer>
+</main>

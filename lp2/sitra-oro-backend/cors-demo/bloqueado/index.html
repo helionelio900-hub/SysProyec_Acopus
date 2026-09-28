@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Prueba CORS: origen no permitido</title>
+  <style>body{font-family:Arial,sans-serif;margin:40px;background:#101820;color:#f4f7fb}button{padding:12px 18px;font-size:16px;background:#d64545;color:white;border:0;border-radius:5px;cursor:pointer}code,pre{background:#1d2935;padding:12px;display:block;border-radius:5px}pre{white-space:pre-wrap}</style>
+</head>
+<body>
+  <h1>Captura 9: origen no permitido</h1>
+  <p>Origen actual: <code id="origin"></code></p>
+  <p>La API solo permite <code>http://localhost:4200</code>.</p>
+  <button id="run">Ejecutar fetch</button>
+  <pre id="result">Presiona el botón y revisa también la Consola (F12).</pre>
+  <script>
+    document.getElementById('origin').textContent = location.origin;
+    document.getElementById('run').addEventListener('click', async () => {
+      const result = document.getElementById('result');
+      result.textContent = 'Consultando API...';
+      try {
+        const response = await fetch('http://localhost:8081/api/v1/mayorista/liquidaciones?estado=REGISTRADA');
+        result.textContent = await response.text();
+      } catch (error) {
+        console.error('CORS bloqueado:', error);
+        result.textContent = 'Bloqueado por CORS. El detalle está visible en la Consola.';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+@import './mayorista-ui.css';
+
+.reception-form {
+  margin-top: 1rem;
+}
+.reception-meta {
+  margin: 1.4rem 0;
+}
+.reception-meta select {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.65rem 2.5rem 0.65rem 0.8rem;
+  border: 1px solid #d5dfeb;
+  border-radius: 0.5rem;
+  background-color: #fff;
+  color: #17283f;
+  font: inherit;
+  cursor: pointer;
+}
+.reception-meta select:focus {
+  outline: 3px solid #f6cf78a8;
+  border-color: #bd8412;
+}
+.reception-meta small {
+  color: #66768b;
+}
+.reception-table-wrap {
+  overflow-x: auto;
+}
+.reception-table {
+  min-width: 1050px !important;
+  width: 100%;
+}
+.reception-table input {
+  width: 100%;
+  min-width: 82px;
+  padding: 0.5rem 0.55rem;
+  border: 1px solid #d5dfeb;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #17283f;
+  font: inherit;
+}
+.reception-table input:focus {
+  outline: 3px solid #f6cf78a8;
+  border-color: #bd8412;
+}
+.reception-table td {
+  background: #fff;
+}
+.reception-table .row-rojo th {
+  background: #fff6f3;
+}
+.reception-table .row-verde th {
+  background: #effaf4;
+}
+.color-tag {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 800;
+}
+.color-tag.rojo {
+  background: #fce3dc;
+  color: #9d3528;
+}
+.color-tag.verde {
+  background: #d8f1e1;
+  color: #1e7045;
+}
+.merma {
+  white-space: nowrap;
+  font-weight: 800;
+}
+.reception-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  max-width: 500px;
+  margin: 1.2rem 0 0 auto;
+}
+.reception-footnote {
+  color: #66768b;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.reception-records {
+  margin-top: 1.25rem;
+}
+.record-actions {
+  white-space: nowrap;
+}
+.record-actions button {
+  margin-right: 0.5rem;
+  border: 0;
+  background: none;
+  color: #274e76;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+.record-actions button:last-child {
+  color: #aa3d35;
+}
+@media (max-width: 700px) {
+  .reception-summary {
+    grid-template-columns: 1fr;
+    max-width: none;
+  }
+}

@@ -1,0 +1,62 @@
+<section class="workspace">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">ACOPIO · CUENTAS DE MINEROS</span>
+      <h1>Solicitudes por aprobar</h1>
+      <p>Revisa qué mineros eligieron este centro para vincular su cuenta.</p>
+    </div>
+    <button mat-stroked-button type="button" class="button-secondary" (click)="cargar()">
+      Actualizar
+    </button>
+  </header>
+  @if (error()) {
+    <p class="feedback error" role="alert">{{ error() }}</p>
+  }
+  @if (mensaje()) {
+    <p class="feedback" role="status">{{ mensaje() }}</p>
+  }
+  @if (cargando()) {
+    <p class="loading-state" role="status">Cargando solicitudes…</p>
+  }
+  @if (!cargando() && solicitudes().length) {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Documento</th>
+          <th>Registro del minero</th>
+          <th>Centro que eligió</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (solicitud of solicitudes(); track solicitud.documentoIdentidad) {
+            <tr>
+              <td>{{ solicitud.documentoIdentidad }}</td>
+              <td>N.º {{ solicitud.idMinero }}</td>
+              <td>Centro N.º {{ solicitud.idCentroAcopioPreferido }}</td>
+              <td>
+                <button
+                  mat-flat-button
+                  class="button-primary"
+                  type="button"
+                  [disabled]="aprobando() === solicitud.documentoIdentidad"
+                  (click)="aprobar(solicitud)"
+                >
+                  {{
+                    aprobando() === solicitud.documentoIdentidad ? 'Aprobando…' : 'Aprobar cuenta'
+                  }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (!cargando()) {
+    <div class="panel empty-state">
+      <h2>Sin solicitudes pendientes</h2>
+      <p>Cuando un minero cree una cuenta y elija este centro, podrás revisar aquí su solicitud.</p>
+    </div>
+  }
+</section>

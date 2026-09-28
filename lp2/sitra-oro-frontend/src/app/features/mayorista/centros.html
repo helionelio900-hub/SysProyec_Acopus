@@ -1,0 +1,186 @@
+<section class="workspace mayorista-workspace">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">MAYORISTA · RED DE ACOPIO</span>
+      <h1>Centros y cuentas de acopiador</h1>
+      <p>El mayorista registra cada centro y crea la cuenta inicial de su acopiador.</p>
+    </div>
+    <button
+      mat-flat-button
+      class="button-primary"
+      type="button"
+      [attr.aria-expanded]="mostrarFormulario()"
+      aria-controls="form-centro"
+      (click)="mostrarFormulario.update((valor) => !valor)"
+    >
+      {{ mostrarFormulario() ? 'Cerrar formulario' : 'Crear centro y cuenta' }}
+    </button>
+  </header>
+  @if (error()) {
+    <p class="feedback error" role="alert">{{ error() }}</p>
+  }
+  @if (mensaje()) {
+    <p class="feedback" role="status">{{ mensaje() }}</p>
+  }
+
+  @if (mostrarFormulario()) {
+    <section class="panel create-panel" id="form-centro" aria-labelledby="crear-titulo">
+      <div class="major-card-head">
+        <span class="major-number">01</span>
+        <div>
+          <h2 id="crear-titulo">Nuevo centro de acopio</h2>
+          <p>Completa los datos del establecimiento y define quién ingresará como acopiador.</p>
+        </div>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="crear()" class="center-form">
+        @if (vistaPrevia) {
+          <div class="major-notice info">
+            <span aria-hidden="true">ⓘ</span>
+            <p>
+              Estás viendo una demostración. Puedes probar el formulario, pero no se creará una
+              cuenta real ni se guardarán los datos.
+            </p>
+          </div>
+        }
+        <fieldset class="form-group">
+          <legend>Datos del centro</legend>
+          <div class="major-grid">
+            <label class="field"
+              >Nombre del centro<input
+                formControlName="nombre"
+                maxlength="120"
+                autocomplete="organization"
+              />
+              @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+                <small class="major-field-error">Ingresa un nombre de hasta 120 caracteres.</small>
+              }
+            </label>
+            <label class="field"
+              >Zona<input formControlName="zona" maxlength="100" autocomplete="address-level2" />
+              @if (form.controls.zona.touched && form.controls.zona.invalid) {
+                <small class="major-field-error">La zona es obligatoria.</small>
+              }
+            </label>
+            <label class="field"
+              >Dirección<input
+                formControlName="direccion"
+                maxlength="200"
+                autocomplete="street-address"
+              />
+              @if (form.controls.direccion.touched && form.controls.direccion.invalid) {
+                <small class="major-field-error">La dirección es obligatoria.</small>
+              }
+            </label>
+            <label class="field"
+              >Teléfono <small>(opcional)</small
+              ><input formControlName="telefono" maxlength="20" autocomplete="tel"
+            /></label>
+          </div>
+        </fieldset>
+        <fieldset class="form-group">
+          <legend>Cuenta del acopiador</legend>
+          <div class="major-grid">
+            <label class="field"
+              >Documento de identidad<input
+                formControlName="documentoAcopiador"
+                minlength="8"
+                maxlength="15"
+                autocomplete="off"
+              />
+              @if (
+                form.controls.documentoAcopiador.touched && form.controls.documentoAcopiador.invalid
+              ) {
+                <small class="major-field-error">Ingresa un documento de 8 a 15 caracteres.</small>
+              }
+            </label>
+            <label class="field"
+              >Clave inicial<input
+                type="password"
+                formControlName="claveInicialAcopiador"
+                minlength="10"
+                maxlength="64"
+                autocomplete="new-password"
+              /><small
+                >Entre 10 y 64 caracteres. Comunícala al acopiador por un canal seguro.</small
+              >
+              @if (
+                form.controls.claveInicialAcopiador.touched &&
+                form.controls.claveInicialAcopiador.invalid
+              ) {
+                <small class="major-field-error">La clave no cumple la longitud requerida.</small>
+              }
+            </label>
+          </div>
+        </fieldset>
+        <div class="major-notice">
+          <span aria-hidden="true">ⓘ</span>
+          <p>
+            La clave inicial se usa para crear el acceso junto con el centro. No se mostrará en el
+            listado posterior.
+          </p>
+        </div>
+        <div class="major-action-row">
+          <span class="major-action-hint">Revisa el documento antes de crear la cuenta.</span
+          ><button mat-flat-button class="button-primary" [disabled]="guardando()">
+            {{ guardando() ? 'Creando…' : vistaPrevia ? 'Crear ejemplo' : 'Crear centro y cuenta' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  <section class="major-section" aria-labelledby="centros-titulo">
+    <div class="major-section-head">
+      <div>
+        <span class="major-kicker">RED REGISTRADA</span>
+        <h2 id="centros-titulo">Centros de acopio</h2>
+      </div>
+      <span class="major-status">{{ centros().length }} centros</span>
+    </div>
+    @if (cargando()) {
+      <p class="loading-state" role="status">Cargando centros…</p>
+    } @else if (centros().length) {
+      <div class="table-wrap">
+        <table>
+          <caption class="major-visually-hidden">
+            Centros de acopio registrados
+          </caption>
+          <thead>
+            <tr>
+              <th>Centro</th>
+              <th>Zona</th>
+              <th>Acopiador (documento)</th>
+              <th>Dirección</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (centro of centros(); track centro.idCentroAcopio) {
+              <tr>
+                <td>
+                  <strong>{{ centro.nombre }}</strong>
+                </td>
+                <td>{{ centro.zona }}</td>
+                <td>{{ centro.documentoAcopiador || 'Cuenta vinculada' }}</td>
+                <td>{{ centro.direccion }}</td>
+                <td>
+                  <span class="major-status" [class.ready]="centro.activo">{{
+                    centro.activo ? 'Activo' : 'Inactivo'
+                  }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="empty-state">
+        {{
+          vistaPrevia
+            ? 'Vista previa sin datos de centros.'
+            : 'Todavía no hay centros. Usa “Crear centro y cuenta” para registrar el primero.'
+        }}
+      </p>
+    }
+  </section>
+</section>

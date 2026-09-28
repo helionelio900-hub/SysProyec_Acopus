@@ -1,0 +1,206 @@
+<section class="workspace mayorista-workspace reception-workspace">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">MAYORISTA · ENTREGA DEL ACOPIADOR</span>
+      <h1>Registro de compra al acopiador</h1>
+      <p>
+        Rojo y verde se pesan por separado. La merma muestra la diferencia entre el peso sin fundir
+        y el fundido.
+      </p>
+    </div>
+  </header>
+  <div class="major-notice info" role="status">
+    <span aria-hidden="true">ⓘ</span>
+    <p>
+      @if (vistaPrevia) {
+        Vista de demostración: los cambios desaparecen al recargar.
+      } @else {
+        Las recepciones se guardan en el sistema y quedan disponibles para consulta.
+      }
+    </p>
+  </div>
+  @if (error()) {
+    <p class="feedback error" role="alert">{{ error() }}</p>
+  }
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="reception-form">
+    <section class="panel" aria-labelledby="registro-title">
+      <div class="major-card-head">
+        <span class="major-number">01</span>
+        <div>
+          <h2 id="registro-title">Entrega y pago del material</h2>
+          <p>Registra únicamente los datos observados; el sistema no aplica una fórmula de pago.</p>
+        </div>
+      </div>
+      <div class="major-grid reception-meta">
+        <label class="field">Fecha <input type="date" formControlName="fecha" /></label>
+        <label class="field"
+          >Acopiador
+          <select formControlName="nombreAcopiador" required>
+            <option value="" disabled>Selecciona un acopiador</option>
+            @if (vistaPrevia) {
+              <option value="Acopiador de ejemplo">Acopiador de ejemplo · Vista de demostración</option>
+            } @else {
+              @for (centro of centros(); track centro.idCentroAcopio) {
+                <option [value]="etiquetaCentro(centro)">{{ etiquetaCentro(centro) }}</option>
+              }
+            }
+          </select>
+          @if (!vistaPrevia && centros().length === 0) {
+            <small>No hay centros activos. Primero registra un centro y su cuenta.</small>
+          }
+        </label>
+      </div>
+      <div class="table-wrap reception-table-wrap">
+        <table class="reception-table">
+          <caption class="major-visually-hidden">
+            Registro separado de oro rojo y verde
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Color</th>
+              <th scope="col">Peso sin fundir (g)</th>
+              <th scope="col">Peso fundido (g)</th>
+              <th scope="col">Merma (g)</th>
+              <th scope="col">Onza</th>
+              <th scope="col">Dólar</th>
+              <th scope="col">Exportación</th>
+              <th scope="col">Pago material</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr formGroupName="rojo" class="row-rojo">
+              <th scope="row"><span class="color-tag rojo">Rojo</span></th>
+              <td>
+                <input
+                  aria-label="Peso sin fundir rojo en gramos"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  formControlName="pesoSinFundirG"
+                />
+              </td>
+              <td>
+                <input
+                  aria-label="Peso fundido rojo en gramos"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  formControlName="pesoFundidoG"
+                />
+              </td>
+              <td class="merma">{{ merma('rojo') }}</td>
+              <td><input aria-label="Onza para rojo" formControlName="onza" /></td>
+              <td><input aria-label="Dólar para rojo" formControlName="dolar" /></td>
+              <td><input aria-label="Exportación para rojo" formControlName="exportacion" /></td>
+              <td><input aria-label="Pago material rojo" formControlName="pagoMaterial" /></td>
+            </tr>
+            <tr formGroupName="verde" class="row-verde">
+              <th scope="row"><span class="color-tag verde">Verde</span></th>
+              <td>
+                <input
+                  aria-label="Peso sin fundir verde en gramos"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  formControlName="pesoSinFundirG"
+                />
+              </td>
+              <td>
+                <input
+                  aria-label="Peso fundido verde en gramos"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  formControlName="pesoFundidoG"
+                />
+              </td>
+              <td class="merma">{{ merma('verde') }}</td>
+              <td><input aria-label="Onza para verde" formControlName="onza" /></td>
+              <td><input aria-label="Dólar para verde" formControlName="dolar" /></td>
+              <td><input aria-label="Exportación para verde" formControlName="exportacion" /></td>
+              <td><input aria-label="Pago material verde" formControlName="pagoMaterial" /></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="reception-summary">
+        <label class="field"
+          >Descuento <input formControlName="descuento" placeholder="Registro manual"
+        /></label>
+        <label class="field"
+          >Total <input formControlName="total" placeholder="Registro manual"
+        /></label>
+      </div>
+      <p class="reception-footnote">
+        Los importes se anotan manualmente. No se calcula ni se publica una fórmula general de
+        liquidación.
+      </p>
+      <div class="major-action-row">
+        <span class="major-action-hint">{{
+          vistaPrevia
+            ? 'Solo demostración: no hay guardado permanente.'
+            : 'Los importes quedan registrados tal como los ingreses.'
+        }}</span>
+        <button
+          mat-stroked-button
+          class="button-secondary"
+          type="button"
+          (click)="limpiar()"
+          [disabled]="guardando()"
+        >
+          Limpiar
+        </button>
+        <button mat-flat-button class="button-primary" type="submit" [disabled]="guardando()">
+          {{
+            guardando()
+              ? 'Guardando…'
+              : editandoId() === null
+                ? 'Guardar registro'
+                : 'Actualizar registro'
+          }}
+        </button>
+      </div>
+    </section>
+  </form>
+  @if (mensaje()) {
+    <p class="feedback" role="status">{{ mensaje() }}</p>
+  }
+  @if (cargando()) {
+    <p class="loading-state" role="status">Cargando recepciones guardadas…</p>
+  } @else if (registros().length) {
+    <section class="panel reception-records" aria-label="Registros de compra">
+      <h2>Registros de compra</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Acopiador</th>
+              <th>Rojo fundido</th>
+              <th>Verde fundido</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (registro of registros(); track registro.idRecepcion) {
+              <tr>
+                <td>{{ registro.fecha }}</td>
+                <td>{{ registro.nombreAcopiador }}</td>
+                <td>{{ registro.rojo.pesoFundidoG ?? '—' }} g</td>
+                <td>{{ registro.verde.pesoFundidoG ?? '—' }} g</td>
+                <td class="record-actions">
+                  <button type="button" (click)="editar(registro)">Editar</button>
+                  <button type="button" (click)="eliminar(registro.idRecepcion)">Eliminar</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  } @else {
+    <p class="empty-state">
+      Aún no hay registros de compra. Completa el formulario para guardar el primero.
+    </p>
+  }
+</section>

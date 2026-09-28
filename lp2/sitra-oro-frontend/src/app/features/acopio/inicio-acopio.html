@@ -1,0 +1,50 @@
+<section class="workspace">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">ESPACIO DEL ACOPIADOR</span>
+      <h1>Resumen del acopio</h1>
+      <p>Consulta las compras registradas y los acumulados por tipo de oro.</p>
+    </div>
+  </header>
+  @if (cargando()) {
+    <p class="loading-state" role="status">Cargando resumen…</p>
+  }
+  @if (error()) {
+    <p class="feedback error" role="alert">{{ error() }}</p>
+  }
+  @if (resumen(); as datos) {
+    <div class="metric-grid">
+      <article class="metric">
+        <span>Total de oro recibido</span><strong>{{ gramos(datos.totalGeneralGramos) }}</strong>
+      </article>
+      <article class="metric">
+        <span>Total pagado registrado</span
+        ><strong>{{ dinero(datos.totalGeneralDineroPen) }}</strong>
+      </article>
+      <article class="metric">
+        <span>Oro rojo · acumulado</span><strong>{{ gramos(datos.sumatoriaGramosOroRojo) }}</strong>
+      </article>
+      <article class="metric">
+        <span>Pago por oro rojo</span><strong>{{ dinero(datos.sumatoriaDineroOroRojoPen) }}</strong>
+      </article>
+      <article class="metric">
+        <span>Oro verde · acumulado</span
+        ><strong>{{ gramos(datos.sumatoriaGramosOroVerde) }}</strong>
+      </article>
+      <article class="metric">
+        <span>Pago por oro verde</span
+        ><strong>{{ dinero(datos.sumatoriaDineroOroVerdePen) }}</strong>
+      </article>
+    </div>
+    <h2 class="section-title">Acciones de trabajo</h2>
+    <nav class="actions" aria-label="Acciones del acopiador">
+      <a mat-flat-button class="button-primary" routerLink="/acopio/operaciones"
+        >Registrar compra de oro</a
+      ><a mat-stroked-button class="button-secondary" routerLink="/acopio/mineros">Ver mineros</a
+      ><a mat-stroked-button class="button-secondary" routerLink="/acopio/solicitudes"
+        >Revisar cuentas por aprobar</a
+      >
+    </nav>
+    <p class="notice">Los acumulados provienen de las operaciones registradas en SITRA-ORO.</p>
+  }
+</section>

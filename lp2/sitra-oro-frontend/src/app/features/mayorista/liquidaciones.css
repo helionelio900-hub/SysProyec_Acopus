@@ -1,0 +1,41 @@
+@import './mayorista-ui.css';
+
+.liquidation-layout {
+  align-items: stretch;
+  margin-top: 1rem;
+}
+.technical-source {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1.3rem;
+  padding: 1rem;
+  border: 1px dashed #cedae6;
+  border-radius: 0.72rem;
+  background: #f8fafc;
+}
+.technical-source span {
+  color: #677b91;
+  font-size: 0.74rem;
+  font-weight: 750;
+}
+.technical-source strong {
+  color: #334b66;
+  font-size: 0.94rem;
+}
+.technical-source p {
+  margin: 0.2rem 0 0.6rem;
+  color: #74869a;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.market-fields {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+.market-fields .field small {
+  margin-left: 0.25rem;
+}
+.result-grid {
+  margin-top: 1.15rem;
+}

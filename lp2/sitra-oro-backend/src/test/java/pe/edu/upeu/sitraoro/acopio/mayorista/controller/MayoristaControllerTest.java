@@ -7,6 +7,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.DetalleLiquidacionRequest;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.DetalleLiquidacionResponse;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Request;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = {MayoristaController.class, GlobalExceptionHandler.class})
+@WithMockUser(roles = "G1_MAYORISTA")
 class MayoristaControllerTest {
 
     @Autowired

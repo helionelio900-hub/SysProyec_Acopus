@@ -6,6 +6,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 import pe.edu.upeu.sitraoro.acopio.parametros.dto.MineroRequest;
 import pe.edu.upeu.sitraoro.acopio.parametros.dto.MineroResponse;
 import pe.edu.upeu.sitraoro.acopio.parametros.service.MineroService;
@@ -21,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(MineroController.class)
+@WithMockUser(roles = "G2_ACOPIADOR")
 class MineroControllerTest {
 
     @Autowired

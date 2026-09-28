@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Request;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Response;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionReporte;
+import pe.edu.upeu.sitraoro.acopio.mayorista.dto.RecepcionMayoristaRequest;
+import pe.edu.upeu.sitraoro.acopio.mayorista.dto.RecepcionMayoristaResponse;
 import pe.edu.upeu.sitraoro.acopio.mayorista.entity.EstadoLiquidacion;
 import pe.edu.upeu.sitraoro.acopio.mayorista.service.MayoristaService;
+import pe.edu.upeu.sitraoro.acopio.mayorista.service.RecepcionMayoristaService;
 import pe.edu.upeu.sitraoro.exception.ApiErrorResponse;
 
 import java.time.LocalDateTime;
@@ -32,6 +35,35 @@ import java.util.List;
 public class MayoristaController {
 
     private final MayoristaService mayoristaService;
+    private final RecepcionMayoristaService recepcionMayoristaService;
+
+    @GetMapping("/recepciones")
+    @Operation(summary = "Listar registros de compra recibidos del acopiador")
+    public List<RecepcionMayoristaResponse> listarRecepciones() {
+        return recepcionMayoristaService.listar();
+    }
+
+    @PostMapping("/recepciones")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Guardar un registro de compra mayorista")
+    public RecepcionMayoristaResponse registrarRecepcion(
+            @Valid @RequestBody RecepcionMayoristaRequest request) {
+        return recepcionMayoristaService.registrar(request);
+    }
+
+    @PutMapping("/recepciones/{id}")
+    @Operation(summary = "Actualizar un registro de compra mayorista")
+    public RecepcionMayoristaResponse actualizarRecepcion(
+            @PathVariable Long id, @Valid @RequestBody RecepcionMayoristaRequest request) {
+        return recepcionMayoristaService.actualizar(id, request);
+    }
+
+    @DeleteMapping("/recepciones/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Eliminar un registro de compra mayorista")
+    public void eliminarRecepcion(@PathVariable Long id) {
+        recepcionMayoristaService.eliminar(id);
+    }
 
     @PostMapping("/liquidaciones")
     @ResponseStatus(HttpStatus.CREATED)
