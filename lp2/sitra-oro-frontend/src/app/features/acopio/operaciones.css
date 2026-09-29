@@ -33,17 +33,18 @@
 .red-dot { background:#ba594f; box-shadow:0 0 0 4px #ba594f1a; }
 .green-dot { background:#3a9871; box-shadow:0 0 0 4px #3a98711a; }
 .exception-panel { display:grid; gap:.9rem; border:1px solid #eadfbf; border-radius:.75rem; padding:.95rem; background:#fffcf4; }
-.exception-toggle { display:grid; grid-template-columns:1rem 2.2rem 1fr; align-items:center; gap:.65rem; color:#2c3c50; cursor:pointer; }
+.exception-toggle { display:grid; grid-template-columns:2.2rem minmax(0,1fr); align-items:center; gap:.65rem; color:#2c3c50; cursor:pointer; }
 .exception-toggle > input { position:absolute; width:1px; height:1px; opacity:0; }
-.switch-visual { position:relative; width:2.1rem; height:1.2rem; border-radius:1rem; background:#cad1dc; transition:background .16s; }
+.switch-visual { position:relative; grid-column:1; width:2.1rem; height:1.2rem; border-radius:1rem; background:#cad1dc; transition:background .16s; }
 .switch-visual::after { position:absolute; top:.16rem; left:.16rem; width:.88rem; height:.88rem; border-radius:50%; background:white; box-shadow:0 1px 3px #0003; content:''; transition:transform .16s; }
 .exception-toggle input:checked + .switch-visual { background:#b27b0a; }
 .exception-toggle input:checked + .switch-visual::after { transform:translateX(.9rem); }
 .exception-toggle input:focus-visible + .switch-visual { outline:3px solid #edc45e; outline-offset:2px; }
+.exception-copy { grid-column:2; min-width:0; }
 .exception-copy strong,.exception-copy small { display:block; }
 .exception-copy strong { font-size:.81rem; }
 .exception-copy small,.system-price-note { margin:.2rem 0 0; color:#7a8492; font-size:.75rem; font-weight:450; line-height:1.5; }
-.adjustment-field { max-width:32rem; margin-left:3.9rem; }
+.adjustment-field { max-width:32rem; margin-left:2.85rem; }
 .submit-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:.25rem; }
 .secure-note { color:#78869a; font-size:.73rem; }
 .secure-note span { margin-right:.3rem; color:#4a9b73; font-size:.62rem; }
