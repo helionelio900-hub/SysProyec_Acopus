@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface RecepcionMayoristaRepository extends JpaRepository<RecepcionMayorista, Long> {
     List<RecepcionMayorista> findAllByOrderByFechaDescIdRecepcionDesc();
+    List<RecepcionMayorista> findByCentroAcopio_IdCentroAcopioOrderByFechaDescIdRecepcionDesc(Long idCentroAcopio);
 }

@@ -24,6 +24,8 @@ export class OperacionesAcopio implements OnInit {
   private readonly servicio = inject(OperacionesService);
   private readonly minerosService = inject(MineroService);
   protected readonly mineros = signal<Minero[]>([]);
+  protected readonly cargandoMineros = signal(true);
+  protected readonly errorMineros = signal('');
   protected readonly operaciones = signal<TransaccionAcopio[]>([]);
   protected readonly acumulados = signal<AcumuladosAcopio | null>(null);
   protected readonly cargando = signal(true);
@@ -45,9 +47,16 @@ export class OperacionesAcopio implements OnInit {
       .subscribe(() => this.ultimoResultado.set(null));
     this.cargar();
     this.minerosService.listar().subscribe({
-      next: (items) => this.mineros.set(items),
-      error: () =>
-        this.error.set('No se pudo cargar la lista de mineros para registrar una compra.'),
+      next: (items) => {
+        this.mineros.set(items);
+        this.cargandoMineros.set(false);
+        this.errorMineros.set('');
+      },
+      error: () => {
+        this.mineros.set([]);
+        this.cargandoMineros.set(false);
+        this.errorMineros.set('No se pudo cargar la lista de mineros. Actualiza los datos para intentarlo de nuevo.');
+      },
     });
   }
   protected cargar(): void {
@@ -127,6 +136,21 @@ export class OperacionesAcopio implements OnInit {
           console.error('[Acopio] Compra rechazada.', response.status);
         },
       });
+  }
+  protected actualizarMineros(): void {
+    this.cargandoMineros.set(true);
+    this.errorMineros.set('');
+    this.minerosService.listar().subscribe({
+      next: (items) => {
+        this.mineros.set(items);
+        this.cargandoMineros.set(false);
+      },
+      error: () => {
+        this.mineros.set([]);
+        this.cargandoMineros.set(false);
+        this.errorMineros.set('No se pudo cargar la lista de mineros. Inténtalo de nuevo.');
+      },
+    });
   }
   protected dinero(valor: number): string {
     return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(valor);

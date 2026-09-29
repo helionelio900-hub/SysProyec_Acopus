@@ -28,12 +28,14 @@ export class RecepcionMayorista implements OnInit {
   protected readonly guardando = signal(false);
   protected readonly registros = signal<Registro[]>([]);
   protected readonly centros = signal<CentroAcopio[]>([]);
+  protected readonly centroFiltrado = signal<number | null>(null);
   protected readonly editandoId = signal<number | null>(null);
   private siguienteId = 1;
+  private consultaActual = 0;
 
   protected readonly form = this.fb.nonNullable.group({
     fecha: [this.fechaLocal(), Validators.required],
-    nombreAcopiador: ['', [Validators.required, Validators.maxLength(120)]],
+    idCentroAcopio: [0, [Validators.required, Validators.min(1)]],
     rojo: this.crearFila(),
     verde: this.crearFila(),
     descuento: [''],
@@ -43,7 +45,7 @@ export class RecepcionMayorista implements OnInit {
   ngOnInit(): void {
     if (this.vistaPrevia) {
       this.form.patchValue({
-        nombreAcopiador: 'Acopiador de ejemplo',
+        idCentroAcopio: 1,
         rojo: { pesoSinFundirG: 10.1, pesoFundidoG: 10 },
       });
       return;
@@ -67,17 +69,19 @@ export class RecepcionMayorista implements OnInit {
     this.error.set('');
     if (this.form.invalid || !this.pesosValidos()) {
       this.form.markAllAsTouched();
-      this.error.set(
-        'Completa la fecha, el nombre y los pesos. Cada color debe tener ambos pesos o ninguno.',
-      );
+      this.error.set('Selecciona el centro de acopio y completa los pesos. Cada color debe tener ambos pesos o ninguno.');
       return;
     }
-    const datos = this.form.getRawValue() as CrearRecepcionMayorista;
+    const datos: CrearRecepcionMayorista = this.form.getRawValue();
     const id = this.editandoId();
     this.guardando.set(true);
     if (this.vistaPrevia) {
       const idRecepcion = id ?? this.siguienteId++;
-      const item: Registro = { ...datos, idRecepcion };
+      const item: Registro = {
+        ...datos,
+        idRecepcion,
+        nombreAcopiador: 'Acopiador de ejemplo · Vista de demostración',
+      };
       this.registros.update((actuales) =>
         id === null
           ? [...actuales, item]
@@ -91,28 +95,36 @@ export class RecepcionMayorista implements OnInit {
         ? this.operaciones.registrarRecepcionMayorista(datos)
         : this.operaciones.actualizarRecepcionMayorista(id, datos);
     peticion.subscribe({
-      next: (guardado) => {
-        this.registros.update((actuales) =>
-          id === null
-            ? [guardado, ...actuales]
-            : actuales.map((registro) => (registro.idRecepcion === id ? guardado : registro)),
-        );
+      next: () => {
+        this.cargar();
         this.finalizarGuardado(
           id === null ? 'Registro guardado correctamente.' : 'Registro actualizado correctamente.',
         );
       },
       error: (response: HttpErrorResponse) => {
         this.guardando.set(false);
-        this.error.set(
-          response.error?.message ??
-            'No se pudo guardar el registro. Revisa la conexión con el servidor.',
-        );
+        const detalle = String(response.error?.message ?? '').toLowerCase();
+        if (response.status === 404 && detalle.includes('centro de acopio')) {
+          this.form.controls.idCentroAcopio.setValue(0);
+          this.form.controls.idCentroAcopio.markAsTouched();
+          this.error.set('El centro seleccionado ya no está disponible. Elige otro de la lista.');
+          this.cargarCentros();
+          return;
+        }
+        this.error.set(response.error?.message ?? 'No se pudo guardar el registro. Revisa la conexión con el servidor.');
       },
     });
   }
 
   protected editar(registro: Registro): void {
-    this.form.patchValue(registro);
+    this.form.patchValue({
+      fecha: registro.fecha,
+      idCentroAcopio: registro.idCentroAcopio,
+      rojo: registro.rojo,
+      verde: registro.verde,
+      descuento: registro.descuento,
+      total: registro.total,
+    });
     this.editandoId.set(registro.idRecepcion);
     this.mensaje.set('Editando el registro seleccionado.');
     this.error.set('');
@@ -129,7 +141,7 @@ export class RecepcionMayorista implements OnInit {
     if (!window.confirm('¿Eliminar este registro de recepción?')) return;
     this.operaciones.eliminarRecepcionMayorista(id).subscribe({
       next: () => {
-        this.registros.update((actuales) => actuales.filter((item) => item.idRecepcion !== id));
+        this.cargar();
         if (this.editandoId() === id) this.limpiar();
         this.mensaje.set('Registro eliminado.');
       },
@@ -147,14 +159,22 @@ export class RecepcionMayorista implements OnInit {
     this.error.set('');
   }
 
+  protected filtrarPorCentro(valor: string): void {
+    this.centroFiltrado.set(valor ? Number(valor) : null);
+    this.cargar();
+  }
+
   private cargar(): void {
+    const consulta = ++this.consultaActual;
     this.cargando.set(true);
-    this.operaciones.recepcionesMayorista().subscribe({
+    this.operaciones.recepcionesMayorista(this.centroFiltrado()).subscribe({
       next: (items) => {
+        if (consulta !== this.consultaActual) return;
         this.registros.set(items);
         this.cargando.set(false);
       },
       error: (response: HttpErrorResponse) => {
+        if (consulta !== this.consultaActual) return;
         this.cargando.set(false);
         this.error.set(
           response.status === 401

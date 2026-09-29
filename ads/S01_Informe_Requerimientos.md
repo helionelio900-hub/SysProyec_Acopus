@@ -9,17 +9,18 @@ El proyecto **`sitra-oro`** (**SITRA-ORO**) es un sistema automatizado empresari
 
 ---
 
-## 2. ESTRUCTURA FORMAL DE 5 MÓDULOS DEL SISTEMA
+## 2. ESTRUCTURA FUNCIONAL DEL SISTEMA
 
-El sistema se divide en **1 Módulo de Seguridad, 2 Módulos Transaccionales y 2 Módulos No Transaccionales**:
+El sistema comprende **1 módulo de seguridad, 2 módulos transaccionales y 3 módulos no transaccionales**:
 
 | # | Nombre del Módulo | Tipo de Módulo | Descripción y Alcance |
 |---|---|---|---|
 | **1** | **`seguridad`** | **Módulo de Seguridad** | Autenticación con JWT (JSON Web Token), BCrypt y control de acceso RBAC (`ROLE_MINERO`, `ROLE_G2_ACOPIADOR`, `ROLE_G1_MAYORISTA`). |
-| **2** | **`acopiador`** | **Transaccional 1** | Registro de fundición real de oro bruto, pesaje neto, clasificación en 🔴 **Oro Rojo** / 🟢 **Oro Verde**, pago directo y registro en `TRANSACCIONES_G2`. |
-| **3** | **`mayorista`** | **Transaccional 2** | Cierre semanal presencial G2-G1, ingreso de Cotización Onza USD y Tipo Cambio Dólar, liquidación financiera y registro en `LIQUIDACIONES_G1`. |
-| **4** | **`cotizador`** | **No Transaccional 1** | Consulta rápida y estimativa para mineros (sin login), calculando la bajada/merma estimativa y monto aproximado sin persistir compras. |
-| **5** | **`parametros`** | **No Transaccional 2** | Registro del catálogo de mineros, configuración de precios del día, tasa de merma estándar y Dashboard Consolidado con sumatorias por color. |
+| **2** | **`minero`** | **Portal de autoservicio** | Registro e inicio de sesión del minero, elección de centro preferido y consulta/actualización de su propio perfil. Reutiliza el catálogo maestro `MINEROS`. |
+| **3** | **`acopiador`** | **Transaccional 1** | Registro de fundición real de oro bruto, pesaje neto, clasificación en 🔴 **Oro Rojo** / 🟢 **Oro Verde**, pago directo y registro en `TRANSACCIONES_G2`. Incluye validación presencial de cuentas mineras pendientes. |
+| **4** | **`mayorista`** | **Transaccional 2 / administración de centros** | Cierre semanal presencial G2-G1, ingreso de Cotización Onza USD y Tipo Cambio Dólar, liquidación financiera y registro en `LIQUIDACIONES_G1`. Administra centros de acopio y crea sus cuentas G2. |
+| **5** | **`cotizador`** | **No Transaccional 1** | Consulta rápida y estimativa para visitantes y mineros (sin login), calculando la bajada/merma estimativa y monto aproximado sin persistir compras ni reservar precio. |
+| **6** | **`parametros`** | **No Transaccional 2** | Registro del catálogo maestro de mineros, configuración de precios del día, tasa de merma estándar y Dashboard Consolidado con sumatorias por color. |
 
 ---
 
@@ -31,26 +32,31 @@ El esquema de base de datos implementa las siguientes tablas en Oracle:
 2. **`MINEROS`:** Catálogo maestro de mineros registrados.
 3. **`TRANSACCIONES_G2`:** Almacena las compras individuales de G2 con peso bruto, peso fundido, tipo de oro (`ROJO` o `VERDE`), precio y total pagado.
 4. **`LIQUIDACIONES_G1`:** Almacena las liquidaciones semanales efectuadas por G1 a G2.
+5. **`DETALLE_LIQUIDACIONES_G1`:** Detalles de cada cierre semanal por tipo de oro.
+6. **`CUENTAS_ACCESO`:** Documento de acceso, hash BCrypt, rol, estado y vínculos al minero o centro asignado; nunca almacena claves en texto plano.
+7. **`CENTROS_ACOPIO`:** Centros creados por el mayorista, con datos de atención y la cuenta de su acopiador.
 
 ---
 
 ## 4. MATRIZ DE SEGURIDAD Y PERMISOS (RBAC)
 
-| Módulo / Funcionalidad | Público (`ROLE_MINERO`) | Acopiador (`ROLE_G2_ACOPIADOR`) | Mayorista (`ROLE_G1_MAYORISTA`) |
+| Módulo / Funcionalidad | Visitante / Minero | Acopiador (`ROLE_G2_ACOPIADOR`) | Mayorista (`ROLE_G1_MAYORISTA`) |
 |---|:---:|:---:|:---:|
 | **Cotizador Estimativo** | ✔️ | ✔️ | ✔️ |
+| **Consultar centros y registrarse** | ✔️ | ❌ | ❌ |
+| **Consultar/actualizar perfil propio y centro preferido** | ✔️ | ❌ | ❌ |
+| **Validar en persona una cuenta minera pendiente** | ❌ | ✔️ | ❌ |
 | **Registrar Compra / Fundición G2** | ❌ | ✔️ | ❌ |
 | **Sumatorias Acumuladas G2** | ❌ | ✔️ | ❌ |
 | **Ingresar Onza USD / Tipo Cambio** | ❌ | ❌ | ✔️ |
 | **Liquidación Semanal G1** | ❌ | ❌ | ✔️ |
+| **Crear centros y cuentas de acopio** | ❌ | ❌ | ✔️ |
 | **Dashboard Consolidado General** | ❌ | ❌ | ✔️ |
 
 ## 5. Corte arquitectónico U1 y trazabilidad LP2–BD2
 
-Este documento es la referencia de alcance del proyecto (brief funcional). En U1
-hay cuatro módulos implementados: parametros, cotizador, acopiador y mayorista.
-Seguridad y la matriz RBAC de la sección 4 son diseño previsto para U2/S10;
-no describen permisos ya aplicados por el backend actual.
+Este apartado conserva la línea base funcional U1. La evolución del módulo Minero
+y la activación de seguridad/RBAC se documentan en la sección 6.
 
 La vista de componentes C3 del monolito es:
 
@@ -91,3 +97,34 @@ Las reglas de cálculo y stock se implementan en los servicios Java; BD2 aporta
 PK, FK, unicidad, CHECK de tipos/estado e índices. No se atribuyen a procedimientos
 PL/SQL de negocio inexistentes. La verificación Oracle instala el DDL de BD2 y
 arranca Hibernate en modo validate antes de probar commit, rollback y consultas.
+
+## 6. Evolución S07: módulo Minero y acceso por roles
+
+El backend incorpora un portal minero separado del CRUD de catálogo usado por
+Acopio. La entidad `MINEROS` se conserva porque las compras existentes la referencian;
+`CUENTAS_ACCESO` contiene las credenciales y enlaza el usuario autenticado con el
+registro maestro. La contraseña se almacena con BCrypt y los endpoints internos
+usan JWT de acceso temporal y roles.
+
+Recorrido implementado:
+
+1. El mayorista crea un centro y una cuenta `ROLE_ACOPIADOR` desde
+   `POST /api/v1/mayorista/centros-acopio`.
+2. El visitante consulta centros activos en `GET /api/v1/publico/centros-acopio` y
+   puede registrarse sin que se cree una transacción de compra.
+3. Si el documento ya tiene registro histórico en `MINEROS`, la cuenta queda
+   pendiente y el acopiador del centro elegido valida presencialmente el documento
+   antes de activarla. Las cuentas nuevas de minero se crean junto con el registro
+   maestro, sin duplicar documentos.
+4. El minero ingresa desde cualquier dispositivo con documento y clave, consulta su
+   perfil y puede cambiar su centro preferido. Su token no autoriza consultas sobre
+   otros mineros ni operaciones de Acopio.
+5. La cotización pública sigue siendo estimativa y no reserva precio. El precio y
+   pago de una compra se registran cuando Acopio procesa la entrega.
+
+La seguridad es stateless. El JWT se firma con `SITRAORO_JWT_SECRET`; para el primer
+mayorista se usan las variables `SITRAORO_BOOTSTRAP_MAYORISTA_DOCUMENTO` y
+`SITRAORO_BOOTSTRAP_MAYORISTA_CLAVE`. En desarrollo, sin una clave definida se genera
+una clave temporal en memoria. En los esquemas Oracle existentes se debe ejecutar
+`bd2/S07_01_tablas_minero_seguridad.sql` una vez antes de arrancar con Hibernate en
+modo validate.

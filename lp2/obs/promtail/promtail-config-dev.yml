@@ -1,0 +1,18 @@
+server:
+  http_listen_port: 9080
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://sitra-oro-loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: sitra-oro-backend
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          application: sitra-oro-backend
+          environment: dev
+          __path__: /var/log/sitra-oro-backend/*.log

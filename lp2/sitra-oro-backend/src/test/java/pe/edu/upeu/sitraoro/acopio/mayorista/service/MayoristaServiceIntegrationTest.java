@@ -10,13 +10,21 @@ import pe.edu.upeu.sitraoro.acopio.acopiador.repository.TransaccionG2Repository;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.DetalleLiquidacionRequest;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Request;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Response;
+import pe.edu.upeu.sitraoro.acopio.mayorista.dto.RecepcionMayoristaRequest;
+import pe.edu.upeu.sitraoro.acopio.mayorista.entity.CentroAcopio;
+import pe.edu.upeu.sitraoro.acopio.mayorista.repository.CentroAcopioRepository;
 import pe.edu.upeu.sitraoro.acopio.mayorista.repository.LiquidacionG1Repository;
+import pe.edu.upeu.sitraoro.acopio.mayorista.repository.RecepcionMayoristaRepository;
+import pe.edu.upeu.sitraoro.acopio.mayorista.service.RecepcionMayoristaService;
 import pe.edu.upeu.sitraoro.acopio.parametros.entity.Minero;
 import pe.edu.upeu.sitraoro.acopio.parametros.repository.MineroRepository;
+import pe.edu.upeu.sitraoro.exception.ResourceNotFoundException;
 import pe.edu.upeu.sitraoro.exception.StockInsuficienteException;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.time.LocalDateTime;
 import pe.edu.upeu.sitraoro.acopio.mayorista.entity.LiquidacionG1;
 import pe.edu.upeu.sitraoro.acopio.mayorista.entity.EstadoLiquidacion;
@@ -37,6 +45,15 @@ class MayoristaServiceIntegrationTest {
     private LiquidacionG1Repository liquidacionG1Repository;
 
     @Autowired
+    private RecepcionMayoristaRepository recepcionMayoristaRepository;
+
+    @Autowired
+    private CentroAcopioRepository centroAcopioRepository;
+
+    @Autowired
+    private RecepcionMayoristaService recepcionMayoristaService;
+
+    @Autowired
     private TransaccionG2Repository transaccionG2Repository;
 
     @Autowired
@@ -50,9 +67,56 @@ class MayoristaServiceIntegrationTest {
 
     @BeforeEach
     void limpiarBase() {
+        recepcionMayoristaRepository.deleteAll();
         transaccionG2Repository.deleteAll();
         liquidacionG1Repository.deleteAll();
         mineroRepository.deleteAll();
+    }
+
+    @Test
+    void recepcionCrud_conservaCentroYRechazaCentroInactivo() {
+        CentroAcopio centro = centroAcopioRepository.saveAndFlush(CentroAcopio.builder()
+                .nombre("Centro S8 " + UUID.randomUUID())
+                .zona("Zona de prueba")
+                .direccion("Dirección de prueba")
+                .idCuentaAcopiador(1_000_000_000_000L + Math.abs(System.nanoTime() % 1_000_000_000L))
+                .activo(true)
+                .build());
+
+        var creado = recepcionMayoristaService.registrar(
+                solicitudRecepcion(centro.getIdCentroAcopio(), LocalDate.now()));
+        assertNotNull(creado.idRecepcion());
+        assertEquals(centro.getIdCentroAcopio(), creado.idCentroAcopio());
+        assertEquals(centro.getNombre() + " · " + centro.getZona(), creado.nombreAcopiador());
+        assertEquals(1, recepcionMayoristaService.listar().size());
+
+        LocalDate fechaActualizada = LocalDate.now().minusDays(1);
+        var actualizado = recepcionMayoristaService.actualizar(
+                creado.idRecepcion(), solicitudRecepcion(centro.getIdCentroAcopio(), fechaActualizada));
+        assertEquals(fechaActualizada, actualizado.fecha());
+        assertEquals(centro.getIdCentroAcopio(), actualizado.idCentroAcopio());
+
+        recepcionMayoristaService.eliminar(creado.idRecepcion());
+        assertEquals(0, recepcionMayoristaService.listar().size());
+
+        centro.setActivo(false);
+        centroAcopioRepository.saveAndFlush(centro);
+        assertThrows(ResourceNotFoundException.class,
+                () -> recepcionMayoristaService.registrar(
+                        solicitudRecepcion(centro.getIdCentroAcopio(), LocalDate.now())));
+        assertThrows(ResourceNotFoundException.class,
+                () -> recepcionMayoristaService.registrar(solicitudRecepcion(Long.MAX_VALUE, LocalDate.now())));
+    }
+
+    private RecepcionMayoristaRequest solicitudRecepcion(Long idCentro, LocalDate fecha) {
+        return new RecepcionMayoristaRequest(
+                fecha,
+                idCentro,
+                new RecepcionMayoristaRequest.FilaOro(
+                        new BigDecimal("1.000"), new BigDecimal("0.900"), "", "", "", ""),
+                new RecepcionMayoristaRequest.FilaOro(null, null, "", "", "", ""),
+                "",
+                "");
     }
 
     @Test

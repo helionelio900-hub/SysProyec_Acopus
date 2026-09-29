@@ -11,7 +11,9 @@ Módulos: seguridad, minero, parametros, cotizador, acopiador y mayorista.
    También puede configurar `DB_USERNAME`, `DB_PASSWORD` y `DB_URL` en el entorno.
 3. En una base ya instalada con `../../bd2/S01_03_tablas_bomerp_app.sql`, ejecute una sola vez
    `../../bd2/S07_01_tablas_minero_seguridad.sql` en el mismo usuario Oracle.
-4. Ejecute una sola vez `../../bd2/S08_01_recepciones_mayorista.sql` para crear el registro de recepción.
+4. Si es una instalación nueva, ejecute `../../bd2/S08_01_recepciones_mayorista.sql`.
+   Si ya ejecutó la versión anterior de ese script, revise y ejecute
+   `../../bd2/S08_02_vincular_recepciones_centro.sql` para agregar la relación con centros existentes.
 5. Configure las variables seguras de inicio de sesión indicadas abajo y ejecute
    `./mvnw.cmd spring-boot:run` desde esta carpeta.
 6. Abra [Swagger](http://localhost:8081/swagger-ui.html) y

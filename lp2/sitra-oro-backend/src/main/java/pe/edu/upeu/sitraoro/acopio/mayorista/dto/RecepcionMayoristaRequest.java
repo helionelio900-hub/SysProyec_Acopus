@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 public record RecepcionMayoristaRequest(
         @NotNull LocalDate fecha,
-        @NotBlank @Size(max = 120) String nombreAcopiador,
+        @NotNull @Positive Long idCentroAcopio,
         @NotNull @Valid FilaOro rojo,
         @NotNull @Valid FilaOro verde,
         @Size(max = 100) String descuento,

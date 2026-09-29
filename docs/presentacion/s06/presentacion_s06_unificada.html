@@ -1,0 +1,1679 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SITRA-ORO · Sustentación Final S06 (Presentación Unificada)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Reset & Base Deck Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #020b19;
+      font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;
+      color: #f8fafc;
+      user-select: none;
+    }
+    
+    /* Presentation Container */
+    .deck-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #020b19;
+    }
+    
+    .slide-wrapper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: scale(0.985);
+      z-index: 1;
+      overflow: hidden;
+    }
+    
+    .slide-wrapper.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: scale(1);
+      z-index: 10;
+    }
+    
+    /* Navigation Controls */
+    .nav-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid rgba(242, 183, 54, 0.3);
+      background: rgba(2, 11, 25, 0.75);
+      color: #f2b736;
+      font-size: 26px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: #f2b736;
+      color: #020b19;
+      border-color: #f2b736;
+      transform: translateY(-50%) scale(1.1);
+    }
+    .nav-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+      border-color: rgba(157, 188, 226, 0.2);
+      color: #8899ac;
+    }
+    .nav-prev { left: 18px; }
+    .nav-next { right: 18px; }
+    
+    /* Bottom Keyboard Helper */
+    .deck-hint {
+      position: fixed;
+      bottom: 12px;
+      right: 24px;
+      z-index: 100;
+      display: flex;
+      gap: 12px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: rgba(2, 11, 25, 0.75);
+      border: 1px solid rgba(157, 188, 226, 0.18);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #afbed2;
+      backdrop-filter: blur(6px);
+      pointer-events: none;
+    }
+    .deck-hint span {
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    /* Shared CSS from project */
+    /* SITRA-ORO · Sustentación U1 LP2 — sistema visual compartido (diapositivas 02–07) */
+:root {
+  --navy: #020b19;
+  --navy-soft: #071426;
+  --navy-card: #0a1a30;
+  --gold: #f2b736;
+  --gold-soft: #f8cf76;
+  --text: #f7f9fc;
+  --dim: #a7b7cc;
+  --line: rgba(128, 164, 214, .20);
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --ok: #4ade80;
+  --err: #f87171;
+}
+
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; }
+body {
+  min-width: 320px;
+  overflow: hidden;
+  background:
+    radial-gradient(60rem 40rem at 110% -10%, rgba(242,183,54,.08), transparent 60%),
+    var(--navy);
+  color: var(--text);
+  font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+}
+
+.mono { font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing: .15em; text-transform: uppercase; }
+
+.slide {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header (igual a la portada) */
+.header {
+  height: 5.6rem;
+  padding: 0 clamp(2rem, 4.8vw, 5.4rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+.upeu-logo { width: auto; height: 2.9rem; object-fit: contain; filter: brightness(0) invert(1) grayscale(1) brightness(2.8); }
+.career { display: flex; align-items: center; gap: .7rem; text-align: right; }
+.career img { width: 2.9rem; height: 2.9rem; object-fit: contain; }
+.career small { display: block; color: var(--dim); font-size: .58rem; font-weight: 600; }
+.career b { display: block; margin-top: .12rem; color: #fff; font-size: .85rem; font-family: "Plus Jakarta Sans"; text-transform: none; letter-spacing: 0; }
+
+/* Cuerpo */
+.body {
+  flex: 1 1 auto;
+  padding: clamp(2rem, 4vh, 3.2rem) clamp(2rem, 4.8vw, 5.4rem) 1.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  color: var(--gold);
+  font: 700 .72rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+}
+.eyebrow::before { width: 2.8rem; height: .17rem; content: ""; border-radius: 2rem; background: var(--gold); }
+
+h1 {
+  margin: .95rem 0 .3rem;
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  line-height: 1.04;
+}
+h1 em { color: var(--gold); font-style: normal; }
+
+.lede {
+  max-width: 56rem;
+  margin: 0 0 1.6rem;
+  color: var(--dim);
+  font-size: clamp(.95rem, 1.15vw, 1.12rem);
+  line-height: 1.55;
+}
+
+/* Tarjetas reutilizables */
+.card {
+  background: linear-gradient(105deg, rgba(10, 26, 48, .78), rgba(10, 26, 48, .4) 76%);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  box-shadow: 0 1.2rem 3rem -1.8rem rgba(0, 0, 0, .7);
+}
+.card--gold { border-left: 3px solid var(--gold); }
+
+.grid { display: grid; gap: 1rem; }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+code, pre {
+  font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+  text-transform: none;
+  letter-spacing: 0;
+}
+pre {
+  margin: 0;
+  padding: 1rem 1.15rem;
+  font-size: .78rem;
+  line-height: 1.55;
+  color: #cfe0f5;
+  background: rgba(2, 8, 18, .6);
+  border: 1px solid var(--line);
+  border-radius: .7rem;
+  overflow: auto;
+}
+pre .kw { color: var(--gold-soft); }
+pre .str { color: #8fd6a8; }
+pre .cm { color: #6d84a3; font-style: italic; }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .3rem .62rem;
+  border-radius: .5rem;
+  font: 700 .62rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.tag--ok { color: var(--ok); background: rgba(74, 222, 128, .12); border: 1px solid rgba(74, 222, 128, .35); }
+.tag--err { color: var(--err); background: rgba(248, 113, 113, .12); border: 1px solid rgba(248, 113, 113, .35); }
+.tag--gold { color: var(--gold-soft); background: rgba(242, 183, 54, .1); border: 1px solid rgba(242, 183, 54, .32); }
+.tag--dim { color: var(--dim); background: rgba(167, 183, 204, .08); border: 1px solid var(--line); }
+
+/* Footer (igual patrón que la portada) */
+.footer {
+  flex: 0 0 auto;
+  height: 3.6rem;
+  padding: 0 clamp(1.5rem, 4.8vw, 5.4rem);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid var(--line);
+}
+.footer-title { color: var(--dim); font: 600 .68rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+.dots { display: flex; gap: .46rem; justify-self: center; }
+.dots i { display: block; width: .48rem; height: .48rem; border: 1px solid rgba(139, 178, 225, .46); border-radius: 50%; }
+.dots i.active { width: 1.85rem; border-color: var(--gold); border-radius: 1rem; background: var(--gold); }
+.footer-label { justify-self: end; color: #d5e0ef; font: 600 .67rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+
+@media (max-width: 900px), (max-height: 680px) {
+  .header { height: 4.6rem; padding-inline: 1.6rem; }
+  .body { padding: 1.4rem 1.6rem 1rem; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  h1 { font-size: 2rem; }
+}
+
+/* Composiciones de contenido para la sustentación U1 */
+.content-fill { flex: 1 1 auto; min-height: 0; }
+.process-line { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; align-items: stretch; }
+.process-step { position: relative; padding: 1rem 1.05rem; background: linear-gradient(145deg, rgba(11,31,57,.92), rgba(5,17,32,.72)); border: 1px solid var(--line); border-top: 3px solid var(--gold); border-radius: .85rem; }
+.process-step { display:flex; flex-direction:column; }
+.process-step .num { display:block; color:var(--gold); font:700 .7rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing:.14em; }
+.process-step h3 { margin:.5rem 0 .3rem; color:#fff; font-size:1rem; }
+.process-step p { margin:0; color:var(--dim); font-size:.78rem; line-height:1.48; }
+.process-step ul { margin:.7rem 0 0; padding-left:1rem; color:var(--dim); font-size:.74rem; line-height:1.48; }
+.process-step .process-foot { margin-top:auto; padding-top:.7rem; border-top:1px solid var(--line); color:var(--gold-soft); font:600 .68rem/1.4 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing:.04em; }
+.process-step:not(:last-child)::after { content:""; position:absolute; top:50%; right:-.58rem; width:.46rem; height:1px; background:var(--gold); }
+.scope-strip { display:grid; grid-template-columns: 1.15fr .85fr; gap:1rem; margin-top:1rem; }
+.scope-block { padding:1rem 1.15rem; border-radius:.8rem; background:rgba(8,25,47,.72); border:1px solid var(--line); }
+.scope-block h3, .logic-title { margin:0 0 .55rem; font-size:.82rem; color:var(--gold-soft); font-family:"Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing:.1em; text-transform:uppercase; }
+.scope-block p { margin:0; color:var(--text); font-size:.85rem; line-height:1.45; }
+.scope-block ul { margin:.2rem 0 0; padding-left:1rem; color:var(--dim); font-size:.81rem; line-height:1.55; }
+
+.architecture-board { display:grid; grid-template-columns: 1.06fr .94fr; gap:1.25rem; }
+.layers { display:grid; gap:.62rem; }
+.layer { display:grid; grid-template-columns: 8.5rem 1fr; min-height:3.3rem; overflow:hidden; border:1px solid var(--line); border-radius:.65rem; background:rgba(8,25,47,.68); }
+.layer b { display:flex; align-items:center; padding:.7rem .9rem; color:var(--gold); background:rgba(242,183,54,.08); font-size:.79rem; }
+.layer span { display:flex; align-items:center; padding:.7rem .9rem; color:var(--text); font-size:.82rem; line-height:1.35; }
+.module-table { width:100%; border-collapse:collapse; overflow:hidden; border:1px solid var(--line); border-radius:.7rem; background:rgba(8,25,47,.55); font-size:.75rem; }
+.module-table th { padding:.62rem .68rem; color:var(--gold-soft); text-align:left; font:700 .62rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing:.08em; text-transform:uppercase; background:rgba(242,183,54,.06); }
+.module-table td { padding:.62rem .68rem; color:var(--dim); vertical-align:top; line-height:1.35; border-top:1px solid var(--line); }
+.module-table td:first-child { color:#fff; font-weight:700; }
+.contract-note { margin-top:.85rem; padding:.9rem 1rem; border-left:3px solid var(--gold); background:rgba(242,183,54,.07); color:var(--text); font-size:.84rem; line-height:1.45; }
+.contract-note code { color:var(--gold-soft); }
+
+.entity-stage { display:grid; grid-template-columns: 1fr 1.12fr; gap:1.2rem; }
+.entity-diagram { position:relative; display:grid; grid-template-columns:1fr .36fr 1fr; grid-template-rows:1fr .42fr 1fr; gap:.45rem; min-height:18rem; align-items:center; }
+.entity { padding:.9rem .95rem; border:1px solid var(--line); border-radius:.7rem; background:linear-gradient(145deg,rgba(11,31,57,.94),rgba(4,16,31,.84)); }
+.entity h3 { margin:0 0 .42rem; color:var(--gold); font-size:.87rem; font-family:"Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing:.04em; }
+.entity p { margin:.16rem 0; color:var(--dim); font-size:.73rem; line-height:1.35; }
+.entity strong { color:#fff; }
+.rel { text-align:center; color:var(--gold-soft); font:700 .67rem/1.2 "Plus Jakarta Sans", "Segoe UI", sans-serif; }
+.entity-key { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; margin-top:.7rem; }
+.entity-key div { padding:.65rem .72rem; background:rgba(8,25,47,.65); border:1px solid var(--line); border-radius:.55rem; color:var(--dim); font-size:.75rem; line-height:1.35; }
+.entity-key b { display:block; margin-bottom:.18rem; color:var(--gold-soft); font-size:.72rem; }
+
+.rule-layout { display:grid; grid-template-columns:.9fr 1.1fr; gap:1.25rem; }
+.formula { padding:1rem 1.15rem; border:1px solid rgba(242,183,54,.42); border-radius:.75rem; background:linear-gradient(145deg,rgba(242,183,54,.08),rgba(8,25,47,.72)); }
+.formula .formula-main { margin:.55rem 0; color:#fff; font:700 1.05rem/1.4 "Plus Jakarta Sans", "Segoe UI", sans-serif; }
+.formula p { margin:.55rem 0 0; color:var(--dim); font-size:.78rem; line-height:1.45; }
+.rules { display:grid; gap:.55rem; }
+.rule-row { display:grid; grid-template-columns:2.1rem 1fr; gap:.75rem; align-items:start; padding:.67rem .75rem; border-bottom:1px solid var(--line); }
+.rule-row:last-child { border-bottom:0; }
+.rule-row .ordinal { display:flex; align-items:center; justify-content:center; width:1.75rem; height:1.75rem; border-radius:50%; color:var(--navy); background:var(--gold); font-weight:800; font-size:.76rem; }
+.rule-row h3 { margin:0 0 .18rem; color:#fff; font-size:.85rem; }
+.rule-row p { margin:0; color:var(--dim); font-size:.78rem; line-height:1.42; }
+.exact-box { margin-top:.8rem; padding:.85rem 1rem; border-left:3px solid var(--err); background:rgba(248,113,113,.07); color:var(--text); font-size:.84rem; line-height:1.45; }
+
+.api-stage { display:grid; grid-template-columns:.95fr 1.05fr; gap:1.2rem; }
+.request-panel, .response-panel { padding:1rem 1.1rem; border:1px solid var(--line); border-radius:.75rem; background:rgba(8,25,47,.72); }
+.request-panel h3, .response-panel h3 { margin:0 0 .65rem; color:var(--gold-soft); font-size:.8rem; font-family:"Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing:.09em; text-transform:uppercase; }
+.api-table { width:100%; margin-top:.75rem; border-collapse:collapse; font-size:.76rem; }
+.api-table th { padding:.48rem .48rem; color:var(--gold-soft); text-align:left; font:700 .61rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing:.08em; text-transform:uppercase; }
+.api-table td { padding:.5rem .48rem; border-top:1px solid var(--line); color:var(--dim); line-height:1.35; }
+.api-table td:first-child { color:#fff; white-space:nowrap; }
+.result-band { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-top:.85rem; }
+.result { padding:.75rem .85rem; border-radius:.65rem; background:rgba(8,25,47,.68); border:1px solid var(--line); }
+.result h4 { margin:0 0 .32rem; font:700 .7rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing:.1em; }
+.result p { margin:0; color:var(--dim); font-size:.75rem; line-height:1.4; }
+
+.evidence-layout { display:grid; grid-template-columns:1.12fr .88fr; gap:1.2rem; }
+.test-table { width:100%; border-collapse:collapse; font-size:.79rem; background:rgba(8,25,47,.55); border:1px solid var(--line); border-radius:.7rem; overflow:hidden; }
+.test-table th { padding:.65rem .75rem; color:var(--gold-soft); text-align:left; font:700 .62rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing:.08em; text-transform:uppercase; background:rgba(242,183,54,.07); }
+.test-table td { padding:.6rem .75rem; color:var(--dim); border-top:1px solid var(--line); line-height:1.35; }
+.test-table td:first-child { color:#fff; }
+.test-table td:last-child { color:var(--gold); text-align:center; font-weight:800; }
+.evidence-total { margin-top:.75rem; display:flex; align-items:center; justify-content:space-between; padding:.85rem 1rem; border-left:3px solid var(--ok); background:rgba(74,222,128,.06); }
+.evidence-total b { color:#fff; font-size:.92rem; }.evidence-total span { color:var(--ok); font:700 .82rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif; }
+.runtime-list { margin:0; padding:0; list-style:none; }
+.runtime-list li { padding:.73rem 0; border-bottom:1px solid var(--line); color:var(--dim); font-size:.8rem; line-height:1.42; }.runtime-list li:last-child{border-bottom:0}.runtime-list b{display:block;color:#fff;margin-bottom:.14rem}
+
+@media (max-width: 900px), (max-height: 680px) {
+  .process-line,.architecture-board,.entity-stage,.rule-layout,.api-stage,.evidence-layout,.scope-strip { grid-template-columns:1fr; }
+  .entity-diagram { min-height:auto; }
+}
+
+
+/* === Slide 1 CSS (portada_s6.html) === */
+#slide-1 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+    :root {
+      --navy: #020b19;
+      --navy-soft: #071426;
+      --gold: #f2b736;
+      --gold-soft: #f8cf76;
+      --text: #f7f9fc;
+      --dim: #a7b7cc;
+      --line: rgba(128, 164, 214, .20);
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; }
+    body {
+      min-width: 320px;
+      overflow: hidden;
+      background: var(--navy);
+      color: var(--text);
+      font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+    }
+
+    .cover {
+      isolation: isolate;
+      position: relative;
+      min-height: 100svh;
+      overflow: hidden;
+      background: var(--navy);
+    }
+
+    .cover__photo,
+    .cover__photo::after,
+    .cover__photo::before {
+      position: absolute;
+      inset: 0;
+      content: "";
+    }
+
+    .cover__photo { z-index: -2; }
+    .cover__photo::before {
+      background: url("assets/contexto-andino-operacion-sin-nube-v3.png") center / cover no-repeat;
+      filter: saturate(.94) contrast(1.05) brightness(.88);
+    }
+    .cover__photo::after {
+      z-index: 1;
+      background:
+        linear-gradient(99deg, #020b19 0%, rgba(2, 11, 25, .88) 26%, rgba(2, 11, 25, .58) 48%, rgba(2, 11, 25, .18) 67%, rgba(2, 11, 25, .04) 100%),
+        linear-gradient(180deg, rgba(2, 11, 25, .36) 0%, transparent 22%, transparent 76%, rgba(2, 11, 25, .54) 100%);
+    }
+
+    .cover__glow {
+      position: absolute;
+      z-index: -1;
+      right: -8rem;
+      top: -12rem;
+      width: 44rem;
+      height: 44rem;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(242, 183, 54, .10), transparent 67%);
+    }
+
+    .cloud-layer {
+      position: absolute;
+      z-index: -1;
+      top: 10%;
+      right: 3%;
+      width: 40%;
+      height: 26%;
+      pointer-events: none;
+      opacity: .70;
+      filter: saturate(.84) brightness(.92) blur(.35px);
+      will-change: transform;
+      background: url("assets/nube-cordillera-v1.png") center / contain no-repeat;
+      animation: cloud-drift 22s ease-in-out infinite alternate;
+    }
+
+    @keyframes cloud-drift {
+      from { transform: translate3d(8%, -1%, 0) scale(1); }
+      to { transform: translate3d(-12%, 1.5%, 0) scale(1.03); }
+    }
+
+    .header {
+      position: absolute;
+      z-index: 2;
+      inset: 0 0 auto;
+      height: 6.2rem;
+      padding: 0 clamp(2rem, 4.8vw, 5.4rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(180deg, rgba(2, 11, 25, .88), rgba(2, 11, 25, .40) 70%, transparent);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .header-divider {
+      width: 1px;
+      height: 2.6rem;
+      background: rgba(128, 164, 214, .25);
+    }
+
+    .upeu-logo {
+      width: auto;
+      height: 3.65rem;
+      object-fit: contain;
+      filter: brightness(0) invert(1) grayscale(1) brightness(2.8);
+    }
+
+    .company-lockup {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      margin: 0;
+      padding: .2rem 0;
+    }
+    .company-emblem {
+      width: 4.4rem;
+      height: 2.75rem;
+      flex: 0 0 auto;
+      object-fit: contain;
+      filter: drop-shadow(0 .35rem .65rem rgba(0, 0, 0, .45));
+    }
+    .company-copy {
+      display: grid;
+      gap: .1rem;
+      padding-left: .7rem;
+      border-left: 2px solid var(--gold);
+    }
+    .company-copy small {
+      color: var(--gold);
+      font: 700 .58rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .company-copy strong {
+      color: #fff;
+      font-size: .88rem;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+    .company-copy span {
+      color: #93c5fd;
+      font-size: .68rem;
+      line-height: 1.2;
+    }
+
+    .career {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      text-align: right;
+    }
+    .career img { width: 4.15rem; height: 4.15rem; object-fit: contain; }
+    .career small,
+    .mono {
+      font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .career small { display: block; color: var(--dim); font-size: .65rem; font-weight: 600; }
+    .career b { display: block; margin-top: .16rem; color: #fff; font-size: 1rem; }
+
+    .hero {
+      width: min(46rem, 56vw);
+      min-height: 100svh;
+      padding: clamp(7rem, 13vh, 9rem) 0 5.2rem clamp(3rem, 5.8vw, 7.4rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      color: var(--gold);
+      font: 700 .75rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { width: 3.35rem; height: .19rem; content: ""; border-radius: 2rem; background: var(--gold); }
+
+    h1 {
+      margin: 1.25rem 0 .55rem;
+      font-size: clamp(3.5rem, 6.7vw, 6.35rem);
+      font-weight: 800;
+      letter-spacing: -.058em;
+      line-height: .92;
+      text-transform: uppercase;
+    }
+    h1 span { color: #fff; }
+    h1 strong { color: var(--gold); font-weight: 800; text-shadow: 0 0 2rem rgba(242, 183, 54, .21); }
+
+    .context-box {
+      max-width: 44rem;
+      margin: 0 0 .85rem;
+      padding: .65rem .95rem;
+      background: rgba(5, 15, 31, .45);
+      border-left: 2px solid var(--gold-soft);
+      border-radius: 0 .6rem .6rem 0;
+      backdrop-filter: blur(6px);
+    }
+    .context-box p {
+      margin: 0;
+      color: #dbe4ef;
+      font-size: clamp(.78rem, .95vw, .86rem);
+      line-height: 1.42;
+    }
+
+    .members-modules {
+      width: min(44rem, 100%);
+      margin: 0 0 .85rem;
+      padding: .62rem .75rem .72rem;
+      background: rgba(5, 15, 31, .55);
+      border: 1px solid rgba(128, 164, 214, .18);
+      border-radius: .75rem;
+      backdrop-filter: blur(8px);
+    }
+    .team-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: .55rem;
+      padding-bottom: .38rem;
+      border-bottom: 1px solid rgba(128, 164, 214, .18);
+    }
+    .team-title strong {
+      color: #fff;
+      font-size: .78rem;
+      font-weight: 750;
+    }
+    .team-title span {
+      color: var(--gold);
+      font: 700 .58rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .member-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+    .member-group {
+      min-width: 0;
+      padding: 0;
+      background: transparent;
+    }
+    .member-group + .member-group {
+      padding-left: .75rem;
+      border-left: 1px solid rgba(128, 164, 214, .18);
+    }
+    .member-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: .42rem;
+      padding: 0 .08rem;
+    }
+    .member-title strong {
+      color: #fff;
+      font-size: .7rem;
+      font-weight: 700;
+    }
+    .member-title span {
+      color: var(--gold);
+      font: 700 .54rem "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .member-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .38rem;
+    }
+    .feature-card {
+      padding: .46rem .52rem;
+      background: linear-gradient(135deg, rgba(7, 20, 38, .85), rgba(5, 15, 31, .45));
+      border: 1px solid rgba(242, 183, 54, .25);
+      border-radius: .6rem;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, .26);
+      transition: transform .2s var(--ease), border-color .2s ease;
+    }
+    .feature-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+    .feature-header {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      margin-bottom: .2rem;
+    }
+    .feature-icon {
+      font-size: .95rem;
+      line-height: 1;
+    }
+    .feature-card strong {
+      display: block;
+      color: #fff;
+      font-size: .74rem;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+    .tag-trans {
+      display: inline-block;
+      margin-bottom: .2rem;
+      color: #4ade80;
+      font: 700 .56rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .tag-notrans {
+      display: inline-block;
+      margin-bottom: .2rem;
+      color: #60a5fa;
+      font: 700 .56rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .feature-card small {
+      display: block;
+      color: var(--dim);
+      font-size: .62rem;
+      line-height: 1.22;
+    }
+
+    .data-card {
+      width: min(44rem, 100%);
+      padding: .65rem .95rem;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .55rem 1rem;
+      background: linear-gradient(105deg, rgba(5, 15, 31, .57), rgba(5, 15, 31, .22) 76%, rgba(5, 15, 31, .08));
+      border: 1px solid rgba(128, 164, 214, .16);
+      border-left: 3px solid var(--gold);
+      border-radius: .85rem;
+      box-shadow: 0 1.2rem 3rem -1.6rem rgba(0, 0, 0, .68);
+      backdrop-filter: blur(8px);
+    }
+
+    .data-row {
+      display: grid;
+      grid-template-columns: 1.15rem 1fr;
+      gap: .65rem;
+      align-items: start;
+    }
+    .data-row svg { width: 1.15rem; height: 1.15rem; margin-top: .1rem; stroke: var(--gold); fill: none; stroke-width: 1.9; }
+    .data-row dt { color: var(--gold); font: 700 .65rem/1.15 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+    .data-row dd { margin: .18rem 0 0; color: #fff; font-size: .78rem; line-height: 1.28; }
+
+    .footer {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 4.2rem;
+      padding: 0 clamp(1.5rem, 4.8vw, 5.4rem);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 1rem;
+    }
+    .honor-code {
+      max-width: 42rem;
+      color: rgba(247, 249, 252, .94);
+      font-size: clamp(.72rem, .82vw, .9rem);
+      font-style: italic;
+      font-weight: 500;
+      line-height: 1.4;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, .68);
+    }
+    .dots { display: flex; gap: .46rem; }
+    .dots i { display: block; width: .48rem; height: .48rem; border: 1px solid rgba(139, 178, 225, .46); border-radius: 50%; }
+    .dots i:first-child { width: 1.85rem; border-color: var(--gold); border-radius: 1rem; background: var(--gold); }
+    .footer-label { justify-self: end; color: #d5e0ef; font: 600 .68rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+
+    @media (max-width: 900px), (max-height: 680px) {
+      .header { height: 5.2rem; padding-inline: 1.7rem; }
+      .header-left { gap: .8rem; }
+      .header-divider { height: 2rem; }
+      .upeu-logo { width: auto; height: 2.8rem; }
+      .company-emblem { width: 3.4rem; height: 2.1rem; }
+      .company-copy strong { font-size: .75rem; }
+      .company-copy span { font-size: .58rem; }
+      .career img { width: 3.2rem; height: 3.2rem; }
+      .career b { font-size: .8rem; }
+      .career small { font-size: .5rem; }
+      .hero { width: min(46rem, 82vw); min-height: 100svh; padding: 5.7rem 1.7rem 4rem; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); gap: .5rem; }
+      .data-card { padding: .7rem .9rem; gap: .5rem .8rem; }
+      .data-row dd { font-size: .74rem; }
+      .data-row dt { font-size: .56rem; }
+      .footer { height: 3.1rem; }
+    }
+
+    @media (max-width: 600px) {
+      body { overflow: auto; }
+      .cover { min-height: 46rem; }
+      .career div { display: none; }
+      .company-copy span { display: none; }
+      .header { padding-inline: 1.1rem; }
+      .hero { width: 100%; padding-inline: 1.25rem; }
+      h1 { font-size: 3.6rem; }
+      .subtitle { font-size: 1.04rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .data-card { grid-template-columns: 1fr; }
+      .data-row:last-child { grid-column: auto; }
+      .honor-code { display: none; }
+      .footer-label { display: none; }
+      .footer { grid-template-columns: 1fr auto; }
+      .dots { justify-self: end; }
+    }
+  
+
+/* === Slide 2 CSS (propuesta_01_contexto.html) === */
+#slide-2 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+  :root{--navy:#020b19;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f8fafc;--dim:#afbed2;--line:rgba(157,188,226,.23)}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif;color:var(--text)}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:var(--navy)}
+  .background{position:absolute;inset:0;background:url('assets/contexto-andino-diapositiva-01-v1.png') center/cover no-repeat}
+  .background:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,11,25,.2),transparent 26%,rgba(2,11,25,.42) 100%)}
+  header{position:absolute;z-index:3;top:0;left:0;right:0;height:90px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.68);border-bottom:1px solid rgba(157,188,226,.12)}
+  .upeu{height:51px;filter:brightness(0) invert(1)}.career{display:flex;align-items:center;gap:12px}.career img{width:52px;height:52px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:5px;font-size:15px;letter-spacing:-.02em}
+  main{position:relative;z-index:2;width:54%;height:calc(100% - 146px);margin-top:90px;padding:70px 0 24px 8.4vw;display:flex;flex-direction:column;justify-content:center}
+  .eyebrow{display:flex;align-items:center;gap:15px;color:var(--gold);font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.28em;text-transform:uppercase}.eyebrow:before{content:"";width:44px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{max-width:700px;margin:20px 0 13px;font-size:clamp(46px,4.05vw,70px);line-height:1.02;letter-spacing:-.045em}.gold{color:var(--gold)}
+  .lead{max-width:710px;margin:0;color:#e3e9f3;font-size:20px;line-height:1.5}
+  .items{width:710px;margin-top:36px;border-top:1px solid var(--line)}
+  .item{display:grid;grid-template-columns:174px 1fr;gap:20px;padding:17px 0;border-bottom:1px solid var(--line)}
+  .item h2{margin:0;color:var(--gold-soft);font:700 12px/1.35 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.14em;text-transform:uppercase}.item p{margin:0;color:#f2f6fb;font-size:16px;line-height:1.46}.item p span{color:var(--dim)}
+  .scope{width:710px;margin-top:20px;padding:15px 17px;border-left:4px solid var(--gold);background:rgba(2,11,25,.48);color:#eff5fd;font-size:15px;line-height:1.45}.scope b{color:var(--gold-soft);font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.1em;text-transform:uppercase}
+  .visual{position:absolute;z-index:2;right:5.3vw;bottom:105px;width:298px;padding:14px 17px;text-align:right;border-right:2px solid var(--gold);background:linear-gradient(90deg,transparent,rgba(2,11,25,.5))}.visual b{display:block;color:var(--gold-soft);font:700 12px/1.2 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.visual span{display:block;margin-top:5px;color:#f1f5fb;font-size:13px;line-height:1.35}
+  footer{position:absolute;z-index:3;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(157,188,226,.14);background:rgba(2,11,25,.68)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(157,188,226,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.2em;text-transform:uppercase}
+
+
+/* === Slide 3 CSS (diapositiva-03-crud-mineros.html) === */
+#slide-3 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+  :root{--navy:#020b19;--navy2:#071426;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f7f9fc;--dim:#a8b8cf;--line:rgba(139,178,225,.22);--green:#4ade80;--red:#f87171}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);color:var(--text);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:radial-gradient(50rem 28rem at 105% 5%,rgba(11,66,78,.25),transparent 60%),radial-gradient(38rem 30rem at 4% 94%,rgba(242,183,54,.06),transparent 65%),var(--navy)}
+  .grid{position:absolute;inset:90px 0 56px;opacity:.48;background-image:linear-gradient(rgba(115,161,216,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(115,161,216,.045) 1px,transparent 1px);background-size:45px 45px;mask-image:linear-gradient(90deg,#000 0%,rgba(0,0,0,.45) 55%,transparent 100%)}
+  header{position:absolute;z-index:3;top:0;left:0;right:0;height:90px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.68);border-bottom:1px solid rgba(139,178,225,.12)}
+  .upeu{height:51px;filter:brightness(0) invert(1)}.career{display:flex;align-items:center;gap:12px}.career img{width:52px;height:52px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:5px;font-size:15px;letter-spacing:-.02em}
+  main{position:absolute;z-index:2;inset:90px 0 56px;padding:52px 5.4vw 28px;display:grid;grid-template-columns:38.5% 1fr;gap:50px}
+  .left{display:flex;min-width:0;flex-direction:column;justify-content:center}.eyebrow{display:flex;align-items:center;gap:15px;color:var(--gold);font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.28em;text-transform:uppercase}.eyebrow:before{content:"";width:44px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{margin:20px 0 14px;font-size:clamp(41px,3.25vw,61px);line-height:1.03;letter-spacing:-.045em}.gold{color:var(--gold)}.lead{margin:0;max-width:620px;color:#e1e9f4;font-size:18px;line-height:1.52}
+  .endpoint{display:inline-flex;align-self:flex-start;align-items:center;gap:10px;margin:28px 0 18px;padding:10px 13px;border:1px solid rgba(74,222,128,.42);border-radius:6px;background:rgba(74,222,128,.08);color:#edfff3;font:600 13px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.endpoint b{padding:5px 7px;border-radius:3px;background:#10b981;color:#02140d;font-size:11px;letter-spacing:.08em}.endpoint code{color:#d9f7e5}
+  .pipeline{display:grid;gap:0;border-top:1px solid var(--line)}.pipe{display:grid;grid-template-columns:42px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}.pipe .num{padding-top:2px;color:var(--gold-soft);font:700 12px/1.25 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.pipe h2{margin:0 0 4px;font-size:16px}.pipe p{margin:0;color:var(--dim);font-size:14px;line-height:1.42}.pipe code{color:#f5cb73;font:600 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif}
+  .note{margin-top:19px;padding:11px 14px;border-left:3px solid var(--gold);background:rgba(242,183,54,.07);color:#eaf2fb;font-size:13px;line-height:1.45}.note b{color:var(--gold-soft);font:700 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.12em;text-transform:uppercase}
+  .evidence{min-width:0;display:grid;grid-template-rows:auto 1.18fr 1fr;gap:13px}.evidence-head{display:flex;align-items:end;justify-content:space-between}.evidence-head h2{margin:0;font-size:20px;letter-spacing:-.02em}.evidence-head p{margin:0;color:var(--dim);font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.1em;text-transform:uppercase}
+  .shot{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:10px;background:#081926;box-shadow:0 24px 52px -31px #000}.shot:after{position:absolute;top:0;right:0;padding:9px 12px;border-bottom-left-radius:8px;font:700 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.12em;z-index:4}.shot img{position:absolute;width:100%;height:100%;object-fit:cover;object-position:center 22%;filter:contrast(1.04) saturate(.94)}.shot.success{border-color:rgba(74,222,128,.5)}.shot.success:after{content:"201 CREATED";color:#a7f3c2;background:rgba(6,45,29,.92)}.shot.error{border-color:rgba(248,113,113,.5)}.shot.error:after{content:"400 BAD REQUEST";color:#fecaca;background:rgba(73,19,24,.92)}.shot.error img{object-position:center 39%}
+  .proof-map{position:absolute;z-index:4;top:12px;left:14px;display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:4px;background:rgba(2,11,25,.9);font:700 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.08em;text-transform:uppercase}.proof-map b{color:var(--gold-soft)}.proof-map i{position:relative;width:27px;height:1px;background:currentColor}.proof-map i:after{content:"";position:absolute;right:-1px;top:-3px;border-left:6px solid currentColor;border-top:3px solid transparent;border-bottom:3px solid transparent}.proof-map.ok{color:#8df1af;border:1px solid rgba(74,222,128,.35)}.proof-map.err{color:#fcb4b4;border:1px solid rgba(248,113,113,.35)}
+  .shot.success img{width:160%;height:auto;max-width:none;left:-8%;top:-28%;transform:none;object-fit:initial}.shot.error img{width:160%;height:auto;max-width:none;left:0;top:-145%;transform:none;object-fit:initial}
+  footer{position:absolute;z-index:3;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(139,178,225,.14);background:rgba(2,11,25,.68)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(139,178,225,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.2em;text-transform:uppercase}
+
+
+/* === Slide 4 CSS (diapositiva-04-acopio-g2.html) === */
+#slide-4 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+  :root{--navy:#020b19;--navy2:#071426;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f7f9fc;--dim:#a8b8cf;--line:rgba(139,178,225,.22);--red:#e75b58;--green:#49b879}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);color:var(--text);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:radial-gradient(48rem 30rem at 92% 45%,rgba(23,63,94,.22),transparent 66%),radial-gradient(34rem 28rem at 5% 92%,rgba(242,183,54,.06),transparent 65%),var(--navy)}
+  .grid{position:absolute;inset:90px 0 56px;opacity:.45;background-image:linear-gradient(rgba(115,161,216,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(115,161,216,.04) 1px,transparent 1px);background-size:45px 45px;mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.32) 52%,transparent)}
+  header{position:absolute;z-index:3;top:0;left:0;right:0;height:90px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.68);border-bottom:1px solid rgba(139,178,225,.12)}
+  .upeu{height:51px;filter:brightness(0) invert(1)}.career{display:flex;align-items:center;gap:12px}.career img{width:52px;height:52px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:5px;font-size:15px;letter-spacing:-.02em}
+  main{position:absolute;z-index:2;inset:90px 0 56px;padding:55px 5.4vw 30px;display:grid;grid-template-columns:37.5% 1fr;gap:58px}
+  .left{display:flex;min-width:0;flex-direction:column;justify-content:center}.eyebrow{display:flex;align-items:center;gap:15px;color:var(--gold);font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.28em;text-transform:uppercase}.eyebrow:before{content:"";width:44px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{margin:20px 0 14px;font-size:clamp(43px,3.55vw,66px);line-height:1.02;letter-spacing:-.046em}.gold{color:var(--gold)}.lead{margin:0;max-width:610px;color:#e1e9f4;font-size:18px;line-height:1.52}
+  .endpoints{display:grid;gap:8px;margin:27px 0 25px}.endpoint{display:flex;align-items:center;gap:10px;color:#dfeafa;font:600 12px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.endpoint b{min-width:45px;padding:5px 7px;border-radius:3px;text-align:center;font-size:10px;letter-spacing:.08em}.endpoint.post b{background:#10b981;color:#02140d}.endpoint.get b{background:#3288d8;color:#eaf6ff}.endpoint code{color:#e7eef8}
+  .facts{border-top:1px solid var(--line)}.fact{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:15px 0;border-bottom:1px solid var(--line)}.fact .num{color:var(--gold-soft);font:700 12px/1.25 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.fact h2{margin:0 0 4px;font-size:16px}.fact p{margin:0;color:var(--dim);font-size:14px;line-height:1.43}
+  .rule{margin-top:20px;padding:13px 15px;border-left:3px solid var(--gold);background:rgba(242,183,54,.07);color:#eaf2fb;font-size:14px;line-height:1.46}.rule b{display:block;margin-bottom:4px;color:var(--gold-soft);font:700 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.11em;text-transform:uppercase}
+  .diagram{position:relative;min-width:0;display:grid;grid-template-rows:1fr 1.14fr;gap:38px;align-content:center;padding:30px 20px 20px}.diagram:before{content:"MODELO DE TRAZABILIDAD";position:absolute;top:3px;right:20px;color:#8ea4c1;font:700 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}
+  .branch-flow{position:absolute;z-index:0;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}.branch-flow path{fill:none;stroke:#5ea2e5;stroke-width:1.2;vector-effect:non-scaling-stroke}.branch-flow circle{fill:#5ea2e5}.branch-label{position:absolute;z-index:2;left:61%;top:45.2%;transform:translate(-50%,-50%);padding:6px 10px;border:1px solid var(--line);border-radius:4px;background:var(--navy);color:#9fc4e9;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.1em;text-transform:uppercase}
+  .relation{position:relative;display:grid;grid-template-columns:252px 1fr 390px;gap:24px;align-items:center}.node{position:relative;padding:20px 22px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,rgba(11,31,57,.96),rgba(4,16,31,.88));box-shadow:0 26px 50px -34px #000}.node .type{display:block;margin-bottom:9px;color:var(--gold-soft);font:700 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.14em;text-transform:uppercase}.node h2{margin:0 0 10px;font-size:25px;letter-spacing:-.025em}.node dl{margin:0;display:grid;gap:7px}.node dl div{display:flex;justify-content:space-between;gap:18px}.node dt{color:var(--dim);font-size:12px}.node dd{margin:0;color:#fff;font:600 12px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.minero{border-top:3px solid var(--gold)}.transaction{border-top:3px solid #5ea2e5}.transaction:before,.transaction:after{content:"";position:absolute;z-index:-1;inset:10px -10px -10px 10px;border:1px solid rgba(139,178,225,.12);border-radius:12px;background:rgba(5,18,34,.65)}.transaction:after{inset:20px -20px -20px 20px;opacity:.52}
+  .one-many{position:relative;height:2px}.flow-line{position:absolute;inset:0;background:linear-gradient(90deg,var(--gold),#5ea2e5);transform-origin:left center}.flow-line:after{content:"";position:absolute;top:50%;left:0;width:7px;height:7px;border-radius:50%;background:#d9edff;box-shadow:0 0 13px 3px rgba(94,162,229,.72);opacity:0;transform:translate(-50%,-50%)}.one-many:before,.one-many:after{position:absolute;top:-29px;color:#fff;font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.one-many:before{content:"1";left:0}.one-many:after{content:"N";right:0}.one-many i{position:absolute;left:50%;top:-31px;transform:translateX(-50%);padding:6px 9px;border:1px solid var(--line);border-radius:4px;background:var(--navy);color:var(--dim);font:700 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.09em;text-transform:uppercase}.one-many span{position:absolute;right:-1px;top:-5px;border-left:9px solid #5ea2e5;border-top:5px solid transparent;border-bottom:5px solid transparent}
+  .split{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:start;padding-top:43px}.split:before{content:"";position:absolute;top:0;left:50%;width:1px;height:23px;background:#5ea2e5}.split:after{content:"";position:absolute;top:22px;left:25%;right:25%;height:1px;background:linear-gradient(90deg,var(--red),#5ea2e5 50%,var(--green))}.stock{position:relative;min-height:250px;padding:22px 23px;border-radius:12px;background:rgba(6,21,39,.9);box-shadow:0 26px 50px -34px #000}.stock:before{content:"";position:absolute;top:-21px;left:50%;width:1px;height:21px;background:currentColor}.stock.red{color:#ff8c89;border:1px solid rgba(231,91,88,.48);border-top:3px solid var(--red)}.stock.green{color:#80dda7;border:1px solid rgba(73,184,121,.48);border-top:3px solid var(--green)}.stock .type{color:currentColor;font:700 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.15em;text-transform:uppercase}.stock h3{margin:10px 0 14px;color:#fff;font-size:24px}.measure{display:grid;grid-template-columns:1fr auto;gap:12px;padding:8px 0;border-top:1px solid rgba(139,178,225,.14)}.measure span{color:var(--dim);font-size:12px}.measure code{color:#fff;font:600 11px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.pending{margin-top:13px;color:currentColor;font:700 10px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.1em;text-transform:uppercase}
+  @keyframes node-enter{0%{opacity:0;filter:blur(6px);transform:translateY(14px) scale(.975)}100%{opacity:1;filter:blur(0);transform:translateY(0) scale(1)}}
+  @keyframes node-enter-right{0%{opacity:0;filter:blur(6px);transform:translateX(24px) scale(.975)}100%{opacity:1;filter:blur(0);transform:translateX(0) scale(1)}}
+  @keyframes line-grow{0%{opacity:.18;transform:scaleX(0)}100%{opacity:1;transform:scaleX(1)}}
+  @keyframes spark-travel{0%{left:0;opacity:0}14%{opacity:1}86%{opacity:1}100%{left:100%;opacity:0}}
+  @keyframes meta-enter{0%{opacity:0;transform:translateY(5px)}100%{opacity:1;transform:translateY(0)}}
+  @keyframes branch-draw{0%{stroke-dashoffset:1;opacity:.2}100%{stroke-dashoffset:0;opacity:1}}
+  @keyframes branch-point{0%{opacity:0;transform:scale(0);transform-origin:center}65%{opacity:1;transform:scale(1.7);transform-origin:center}100%{opacity:1;transform:scale(1);transform-origin:center}}
+  @keyframes split-down{0%{opacity:0;transform:scaleY(0)}100%{opacity:1;transform:scaleY(1)}}
+  @keyframes split-wide{0%{opacity:0;transform:scaleX(0)}100%{opacity:1;transform:scaleX(1)}}
+  @keyframes stock-enter{0%{opacity:0;filter:blur(6px);transform:translateY(18px) scale(.98)}100%{opacity:1;filter:blur(0);transform:translateY(0) scale(1)}}
+  @keyframes detail-enter{0%{opacity:0;transform:translateY(7px)}100%{opacity:1;transform:translateY(0)}}
+  @keyframes red-pulse{0%,100%{box-shadow:0 26px 50px -34px #000}45%{box-shadow:0 0 34px -9px rgba(231,91,88,.68)}}
+  @keyframes green-pulse{0%,100%{box-shadow:0 26px 50px -34px #000}45%{box-shadow:0 0 34px -9px rgba(73,184,121,.68)}}
+  .architecture-motion .minero{animation:node-enter .62s cubic-bezier(.2,.8,.2,1) .12s both}
+  .architecture-motion .flow-line{animation:line-grow .82s cubic-bezier(.2,.75,.15,1) .7s both}
+  .architecture-motion .flow-line:after{animation:spark-travel .82s ease-in-out .72s both}
+  .architecture-motion .one-many:before,.architecture-motion .one-many:after,.architecture-motion .one-many i,.architecture-motion .one-many span{animation:meta-enter .36s ease-out 1.28s both}
+  .architecture-motion .transaction{animation:node-enter-right .62s cubic-bezier(.2,.8,.2,1) 1.52s both}
+  .architecture-motion .branch-flow path{stroke-dasharray:1;stroke-dashoffset:1;animation:branch-draw 1.05s cubic-bezier(.35,.05,.2,1) 2.18s both}
+  .architecture-motion .branch-flow circle{animation:branch-point .42s ease-out 2.14s both}
+  .architecture-motion .branch-label{animation:meta-enter .4s ease-out 2.72s both}
+  .architecture-motion .split:before{transform-origin:top center;animation:split-down .34s ease-out 3.18s both}
+  .architecture-motion .split:after{transform-origin:center center;animation:split-wide .58s cubic-bezier(.2,.75,.15,1) 3.47s both}
+  .architecture-motion .stock:before{transform-origin:top center;animation:split-down .3s ease-out 3.93s both}
+  .architecture-motion .stock.red{animation:stock-enter .62s cubic-bezier(.2,.8,.2,1) 4.08s both,red-pulse .85s ease-out 5.12s both}
+  .architecture-motion .stock.green{animation:stock-enter .62s cubic-bezier(.2,.8,.2,1) 4.24s both,green-pulse .85s ease-out 5.22s both}
+  .architecture-motion .stock .type,.architecture-motion .stock h3,.architecture-motion .stock .measure,.architecture-motion .stock .pending{animation:detail-enter .38s ease-out both}
+  .architecture-motion .stock .type{animation-delay:4.48s}.architecture-motion .stock h3{animation-delay:4.58s}.architecture-motion .stock .measure:nth-of-type(1){animation-delay:4.7s}.architecture-motion .stock .measure:nth-of-type(2){animation-delay:4.8s}.architecture-motion .stock .measure:nth-of-type(3){animation-delay:4.9s}.architecture-motion .stock .measure:nth-of-type(4){animation-delay:5s}.architecture-motion .stock .pending{animation-delay:5.12s}
+  @media (prefers-reduced-motion:reduce){.architecture-motion .minero,.architecture-motion .flow-line,.architecture-motion .flow-line:after,.architecture-motion .one-many:before,.architecture-motion .one-many:after,.architecture-motion .one-many i,.architecture-motion .one-many span,.architecture-motion .transaction,.architecture-motion .branch-flow path,.architecture-motion .branch-flow circle,.architecture-motion .branch-label,.architecture-motion .split:before,.architecture-motion .split:after,.architecture-motion .stock:before,.architecture-motion .stock,.architecture-motion .stock .type,.architecture-motion .stock h3,.architecture-motion .stock .measure,.architecture-motion .stock .pending{animation:none!important;opacity:1!important;filter:none!important;transform:none!important;stroke-dashoffset:0!important}}
+  footer{position:absolute;z-index:3;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(139,178,225,.14);background:rgba(2,11,25,.68)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(139,178,225,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.2em;text-transform:uppercase}
+
+
+/* === Slide 5 CSS (diapositiva-05-cierre-g1.html) === */
+#slide-5 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+  :root{--navy:#020b19;--navy2:#071426;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f7f9fc;--dim:#a8b8cf;--line:rgba(139,178,225,.22);--blue:#5ea2e5;--red:#e75b58;--green:#49b879}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);color:var(--text);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:radial-gradient(46rem 30rem at 88% 40%,rgba(37,93,133,.2),transparent 67%),radial-gradient(32rem 26rem at 8% 91%,rgba(242,183,54,.055),transparent 66%),var(--navy)}
+  .grid{position:absolute;inset:90px 0 56px;opacity:.45;background-image:linear-gradient(rgba(115,161,216,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(115,161,216,.04) 1px,transparent 1px);background-size:45px 45px;mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.26) 55%,transparent)}
+  header{position:absolute;z-index:3;top:0;left:0;right:0;height:90px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.68);border-bottom:1px solid rgba(139,178,225,.12)}
+  .upeu{height:51px;filter:brightness(0) invert(1)}.career{display:flex;align-items:center;gap:12px}.career img{width:52px;height:52px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:5px;font-size:15px;letter-spacing:-.02em}
+  main{position:absolute;z-index:2;inset:90px 0 56px;padding:49px 5.1vw 28px;display:grid;grid-template-columns:37% 1fr;gap:58px}
+  .left{display:flex;min-width:0;flex-direction:column;justify-content:center}.eyebrow{display:flex;align-items:center;gap:15px;color:var(--gold);font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.28em;text-transform:uppercase}.eyebrow:before{content:"";width:44px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{margin:19px 0 13px;font-size:clamp(43px,3.45vw,64px);line-height:1.02;letter-spacing:-.046em}.gold{color:var(--gold)}.lead{margin:0;max-width:610px;color:#e1e9f4;font-size:18px;line-height:1.5}
+  .endpoint{display:flex;align-items:center;gap:10px;margin:24px 0 22px;color:#dfeafa;font:600 12px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.endpoint b{min-width:45px;padding:5px 7px;border-radius:3px;background:#10b981;color:#02140d;text-align:center;font-size:10px;letter-spacing:.08em}.endpoint code{color:#e7eef8}
+  .facts{border-top:1px solid var(--line)}.fact{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}.fact .num{color:var(--gold-soft);font:700 12px/1.25 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.fact h2{margin:0 0 4px;font-size:16px}.fact p{margin:0;color:var(--dim);font-size:14px;line-height:1.42}
+  .rule{margin-top:18px;padding:13px 15px;border-left:3px solid var(--gold);background:rgba(242,183,54,.07);color:#eaf2fb;font-size:14px;line-height:1.44}.rule b{display:block;margin-bottom:4px;color:var(--gold-soft);font:700 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.11em;text-transform:uppercase}
+  .diagram{position:relative;min-width:0;display:grid;grid-template-rows:132px 238px 1fr;gap:26px;align-content:center;padding:28px 14px 13px}.diagram:before{content:"OPERACIÓN CABECERA–DETALLE";position:absolute;top:1px;right:14px;color:#8ea4c1;font:700 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}
+  .pricing{position:relative;display:grid;grid-template-columns:1fr 54px 1.05fr 54px 1.15fr;align-items:center}.source,.formula{position:relative;border:1px solid var(--line);border-radius:10px;background:linear-gradient(145deg,rgba(11,31,57,.95),rgba(4,16,31,.9));box-shadow:0 24px 45px -35px #000}.source{padding:15px 18px}.source small,.formula small,.type{display:block;color:var(--gold-soft);font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.source strong{display:block;margin-top:7px;font-size:20px}.source code{display:block;margin-top:4px;color:var(--dim);font:600 10px/1.2 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.join{height:1px;background:linear-gradient(90deg,var(--gold),var(--blue));position:relative;transform-origin:left}.join:after{content:"";position:absolute;right:-1px;top:-4px;border-left:7px solid var(--blue);border-top:4px solid transparent;border-bottom:4px solid transparent}.formula{padding:15px 18px;border-top:3px solid var(--blue)}.formula strong{display:block;margin:8px 0 4px;color:#fff;font:700 16px/1.2 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.formula span{color:var(--dim);font-size:11px}
+  .header-card{position:relative;width:78%;justify-self:center;padding:20px 25px 18px;border:1px solid rgba(242,183,54,.42);border-top:3px solid var(--gold);border-radius:13px;background:linear-gradient(145deg,rgba(13,34,61,.98),rgba(4,16,31,.94));box-shadow:0 30px 60px -38px #000}.header-card:after{content:"";position:absolute;z-index:-1;inset:10px -10px -10px 10px;border:1px solid rgba(139,178,225,.12);border-radius:13px;background:rgba(5,18,34,.62)}.header-title{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}.header-title h2{margin:8px 0 0;font-size:27px;letter-spacing:-.03em}.state{padding:6px 10px;border:1px solid rgba(73,184,121,.42);border-radius:999px;color:#80dda7;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.12em;text-transform:uppercase}.header-fields{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:0;margin-top:16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.field{padding:12px 14px 11px 0}.field+.field{padding-left:15px;border-left:1px solid var(--line)}.field span{display:block;color:var(--dim);font-size:11px}.field code{display:block;margin-top:5px;color:#fff;font:600 11px/1.25 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.header-total{display:flex;justify-content:space-between;margin-top:13px;color:#dbe8f8;font-size:12px}.header-total b{color:var(--gold-soft);font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif}
+  .details{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:34px;padding-top:42px}.details:before{content:"";position:absolute;left:50%;top:-26px;width:1px;height:48px;background:var(--blue);transform-origin:top}.details:after{content:"";position:absolute;left:24%;right:24%;top:21px;height:1px;background:linear-gradient(90deg,var(--red),var(--blue) 50%,var(--green));transform-origin:center}.detail{position:relative;min-height:198px;padding:19px 21px;border-radius:12px;background:rgba(6,21,39,.92);box-shadow:0 26px 50px -34px #000}.detail:before{content:"";position:absolute;top:-21px;left:50%;width:1px;height:21px;background:currentColor;transform-origin:top}.detail.red{color:#ff8c89;border:1px solid rgba(231,91,88,.5);border-top:3px solid var(--red)}.detail.green{color:#80dda7;border:1px solid rgba(73,184,121,.5);border-top:3px solid var(--green)}.detail h3{margin:8px 0 12px;color:#fff;font-size:22px}.detail-row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:7px 0;border-top:1px solid rgba(139,178,225,.14)}.detail-row span{color:var(--dim);font-size:11px}.detail-row code{color:#fff;font:600 10px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.subtotal{margin-top:10px;color:currentColor;font:700 10px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.08em;text-transform:uppercase}
+  .transaction-note{position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);width:max-content;padding:6px 10px;border:1px solid rgba(94,162,229,.25);border-radius:5px;background:var(--navy);color:#a9c8e8;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.09em;text-transform:uppercase}
+  @keyframes rise{0%{opacity:0;filter:blur(5px);transform:translateY(13px) scale(.98)}100%{opacity:1;filter:blur(0);transform:translateY(0) scale(1)}}
+  @keyframes grow{0%{opacity:.2;transform:scaleX(0)}100%{opacity:1;transform:scaleX(1)}}
+  @keyframes grow-y{0%{opacity:.2;transform:scaleY(0)}100%{opacity:1;transform:scaleY(1)}}
+  @keyframes pulse-gold{0%,100%{box-shadow:0 30px 60px -38px #000}50%{box-shadow:0 0 34px -8px rgba(242,183,54,.6)}}
+  @keyframes pulse-red{0%,100%{box-shadow:0 26px 50px -34px #000}50%{box-shadow:0 0 31px -8px rgba(231,91,88,.62)}}
+  @keyframes pulse-green{0%,100%{box-shadow:0 26px 50px -34px #000}50%{box-shadow:0 0 31px -8px rgba(73,184,121,.62)}}
+  .architecture-motion .source:nth-child(1){animation:rise .5s ease-out .1s both}.architecture-motion .pricing .join:nth-child(2){animation:grow .42s ease-out .52s both}.architecture-motion .source:nth-child(3){animation:rise .5s ease-out .82s both}.architecture-motion .pricing .join:nth-child(4){animation:grow .42s ease-out 1.25s both}.architecture-motion .formula{animation:rise .56s ease-out 1.52s both}.architecture-motion .header-card{animation:rise .62s cubic-bezier(.2,.8,.2,1) 2.05s both,pulse-gold .8s ease-out 2.72s both}.architecture-motion .details:before{animation:grow-y .35s ease-out 2.82s both}.architecture-motion .details:after{animation:grow .55s ease-out 3.12s both}.architecture-motion .detail:before{animation:grow-y .28s ease-out 3.52s both}.architecture-motion .detail.red{animation:rise .58s ease-out 3.7s both,pulse-red .8s ease-out 4.45s both}.architecture-motion .detail.green{animation:rise .58s ease-out 3.86s both,pulse-green .8s ease-out 4.58s both}.architecture-motion .transaction-note{animation:rise .4s ease-out 4.62s both}
+  @media(prefers-reduced-motion:reduce){.architecture-motion .source,.architecture-motion .join,.architecture-motion .formula,.architecture-motion .header-card,.architecture-motion .details:before,.architecture-motion .details:after,.architecture-motion .detail:before,.architecture-motion .detail,.architecture-motion .transaction-note{animation:none!important;opacity:1!important;filter:none!important;transform:none!important}.architecture-motion .transaction-note{transform:translateX(-50%)!important}}
+  footer{position:absolute;z-index:3;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(139,178,225,.14);background:rgba(2,11,25,.68)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(139,178,225,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.2em;text-transform:uppercase}
+
+
+/* === Slide 6 CSS (diapositiva-06-regla-cierre.html) === */
+#slide-6 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+  :root{--navy:#020b19;--navy2:#071426;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f7f9fc;--dim:#a8b8cf;--line:rgba(139,178,225,.22);--blue:#5ea2e5;--cyan:#49b9c5;--danger:#f06565;--danger-soft:#ff9b98}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);color:var(--text);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:radial-gradient(43rem 29rem at 84% 42%,rgba(38,87,124,.19),transparent 68%),radial-gradient(28rem 25rem at 7% 90%,rgba(242,183,54,.05),transparent 66%),var(--navy)}
+  .grid{position:absolute;inset:90px 0 56px;opacity:.45;background-image:linear-gradient(rgba(115,161,216,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(115,161,216,.04) 1px,transparent 1px);background-size:45px 45px;mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.3) 55%,transparent)}
+  header{position:absolute;z-index:3;top:0;left:0;right:0;height:90px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.68);border-bottom:1px solid rgba(139,178,225,.12)}
+  .upeu{height:51px;filter:brightness(0) invert(1)}.career{display:flex;align-items:center;gap:12px}.career img{width:52px;height:52px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:5px;font-size:15px;letter-spacing:-.02em}
+  main{position:absolute;z-index:2;inset:90px 0 56px;padding:49px 5.1vw 29px;display:grid;grid-template-columns:36.5% 1fr;gap:58px}
+  .left{display:flex;min-width:0;flex-direction:column;justify-content:center}.eyebrow{display:flex;align-items:center;gap:15px;color:var(--gold);font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.28em;text-transform:uppercase}.eyebrow:before{content:"";width:44px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{margin:19px 0 13px;font-size:clamp(42px,3.35vw,62px);line-height:1.02;letter-spacing:-.046em}.gold{color:var(--gold)}.lead{margin:0;max-width:610px;color:#e1e9f4;font-size:18px;line-height:1.5}
+  .endpoint{display:flex;align-items:center;gap:10px;margin:24px 0 22px;color:#dfeafa;font:600 12px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.endpoint b{min-width:45px;padding:5px 7px;border-radius:3px;background:#10b981;color:#02140d;text-align:center;font-size:10px;letter-spacing:.08em}.endpoint code{color:#e7eef8}
+  .facts{border-top:1px solid var(--line)}.fact{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}.fact .num{color:var(--gold-soft);font:700 12px/1.25 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.fact h2{margin:0 0 4px;font-size:16px}.fact p{margin:0;color:var(--dim);font-size:14px;line-height:1.42}.fact code{color:#dcecff;font:600 12px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif}
+  .rule{margin-top:18px;padding:13px 15px;border-left:3px solid var(--gold);background:rgba(242,183,54,.07);color:#eaf2fb;font-size:14px;line-height:1.44}.rule b{display:block;margin-bottom:4px;color:var(--gold-soft);font:700 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.11em;text-transform:uppercase}
+  .comparison{position:relative;min-width:0;display:grid;grid-template-rows:154px 54px 1fr;align-content:center;padding:30px 8px 9px}.comparison:before{content:"CONTROL DE CONSISTENCIA";position:absolute;top:2px;right:8px;color:#8ea4c1;font:700 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}
+  .stock-source{position:relative;width:78%;justify-self:center;padding:20px 24px 18px;border:1px solid rgba(94,162,229,.44);border-top:3px solid var(--blue);border-radius:13px;background:linear-gradient(145deg,rgba(12,34,61,.98),rgba(4,16,31,.94));box-shadow:0 28px 55px -36px #000}.stock-top{display:flex;justify-content:space-between;align-items:flex-end;gap:22px}.stock-label{display:block;color:#94c3f0;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.14em;text-transform:uppercase}.stock-source h2{margin:8px 0 0;font-size:26px;letter-spacing:-.03em}.query{padding:7px 10px;border:1px solid var(--line);border-radius:5px;color:#c7d8eb;font:600 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.stock-equation{display:grid;grid-template-columns:1fr auto;gap:18px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.stock-equation span{color:var(--dim);font-size:12px}.stock-equation code{color:#fff;font:700 13px/1.2 'Plus Jakarta Sans', 'Segoe UI', sans-serif}
+  .fork{position:relative}.fork:before{content:"";position:absolute;left:50%;top:0;width:1px;height:24px;background:var(--blue);transform-origin:top}.fork:after{content:"";position:absolute;left:23%;right:23%;top:23px;height:1px;background:linear-gradient(90deg,var(--gold),var(--blue) 50%,var(--danger));transform-origin:center}.fork span{position:absolute;left:50%;top:11px;transform:translateX(-50%);padding:5px 9px;border:1px solid var(--line);border-radius:4px;background:var(--navy);color:#a8c8e7;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.1em;text-transform:uppercase}
+  .cases{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:stretch}.case{position:relative;display:flex;flex-direction:column;padding:21px 23px 18px;border-radius:13px;background:linear-gradient(145deg,rgba(10,30,53,.97),rgba(4,16,31,.93));box-shadow:0 28px 55px -36px #000}.case:before{content:"";position:absolute;top:-31px;left:50%;width:1px;height:31px;background:currentColor;transform-origin:top}.case.ok{color:var(--gold-soft);border:1px solid rgba(242,183,54,.46);border-top:3px solid var(--gold)}.case.error{color:var(--danger-soft);border:1px solid rgba(240,101,101,.46);border-top:3px solid var(--danger)}.case-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}.case small{display:block;color:currentColor;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.14em;text-transform:uppercase}.case h2{margin:8px 0 0;color:#fff;font-size:25px;letter-spacing:-.03em}.status{padding:7px 10px;border:1px solid currentColor;border-radius:999px;color:currentColor;font:700 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;white-space:nowrap}.numbers{margin:19px 0 16px;padding:14px 15px;border:1px solid rgba(139,178,225,.15);border-radius:8px;background:rgba(1,8,18,.46)}.numbers div{display:flex;justify-content:space-between;gap:18px;color:var(--dim);font-size:12px}.numbers div+div{margin-top:9px}.numbers code{color:#fff;font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.operator{display:grid;place-items:center;width:36px;height:36px;margin:-4px auto -14px;border:1px solid currentColor;border-radius:50%;background:var(--navy);color:currentColor;font:800 17px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif}
+  .effects{margin-top:18px;border-top:1px solid var(--line)}.effect{display:grid;grid-template-columns:20px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid rgba(139,178,225,.13)}.effect i{font-style:normal;color:currentColor;font:800 12px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.effect span{color:#dce7f4;font-size:12px;line-height:1.35}.effect code{color:#fff;font:600 10px/1.2 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.message{margin-top:14px;padding:11px 12px;border-left:2px solid currentColor;background:rgba(240,101,101,.055);color:#dce7f4;font:600 10px/1.45 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.message b{color:currentColor}.result{margin-top:14px;color:currentColor;font:700 10px/1.35 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.1em;text-transform:uppercase}.db-state{margin-top:auto;padding-top:17px}.db-state b{display:block;margin-bottom:8px;color:#9fb3cd;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.12em;text-transform:uppercase}.db-row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:8px 0;border-top:1px solid rgba(139,178,225,.14)}.db-row span{color:var(--dim);font:600 10px/1.2 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.db-row code{color:#fff;font:700 10px/1.2 'Plus Jakarta Sans', 'Segoe UI', sans-serif}
+  @keyframes rise{0%{opacity:0;filter:blur(5px);transform:translateY(15px) scale(.98)}100%{opacity:1;filter:blur(0);transform:translateY(0) scale(1)}}
+  @keyframes grow-x{0%{opacity:.15;transform:scaleX(0)}100%{opacity:1;transform:scaleX(1)}}
+  @keyframes grow-y{0%{opacity:.15;transform:scaleY(0)}100%{opacity:1;transform:scaleY(1)}}
+  @keyframes pulse-ok{0%,100%{box-shadow:0 28px 55px -36px #000}48%{box-shadow:0 0 34px -8px rgba(242,183,54,.66)}}
+  @keyframes pulse-error{0%,100%{box-shadow:0 28px 55px -36px #000}48%{box-shadow:0 0 34px -8px rgba(240,101,101,.68)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
+  .architecture-motion .stock-source{animation:rise .62s cubic-bezier(.2,.8,.2,1) .12s both}.architecture-motion .fork:before{animation:grow-y .34s ease-out .77s both}.architecture-motion .fork:after{animation:grow-x .58s ease-out 1.07s both}.architecture-motion .fork span{animation:rise .35s ease-out 1.42s both}.architecture-motion .case:before{animation:grow-y .3s ease-out 1.63s both}.architecture-motion .case.ok{animation:rise .58s ease-out 1.86s both,pulse-ok .8s ease-out 2.55s both}.architecture-motion .case.error{animation:rise .58s ease-out 2.03s both,pulse-error .8s ease-out 3.12s both}.architecture-motion .case.error .status{animation:shake .35s ease-out 3.2s both}
+  @media(prefers-reduced-motion:reduce){.architecture-motion .stock-source,.architecture-motion .fork:before,.architecture-motion .fork:after,.architecture-motion .fork span,.architecture-motion .case:before,.architecture-motion .case,.architecture-motion .case.error .status{animation:none!important;opacity:1!important;filter:none!important;transform:none!important}.architecture-motion .fork span{transform:translateX(-50%)!important}}
+  footer{position:absolute;z-index:3;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(139,178,225,.14);background:rgba(2,11,25,.68)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(139,178,225,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.2em;text-transform:uppercase}
+
+
+/* === Slide 7 CSS (diapositiva-07-evidencias.html) === */
+#slide-7 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+  :root{--navy:#020b19;--navy2:#071426;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f7f9fc;--dim:#a8b8cf;--line:rgba(139,178,225,.22);--blue:#5ea2e5;--green:#49b879;--cyan:#50c5c9}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);color:var(--text);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:radial-gradient(48rem 31rem at 86% 43%,rgba(32,88,126,.2),transparent 67%),radial-gradient(29rem 25rem at 7% 91%,rgba(242,183,54,.05),transparent 65%),var(--navy)}
+  .grid{position:absolute;inset:90px 0 56px;opacity:.45;background-image:linear-gradient(rgba(115,161,216,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(115,161,216,.04) 1px,transparent 1px);background-size:45px 45px;mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.28) 55%,transparent)}
+  header{position:absolute;z-index:3;top:0;left:0;right:0;height:90px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.68);border-bottom:1px solid rgba(139,178,225,.12)}
+  .upeu{height:51px;filter:brightness(0) invert(1)}.career{display:flex;align-items:center;gap:12px}.career img{width:52px;height:52px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:5px;font-size:15px;letter-spacing:-.02em}
+  main{position:absolute;z-index:2;inset:90px 0 56px;padding:48px 5.1vw 28px;display:grid;grid-template-columns:35.5% 1fr;gap:58px}
+  .left{display:flex;min-width:0;flex-direction:column;justify-content:center}.eyebrow{display:flex;align-items:center;gap:15px;color:var(--gold);font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.28em;text-transform:uppercase}.eyebrow:before{content:"";width:44px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{margin:19px 0 13px;font-size:clamp(42px,3.32vw,62px);line-height:1.02;letter-spacing:-.046em}.gold{color:var(--gold)}.lead{margin:0;max-width:590px;color:#e1e9f4;font-size:18px;line-height:1.5}
+  .endpoints{display:grid;gap:8px;margin:23px 0 22px}.endpoint{display:flex;align-items:center;gap:10px;color:#dfeafa;font:600 11px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.endpoint b{min-width:43px;padding:5px 7px;border-radius:3px;background:#3288d8;color:#eff8ff;text-align:center;font-size:9px;letter-spacing:.08em}.endpoint code{color:#e7eef8}
+  .facts{border-top:1px solid var(--line)}.fact{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}.fact .num{color:var(--gold-soft);font:700 12px/1.25 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.fact h2{margin:0 0 4px;font-size:16px}.fact p{margin:0;color:var(--dim);font-size:14px;line-height:1.42}.fact code{color:#dcecff;font:600 11px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif}
+  .rule{margin-top:18px;padding:13px 15px;border-left:3px solid var(--gold);background:rgba(242,183,54,.07);color:#eaf2fb;font-size:14px;line-height:1.44}.rule b{display:block;margin-bottom:4px;color:var(--gold-soft);font:700 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.11em;text-transform:uppercase}
+  .evidence-panel{position:relative;min-width:0;display:grid;grid-template-rows:auto 402px 116px 112px;gap:18px;align-content:center;padding:27px 6px 5px}.evidence-panel:before{content:"EVIDENCIA DE EJECUCIÓN";position:absolute;top:0;right:6px;color:#8ea4c1;font:700 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}
+  .proof-heading{display:flex;align-items:end;justify-content:space-between;gap:20px}.proof-heading div small{display:block;color:#8fb8e1;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.proof-heading h2{margin:7px 0 0;font-size:24px;letter-spacing:-.03em}.proof-tags{display:flex;gap:7px;align-items:center}.proof-tags span{padding:6px 9px;border:1px solid var(--line);border-radius:5px;color:#bfd2e8;font:600 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.proof-tags .ok{border-color:rgba(73,184,121,.45);color:#80dda7}
+  .screenshot{position:relative;overflow:hidden;border:1px solid rgba(94,162,229,.38);border-top:3px solid var(--blue);border-radius:12px;background:#151a1e;box-shadow:0 30px 60px -38px #000}.screenshot img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top}.screenshot:after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),inset 0 -45px 60px -55px #000}.focus{position:absolute;z-index:2;left:1.7%;right:1.7%;bottom:2.4%;height:36%;border:2px solid rgba(242,183,54,.9);border-radius:7px;box-shadow:0 0 0 999px rgba(2,11,25,.12),0 0 24px -7px rgba(242,183,54,.66);pointer-events:none}.focus-label{position:absolute;z-index:3;right:2.4%;bottom:34.5%;padding:6px 9px;border-radius:4px;background:var(--gold);color:#142032;font:800 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.08em;text-transform:uppercase}
+  .metrics{display:grid;grid-template-columns:1fr 1.15fr 1.15fr;gap:14px}.metric{position:relative;padding:15px 17px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(145deg,rgba(11,31,57,.95),rgba(4,16,31,.9));box-shadow:0 22px 42px -34px #000}.metric small{display:block;color:#91a8c3;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.12em;text-transform:uppercase}.metric strong{display:block;margin-top:8px;color:#fff;font-size:22px;letter-spacing:-.025em}.metric strong em{color:var(--gold);font-style:normal}.metric span{display:block;margin-top:4px;color:var(--dim);font-size:10px}.metric:first-child{border-top:3px solid var(--blue)}.metric:nth-child(2){border-top:3px solid var(--gold)}.metric:nth-child(3){border-top:3px solid var(--cyan)}
+  .checks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.check{position:relative;padding:17px 17px 14px 38px}.check+.check{border-left:1px solid var(--line)}.check:before{content:"✓";position:absolute;left:12px;top:17px;color:#75d6a0;font:800 15px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.check b{display:block;font-size:13px}.check span{display:block;margin-top:6px;color:var(--dim);font-size:11px;line-height:1.35}.demo{position:absolute;right:6px;bottom:-18px;color:#8fa8c5;font:600 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.05em}.demo b{color:var(--gold-soft)}
+  @keyframes rise{0%{opacity:0;filter:blur(5px);transform:translateY(14px) scale(.985)}100%{opacity:1;filter:blur(0);transform:translateY(0) scale(1)}}
+  @keyframes reveal{0%{opacity:0;clip-path:inset(0 100% 0 0)}100%{opacity:1;clip-path:inset(0 0 0 0)}}
+  @keyframes focus-pulse{0%{opacity:0;transform:scale(.985)}55%{opacity:1;transform:scale(1.01)}100%{opacity:1;transform:scale(1)}}
+  @keyframes metric-pulse{0%,100%{box-shadow:0 22px 42px -34px #000}50%{box-shadow:0 0 28px -8px rgba(242,183,54,.46)}}
+  .architecture-motion .proof-heading{animation:rise .46s ease-out .12s both}.architecture-motion .screenshot{animation:reveal .9s cubic-bezier(.2,.75,.15,1) .52s both}.architecture-motion .focus,.architecture-motion .focus-label{animation:focus-pulse .52s ease-out 1.46s both}.architecture-motion .metric:nth-child(1){animation:rise .46s ease-out 2.02s both}.architecture-motion .metric:nth-child(2){animation:rise .46s ease-out 2.16s both,metric-pulse .85s ease-out 2.72s both}.architecture-motion .metric:nth-child(3){animation:rise .46s ease-out 2.3s both}.architecture-motion .check:nth-child(1){animation:rise .4s ease-out 2.86s both}.architecture-motion .check:nth-child(2){animation:rise .4s ease-out 3.02s both}.architecture-motion .check:nth-child(3){animation:rise .4s ease-out 3.18s both}.architecture-motion .demo{animation:rise .35s ease-out 3.5s both}
+  @media(prefers-reduced-motion:reduce){.architecture-motion .proof-heading,.architecture-motion .screenshot,.architecture-motion .focus,.architecture-motion .focus-label,.architecture-motion .metric,.architecture-motion .check,.architecture-motion .demo{animation:none!important;opacity:1!important;filter:none!important;transform:none!important;clip-path:none!important}}
+  footer{position:absolute;z-index:3;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(139,178,225,.14);background:rgba(2,11,25,.68)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(139,178,225,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.2em;text-transform:uppercase}
+
+
+/* === Slide 8 CSS (diapositiva-08-prometheus.html) === */
+#slide-8 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+  :root{--navy:#020b19;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f7f9fc;--dim:#aebdd1;--line:rgba(139,178,225,.22);--blue:#65a9ec;--green:#55d08d}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);color:var(--text);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:radial-gradient(48rem 30rem at 80% 42%,rgba(32,88,126,.18),transparent 68%),radial-gradient(29rem 23rem at 7% 88%,rgba(242,183,54,.055),transparent 68%),var(--navy)}
+  .grid{position:absolute;inset:90px 0 56px;opacity:.42;background-image:linear-gradient(rgba(115,161,216,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(115,161,216,.04) 1px,transparent 1px);background-size:45px 45px;mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.2) 58%,transparent)}
+  header{position:absolute;z-index:4;top:0;left:0;right:0;height:90px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.72);border-bottom:1px solid rgba(139,178,225,.12)}
+  .upeu{height:51px;filter:brightness(0) invert(1)}.career{display:flex;align-items:center;gap:12px}.career img{width:52px;height:52px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:5px;font-size:15px;letter-spacing:-.02em}
+  main{position:absolute;z-index:2;inset:90px 0 56px;padding:52px 5.1vw 36px;display:grid;grid-template-columns:34% 1fr;gap:62px}
+  .story{display:flex;min-width:0;flex-direction:column;justify-content:center}.eyebrow{display:flex;align-items:center;gap:15px;color:var(--gold);font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.28em;text-transform:uppercase}.eyebrow:before{content:"";width:44px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{margin:20px 0 15px;font-size:clamp(44px,3.65vw,70px);line-height:1.01;letter-spacing:-.052em}.gold{color:var(--gold)}.lead{margin:0;max-width:570px;color:#e3eaf4;font-size:18px;line-height:1.5}
+  .route{margin:28px 0 25px;padding:16px 18px;border-left:3px solid var(--green);background:linear-gradient(90deg,rgba(85,208,141,.1),transparent);font:600 12px/1.45 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.route small{display:block;margin-bottom:6px;color:#87e2ae;font-size:9px;letter-spacing:.13em;text-transform:uppercase}.route code{color:#fff}.route span{display:block;margin-top:7px;color:#9eb3cc;font-size:9px}
+  .proofs{border-top:1px solid var(--line)}.proof{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}.proof .num{color:var(--gold-soft);font:700 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.proof b{display:block;font-size:15px}.proof p{margin:4px 0 0;color:var(--dim);font-size:12px;line-height:1.38}.proof strong{color:#fff;font:700 15px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;white-space:nowrap}.proof strong.ok{color:#77dda4}
+  .scope{margin-top:21px;color:#8fa5c1;font:600 10px/1.45 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.scope b{color:var(--gold-soft);letter-spacing:.1em;text-transform:uppercase}
+  .evidence{position:relative;min-width:0;display:flex;flex-direction:column;justify-content:center}.evidence-label{display:flex;align-items:end;justify-content:space-between;gap:24px;margin:0 0 15px}.evidence-label small{display:block;color:#8fb8e1;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.evidence-label h2{margin:7px 0 0;font-size:25px;letter-spacing:-.03em}.live{display:flex;align-items:center;gap:8px;color:#82daa8;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.1em}.live:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 15px rgba(85,208,141,.8)}
+  .browser{position:relative;height:332px;overflow:hidden;border:1px solid rgba(101,169,236,.36);border-radius:15px;background:#050b12;box-shadow:0 38px 80px -42px #000,0 0 60px -45px rgba(101,169,236,.75)}
+  .browser.prometheus{height:285px}.browser.loki{height:378px;margin-top:16px;border-color:rgba(168,112,255,.42)}
+  .browser-bar{height:52px;padding:0 17px;display:flex;align-items:center;gap:13px;border-bottom:1px solid rgba(139,178,225,.18);background:#091424}.method{padding:6px 9px;border-radius:4px;background:#16865a;color:#effff6;font:800 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.09em}.address{flex:1;min-width:0;color:#d6e5f5;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.response{color:#75dba2;font:700 9px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.08em}.browser img{display:block;width:100%;height:calc(100% - 52px);object-fit:contain;object-position:center top;background:#212121;filter:contrast(1.03) saturate(.95)}
+  .method.loki{background:#7c4fd1}.browser.loki img{object-fit:cover;object-position:left top;background:#090d12}
+  .focus{position:absolute;z-index:2;left:18px;right:18px;top:68px;height:106px;border:2px solid rgba(242,183,54,.9);border-radius:7px;box-shadow:0 0 25px -8px rgba(242,183,54,.68);pointer-events:none}.focus-tag{position:absolute;z-index:3;right:28px;top:157px;padding:7px 10px;border-radius:4px;background:var(--gold);color:#152033;font:800 8px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.1em;text-transform:uppercase}.caption{display:flex;align-items:center;justify-content:space-between;margin-top:13px;color:#8fa5c1;font:600 9px/1.4 'Plus Jakarta Sans', 'Segoe UI', sans-serif}.caption b{color:#bfd4ed}.caption span:last-child{color:#77dda4}
+  .verification{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}.verify-card{min-width:0;padding:16px 17px;border:1px solid var(--line);border-radius:11px;background:rgba(7,20,37,.82)}.verify-card small{display:block;color:#87a7ca;font:700 8px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.12em;text-transform:uppercase}.verify-card strong{display:block;margin-top:8px;font:800 19px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;white-space:nowrap}.verify-card strong.ok{color:#69db9b}.verify-card span{display:block;margin-top:7px;color:#a9bad0;font-size:10px;line-height:1.35}
+  @keyframes rise{0%{opacity:0;filter:blur(5px);transform:translateY(15px)}100%{opacity:1;filter:blur(0);transform:translateY(0)}}
+  @keyframes reveal{0%{opacity:0;clip-path:inset(0 100% 0 0)}100%{opacity:1;clip-path:inset(0 0 0 0)}}
+  @keyframes focus-in{0%{opacity:0;transform:scale(.985)}60%{opacity:1;transform:scale(1.01)}100%{opacity:1;transform:scale(1)}}
+  @keyframes live-pulse{0%,100%{opacity:1}50%{opacity:.45}}
+  .architecture-motion .evidence-label{animation:rise .45s ease-out .14s both}.architecture-motion .browser{animation:reveal .95s cubic-bezier(.2,.75,.15,1) .55s both}.architecture-motion .focus,.architecture-motion .focus-tag{animation:focus-in .55s ease-out 1.58s both}.architecture-motion .proof:nth-child(1){animation:rise .42s ease-out 2.05s both}.architecture-motion .proof:nth-child(2){animation:rise .42s ease-out 2.2s both}.architecture-motion .proof:nth-child(3){animation:rise .42s ease-out 2.35s both}.architecture-motion .live:before{animation:live-pulse 1.25s ease-in-out 2.8s infinite}
+  @media(prefers-reduced-motion:reduce){.architecture-motion .evidence-label,.architecture-motion .browser,.architecture-motion .focus,.architecture-motion .focus-tag,.architecture-motion .proof,.architecture-motion .live:before{animation:none!important;opacity:1!important;filter:none!important;transform:none!important;clip-path:none!important}}
+  footer{position:absolute;z-index:4;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(139,178,225,.14);background:rgba(2,11,25,.72)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(139,178,225,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.2em;text-transform:uppercase}
+
+
+/* === Slide 9 CSS (diapositiva-09-despedida.html) === */
+#slide-9 {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+  :root{--navy:#020b19;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f7f9fc;--dim:#b7c5d8;--line:rgba(139,178,225,.22)}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);color:var(--text);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:var(--navy)}
+  .photo{position:absolute;inset:90px 0 56px;background:url('assets/contexto-andino-horizontal.png') center/cover no-repeat;transform:scale(1.015)}
+  .veil{position:absolute;inset:90px 0 56px;background:linear-gradient(90deg,rgba(2,11,25,.98) 0%,rgba(2,11,25,.91) 32%,rgba(2,11,25,.54) 58%,rgba(2,11,25,.23) 100%),linear-gradient(0deg,rgba(2,11,25,.66),transparent 45%,rgba(2,11,25,.28))}
+  header{position:absolute;z-index:5;top:0;left:0;right:0;height:90px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.86);border-bottom:1px solid rgba(139,178,225,.13)}
+  .upeu{height:51px;filter:brightness(0) invert(1)}
+  .career{display:flex;align-items:center;gap:12px}.career img{width:52px;height:52px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:5px;font-size:15px;letter-spacing:-.02em}
+  main{position:absolute;z-index:3;inset:90px 0 56px;display:flex;flex-direction:column;justify-content:center;padding:50px 7vw 50px}.content{max-width:920px}.eyebrow{display:flex;align-items:center;gap:16px;color:var(--gold);font:700 12px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.29em;text-transform:uppercase}.eyebrow:before{content:"";width:48px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{margin:22px 0 0;font-size:clamp(58px,5.2vw,92px);line-height:.98;letter-spacing:-.055em}.gold{color:var(--gold)}.project{margin:22px 0 0;max-width:800px;color:#e2eaf5;font-size:22px;line-height:1.48}.project b{color:#fff}
+  
+  .co-branding{display:inline-flex;align-items:center;gap:22px;margin-top:28px;padding:14px 24px;border:1px solid rgba(139,178,225,.26);border-radius:12px;background:linear-gradient(135deg,rgba(7,25,47,.82),rgba(2,11,25,.65));backdrop-filter:blur(10px);box-shadow:0 16px 36px -18px rgba(0,0,0,.6)}
+  .brand-item{display:flex;align-items:center;gap:14px}
+  .upeu-brand{height:42px;width:auto;filter:brightness(0) invert(1)}
+  .bullion-brand{height:40px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
+  .brand-divider{width:1px;height:38px;background:linear-gradient(180deg,transparent,rgba(242,183,54,.6),transparent)}
+  .brand-text{display:grid;gap:2px}
+  .brand-text small{color:var(--gold);font:700 9.5px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.14em;text-transform:uppercase}
+  .brand-text b{color:#fff;font-size:14px;letter-spacing:-.01em}
+  .brand-text span{color:#93c5fd;font-size:11.5px}
+  
+  .team{display:grid;grid-template-columns:130px 1fr;gap:24px;margin-top:34px;padding-top:22px;border-top:1px solid var(--line);max-width:760px}.team-label{color:var(--gold-soft);font:700 11px/1.3 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.14em;text-transform:uppercase}.names{display:grid;gap:6px;color:#e6edf7;font-size:15px}.names span{display:block}
+  @keyframes photo-in{0%{opacity:.6;transform:scale(1.08)}100%{opacity:1;transform:scale(1.015)}}
+  @keyframes rise{0%{opacity:0;filter:blur(6px);transform:translateY(18px)}100%{opacity:1;filter:blur(0);transform:translateY(0)}}
+  .architecture-motion .photo{animation:photo-in 1.35s cubic-bezier(.2,.75,.15,1) both}.architecture-motion .eyebrow{animation:rise .45s ease-out .25s both}.architecture-motion h1{animation:rise .68s cubic-bezier(.2,.8,.2,1) .58s both}.architecture-motion .project{animation:rise .52s ease-out 1.06s both}.architecture-motion .co-branding{animation:rise .5s ease-out 1.22s both}.architecture-motion .team{animation:rise .5s ease-out 1.38s both}
+  @media(prefers-reduced-motion:reduce){.architecture-motion .photo,.architecture-motion .eyebrow,.architecture-motion h1,.architecture-motion .project,.architecture-motion .co-branding,.architecture-motion .team{animation:none!important;opacity:1!important;filter:none!important;transform:none!important}.architecture-motion .photo{transform:scale(1.015)!important}}
+  footer{position:absolute;z-index:5;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(139,178,225,.14);background:rgba(2,11,25,.9)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(139,178,225,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.2em;text-transform:uppercase}
+
+
+  </style>
+</head>
+<body>
+  <div class="deck-container" id="presentationDeck">
+
+    <!-- SLIDE 1: portada_s6.html -->
+    <div class="slide-wrapper active" id="slide-1">
+      <main class="cover" aria-label="Portada de la sustentación de SITRA-ORO">
+    <div class="cover__photo" aria-hidden="true"></div>
+    <div class="cloud-layer" aria-hidden="true"></div>
+    <div class="cover__glow" aria-hidden="true"></div>
+
+    <header class="header">
+      <div class="header-left">
+        <img class="upeu-logo" src="assets/upeu.png" alt="Universidad Peruana Unión">
+        <div class="header-divider" aria-hidden="true"></div>
+        <div class="company-lockup" aria-label="Empresa del caso: Quilate Bullion S.A.C.">
+          <img class="company-emblem" src="assets/quilate-bullion-emblema-v2.png" alt="Emblema de Quilate Bullion">
+          <div class="company-copy">
+            <small>Empresa del caso</small>
+            <strong>Quilate Bullion S.A.C.</strong>
+            <span>Plataforma operativa de acopio de oro</span>
+          </div>
+        </div>
+      </div>
+      <div class="career">
+        <img src="assets/ingenieria-sistemas.png" alt="Escuela Profesional de Ingeniería de Sistemas">
+        <div>
+          <small>Escuela Profesional de</small>
+          <b>Ingeniería de Sistemas</b>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">Sustentación · Unidad I</div>
+      <h1><span>SITRA-</span><strong>ORO</strong></h1>
+
+      <div class="context-box">
+        <p>Plataforma integral que digitaliza y transparenta el acopio de oro en Puno: cotización en vivo, control exacto de ley y liquidación transaccional segura para mineros y acopiadores.</p>
+      </div>
+
+      <div class="members-modules">
+        <div class="team-title">
+          <strong>Equipo 05</strong>
+          <span>Responsabilidades por integrante</span>
+        </div>
+        <div class="member-columns">
+          <!-- Integrante 1: Helio Paul -->
+          <div class="member-group">
+            <div class="member-title">
+              <strong>Faijo Calisaya Helio Paul</strong>
+              <span>Módulos 2</span>
+            </div>
+            <div class="member-cards-grid">
+              <div class="feature-card">
+                <div class="feature-header">
+                  <span class="feature-icon">📑</span>
+                  <strong>Mayorista</strong>
+                </div>
+                <span class="tag-trans">Transaccional 2</span>
+                <small>Liquidación mayorista, cierre y reportes.</small>
+              </div>
+              <div class="feature-card">
+                <div class="feature-header">
+                  <span class="feature-icon">⚙️</span>
+                  <strong>Parámetros</strong>
+                </div>
+                <span class="tag-notrans">No Transaccional 2</span>
+                <small>Tarifas, factores de merma y reglas de negocio.</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Integrante 2: Jhymel Nelio -->
+          <div class="member-group">
+            <div class="member-title">
+              <strong>Figueroa Chambi Jhymel Nelio</strong>
+              <span>Módulos 1</span>
+            </div>
+            <div class="member-cards-grid">
+              <div class="feature-card">
+                <div class="feature-header">
+                  <span class="feature-icon">⚖️</span>
+                  <strong>Acopiador</strong>
+                </div>
+                <span class="tag-trans">Transaccional 1</span>
+                <small>Recepción, pesaje, ley y merma por lote.</small>
+              </div>
+              <div class="feature-card">
+                <div class="feature-header">
+                  <span class="feature-icon">🪙</span>
+                  <strong>Cotizador</strong>
+                </div>
+                <span class="tag-notrans">No Transaccional 1</span>
+                <small>Precios internacionales USD/PEN en vivo.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <dl class="data-card">
+        <div class="data-row">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg>
+          <div><dt>Institución</dt><dd>Universidad Peruana Unión (UPeU) · Campus Juliaca</dd></div>
+        </div>
+        <div class="data-row">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+          <div><dt>Ciclo y semestre</dt><dd>Ciclo IV · Semestre Académico 2026-II</dd></div>
+        </div>
+        <div class="data-row">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 19V5"/></svg>
+          <div><dt>Curso</dt><dd>Lenguaje de Programación II · LP2</dd></div>
+        </div>
+        <div class="data-row">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.1 3.4-6 8-6s7.3 1.9 8 6"/></svg>
+          <div><dt>Evaluación</dt><dd>Sesión 6 · Sustentación de la Unidad I</dd></div>
+        </div>
+      </dl>
+    </section>
+
+    <footer class="footer">
+      <span class="honor-code">“Sé Íntegro, Sé Misionero, Sé Innovador”</span>
+      <span class="dots" aria-label="Diapositiva 1 de 9"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="footer-label">01 / 09 · SITRA-ORO</span>
+    </footer>
+  </main>
+    </div>
+
+    <!-- SLIDE 2: propuesta_01_contexto.html -->
+    <div class="slide-wrapper" id="slide-2">
+      <section class="slide">
+  <div class="background" aria-hidden="true"></div>
+  <header><img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión"><div class="career"><img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas"><div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div></div></header>
+  <main>
+    <div class="eyebrow">01 · Arquitectura del sistema</div>
+    <h1>Alcance del dominio y <span class="gold">arquitectura</span></h1>
+    <p class="lead">SITRA-ORO concentra la cotización, el acopio y la liquidación semanal de oro en un backend REST conectado a Oracle.</p>
+    <section class="items" aria-label="Alcance técnico">
+      <article class="item"><h2>Monolito modular</h2><p>Una aplicación Spring Boot organizada por responsabilidades y verificada con Spring Modulith.</p></article>
+      <article class="item"><h2>Módulos funcionales</h2><p>Cotizador, Acopiador G2, Mayorista G1 y Parámetros <span>cubren el flujo operativo actual.</span></p></article>
+      <article class="item"><h2>Persistencia real</h2><p>Oracle de BD2 mediante un perfil de ejecución y configuración externalizada.</p></article>
+    </section>
+    <div class="scope"><b>Alcance actual</b><br>El backend cubre operación, transacciones, consultas, reportes y pruebas. Seguridad JWT: evolución posterior.</div>
+  </main>
+  <aside class="visual"><b>Acopio de oro</b><span>Contexto territorial de la operación</span></aside>
+  <footer><span class="count">02 / 09</span><span class="dots"><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="brand">SITRA-ORO · UPeU Juliaca</span></footer>
+</section>
+    </div>
+
+    <!-- SLIDE 3: diapositiva-03-crud-mineros.html -->
+    <div class="slide-wrapper" id="slide-3">
+      <section class="slide">
+  <div class="grid" aria-hidden="true"></div>
+  <header><img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión"><div class="career"><img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas"><div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div></div></header>
+  <main>
+    <section class="left">
+      <div class="eyebrow">02 · Registro de mineros</div>
+      <h1>CRUD de mineros:<br><span class="gold">datos confiables</span><br>desde el origen</h1>
+      <p class="lead">Antes de registrar una compra, SITRA-ORO valida y persiste la información del minero como base de la trazabilidad del acopio.</p>
+      <div class="endpoint"><b>POST</b><code>/api/v1/acopio/mineros</code></div>
+      <section class="pipeline" aria-label="Flujo de validación">
+        <article class="pipe"><span class="num">01</span><div><h2>Solicitud controlada</h2><p>El contrato recibe un <code>MineroRequest</code>, sin exponer la entidad de base de datos.</p></div></article>
+        <article class="pipe"><span class="num">02</span><div><h2>Validación de entrada</h2><p>Documento y nombre obligatorios. Longitudes definidas para documento, teléfono y zona.</p></div></article>
+        <article class="pipe"><span class="num">03</span><div><h2>Persistencia y respuesta</h2><p>El servicio registra en Oracle y devuelve un <code>MineroResponse</code> con su identificador.</p></div></article>
+      </section>
+      <div class="note"><b>Evidencia mostrada</b><br>Registro válido <strong>201</strong> y error de validación <strong>400</strong> ejecutados desde Swagger.</div>
+    </section>
+    <section class="evidence" aria-label="Evidencia real en Swagger">
+      <div class="evidence-head"><h2>Evidencia de ejecución</h2><p>Swagger · Oracle · API REST</p></div>
+      <article class="shot success"><span class="proof-map ok"><b>01 + 03</b><i></i>Solicitud y persistencia</span><img src="assets/evidencia-minero-201.png" alt="Respuesta 201 Created al registrar minero"></article>
+      <article class="shot error"><span class="proof-map err"><b>02</b><i></i>Validación de entrada</span><img src="assets/evidencia-minero-400.png" alt="Respuesta 400 Bad Request por documento obligatorio"></article>
+    </section>
+  </main>
+  <footer><span class="count">03 / 09</span><span class="dots"><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="brand">SITRA-ORO · UPeU Juliaca</span></footer>
+</section>
+    </div>
+
+    <!-- SLIDE 4: diapositiva-04-acopio-g2.html -->
+    <div class="slide-wrapper" id="slide-4">
+      <section class="slide">
+  <div class="grid" aria-hidden="true"></div>
+  <header><img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión"><div class="career"><img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas"><div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div></div></header>
+  <main>
+    <section class="left">
+      <div class="eyebrow">03 · Operación de acopio</div>
+      <h1>Acopio G2:<br><span class="gold">trazabilidad</span><br>por minero y color</h1>
+      <p class="lead">Cada compra conserva quién entregó el oro, cuánto quedó después de la fundición y qué monto recibió el minero.</p>
+      <div class="endpoints">
+        <div class="endpoint post"><b>POST</b><code>/api/v1/acopio/transacciones</code></div>
+        <div class="endpoint get"><b>GET</b><code>/api/v1/acopio/acumulados-semanales</code></div>
+      </div>
+      <section class="facts">
+        <article class="fact"><span class="num">01</span><div><h2>Relación persistente</h2><p>Un minero puede tener varias transacciones; cada transacción pertenece a un solo minero.</p></div></article>
+        <article class="fact"><span class="num">02</span><div><h2>Compra calculada</h2><p>Registra peso sin fundir, peso neto, precio aplicado y total pagado en soles.</p></div></article>
+        <article class="fact"><span class="num">03</span><div><h2>Stock separado</h2><p>Los gramos y desembolsos se acumulan de forma independiente para ROJO y VERDE.</p></div></article>
+      </section>
+      <div class="rule"><b>Resultado</b>El sistema conserva el origen del lote y evita mezclar tipos de oro durante el cierre.</div>
+    </section>
+    <section class="diagram" aria-label="Relación entre mineros, transacciones G2 y acumulados por color">
+      <svg class="branch-flow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <path pathLength="1" d="M80 38 V47 H50 V51"></path>
+        <circle cx="80" cy="38" r="0.42"></circle>
+      </svg>
+      <span class="branch-label">clasifica y acumula</span>
+      <div class="relation">
+        <article class="node minero">
+          <span class="type">Entidad de origen</span>
+          <h2>Minero</h2>
+          <dl><div><dt>Identificador</dt><dd>idMinero</dd></div><div><dt>Documento</dt><dd>único</dd></div><div><dt>Procedencia</dt><dd>zona</dd></div></dl>
+        </article>
+        <div class="one-many" aria-label="Relación uno a muchos"><b class="flow-line" aria-hidden="true"></b><i>realiza</i><span></span></div>
+        <article class="node transaction">
+          <span class="type">Entidad transaccional</span>
+          <h2>Transacción G2</h2>
+          <dl><div><dt>Pesos</dt><dd>bruto / neto</dd></div><div><dt>Clasificación</dt><dd>ROJO / VERDE</dd></div><div><dt>Desembolso</dt><dd>totalPagadoPen</dd></div></dl>
+        </article>
+      </div>
+      <div class="split">
+        <article class="stock red">
+          <span class="type">Acumulado por color</span><h3>Oro ROJO</h3>
+          <div class="measure"><span>Peso disponible</span><code>totalGramosRojo</code></div>
+          <div class="measure"><span>Dinero pagado</span><code>totalDineroRojoPen</code></div>
+          <div class="measure"><span>Cálculo</span><code>SUM(pesoNeto)</code></div>
+          <div class="measure"><span>Condición</span><code>liquidación = null</code></div>
+          <div class="pending">Stock pendiente de liquidación</div>
+        </article>
+        <article class="stock green">
+          <span class="type">Acumulado por color</span><h3>Oro VERDE</h3>
+          <div class="measure"><span>Peso disponible</span><code>totalGramosVerde</code></div>
+          <div class="measure"><span>Dinero pagado</span><code>totalDineroVerdePen</code></div>
+          <div class="measure"><span>Cálculo</span><code>SUM(pesoNeto)</code></div>
+          <div class="measure"><span>Condición</span><code>liquidación = null</code></div>
+          <div class="pending">Stock pendiente de liquidación</div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer><span class="count">04 / 09</span><span class="dots"><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></span><span class="brand">SITRA-ORO · UPeU Juliaca</span></footer>
+</section>
+
+    </div>
+
+    <!-- SLIDE 5: diapositiva-05-cierre-g1.html -->
+    <div class="slide-wrapper" id="slide-5">
+      <section class="slide">
+  <div class="grid" aria-hidden="true"></div>
+  <header><img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión"><div class="career"><img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas"><div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div></div></header>
+  <main>
+    <section class="left">
+      <div class="eyebrow">04 · Cierre Mayorista G1</div>
+      <h1>Cierre semanal:<br><span class="gold">cabecera y detalle</span></h1>
+      <p class="lead">Una liquidación reúne el stock pendiente por color, calcula el pago al acopiador y conserva cada importe que forma el total.</p>
+      <div class="endpoint"><b>POST</b><code>/api/v1/mayorista/liquidaciones</code></div>
+      <section class="facts">
+        <article class="fact"><span class="num">01</span><div><h2>Cabecera consolidada</h2><p>Registra al acopiador, la cotización, el tipo de cambio, el peso total y el pago final.</p></div></article>
+        <article class="fact"><span class="num">02</span><div><h2>Un detalle por color</h2><p>ROJO usa el precio base. VERDE aplica el diferencial de 5 % y cada línea conserva su subtotal.</p></div></article>
+        <article class="fact"><span class="num">03</span><div><h2>Operación atómica</h2><p>El cierre enlaza los lotes liquidados. Si un peso no coincide con el stock pendiente, toda la transacción se revierte.</p></div></article>
+      </section>
+      <div class="rule"><b>Resultado</b>El Mayorista G1 recibe una liquidación trazable y el Acopiador G2 queda sin stock pendiente para los colores cerrados.</div>
+    </section>
+    <section class="diagram" aria-label="Cálculo y estructura cabecera-detalle de la liquidación G1">
+      <div class="pricing">
+        <article class="source"><small>Mercado Internacional</small><strong>Onza USD</strong><code>cotizacionOnzaUsd</code></article>
+        <span class="join" aria-hidden="true"></span>
+        <article class="source"><small>Divisa Oficial</small><strong>Tipo de cambio</strong><code>tipoCambioUsdPen</code></article>
+        <span class="join" aria-hidden="true"></span>
+        <article class="formula"><small>Precio Base / Gramo</small><strong>(Onza ÷ Factor Troy) × TC</strong><span>Cálculo oficial en PEN</span></article>
+      </div>
+      <article class="header-card">
+        <span class="type">Cabecera · Liquidación G1</span>
+        <div class="header-title"><h2>Cierre del Acopiador G2</h2><span class="state">Registrada</span></div>
+        <div class="header-fields">
+          <div class="field"><span>Responsable</span><code>nombreAcopiadorG2</code></div>
+          <div class="field"><span>Peso consolidado</span><code>Σ pesoFundidoG</code></div>
+          <div class="field"><span>Fecha</span><code>fechaLiquidacion</code></div>
+        </div>
+        <div class="header-total"><span>Total pagado al G2</span><b>Σ subtotales · PEN</b></div>
+      </article>
+      <section class="details">
+        <article class="detail red">
+          <span class="type">Detalle 01</span><h3>Oro ROJO</h3>
+          <div class="detail-row"><span>Peso</span><code>todo el stock ROJO</code></div>
+          <div class="detail-row"><span>Precio por gramo</span><code>precio base</code></div>
+          <div class="detail-row"><span>Subtotal</span><code>peso × precio</code></div>
+          <div class="detail-row"><span>Validación</span><code>solicitado = pendiente</code></div>
+          <div class="detail-row"><span>Vinculación</span><code>idLiquidacionG1</code></div>
+          <div class="subtotal">Lotes vinculados al cierre</div>
+        </article>
+        <article class="detail green">
+          <span class="type">Detalle 02</span><h3>Oro VERDE</h3>
+          <div class="detail-row"><span>Peso</span><code>todo el stock VERDE</code></div>
+          <div class="detail-row"><span>Precio por gramo</span><code>precio base × 1.05</code></div>
+          <div class="detail-row"><span>Subtotal</span><code>peso × precio</code></div>
+          <div class="detail-row"><span>Validación</span><code>solicitado = pendiente</code></div>
+          <div class="detail-row"><span>Vinculación</span><code>idLiquidacionG1</code></div>
+          <div class="subtotal">Lotes vinculados al cierre</div>
+        </article>
+        <div class="transaction-note">Una transacción · persistencia o rollback completo</div>
+      </section>
+    </section>
+  </main>
+  <footer><span class="count">05 / 09</span><span class="dots"><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i></span><span class="brand">SITRA-ORO · UPeU Juliaca</span></footer>
+</section>
+
+    </div>
+
+    <!-- SLIDE 6: diapositiva-06-regla-cierre.html -->
+    <div class="slide-wrapper" id="slide-6">
+      <section class="slide">
+  <div class="grid" aria-hidden="true"></div>
+  <header><img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión"><div class="career"><img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas"><div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div></div></header>
+  <main>
+    <section class="left">
+      <div class="eyebrow">05 · Regla de negocio</div>
+      <h1>El cierre exige una<br><span class="gold">coincidencia exacta</span></h1>
+      <p class="lead">Cada detalle debe liquidar todo el stock pendiente del color. Una diferencia bloquea el cierre y conserva los datos anteriores.</p>
+      <div class="endpoint"><b>POST</b><code>/api/v1/mayorista/liquidaciones</code></div>
+      <section class="facts">
+        <article class="fact"><span class="num">01</span><div><h2>Stock pendiente</h2><p>El sistema suma los lotes del color cuyo <code>idLiquidacionG1</code> permanece vacío.</p></div></article>
+        <article class="fact"><span class="num">02</span><div><h2>Comparación estricta</h2><p>El peso del detalle debe ser igual al total disponible. No admite cierres parciales ni excesos.</p></div></article>
+        <article class="fact"><span class="num">03</span><div><h2>Rollback transaccional</h2><p>Si la validación falla, Oracle no conserva la cabecera, los detalles ni vínculos incompletos.</p></div></article>
+      </section>
+      <div class="rule"><b>Defensa</b>La regla protege la trazabilidad: cada lote pendiente termina asociado a un único cierre semanal.</div>
+    </section>
+    <section class="comparison" aria-label="Comparación entre cierre aceptado y cierre rechazado">
+      <article class="stock-source">
+        <div class="stock-top"><div><span class="stock-label">Referencia del sistema</span><h2>Stock pendiente del color</h2></div><span class="query">idLiquidacionG1 = null</span></div>
+        <div class="stock-equation"><span>Suma de pesos netos disponibles</span><code>disponible = Σ pesoFundidoNetoG</code></div>
+      </article>
+      <div class="fork" aria-hidden="true"><span>compara con el detalle solicitado</span></div>
+      <section class="cases">
+        <article class="case ok">
+          <div class="case-head"><div><small>Caso aceptado</small><h2>Pesos iguales</h2></div><span class="status">201 Created</span></div>
+          <div class="numbers"><div><span>Disponible</span><code>875.250 g</code></div><span class="operator">=</span><div><span>Solicitado</span><code>875.250 g</code></div></div>
+          <div class="effects">
+            <div class="effect"><i>01</i><span>Guarda la cabecera y sus detalles.</span></div>
+            <div class="effect"><i>02</i><span>Asigna el nuevo <code>idLiquidacionG1</code> a los lotes.</span></div>
+            <div class="effect"><i>03</i><span>El stock pendiente del color queda en cero.</span></div>
+          </div>
+          <div class="result">Liquidación registrada</div>
+          <div class="db-state"><b>Estado final en Oracle</b><div class="db-row"><span>LIQUIDACIONES_G1</span><code>+1 cabecera</code></div><div class="db-row"><span>DETALLE_LIQUIDACIONES_G1</span><code>+1 o 2 líneas</code></div><div class="db-row"><span>TRANSACCIONES_G2</span><code>lotes vinculados</code></div></div>
+        </article>
+        <article class="case error">
+          <div class="case-head"><div><small>Caso rechazado</small><h2>Pesos diferentes</h2></div><span class="status">409 Conflict</span></div>
+          <div class="numbers"><div><span>Disponible</span><code>875.250 g</code></div><span class="operator">≠</span><div><span>Solicitado</span><code>800.000 g</code></div></div>
+          <div class="message"><b>Mensaje:</b> el cierre debe coincidir con todo el stock disponible del color.</div>
+          <div class="effects">
+            <div class="effect"><i>01</i><span>Revierte la cabecera y los detalles.</span></div>
+            <div class="effect"><i>02</i><span>Los lotes continúan pendientes y sin modificación.</span></div>
+          </div>
+          <div class="result">Estado anterior conservado</div>
+          <div class="db-state"><b>Estado final en Oracle</b><div class="db-row"><span>LIQUIDACIONES_G1</span><code>sin nueva fila</code></div><div class="db-row"><span>DETALLE_LIQUIDACIONES_G1</span><code>sin nuevas líneas</code></div><div class="db-row"><span>TRANSACCIONES_G2</span><code>sin cambios</code></div></div>
+        </article>
+      </section>
+    </section>
+  </main>
+  <footer><span class="count">06 / 09</span><span class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i></span><span class="brand">SITRA-ORO · UPeU Juliaca</span></footer>
+</section>
+
+    </div>
+
+    <!-- SLIDE 7: diapositiva-07-evidencias.html -->
+    <div class="slide-wrapper" id="slide-7">
+      <section class="slide">
+  <div class="grid" aria-hidden="true"></div>
+  <header><img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión"><div class="career"><img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas"><div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div></div></header>
+  <main>
+    <section class="left">
+      <div class="eyebrow">06 · Verificación funcional</div>
+      <h1>Consultas, reportes y<br><span class="gold">evidencia de ejecución</span></h1>
+      <p class="lead">El backend consulta liquidaciones persistidas, combina filtros y entrega un resumen preparado para consumo empresarial.</p>
+      <div class="endpoints">
+        <div class="endpoint"><b>GET</b><code>/api/v1/mayorista/liquidaciones</code></div>
+        <div class="endpoint"><b>GET</b><code>/api/v1/mayorista/liquidaciones/resumen</code></div>
+      </div>
+      <section class="facts">
+        <article class="fact"><span class="num">01</span><div><h2>Consulta flexible</h2><p>Combina estado, rango de fechas y ordenamiento dentro del mismo recurso.</p></div></article>
+        <article class="fact"><span class="num">02</span><div><h2>Reporte resumido</h2><p>Devuelve conteo, monto total y ticket promedio junto con un DTO ligero por liquidación.</p></div></article>
+        <article class="fact"><span class="num">03</span><div><h2>Integración web controlada</h2><p>CORS permite el origen configurado para la SPA y expone la API bajo <code>/api/**</code>.</p></div></article>
+      </section>
+      <div class="rule"><b>Resultado</b>La demostración conecta el contrato REST con datos persistidos y respuestas que el equipo puede explicar y repetir.</div>
+    </section>
+    <section class="evidence-panel" aria-label="Evidencias de consultas, reporte, Oracle, pruebas y CORS">
+      <div class="proof-heading"><div><small>Captura real · Swagger UI</small><h2>Filtros combinados con respuesta del servidor</h2></div><div class="proof-tags"><span>REGISTRADA</span><span>fecha DESC</span><span class="ok">200 OK</span></div></div>
+      <figure class="screenshot"><img src="assets/evidencia-consultas-filtros.png" alt="Consulta real de liquidaciones con estado, fechas y ordenamiento"><span class="focus" aria-hidden="true"></span><figcaption class="focus-label">Respuesta persistida</figcaption></figure>
+      <section class="metrics" aria-label="Resultados reales del reporte agregado">
+        <article class="metric"><small>Total de liquidaciones</small><strong><em>4</em></strong><span>Registros del intervalo consultado</span></article>
+        <article class="metric"><small>Monto total</small><strong>S/ <em>81 313.80</em></strong><span>Suma con BigDecimal</span></article>
+        <article class="metric"><small>Ticket promedio</small><strong>S/ <em>20 328.45</em></strong><span>Cero cuando no existen filas</span></article>
+      </section>
+      <section class="checks" aria-label="Comprobaciones técnicas">
+        <article class="check"><b>Oracle XE 21</b><span>Perfil dev y esquema funcional del proyecto.</span></article>
+        <article class="check"><b>29 pruebas correctas</b><span>Sin fallos ni errores en la verificación Maven.</span></article>
+        <article class="check"><b>CORS configurable</b><span>Origen permitido: localhost:4200.</span></article>
+      </section>
+      <div class="demo"><b>DEMO:</b> localhost:8081/swagger-ui/index.html</div>
+    </section>
+  </main>
+  <footer><span class="count">07 / 09</span><span class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></span><span class="brand">SITRA-ORO · UPeU Juliaca</span></footer>
+</section>
+
+    </div>
+
+    <!-- SLIDE 8: diapositiva-08-prometheus.html -->
+    <div class="slide-wrapper" id="slide-8">
+      <section class="slide">
+  <div class="grid" aria-hidden="true"></div>
+  <header><img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión"><div class="career"><img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas"><div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div></div></header>
+  <main>
+    <section class="story">
+      <div class="eyebrow">07 · Observabilidad</div>
+      <h1>Observabilidad<br><span class="gold">comprobada</span></h1>
+      <p class="lead">Prometheus supervisa las dos instancias del backend. Promtail centraliza sus registros y Loki permite localizar el error que activa el rollback.</p>
+      <div class="route"><small>Servicios verificados</small><code>Prometheus :39090 · Loki :33100</code><span>métricas en 8080 y 8081 · logs de SITRA-ORO</span></div>
+      <section class="proofs" aria-label="Resultados de la verificación">
+        <article class="proof"><span class="num">01</span><div><b>Dos instancias disponibles</b><p>Los endpoints de 8080 y 8081 responden a cada scrape.</p></div><strong class="ok">2 / 2 UP</strong></article>
+        <article class="proof"><span class="num">02</span><div><b>Logs centralizados</b><p>Loki recibe el archivo generado por el backend mediante Promtail.</p></div><strong class="ok">SUCCESS</strong></article>
+        <article class="proof"><span class="num">03</span><div><b>Rollback localizable</b><p>La consulta recupera el evento de stock que produce el conflicto.</p></div><strong>409</strong></article>
+      </section>
+      <p class="scope"><b>Anexo opcional 3.13</b><br>La observabilidad complementa la sustentación y no altera el alcance funcional de las sesiones 1 a 5.</p>
+    </section>
+    <section class="evidence" aria-label="Capturas reales de Prometheus y Loki">
+      <div class="evidence-label"><div><small>Evidencia real de ejecución</small><h2>Prometheus y Loki · SITRA-ORO</h2></div><span class="live">OBSERVABILIDAD ACTIVA</span></div>
+      <figure class="browser prometheus">
+        <div class="browser-bar"><span class="method">PROM</span><span class="address">http://localhost:39090/targets</span><span class="response">2 / 2 · UP</span></div>
+        <img src="assets/evidencia-prometheus-target-up.png" alt="Prometheus Target Health con el backend SITRA-ORO en estado UP">
+      </figure>
+      <figure class="browser loki">
+        <div class="browser-bar"><span class="method loki">LOKI</span><span class="address">/loki/api/v1/query_range · StockInsuficienteException</span><span class="response">status · success</span></div>
+        <img src="assets/evidencia-loki-stock-insuficiente.png" alt="Respuesta real de Loki con el evento StockInsuficienteException y rollback 409">
+      </figure>
+      <div class="caption"><span><b>Capturas reales:</b> métricas y logs consultados en ejecución</span><span>2/2 UP · 409 encontrado</span></div>
+    </section>
+  </main>
+  <footer><span class="count">08 / 09</span><span class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i></span><span class="brand">SITRA-ORO · UPeU Juliaca</span></footer>
+</section>
+
+    </div>
+
+    <!-- SLIDE 9: diapositiva-09-despedida.html -->
+    <div class="slide-wrapper" id="slide-9">
+      <section class="slide">
+  <div class="photo" aria-hidden="true"></div><div class="veil" aria-hidden="true"></div>
+  <header><img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión"><div class="career"><img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas"><div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div></div></header>
+  <main>
+    <section class="content">
+      <div class="eyebrow">Cierre de sustentación</div>
+      <h1>Gracias por<br><span class="gold">su atención</span></h1>
+      <p class="project"><b>SITRA-ORO</b><br>Backend REST para la trazabilidad del acopio y la liquidación de oro.</p>
+      
+      <!-- Bloque conjunto de Logos UPeU + Quilate Bullion en el Centro Izquierdo -->
+      <div class="co-branding" aria-label="Alianza académica y caso empresarial">
+        <div class="brand-item">
+          <img class="brand-logo upeu-brand" src="assets/upeu.png" alt="Universidad Peruana Unión">
+          <div class="brand-text">
+            <small>INSTITUCIÓN</small>
+            <b>UPeU Juliaca</b>
+          </div>
+        </div>
+        <div class="brand-divider" aria-hidden="true"></div>
+        <div class="brand-item">
+          <img class="brand-logo bullion-brand" src="assets/quilate-bullion-emblema-v2.png" alt="Quilate Bullion S.A.C.">
+          <div class="brand-text">
+            <small>EMPRESA DEL CASO</small>
+            <b>Quilate Bullion S.A.C.</b>
+            <span>Acopio y Liquidación de Oro</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="team"><span class="team-label">Equipo 05</span><div class="names"><span>Faijo Calisaya Helio Paul</span><span>Figueroa Chambi Jhymel Nelio</span></div></div>
+    </section>
+  </main>
+  <footer><span class="count">09 / 09</span><span class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i></span><span class="brand">SITRA-ORO · UPeU Juliaca</span></footer>
+</section>
+
+    </div>
+
+    <!-- Floating Navigation Arrows -->
+    <button id="prevBtn" class="nav-btn nav-prev" aria-label="Anterior" title="Diapositiva anterior (←)">‹</button>
+    <button id="nextBtn" class="nav-btn nav-next" aria-label="Siguiente" title="Diapositiva siguiente (→)">›</button>
+
+    <!-- Bottom Keyboard Shortcut Indicator -->
+    <div class="deck-hint" aria-hidden="true">
+      <span>← → Navegar</span>
+      <span>F · Pantalla completa</span>
+      <span id="slideIndicator">1 / 9</span>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const totalSlides = 9;
+      const slides = Array.from(document.querySelectorAll('.slide-wrapper'));
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const slideIndicator = document.getElementById('slideIndicator');
+
+      const hashNum = Number.parseInt(location.hash.replace('#', ''), 10);
+      let currentIndex = (Number.isInteger(hashNum) && hashNum >= 1 && hashNum <= totalSlides)
+        ? hashNum - 1
+        : 0;
+
+      function updateUI() {
+        slides.forEach((slide, idx) => {
+          if (idx === currentIndex) {
+            slide.classList.add('active');
+          } else {
+            slide.classList.remove('active');
+          }
+        });
+
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex === totalSlides - 1;
+        if (slideIndicator) {
+          slideIndicator.textContent = `${currentIndex + 1} / ${totalSlides}`;
+        }
+        history.replaceState(null, '', `#${currentIndex + 1}`);
+
+        // Sync interactive dots inside slide footer if present
+        const currentSlide = slides[currentIndex];
+        if (currentSlide) {
+          currentSlide.querySelectorAll('.dots i').forEach((dot, dIdx) => {
+            if (dIdx === currentIndex) {
+              dot.classList.add('on');
+            } else {
+              dot.classList.remove('on');
+            }
+          });
+        }
+      }
+
+      function goToSlide(idx) {
+        currentIndex = Math.min(Math.max(idx, 0), totalSlides - 1);
+        updateUI();
+      }
+
+      function step(offset) {
+        goToSlide(currentIndex + offset);
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.();
+        } else {
+          document.exitFullscreen?.();
+        }
+      }
+
+      prevBtn.addEventListener('click', () => step(-1));
+      nextBtn.addEventListener('click', () => step(1));
+
+      // Enable dot clicks across all slides
+      document.querySelectorAll('.dots i').forEach((dot, index) => {
+        if (index < totalSlides) {
+          dot.setAttribute('role', 'button');
+          dot.style.cursor = 'pointer';
+          dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            goToSlide(index);
+          });
+        }
+      });
+
+      // Keyboard Controls
+      document.addEventListener('keydown', (e) => {
+        const key = e.key;
+        if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(key)) {
+          e.preventDefault();
+          step(1);
+        } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(key)) {
+          e.preventDefault();
+          step(-1);
+        } else if (key === 'Home') {
+          e.preventDefault();
+          goToSlide(0);
+        } else if (key === 'End') {
+          e.preventDefault();
+          goToSlide(totalSlides - 1);
+        } else if (key.toLowerCase() === 'f') {
+          e.preventDefault();
+          toggleFullscreen();
+        }
+      });
+
+      // Touch / Swipe Controls
+      let touchStartX = null;
+      document.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].clientX;
+      }, { passive: true });
+
+      document.addEventListener('touchend', (e) => {
+        if (touchStartX === null) return;
+        const diff = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(diff) > 50) {
+          step(diff < 0 ? 1 : -1);
+        }
+        touchStartX = null;
+      }, { passive: true });
+
+      updateUI();
+    })();
+  </script>
+</body>
+</html>

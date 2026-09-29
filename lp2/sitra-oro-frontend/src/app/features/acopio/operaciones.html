@@ -27,14 +27,19 @@
         </div>
       </div>
 
-      @if (!mineros().length) {
-        <p class="notice">Para registrar una compra, primero debe existir un minero en el padrón.</p>
+      @if (cargandoMineros()) {
+        <p class="notice" role="status">Cargando mineros…</p>
+      } @else if (errorMineros()) {
+        <p class="feedback error" role="alert">{{ errorMineros() }}</p>
+        <button mat-stroked-button type="button" (click)="actualizarMineros()">Reintentar carga de mineros</button>
+      } @else if (!mineros().length) {
+        <p class="notice">No hay mineros registrados. Registra un minero antes de ingresar una entrega.</p>
       }
 
       <form [formGroup]="form" (ngSubmit)="registrar()" class="form-grid">
         <label class="field field-wide">
           <span>Minero</span>
-          <select formControlName="idMinero">
+          <select formControlName="idMinero" [attr.aria-invalid]="form.controls.idMinero.invalid && form.controls.idMinero.touched">
             <option [ngValue]="0">Selecciona al minero</option>
             @for (minero of mineros(); track minero.idMinero) {
               <option [ngValue]="minero.idMinero">
@@ -42,6 +47,9 @@
               </option>
             }
           </select>
+          @if (form.controls.idMinero.invalid && form.controls.idMinero.touched) {
+            <small class="field-error" role="alert">Selecciona un minero para registrar la entrega.</small>
+          }
         </label>
 
         <fieldset class="gold-choice field-wide">
@@ -91,7 +99,7 @@
 
         <div class="submit-row field-wide">
           <span class="secure-note"><span aria-hidden="true">●</span> El cálculo se confirma al guardar</span>
-          <button mat-flat-button class="button-primary" [disabled]="guardando() || !mineros().length">
+          <button mat-flat-button class="button-primary" [disabled]="guardando() || cargandoMineros() || !!errorMineros() || !mineros().length">
             {{ guardando() ? 'Registrando…' : 'Registrar entrega' }}
           </button>
         </div>

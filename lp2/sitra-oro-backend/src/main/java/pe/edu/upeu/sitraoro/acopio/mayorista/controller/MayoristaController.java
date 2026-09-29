@@ -39,8 +39,9 @@ public class MayoristaController {
 
     @GetMapping("/recepciones")
     @Operation(summary = "Listar registros de compra recibidos del acopiador")
-    public List<RecepcionMayoristaResponse> listarRecepciones() {
-        return recepcionMayoristaService.listar();
+    public List<RecepcionMayoristaResponse> listarRecepciones(
+            @RequestParam(required = false) Long idCentroAcopio) {
+        return recepcionMayoristaService.listar(idCentroAcopio);
     }
 
     @PostMapping("/recepciones")

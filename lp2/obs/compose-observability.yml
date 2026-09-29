@@ -1,0 +1,32 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.14.0
+    container_name: sitra-oro-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    ports:
+      - "39090:9090"
+    volumes:
+      - ./prometheus/prometheus-dev.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.7.6
+    container_name: sitra-oro-loki
+    ports:
+      - "33100:3100"
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.6.8
+    container_name: sitra-oro-promtail
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./promtail/promtail-config-dev.yml:/etc/promtail/config.yml:ro
+      - ../sitra-oro-backend/logs:/var/log/sitra-oro-backend:ro
+    depends_on:
+      - loki
+    restart: unless-stopped

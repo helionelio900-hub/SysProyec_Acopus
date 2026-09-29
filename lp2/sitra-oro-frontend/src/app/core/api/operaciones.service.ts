@@ -67,13 +67,14 @@ export interface FilaRecepcionMayorista {
 export interface RecepcionMayorista {
   idRecepcion: number;
   fecha: string;
+  idCentroAcopio: number;
   nombreAcopiador: string;
   rojo: FilaRecepcionMayorista;
   verde: FilaRecepcionMayorista;
   descuento: string;
   total: string;
 }
-export type CrearRecepcionMayorista = Omit<RecepcionMayorista, 'idRecepcion'>;
+export type CrearRecepcionMayorista = Omit<RecepcionMayorista, 'idRecepcion' | 'nombreAcopiador'>;
 export interface DetalleLiquidacion {
   tipoOro: 'ROJO' | 'VERDE';
   pesoFundidoG: number;
@@ -143,8 +144,11 @@ export class OperacionesService {
   crearCentro(request: CrearCentro): Observable<CentroAcopio> {
     return this.http.post<CentroAcopio>(this.url('/api/v1/mayorista/centros-acopio'), request);
   }
-  recepcionesMayorista(): Observable<RecepcionMayorista[]> {
-    return this.http.get<RecepcionMayorista[]>(this.url('/api/v1/mayorista/recepciones'));
+  recepcionesMayorista(idCentroAcopio?: number | null): Observable<RecepcionMayorista[]> {
+    const params = idCentroAcopio == null
+      ? undefined
+      : new HttpParams().set('idCentroAcopio', idCentroAcopio);
+    return this.http.get<RecepcionMayorista[]>(this.url('/api/v1/mayorista/recepciones'), { params });
   }
   registrarRecepcionMayorista(request: CrearRecepcionMayorista): Observable<RecepcionMayorista> {
     return this.http.post<RecepcionMayorista>(this.url('/api/v1/mayorista/recepciones'), request);

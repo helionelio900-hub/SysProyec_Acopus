@@ -23,8 +23,12 @@ public class RecepcionMayorista {
     @Column(name = "FECHA", nullable = false)
     private LocalDate fecha;
 
-    @Column(name = "NOMBRE_ACOPIADOR", nullable = false, length = 120)
+    @Column(name = "NOMBRE_ACOPIADOR", nullable = false, length = 223)
     private String nombreAcopiador;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ID_CENTRO_ACOPIO", nullable = false)
+    private CentroAcopio centroAcopio;
 
     @Embedded
     @AttributeOverrides({

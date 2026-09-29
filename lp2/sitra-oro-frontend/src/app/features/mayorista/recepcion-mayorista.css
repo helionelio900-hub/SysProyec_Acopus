@@ -87,6 +87,24 @@
 .reception-records {
   margin-top: 1.25rem;
 }
+.reception-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+}
+.reception-filter label {
+  font-weight: 700;
+}
+.reception-filter select {
+  min-width: 15rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #d5dfeb;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #17283f;
+  font: inherit;
+}
 .record-actions {
   white-space: nowrap;
 }
@@ -103,6 +121,10 @@
   color: #aa3d35;
 }
 @media (max-width: 700px) {
+  .reception-filter {
+    align-items: stretch;
+    flex-direction: column;
+  }
   .reception-summary {
     grid-template-columns: 1fr;
     max-width: none;

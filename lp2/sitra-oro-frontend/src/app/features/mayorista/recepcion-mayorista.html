@@ -34,19 +34,22 @@
       <div class="major-grid reception-meta">
         <label class="field">Fecha <input type="date" formControlName="fecha" /></label>
         <label class="field"
-          >Acopiador
-          <select formControlName="nombreAcopiador" required>
-            <option value="" disabled>Selecciona un acopiador</option>
+          >Centro de acopio
+          <select formControlName="idCentroAcopio" required>
+            <option [ngValue]="0" disabled>Selecciona un centro de acopio</option>
             @if (vistaPrevia) {
-              <option value="Acopiador de ejemplo">Acopiador de ejemplo · Vista de demostración</option>
+              <option [ngValue]="1">Centro de acopio de ejemplo · Vista de demostración</option>
             } @else {
               @for (centro of centros(); track centro.idCentroAcopio) {
-                <option [value]="etiquetaCentro(centro)">{{ etiquetaCentro(centro) }}</option>
+                <option [ngValue]="centro.idCentroAcopio">{{ etiquetaCentro(centro) }}</option>
               }
             }
           </select>
           @if (!vistaPrevia && centros().length === 0) {
             <small>No hay centros activos. Primero registra un centro y su cuenta.</small>
+          }
+          @if (form.controls.idCentroAcopio.touched && form.controls.idCentroAcopio.invalid && centros().length > 0) {
+            <small>Selecciona un centro de acopio de la lista.</small>
           }
         </label>
       </div>
@@ -150,7 +153,12 @@
         >
           Limpiar
         </button>
-        <button mat-flat-button class="button-primary" type="submit" [disabled]="guardando()">
+        <button
+          mat-flat-button
+          class="button-primary"
+          type="submit"
+          [disabled]="guardando() || (!vistaPrevia && centros().length === 0)"
+        >
           {{
             guardando()
               ? 'Guardando…'
@@ -162,6 +170,22 @@
       </div>
     </section>
   </form>
+  @if (!vistaPrevia) {
+    <section class="panel reception-filter" aria-label="Filtro de recepciones">
+      <label for="filtro-centro-recepciones">Filtrar registros por centro de acopio</label>
+      <select
+        id="filtro-centro-recepciones"
+        #filtroCentro
+        [value]="centroFiltrado() ?? ''"
+        (change)="filtrarPorCentro(filtroCentro.value)"
+      >
+        <option value="">Todos los centros</option>
+        @for (centro of centros(); track centro.idCentroAcopio) {
+          <option [value]="centro.idCentroAcopio">{{ etiquetaCentro(centro) }}</option>
+        }
+      </select>
+    </section>
+  }
   @if (mensaje()) {
     <p class="feedback" role="status">{{ mensaje() }}</p>
   }
@@ -200,7 +224,11 @@
     </section>
   } @else {
     <p class="empty-state">
-      Aún no hay registros de compra. Completa el formulario para guardar el primero.
+      @if (centroFiltrado() !== null) {
+        No hay registros de compra para el centro seleccionado.
+      } @else {
+        Aún no hay registros de compra. Completa el formulario para guardar el primero.
+      }
     </p>
   }
 </section>

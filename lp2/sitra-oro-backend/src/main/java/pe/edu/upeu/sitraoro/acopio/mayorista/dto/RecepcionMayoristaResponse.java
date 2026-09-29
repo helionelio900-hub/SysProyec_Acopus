@@ -6,6 +6,7 @@ import java.time.LocalDate;
 public record RecepcionMayoristaResponse(
         Long idRecepcion,
         LocalDate fecha,
+        Long idCentroAcopio,
         String nombreAcopiador,
         FilaOro rojo,
         FilaOro verde,

@@ -7,7 +7,7 @@
   <title>SITRA-ORO · Sustentación U1 LP2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --navy: #020b19;
@@ -73,12 +73,12 @@
     .cloud-layer {
       position: absolute;
       z-index: -1;
-      top: 8%;
-      right: -7%;
-      width: 62%;
-      height: 39%;
+      top: 10%;
+      right: 3%;
+      width: 40%;
+      height: 26%;
       pointer-events: none;
-      opacity: .72;
+      opacity: .70;
       filter: saturate(.84) brightness(.92) blur(.35px);
       will-change: transform;
       background: url("assets/nube-cordillera-v1.png") center / contain no-repeat;
@@ -86,8 +86,8 @@
     }
 
     @keyframes cloud-drift {
-      from { transform: translate3d(12%, -1%, 0) scale(1); }
-      to { transform: translate3d(-16%, 2%, 0) scale(1.04); }
+      from { transform: translate3d(8%, -1%, 0) scale(1); }
+      to { transform: translate3d(-12%, 1.5%, 0) scale(1.03); }
     }
 
     .header {
@@ -102,11 +102,61 @@
       background: linear-gradient(180deg, rgba(2, 11, 25, .88), rgba(2, 11, 25, .40) 70%, transparent);
     }
 
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .header-divider {
+      width: 1px;
+      height: 2.6rem;
+      background: rgba(128, 164, 214, .25);
+    }
+
     .upeu-logo {
       width: auto;
-      height: 4.15rem;
+      height: 3.65rem;
       object-fit: contain;
       filter: brightness(0) invert(1) grayscale(1) brightness(2.8);
+    }
+
+    .company-lockup {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      margin: 0;
+      padding: .2rem 0;
+    }
+    .company-emblem {
+      width: 4.4rem;
+      height: 2.75rem;
+      flex: 0 0 auto;
+      object-fit: contain;
+      filter: drop-shadow(0 .35rem .65rem rgba(0, 0, 0, .45));
+    }
+    .company-copy {
+      display: grid;
+      gap: .1rem;
+      padding-left: .7rem;
+      border-left: 2px solid var(--gold);
+    }
+    .company-copy small {
+      color: var(--gold);
+      font: 700 .58rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .company-copy strong {
+      color: #fff;
+      font-size: .88rem;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+    .company-copy span {
+      color: #93c5fd;
+      font-size: .68rem;
+      line-height: 1.2;
     }
 
     .career {
@@ -118,8 +168,8 @@
     .career img { width: 4.15rem; height: 4.15rem; object-fit: contain; }
     .career small,
     .mono {
-      font-family: "IBM Plex Mono", Consolas, monospace;
-      letter-spacing: .15em;
+      font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      letter-spacing: .08em;
       text-transform: uppercase;
     }
     .career small { display: block; color: var(--dim); font-size: .65rem; font-weight: 600; }
@@ -139,14 +189,14 @@
       align-items: center;
       gap: 1.1rem;
       color: var(--gold);
-      font: 700 .75rem/1 "IBM Plex Mono", Consolas, monospace;
-      letter-spacing: .31em;
+      font: 700 .75rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      letter-spacing: .12em;
       text-transform: uppercase;
     }
     .eyebrow::before { width: 3.35rem; height: .19rem; content: ""; border-radius: 2rem; background: var(--gold); }
 
     h1 {
-      margin: 1.55rem 0 .7rem;
+      margin: 1.25rem 0 .55rem;
       font-size: clamp(3.5rem, 6.7vw, 6.35rem);
       font-weight: 800;
       letter-spacing: -.058em;
@@ -156,66 +206,163 @@
     h1 span { color: #fff; }
     h1 strong { color: var(--gold); font-weight: 800; text-shadow: 0 0 2rem rgba(242, 183, 54, .21); }
 
-    .company {
-      margin: 0 0 .55rem;
-      color: var(--gold-soft);
-      font: 700 .75rem/1.3 "IBM Plex Mono", Consolas, monospace;
-      letter-spacing: .13em;
+    .context-box {
+      max-width: 44rem;
+      margin: 0 0 .85rem;
+      padding: .65rem .95rem;
+      background: rgba(5, 15, 31, .45);
+      border-left: 2px solid var(--gold-soft);
+      border-radius: 0 .6rem .6rem 0;
+      backdrop-filter: blur(6px);
+    }
+    .context-box p {
+      margin: 0;
+      color: #dbe4ef;
+      font-size: clamp(.78rem, .95vw, .86rem);
+      line-height: 1.42;
+    }
+
+    .members-modules {
+      width: min(44rem, 100%);
+      margin: 0 0 .85rem;
+      padding: .62rem .75rem .72rem;
+      background: rgba(5, 15, 31, .55);
+      border: 1px solid rgba(128, 164, 214, .18);
+      border-radius: .75rem;
+      backdrop-filter: blur(8px);
+    }
+    .team-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: .55rem;
+      padding-bottom: .38rem;
+      border-bottom: 1px solid rgba(128, 164, 214, .18);
+    }
+    .team-title strong {
+      color: #fff;
+      font-size: .78rem;
+      font-weight: 750;
+    }
+    .team-title span {
+      color: var(--gold);
+      font: 700 .58rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      letter-spacing: .08em;
       text-transform: uppercase;
     }
-    .company strong { color: #fff; font-weight: 700; }
-
-    .subtitle {
-      max-width: 43rem;
-      margin: 0 0 1.45rem;
-      color: var(--text);
-      font-size: clamp(1.15rem, 1.65vw, 1.55rem);
-      font-weight: 400;
-      line-height: 1.45;
+    .member-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+    .member-group {
+      min-width: 0;
+      padding: 0;
+      background: transparent;
+    }
+    .member-group + .member-group {
+      padding-left: .75rem;
+      border-left: 1px solid rgba(128, 164, 214, .18);
+    }
+    .member-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: .42rem;
+      padding: 0 .08rem;
+    }
+    .member-title strong {
+      color: #fff;
+      font-size: .7rem;
+      font-weight: 700;
+    }
+    .member-title span {
+      color: var(--gold);
+      font: 700 .54rem "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .member-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .38rem;
+    }
+    .feature-card {
+      padding: .46rem .52rem;
+      background: linear-gradient(135deg, rgba(7, 20, 38, .85), rgba(5, 15, 31, .45));
+      border: 1px solid rgba(242, 183, 54, .25);
+      border-radius: .6rem;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, .26);
+      transition: transform .2s var(--ease), border-color .2s ease;
+    }
+    .feature-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+    .feature-header {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      margin-bottom: .2rem;
+    }
+    .feature-icon {
+      font-size: .95rem;
+      line-height: 1;
+    }
+    .feature-card strong {
+      display: block;
+      color: #fff;
+      font-size: .74rem;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+    .tag-trans {
+      display: inline-block;
+      margin-bottom: .2rem;
+      color: #4ade80;
+      font: 700 .56rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .tag-notrans {
+      display: inline-block;
+      margin-bottom: .2rem;
+      color: #60a5fa;
+      font: 700 .56rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .feature-card small {
+      display: block;
+      color: var(--dim);
+      font-size: .62rem;
+      line-height: 1.22;
     }
 
     .data-card {
-      width: min(42rem, 100%);
-      padding: 1rem 1.15rem;
+      width: min(44rem, 100%);
+      padding: .65rem .95rem;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: .9rem 1.25rem;
+      gap: .55rem 1rem;
       background: linear-gradient(105deg, rgba(5, 15, 31, .57), rgba(5, 15, 31, .22) 76%, rgba(5, 15, 31, .08));
       border: 1px solid rgba(128, 164, 214, .16);
       border-left: 3px solid var(--gold);
-      border-radius: .95rem;
+      border-radius: .85rem;
       box-shadow: 0 1.2rem 3rem -1.6rem rgba(0, 0, 0, .68);
       backdrop-filter: blur(8px);
     }
 
-    .data-row:last-child { grid-column: 1 / -1; }
-
     .data-row {
       display: grid;
-      grid-template-columns: 1.25rem 1fr;
-      gap: .78rem;
+      grid-template-columns: 1.15rem 1fr;
+      gap: .65rem;
       align-items: start;
     }
-    .data-row svg { width: 1.22rem; height: 1.22rem; margin-top: .12rem; stroke: var(--gold); fill: none; stroke-width: 1.9; }
-    .data-row dt { color: var(--gold); font: 700 .67rem/1.15 "IBM Plex Mono", Consolas, monospace; letter-spacing: .17em; text-transform: uppercase; }
-    .data-row dd { margin: .23rem 0 0; color: #fff; font-size: .82rem; line-height: 1.32; }
-
-    .scope {
-      width: fit-content;
-      max-width: 100%;
-      margin-top: 1.15rem;
-      padding: .85rem 1.28rem;
-      display: flex;
-      align-items: center;
-      gap: .9rem;
-      border: 1px solid rgba(242, 183, 54, .62);
-      border-radius: .8rem;
-      background: rgba(5, 13, 28, .62);
-      box-shadow: 0 0 1.7rem rgba(242, 183, 54, .08);
-    }
-    .scope svg { flex: 0 0 auto; width: 1.55rem; height: 1.55rem; stroke: var(--gold); fill: none; stroke-width: 1.9; }
-    .scope b { display: block; color: #fff; font-size: .88rem; text-transform: uppercase; }
-    .scope small { display: block; margin-top: .14rem; color: var(--gold-soft); font: 700 .63rem/1.2 "IBM Plex Mono", Consolas, monospace; letter-spacing: .17em; text-transform: uppercase; }
+    .data-row svg { width: 1.15rem; height: 1.15rem; margin-top: .1rem; stroke: var(--gold); fill: none; stroke-width: 1.9; }
+    .data-row dt { color: var(--gold); font: 700 .65rem/1.15 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+    .data-row dd { margin: .18rem 0 0; color: #fff; font-size: .78rem; line-height: 1.28; }
 
     .footer {
       position: absolute;
@@ -241,19 +388,24 @@
     .dots { display: flex; gap: .46rem; }
     .dots i { display: block; width: .48rem; height: .48rem; border: 1px solid rgba(139, 178, 225, .46); border-radius: 50%; }
     .dots i:first-child { width: 1.85rem; border-color: var(--gold); border-radius: 1rem; background: var(--gold); }
-    .footer-label { justify-self: end; color: #d5e0ef; font: 600 .67rem/1 "IBM Plex Mono", Consolas, monospace; letter-spacing: .18em; text-transform: uppercase; }
+    .footer-label { justify-self: end; color: #d5e0ef; font: 600 .68rem/1 "Plus Jakarta Sans", "Segoe UI", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
 
     @media (max-width: 900px), (max-height: 680px) {
       .header { height: 5.2rem; padding-inline: 1.7rem; }
-      .upeu-logo { width: auto; height: 3.2rem; }
+      .header-left { gap: .8rem; }
+      .header-divider { height: 2rem; }
+      .upeu-logo { width: auto; height: 2.8rem; }
+      .company-emblem { width: 3.4rem; height: 2.1rem; }
+      .company-copy strong { font-size: .75rem; }
+      .company-copy span { font-size: .58rem; }
       .career img { width: 3.2rem; height: 3.2rem; }
       .career b { font-size: .8rem; }
       .career small { font-size: .5rem; }
       .hero { width: min(46rem, 82vw); min-height: 100svh; padding: 5.7rem 1.7rem 4rem; }
-      .data-card { padding: .9rem 1.1rem; gap: .7rem 1rem; }
-      .data-row dd { font-size: .77rem; }
-      .data-row dt { font-size: .59rem; }
-      .scope { margin-top: .8rem; padding: .65rem .9rem; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); gap: .5rem; }
+      .data-card { padding: .7rem .9rem; gap: .5rem .8rem; }
+      .data-row dd { font-size: .74rem; }
+      .data-row dt { font-size: .56rem; }
       .footer { height: 3.1rem; }
     }
 
@@ -261,10 +413,12 @@
       body { overflow: auto; }
       .cover { min-height: 46rem; }
       .career div { display: none; }
+      .company-copy span { display: none; }
       .header { padding-inline: 1.1rem; }
       .hero { width: 100%; padding-inline: 1.25rem; }
       h1 { font-size: 3.6rem; }
       .subtitle { font-size: 1.04rem; }
+      .features-grid { grid-template-columns: 1fr; }
       .data-card { grid-template-columns: 1fr; }
       .data-row:last-child { grid-column: auto; }
       .honor-code { display: none; }
@@ -281,7 +435,18 @@
     <div class="cover__glow" aria-hidden="true"></div>
 
     <header class="header">
-      <img class="upeu-logo" src="assets/upeu.png" alt="Universidad Peruana Unión">
+      <div class="header-left">
+        <img class="upeu-logo" src="assets/upeu.png" alt="Universidad Peruana Unión">
+        <div class="header-divider" aria-hidden="true"></div>
+        <div class="company-lockup" aria-label="Empresa del caso: Quilate Bullion S.A.C.">
+          <img class="company-emblem" src="assets/quilate-bullion-emblema-v2.png" alt="Emblema de Quilate Bullion">
+          <div class="company-copy">
+            <small>Empresa del caso</small>
+            <strong>Quilate Bullion S.A.C.</strong>
+            <span>Plataforma operativa de acopio de oro</span>
+          </div>
+        </div>
+      </div>
       <div class="career">
         <img src="assets/ingenieria-sistemas.png" alt="Escuela Profesional de Ingeniería de Sistemas">
         <div>
@@ -294,8 +459,70 @@
     <section class="hero">
       <div class="eyebrow">Sustentación · Unidad I</div>
       <h1><span>SITRA-</span><strong>ORO</strong></h1>
-      <p class="company">Plataforma operativa de <strong>Quilate Bullion S.A.C.</strong></p>
-      <p class="subtitle">Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro.</p>
+
+      <div class="context-box">
+        <p>Plataforma integral que digitaliza y transparenta el acopio de oro en Puno: cotización en vivo, control exacto de ley y liquidación transaccional segura para mineros y acopiadores.</p>
+      </div>
+
+      <div class="members-modules">
+        <div class="team-title">
+          <strong>Equipo 05</strong>
+          <span>Responsabilidades por integrante</span>
+        </div>
+        <div class="member-columns">
+          <!-- Integrante 1: Helio Paul -->
+          <div class="member-group">
+            <div class="member-title">
+              <strong>Faijo Calisaya Helio Paul</strong>
+              <span>Módulos 2</span>
+            </div>
+            <div class="member-cards-grid">
+              <div class="feature-card">
+                <div class="feature-header">
+                  <span class="feature-icon">📑</span>
+                  <strong>Mayorista</strong>
+                </div>
+                <span class="tag-trans">Transaccional 2</span>
+                <small>Liquidación mayorista, cierre y reportes.</small>
+              </div>
+              <div class="feature-card">
+                <div class="feature-header">
+                  <span class="feature-icon">⚙️</span>
+                  <strong>Parámetros</strong>
+                </div>
+                <span class="tag-notrans">No Transaccional 2</span>
+                <small>Tarifas, factores de merma y reglas de negocio.</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Integrante 2: Jhymel Nelio -->
+          <div class="member-group">
+            <div class="member-title">
+              <strong>Figueroa Chambi Jhymel Nelio</strong>
+              <span>Módulos 1</span>
+            </div>
+            <div class="member-cards-grid">
+              <div class="feature-card">
+                <div class="feature-header">
+                  <span class="feature-icon">⚖️</span>
+                  <strong>Acopiador</strong>
+                </div>
+                <span class="tag-trans">Transaccional 1</span>
+                <small>Recepción, pesaje, ley y merma por lote.</small>
+              </div>
+              <div class="feature-card">
+                <div class="feature-header">
+                  <span class="feature-icon">🪙</span>
+                  <strong>Cotizador</strong>
+                </div>
+                <span class="tag-notrans">No Transaccional 1</span>
+                <small>Precios internacionales USD/PEN en vivo.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <dl class="data-card">
         <div class="data-row">
@@ -314,23 +541,11 @@
           <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.1 3.4-6 8-6s7.3 1.9 8 6"/></svg>
           <div><dt>Evaluación</dt><dd>Sesión 6 · Sustentación de la Unidad I</dd></div>
         </div>
-        <div class="data-row">
-          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2"/><path d="M3 21c.6-4 2.6-6 6-6s5.4 2 6 6M15 16c3 0 4.8 1.6 5.4 5"/></svg>
-          <div><dt>Equipo de desarrollo</dt><dd>Equipo 05 · Faijo Calisaya Helio Paul &amp; Figueroa Chambi Jhymel Nelio</dd></div>
-        </div>
       </dl>
-
-      <div class="scope">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-        <div>
-          <b>Backend REST empresarial</b>
-          <small>S1–S5 · 4 módulos U1 · cierre exacto</small>
-        </div>
-      </div>
     </section>
 
     <footer class="footer">
-      <span class="honor-code">“Sé pulcro, sé honesto, sé veraz, sé limpio, sé ilustre y sé libre.”</span>
+      <span class="honor-code">“Sé Íntegro, Sé Misionero, Sé Innovador”</span>
       <span class="dots" aria-label="Diapositiva 1 de 9"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
       <span class="footer-label">01 / 09 · SITRA-ORO</span>
     </footer>

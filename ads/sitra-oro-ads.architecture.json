@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SITRA-ORO · Arquitectura ADS",
+    "output": "SITRA_ORO_Arquitectura_ADS.html",
+    "quality_profile": "showcase",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "viewBox": [1390, 800],
+    "views": [
+      {
+        "id": "recorrido-principal",
+        "label": "Recorrido principal",
+        "focus": ["minero", "acopiador", "mayorista", "exportador"],
+        "note": "Flujo de oro desde el minero hasta la salida preparada para exportación."
+      },
+      {
+        "id": "cotizacion",
+        "label": "Cotización opcional",
+        "focus": ["minero", "cotizador", "parametros"],
+        "note": "La estimación regresa al minero sin crear una operación real."
+      },
+      {
+        "id": "soporte-y-control",
+        "label": "Soporte y control",
+        "focus": ["seguridad", "parametros", "cotizador", "acopiador", "mayorista"],
+        "note": "Seguridad y Parámetros acompañan a los módulos mediante contratos públicos."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "minero",
+      "type": "external",
+      "label": "Minero",
+      "sublabel": "Externo",
+      "pos": [25, 407],
+      "size": [180, 82]
+    },
+    {
+      "id": "cotizador",
+      "type": "backend",
+      "label": "Cotizador",
+      "sublabel": "Estima monto sin operación real",
+      "tag": "Capas · no transaccional",
+      "pos": [230, 265],
+      "size": [220, 90]
+    },
+    {
+      "id": "acopiador",
+      "type": "backend",
+      "label": "Acopiador",
+      "sublabel": "Compra, proceso, pago y acumulación semanal",
+      "tag": "Hexagonal pragmática · transaccional",
+      "pos": [480, 398],
+      "size": [275, 100]
+    },
+    {
+      "id": "mayorista",
+      "type": "backend",
+      "label": "Mayorista",
+      "sublabel": "Ley, valoración, pago y consolidación",
+      "tag": "Hexagonal · transaccional",
+      "pos": [830, 398],
+      "size": [275, 100]
+    },
+    {
+      "id": "exportador",
+      "type": "external",
+      "label": "Exportador",
+      "sublabel": "Externo",
+      "pos": [1210, 407],
+      "size": [180, 82]
+    },
+    {
+      "id": "parametros",
+      "type": "cloud",
+      "label": "Parámetros",
+      "sublabel": "Valores para cálculos",
+      "tag": "Capas · no transaccional",
+      "pos": [610, 175],
+      "size": [250, 88]
+    },
+    {
+      "id": "seguridad",
+      "type": "security",
+      "label": "Seguridad",
+      "sublabel": "Control transversal de acceso",
+      "tag": "Capas · progresiva",
+      "pos": [390, 65],
+      "size": [620, 68]
+    },
+    {
+      "id": "dashboard",
+      "type": "frontend",
+      "label": "Dashboard",
+      "sublabel": "Vista de consulta · no es módulo",
+      "pos": [950, 650],
+      "size": [230, 74]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "SITRA-ORO · Monolito modular con Spring Modulith",
+      "wraps": ["seguridad", "cotizador", "acopiador", "mayorista", "parametros", "dashboard"],
+      "pad": 52
+    }
+  ],
+  "connections": [
+    {
+      "id": "estimacion",
+      "from": "minero",
+      "to": "cotizador",
+      "label": "consulta opcional",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "left",
+      "route": "auto",
+      "labelAt": [259, 369]
+    },
+    {
+      "id": "estimacion-retorno",
+      "from": "cotizador",
+      "to": "minero",
+      "label": "estimación sin transacción",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "top",
+      "route": "auto"
+    },
+    {
+      "id": "entrega-oro",
+      "from": "minero",
+      "to": "acopiador",
+      "label": "entrega de oro",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight",
+      "width": 2.4
+    },
+    {
+      "id": "transferencia",
+      "from": "acopiador",
+      "to": "mayorista",
+      "label": "ROJO / VERDE",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight",
+      "width": 2.4
+    },
+    {
+      "id": "salida",
+      "from": "mayorista",
+      "to": "exportador",
+      "label": "salida preparada",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight",
+      "width": 2.4
+    },
+    {
+      "id": "cotizador-parametros",
+      "from": "cotizador",
+      "to": "parametros",
+      "label": "API pública",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "auto"
+    },
+    {
+      "id": "acopiador-parametros",
+      "from": "acopiador",
+      "to": "parametros",
+      "label": "API pública",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "route": "auto"
+    },
+    {
+      "id": "mayorista-parametros",
+      "from": "mayorista",
+      "to": "parametros",
+      "label": "API pública",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "right",
+      "route": "auto",
+      "labelAt": [850, 350]
+    },
+    {
+      "id": "seguridad-mayorista",
+      "from": "seguridad",
+      "to": "mayorista",
+      "label": "protege acceso",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "auto"
+    },
+    {
+      "id": "dashboard-consulta",
+      "from": "mayorista",
+      "to": "dashboard",
+      "label": "consulta pública",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "auto"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Recorrido principal",
+      "items": ["Minero → Acopiador → Mayorista → Exportador", "La consolidación pertenece al Mayorista"]
+    },
+    {
+      "dot": "cyan",
+      "title": "Límites modulares",
+      "items": ["Exactamente cinco módulos internos", "No se accede al repository de otro módulo", "Comunicación solo por APIs o interfaces públicas"]
+    }
+  ]
+}

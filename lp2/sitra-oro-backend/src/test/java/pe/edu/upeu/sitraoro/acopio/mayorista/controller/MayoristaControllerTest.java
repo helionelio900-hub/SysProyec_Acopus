@@ -13,6 +13,7 @@ import pe.edu.upeu.sitraoro.acopio.mayorista.dto.DetalleLiquidacionResponse;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Request;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Response;
 import pe.edu.upeu.sitraoro.acopio.mayorista.service.MayoristaService;
+import pe.edu.upeu.sitraoro.acopio.mayorista.service.RecepcionMayoristaService;
 import pe.edu.upeu.sitraoro.exception.GlobalExceptionHandler;
 import pe.edu.upeu.sitraoro.exception.StockInsuficienteException;
 import tools.jackson.databind.ObjectMapper;
@@ -39,6 +40,9 @@ class MayoristaControllerTest {
 
     @MockitoBean
     private MayoristaService mayoristaService;
+
+    @MockitoBean
+    private RecepcionMayoristaService recepcionMayoristaService;
 
     @Test
     @DisplayName("POST /api/v1/mayorista/liquidaciones - Caso de Éxito Cabecera-Detalle (201 Created)")

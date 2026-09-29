@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 
 public record TransaccionG2Request(
     @NotNull(message = "El ID del minero es obligatorio")
+    @Positive(message = "El ID del minero debe ser mayor a cero")
     Long idMinero,
 
     @NotNull(message = "El peso sin fundir es obligatorio")
