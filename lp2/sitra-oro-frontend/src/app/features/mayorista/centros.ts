@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { CentroAcopio, OperacionesService } from '../../core/api/operaciones.service';
+import { CentroAcopio, OperacionesService, ZonaAcopio } from '../../core/api/operaciones.service';
 import { MAYORISTA_VISTA_PREVIA } from './mayorista-preview';
 
 @Component({
@@ -16,6 +16,9 @@ export class CentrosMayorista implements OnInit {
   private readonly service = inject(OperacionesService);
   protected readonly vistaPrevia = inject(MAYORISTA_VISTA_PREVIA);
   protected readonly centros = signal<CentroAcopio[]>([]);
+  protected readonly zonas = signal<ZonaAcopio[]>([]);
+  protected readonly nuevaZona = this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(100)]);
+  protected readonly gestionandoZona = signal(false);
   protected readonly cargando = signal(true);
   protected readonly guardando = signal(false);
   protected readonly error = signal('');
@@ -37,6 +40,49 @@ export class CentrosMayorista implements OnInit {
   });
   ngOnInit(): void {
     this.cargar();
+    this.cargarZonas();
+  }
+  protected cargarZonas(): void {
+    this.service.zonasAcopio().subscribe({
+      next: (items) => this.zonas.set(items),
+      error: () => this.error.set('No se pudieron cargar las zonas de acopio.'),
+    });
+  }
+  protected agregarZona(): void {
+    this.nuevaZona.markAsTouched();
+    if (this.nuevaZona.invalid || this.gestionandoZona()) return;
+    this.gestionandoZona.set(true);
+    this.error.set('');
+    this.service.crearZonaAcopio(this.nuevaZona.value.trim()).subscribe({
+      next: (zona) => {
+        this.zonas.update((items) => [...items, zona].sort((a, b) => a.nombre.localeCompare(b.nombre)));
+        this.form.controls.zona.setValue(zona.nombre);
+        this.nuevaZona.reset();
+        this.gestionandoZona.set(false);
+        this.mensaje.set(`Zona ${zona.nombre} guardada y lista para seleccionar.`);
+      },
+      error: (response: HttpErrorResponse) => {
+        this.error.set(response.error?.detail ?? response.error?.message ?? 'No se pudo guardar la zona.');
+        this.gestionandoZona.set(false);
+      },
+    });
+  }
+  protected quitarZona(zona: ZonaAcopio): void {
+    if (this.gestionandoZona()) return;
+    this.gestionandoZona.set(true);
+    this.error.set('');
+    this.service.eliminarZonaAcopio(zona.idZona).subscribe({
+      next: () => {
+        this.zonas.update((items) => items.filter((item) => item.idZona !== zona.idZona));
+        if (this.form.controls.zona.value === zona.nombre) this.form.controls.zona.setValue('');
+        this.gestionandoZona.set(false);
+        this.mensaje.set(`Zona ${zona.nombre} eliminada.`);
+      },
+      error: (response: HttpErrorResponse) => {
+        this.error.set(response.error?.detail ?? response.error?.message ?? 'No se pudo eliminar la zona.');
+        this.gestionandoZona.set(false);
+      },
+    });
   }
   protected cargar(): void {
     this.cargando.set(true);

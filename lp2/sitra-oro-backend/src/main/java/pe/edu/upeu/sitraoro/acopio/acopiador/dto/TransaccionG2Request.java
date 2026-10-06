@@ -1,7 +1,6 @@
 package pe.edu.upeu.sitraoro.acopio.acopiador.dto;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -26,10 +25,4 @@ public record TransaccionG2Request(
 
     @Positive(message = "El precio aplicado debe ser mayor a cero")
     BigDecimal precioAplicadoPen
-) {
-    @AssertTrue(message = "El peso fundido no puede superar el peso sin fundir")
-    public boolean isPesoFundidoValido() {
-        return pesoSinFundirG == null || pesoFundidoNetoG == null
-                || pesoFundidoNetoG.compareTo(pesoSinFundirG) <= 0;
-    }
-}
+) {}

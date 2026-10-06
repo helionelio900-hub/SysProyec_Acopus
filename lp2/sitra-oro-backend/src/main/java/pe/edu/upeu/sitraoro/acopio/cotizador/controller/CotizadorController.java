@@ -25,6 +25,18 @@ import java.math.BigDecimal;
 public class CotizadorController {
 
     private final CotizadorService cotizadorService;
+    private final pe.edu.upeu.sitraoro.acopio.parametros.service.CotizacionColorService cotizacionColorService;
+
+    @GetMapping("/colores")
+    public java.util.List<pe.edu.upeu.sitraoro.acopio.parametros.service.CotizacionColorService.Precio> colores() {
+        return cotizacionColorService.vigentes();
+    }
+
+    @GetMapping("/precio-referencial")
+    @Operation(summary = "Consultar el precio referencial publicado por el mayorista en soles por gramo")
+    public ResponseEntity<BigDecimal> precioReferencial() {
+        return ResponseEntity.ok(cotizadorService.precioReferencialPorGramo());
+    }
 
     @GetMapping("/estimar")
     @Operation(summary = "Calcular estimación rápida de valor por peso bruto en gramos")
@@ -35,7 +47,11 @@ public class CotizadorController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     public ResponseEntity<CotizacionEstimadaResponse> estimarCotizacion(
-            @RequestParam("pesoBrutoGramos") @Positive BigDecimal pesoBrutoGramos) {
-        return ResponseEntity.ok(cotizadorService.calcularCotizacionEstimada(pesoBrutoGramos));
+            @RequestParam("pesoBrutoGramos") @Positive BigDecimal pesoBrutoGramos,
+            @RequestParam(defaultValue = "ROJO") String color) {
+        BigDecimal precio = cotizacionColorService.precio(color.toUpperCase(java.util.Locale.ROOT));
+        return ResponseEntity.ok(new CotizacionEstimadaResponse(pesoBrutoGramos, precio,
+                pesoBrutoGramos.multiply(precio).setScale(2, java.math.RoundingMode.HALF_UP),
+                "Estimado con la cotización vigente. No registra una compra ni congela el precio."));
     }
 }

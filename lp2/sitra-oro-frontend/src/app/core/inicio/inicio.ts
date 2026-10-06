@@ -7,8 +7,7 @@ import { environment } from '../../../environments/environment';
 
 interface CotizacionEstimada {
   pesoBrutoGramos: number;
-  pesoNetoEstimadoGramos: number;
-  precioGramoDiaPen: number;
+  precioGramoReferencialPen: number;
   montoEstimadoTotalPen: number;
   mensaje: string;
 }
@@ -31,6 +30,16 @@ interface CentroAcopio {
 export class Inicio implements OnInit {
   private readonly http = inject(HttpClient);
   protected readonly peso = signal<number | null>(null);
+  protected readonly color = signal('ROJO');
+  protected readonly preciosColor = signal<{ color: string; precioGramoPen: number; fechaPublicacion: string }[]>([]);
+  protected cambiarColor(color: string): void {
+    this.color.set(color);
+    this.cotizacion.set(null);
+    this.cargarPrecio();
+  }
+  protected readonly precioReferencialPen = signal<number | null>(null);
+  protected readonly cargandoPrecio = signal(true);
+  protected readonly errorPrecio = signal('');
   protected readonly cotizacion = signal<CotizacionEstimada | null>(null);
   protected readonly cotizando = signal(false);
   protected readonly errorCotizacion = signal('');
@@ -39,7 +48,28 @@ export class Inicio implements OnInit {
   protected readonly errorCentros = signal(false);
 
   ngOnInit(): void {
+    this.cargarPrecio();
     this.cargarCentros();
+  }
+
+  protected cargarPrecio(): void {
+    this.cargandoPrecio.set(true);
+    this.errorPrecio.set('');
+    this.http.get<{ color: string; precioGramoPen: number; fechaPublicacion: string }[]>(`${environment.apiBaseUrl}/api/v1/cotizador/colores`).subscribe({
+      next: (precios) => {
+        this.preciosColor.set(precios);
+        this.precioReferencialPen.set(precios.find((precio) => precio.color === this.color())?.precioGramoPen ?? null);
+        if (!precios.length) this.errorPrecio.set('El mayorista aún no publicó la cotización.');
+        this.cargandoPrecio.set(false);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.precioReferencialPen.set(null);
+        this.errorPrecio.set(error.status === 404
+          ? 'El mayorista aún no publicó el precio referencial.'
+          : 'No se pudo consultar el precio referencial.');
+        this.cargandoPrecio.set(false);
+      },
+    });
   }
 
   protected cargarCentros(): void {
@@ -64,15 +94,20 @@ export class Inicio implements OnInit {
       this.cotizacion.set(null);
       return;
     }
+    if (this.precioReferencialPen() === null) {
+      this.errorCotizacion.set('Espera a que el mayorista publique el precio referencial.');
+      return;
+    }
 
     this.cotizando.set(true);
     this.errorCotizacion.set('');
     this.cotizacion.set(null);
     this.http.get<CotizacionEstimada>(`${environment.apiBaseUrl}/api/v1/cotizador/estimar`, {
-      params: { pesoBrutoGramos: peso },
+      params: { pesoBrutoGramos: peso, color: this.color() },
     }).subscribe({
       next: (resultado) => {
         this.cotizacion.set(resultado);
+        this.precioReferencialPen.set(resultado.precioGramoReferencialPen);
         this.cotizando.set(false);
       },
       error: (error: HttpErrorResponse) => {

@@ -6,6 +6,7 @@ import java.util.List;
 
 public record LiquidacionG1Response(
     Long idLiquidacionG1,
+    Long idCentroAcopio,
     String nombreAcopiadorG2,
     String estado,
     BigDecimal pesoTotalFundidoG,

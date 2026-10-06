@@ -24,6 +24,9 @@ public class LiquidacionG1 {
     @Column(name = "NOMBRE_ACOPIADOR_G2", nullable = false, length = 150)
     private String nombreAcopiadorG2;
 
+    @Column(name = "ID_CENTRO_ACOPIO", nullable = false)
+    private Long idCentroAcopio;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "ESTADO", nullable = false, length = 20)
     @Builder.Default

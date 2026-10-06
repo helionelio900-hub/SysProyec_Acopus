@@ -9,4 +9,5 @@ public interface CentroAcopioRepository extends JpaRepository<CentroAcopio, Long
     List<CentroAcopio> findByActivoTrueOrderByNombreAsc();
     Optional<CentroAcopio> findByIdCuentaAcopiador(Long idCuentaAcopiador);
     boolean existsByNombreIgnoreCaseAndZonaIgnoreCase(String nombre, String zona);
+    boolean existsByZonaIgnoreCase(String zona);
 }

@@ -14,6 +14,15 @@ Módulos: seguridad, minero, parametros, cotizador, acopiador y mayorista.
 4. Si es una instalación nueva, ejecute `../../bd2/S08_01_recepciones_mayorista.sql`.
    Si ya ejecutó la versión anterior de ese script, revise y ejecute
    `../../bd2/S08_02_vincular_recepciones_centro.sql` para agregar la relación con centros existentes.
+   Para activar la consolidación de liquidaciones en lotes, ejecute una vez
+   `../../bd2/S08_03_lotes_exportacion.sql` en el mismo esquema.
+   Después ejecute `../../bd2/S08_04_zonas_acopio.sql` y
+   `../../bd2/S08_05_vincular_compras_liquidaciones_centro.sql`. Este último
+   conserva las compras y liquidaciones existentes si solo hay un centro; si
+   hay varios centros con historial, se detiene para evitar asignaciones falsas.
+   Ejecute una vez `../../bd2/S08_06_vincular_compras_recepciones.sql` para que
+   cada recepción nueva identifique las compras del acopiador que incluye.
+   Las recepciones históricas permanecen sin vínculo hasta que se editen.
 5. Configure las variables seguras de inicio de sesión indicadas abajo y ejecute
    `./mvnw.cmd spring-boot:run` desde esta carpeta.
 6. Abra [Swagger](http://localhost:8081/swagger-ui.html) y
@@ -27,20 +36,24 @@ y ejecute `docker compose -f compose-dev.yml up -d`. El usuario es `BOMERP_APP`.
 Hibernate valida el esquema (`ddl-auto=validate`); las tablas nuevas y sus relaciones
 se incorporan mediante los scripts S07 y S08, no con cambios automáticos al arrancar.
 
-Para la primera cuenta mayorista, establezca en la misma sesión de PowerShell antes
-de iniciar el backend:
+Para conservar las sesiones entre reinicios, genere una clave JWT una sola vez y
+guárdela en `application-local.properties` (archivo ignorado por Git) como
+`sitraoro.security.jwt.secret=<valor Base64 de 32 bytes>`. No genere una clave nueva
+en cada arranque. Para obtener el valor una sola vez en PowerShell:
 
 ```powershell
 $sitraJwtBytes = New-Object byte[] 32
 [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($sitraJwtBytes)
-$env:SITRAORO_JWT_SECRET = [Convert]::ToBase64String($sitraJwtBytes)
+$jwtPersistente = [Convert]::ToBase64String($sitraJwtBytes)
+# Guarde $jwtPersistente en application-local.properties; no lo publique.
+$env:SITRAORO_JWT_SECRET = $jwtPersistente
 $env:SITRAORO_BOOTSTRAP_MAYORISTA_DOCUMENTO = 'documento-del-mayorista'
 $env:SITRAORO_BOOTSTRAP_MAYORISTA_CLAVE = 'una-clave-larga-y-segura'
 ```
 
-La cuenta se crea una sola vez si ese documento aún no tiene cuenta. La clave JWT
-de desarrollo generada así cambia al cerrar la sesión; para un entorno persistente,
-guarde una clave Base64 aleatoria de 32 bytes en el gestor seguro de secretos.
+La cuenta se crea una sola vez si ese documento aún no tiene cuenta. Una variable
+de entorno `SITRAORO_JWT_SECRET` tiene prioridad sobre el archivo local: si la usa,
+mantenga siempre el mismo valor. En producción, guarde el secreto en un gestor seguro.
 
 ## Pruebas
 
@@ -61,7 +74,8 @@ commit de cabecera/detalles y rollback después del primer descuento.
 
 ## Configuración y trazabilidad
 
-- `CORS_ALLOWED_ORIGIN`: origen permitido (por defecto `http://localhost:4200`).
+- `CORS_ALLOWED_ORIGIN`: orígenes permitidos separados por coma; por defecto acepta
+  `http://localhost:4200` y `http://127.0.0.1:4200` en desarrollo.
 - `SITRAORO_JWT_SECRET`: clave Base64 de al menos 32 bytes para firmar tokens fuera de desarrollo.
 - `SITRAORO_BOOTSTRAP_MAYORISTA_DOCUMENTO` y `SITRAORO_BOOTSTRAP_MAYORISTA_CLAVE`:
   credenciales iniciales del mayorista; no se guardan en Git.
@@ -91,3 +105,7 @@ Consulte [producto U1](../../docs/proyecto-integrador/u1/lp2-demo.md) y
 Los scripts `probar_exito_201.ps1` y `probar_rollback_409.ps1` son demostraciones
 sobre la API activa: requieren stock abierto en cero y se detienen si hay lotes previos.
 El rollback deja sus lotes de demostración abiertos; no lo repita sobre datos ajenos.
+# Catálogo de zonas de acopio
+
+Después de las migraciones S08 anteriores, ejecuta `bd2/S08_04_zonas_acopio.sql` en el esquema de la aplicación. Crea las zonas iniciales La Rinconada, Ananea y Lunar de Oro y conserva las zonas ya utilizadas por centros existentes. El usuario Mayorista puede agregar zonas desde «Centros y cuentas» y eliminar las que no estén asignadas a ningún centro.
+

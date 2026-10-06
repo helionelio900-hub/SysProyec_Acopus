@@ -18,8 +18,7 @@ public class VinculacionMineroController {
 
     @GetMapping
     public List<SolicitudCuentaMineroResponse> listar(@AuthenticationPrincipal Jwt jwt) {
-        Long centroId = jwt.getClaim("idCentroAcopio");
-        if (centroId == null) throw new IllegalArgumentException("La cuenta no tiene un centro de acopio asignado");
+        Long centroId = centroAsignado(jwt);
         return cuentaAccesoService.listarSolicitudesMinero(centroId).stream()
                 .map(VinculacionMineroController::toResponse).toList();
     }
@@ -27,9 +26,15 @@ public class VinculacionMineroController {
     @PostMapping("/{documentoIdentidad}/aprobar")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void aprobar(@AuthenticationPrincipal Jwt jwt, @PathVariable String documentoIdentidad) {
-        Long centroId = jwt.getClaim("idCentroAcopio");
-        if (centroId == null) throw new IllegalArgumentException("La cuenta no tiene un centro de acopio asignado");
+        Long centroId = centroAsignado(jwt);
         cuentaAccesoService.aprobarSolicitudMinero(documentoIdentidad, centroId);
+    }
+
+    private static Long centroAsignado(Jwt jwt) {
+        if (jwt == null || !(jwt.getClaim("idCentroAcopio") instanceof Number id)) {
+            throw new IllegalArgumentException("La cuenta no tiene un centro de acopio asignado");
+        }
+        return id.longValue();
     }
 
     private static SolicitudCuentaMineroResponse toResponse(SolicitudCuentaMinero solicitud) {

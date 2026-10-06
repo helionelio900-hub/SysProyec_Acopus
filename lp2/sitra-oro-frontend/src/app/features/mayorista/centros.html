@@ -56,7 +56,12 @@
               }
             </label>
             <label class="field"
-              >Zona<input formControlName="zona" maxlength="100" autocomplete="address-level2" />
+              >Zona<select formControlName="zona">
+                <option value="">Selecciona una zona</option>
+                @for (zona of zonas(); track zona.idZona) {
+                  <option [value]="zona.nombre">{{ zona.nombre }}</option>
+                }
+              </select>
               @if (form.controls.zona.touched && form.controls.zona.invalid) {
                 <small class="major-field-error">La zona es obligatoria.</small>
               }
@@ -77,6 +82,23 @@
             /></label>
           </div>
         </fieldset>
+        <section class="zones-manager" aria-label="Administrar zonas">
+          <h3>Zonas disponibles</h3>
+          <p>Agrega un lugar nuevo una sola vez; luego aparecerá en el selector.</p>
+          <div class="zone-create">
+            <input [formControl]="nuevaZona" maxlength="100" placeholder="Nombre de la nueva zona" aria-label="Nueva zona" />
+            <button type="button" mat-flat-button (click)="agregarZona()" [disabled]="gestionandoZona()">Guardar zona</button>
+          </div>
+          @if (nuevaZona.touched && nuevaZona.invalid) {
+            <small class="major-field-error">Ingresa un nombre de hasta 100 caracteres.</small>
+          }
+          <ul class="zone-list">
+            @for (zona of zonas(); track zona.idZona) {
+              <li><span>{{ zona.nombre }}</span><button type="button" (click)="quitarZona(zona)" [disabled]="gestionandoZona()" [attr.aria-label]="'Eliminar zona ' + zona.nombre">Eliminar</button></li>
+            }
+          </ul>
+          <small>Una zona asignada a un centro no se puede eliminar.</small>
+        </section>
         <fieldset class="form-group">
           <legend>Cuenta del acopiador</legend>
           <div class="major-grid">

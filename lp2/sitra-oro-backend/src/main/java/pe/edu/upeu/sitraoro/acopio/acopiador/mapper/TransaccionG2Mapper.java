@@ -14,6 +14,8 @@ public interface TransaccionG2Mapper {
     @Mapping(target = "idTransaccionG2", ignore = true)
     @Mapping(target = "fechaTransaccion", ignore = true)
     @Mapping(target = "idLiquidacionG1", ignore = true)
+    @Mapping(target = "idRecepcionMayorista", ignore = true)
+    @Mapping(target = "idCentroAcopio", ignore = true)
     @Mapping(target = "pesoSinFundirG", source = "request.pesoSinFundirG")
     @Mapping(target = "pesoFundidoNetoG", source = "request.pesoFundidoNetoG")
     @Mapping(target = "tipoOro", source = "request.tipoOro")

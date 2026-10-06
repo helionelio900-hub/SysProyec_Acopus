@@ -1,0 +1,85 @@
+Clase,Decisión,Pregunta que resuelve,Aplicación en SITRA-ORO
+TransaccionG2,Tipo concreto,¿Con qué tipo se representa cada atributo?,"pesoSinFundirG, pesoFundidoNetoG, precioAplicadoPen y totalPagadoPen son BigDecimal; fechaTransaccion es LocalDateTime; tipoOro es String; anulada es boolean."
+TransaccionG2,Identidad,¿Cómo se identifica cada objeto?,idTransaccionG2: Long (autogenerado por secuencia Oracle).
+TransaccionG2,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,Navega hacia Minero con @ManyToOne. No navega a liquidación por objeto.
+TransaccionG2,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,tipoOro es String restringido por servicio a 'ROJO' o 'VERDE' (sin enum Java).
+TransaccionG2,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,Guarda idLiquidacionG1, idRecepcionMayorista e idCentroAcopio como Long.
+TransaccionG2,Atributo derivado,¿Se calcula cada vez o se guarda?,totalPagadoPen se calcula (pesoFundidoNetoG * precioAplicadoPen) y se guarda.
+TransaccionG2,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,AcopiadorServiceImpl valida stock y calcula precio; la entidad almacena estado.
+Minero,Tipo concreto,¿Con qué tipo se representa cada atributo?,"documentoIdentidad, nombresApellidos, telefono y zonaProcedencia son String; fechaRegistro es LocalDateTime."
+Minero,Identidad,¿Cómo se identifica cada objeto?,idMinero: Long (autogenerado por secuencia Oracle).
+Minero,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,Relación unidireccional sin @OneToMany hacia transacciones para no saturar memoria.
+Minero,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,Sin enumeraciones; campos abiertos descriptivos.
+Minero,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,Es referenciado por objeto desde TransaccionG2 y por idMinero desde CuentaAcceso.
+Minero,Atributo derivado,¿Se calcula cada vez o se guarda?,No tiene atributos derivados; datos maestros directos.
+Minero,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,MineroServiceImpl valida unicidad de documento y formato.
+LiquidacionG1,Tipo concreto,¿Con qué tipo se representa cada atributo?,"cotizacionOnzaUsd, tipoCambioUsdPen, precioResultanteGramo, pesoTotalFundidoG y totalPagadoG2Pen son BigDecimal; fechaLiquidacion es LocalDateTime; estado es EstadoLiquidacion."
+LiquidacionG1,Identidad,¿Cómo se identifica cada objeto?,idLiquidacionG1: Long (autogenerado por secuencia Oracle).
+LiquidacionG1,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,Navega a su lista de DetalleLiquidacionG1 con @OneToMany(cascade = ALL).
+LiquidacionG1,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,estado usa el enum EstadoLiquidacion (REGISTRADA, ANULADA).
+LiquidacionG1,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,Se vincula con transacciones actualizando el campo idLiquidacionG1 de las compras.
+LiquidacionG1,Atributo derivado,¿Se calcula cada vez o se guarda?,totalPagadoG2Pen se calcula sumando los detalles y se guarda.
+LiquidacionG1,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,MayoristaServiceImpl valida cotizaciones y ejecuta el cierre.
+DetalleLiquidacionG1,Tipo concreto,¿Con qué tipo se representa cada atributo?,"pesoFundidoG, precioGramoPen y subtotalPen son BigDecimal; tipoOro es String."
+DetalleLiquidacionG1,Identidad,¿Cómo se identifica cada objeto?,idDetalleLiquidacion: Long (autogenerado por secuencia Oracle).
+DetalleLiquidacionG1,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,Conoce a su liquidación cabecera LiquidacionG1 con @ManyToOne.
+DetalleLiquidacionG1,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,tipoOro admite 'ROJO' o 'VERDE'.
+DetalleLiquidacionG1,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,Es interno al módulo de liquidación mayorista.
+DetalleLiquidacionG1,Atributo derivado,¿Se calcula cada vez o se guarda?,subtotalPen se calcula (pesoFundidoG * precioGramoPen) y se persiste.
+DetalleLiquidacionG1,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,MayoristaServiceImpl desglosa y genera los detalles por color.
+RecepcionMayorista,Tipo concreto,¿Con qué tipo se representa cada atributo?,"fecha es LocalDate; nombreAcopiador es String; descuento (adelanto) y total son numéricos; fechaCreacion es LocalDateTime."
+RecepcionMayorista,Identidad,¿Cómo se identifica cada objeto?,idRecepcion: Long (autogenerado por secuencia Oracle).
+RecepcionMayorista,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,Navega hacia CentroAcopio con @ManyToOne y embebe dos objetos DatosOro.
+RecepcionMayorista,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,No tiene enum directo; sus estados se controlan al vincularse con lotes.
+RecepcionMayorista,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,Asocia compras del acopiador vinculando su idRecepcionMayorista.
+RecepcionMayorista,Atributo derivado,¿Se calcula cada vez o se guarda?,pagoMaterial y total (restando el adelanto en soles) se calculan y se guardan.
+RecepcionMayorista,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,RecepcionMayoristaServiceImpl valida la recepción y la segunda fundición.
+DatosOro,Tipo concreto,¿Con qué tipo se representa cada atributo?,"pesoSinFundirG y pesoFundidoG son BigDecimal; onza, dolar, exportacion y pagoMaterial son descriptores numéricos."
+DatosOro,Identidad,¿Cómo se identifica cada objeto?,Comparte la identidad de RecepcionMayorista (@Embeddable).
+DatosOro,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,Es un objeto de valor dentro de RecepcionMayorista (campo rojo y verde).
+DatosOro,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,Estructura de pesaje y cotización por color.
+DatosOro,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,Es interno a la recepción mayorista.
+DatosOro,Atributo derivado,¿Se calcula cada vez o se guarda?,Cálculo de merma y pago por color se almacena como foto en sus campos.
+DatosOro,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,Los cálculos de fundición mayorista se realizan en el servicio de recepción.
+CentroAcopio,Tipo concreto,¿Con qué tipo se representa cada atributo?,"nombre, zona, direccion, telefono son String; activo es boolean."
+CentroAcopio,Identidad,¿Cómo se identifica cada objeto?,idCentroAcopio: Long (autogenerado por secuencia Oracle).
+CentroAcopio,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,Recibe referencias @ManyToOne desde RecepcionMayorista; no lista recepciones en memoria.
+CentroAcopio,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,Estado mediante flag booleano activo.
+CentroAcopio,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,Guarda idCuentaAcopiador: Long para vincular con el usuario sin acoplar JPA.
+CentroAcopio,Atributo derivado,¿Se calcula cada vez o se guarda?,No maneja atributos derivados; es un catálogo operativo.
+CentroAcopio,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,CentroAcopioServiceImpl valida la unicidad de nombre por zona.
+ParametrosSistema,Tipo concreto,¿Con qué tipo se representa cada atributo?,"fecha es LocalDate; precioDiarioGramoPen, porcentajeMermaEst, cotizacionOnzaUsd y tipoCambioUsdPen son BigDecimal; estado es String."
+ParametrosSistema,Identidad,¿Cómo se identifica cada objeto?,idParametro: Long (autogenerado por secuencia Oracle).
+ParametrosSistema,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,Tabla autónoma; no tiene navegabilidad directa por JPA con otras entidades.
+ParametrosSistema,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,estado maneja valores 'ACTIVO' / 'INACTIVO'.
+ParametrosSistema,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,Es consultado como servicio transversal por acopiadores y mayoristas.
+ParametrosSistema,Atributo derivado,¿Se calcula cada vez o se guarda?,No tiene atributos derivados; son parámetros de referencia del día.
+ParametrosSistema,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,ParametrosSistemaServiceImpl valida la vigencia de la cotización.
+AjusteCompraG2,Tipo concreto,¿Con qué tipo se representa cada atributo?,"pesoSinFundirAnterior y pesoFundidoAnterior son BigDecimal; tipo, estado y motivo son String."
+AjusteCompraG2,Identidad,¿Cómo se identifica cada objeto?,idAjuste: Long (autogenerado por secuencia Oracle).
+AjusteCompraG2,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,No tiene relaciones JPA directas; almacena identificadores escalares.
+AjusteCompraG2,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,tipo y estado se restringen por reglas del acopio en String.
+AjusteCompraG2,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,"Guarda idTransaccionG2, idCentroAcopio, idMinero, idRecepcionMayorista e idLiquidacionG1 como Long."
+AjusteCompraG2,Atributo derivado,¿Se calcula cada vez o se guarda?,Guarda snapshots históricos de pesos anteriores como foto inmutable.
+AjusteCompraG2,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,AjusteCompraServiceImpl registra la auditoría y valida motivos.
+LoteExportacion,Tipo concreto,¿Con qué tipo se representa cada atributo?,"fecha es LocalDate; fechaCreacion y fechaPreparacion son LocalDateTime; estado es EstadoLoteExportacion."
+LoteExportacion,Identidad,¿Cómo se identifica cada objeto?,idLote: Long (autogenerado por secuencia Oracle).
+LoteExportacion,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,Navega a su colección de PartidaLoteExportacion con @OneToMany(cascade = ALL).
+LoteExportacion,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,estado usa el enum EstadoLoteExportacion (BORRADOR, CONSOLIDADO, EXPORTADO, ANULADO).
+LoteExportacion,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,Agrupa liquidaciones mediante las partidas que asocia.
+LoteExportacion,Atributo derivado,¿Se calcula cada vez o se guarda?,Los totales consolidados de exportación se derivan sumando las partidas.
+LoteExportacion,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,LoteExportacionServiceImpl valida el paso de borrador a exportado.
+PartidaLoteExportacion,Tipo concreto,¿Con qué tipo se representa cada atributo?,lecturaDecimal es BigDecimal.
+PartidaLoteExportacion,Identidad,¿Cómo se identifica cada objeto?,idPartida: Long (autogenerado por secuencia Oracle).
+PartidaLoteExportacion,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,Navega hacia LoteExportacion y hacia LiquidacionG1 con @ManyToOne.
+PartidaLoteExportacion,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,No maneja estados propios; depende del lote contenedor.
+PartidaLoteExportacion,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,Conecta la liquidación con el lote de exportación.
+PartidaLoteExportacion,Atributo derivado,¿Se calcula cada vez o se guarda?,lecturaDecimal se calcula a partir de leyes de pureza y se almacena fija.
+PartidaLoteExportacion,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,Valida en servicio que una liquidación no se duplique en dos partidas (UQ_LOTE_PART_LIQ).
+CuentaAcceso,Tipo concreto,¿Con qué tipo se representa cada atributo?,"documentoIdentidad y claveHash son String; rol es RolCuenta; activo es boolean; fechaCreacion es LocalDateTime."
+CuentaAcceso,Identidad,¿Cómo se identifica cada objeto?,idCuenta: Long (con restricción única en documentoIdentidad).
+CuentaAcceso,Navegabilidad,¿Desde qué clase se puede llegar a la otra?,Módulo de seguridad aislado; no mantiene relaciones JPA hacia entidades de negocio.
+CuentaAcceso,Enumeraciones,¿Qué valores admite un atributo de estado o tipo?,rol usa el enum RolCuenta (MINERO, G2_ACOPIADOR, G1_MAYORISTA).
+CuentaAcceso,Referencia entre módulos,¿Una clase de otro módulo se referencia por objeto o por identificador?,Guarda idMinero e idCentroAcopioAsignado como identificadores numéricos Long.
+CuentaAcceso,Atributo derivado,¿Se calcula cada vez o se guarda?,No maneja atributos derivados.
+CuentaAcceso,Ubicación de la operación,¿La regla vive en la entidad o en un servicio?,CuentaAccesoServiceImpl y SecurityConfig manejan hash bcrypt y tokens JWT.

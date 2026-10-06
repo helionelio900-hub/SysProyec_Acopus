@@ -24,6 +24,19 @@
 .form-group .field small {
   font-weight: 450;
 }
+.zones-manager {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.1rem;
+}
+.zones-manager h3 { margin: 0 0 0.35rem; font-size: 1rem; }
+.zones-manager p { margin: 0 0 0.8rem; color: #58708f; }
+.zone-create { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.zone-create input { flex: 1 1 15rem; padding: 0.75rem; border: 1px solid #cad8e8; border-radius: 0.55rem; }
+.zone-list { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; }
+.zone-list li { display: flex; align-items: center; gap: 0.55rem; padding: 0.4rem 0.65rem; border: 1px solid #d8e2ee; border-radius: 0.55rem; }
+.zone-list button { border: 0; background: transparent; color: #a42323; cursor: pointer; }
+.zone-list button:disabled { opacity: 0.5; cursor: default; }
 @media (max-width: 700px) {
   .form-group {
     padding: 0.8rem;

@@ -17,11 +17,19 @@ public class DashboardAcopioAdapter implements DashboardAcopioPort {
 
     @Override
     @Transactional(readOnly = true)
-    public DashboardResponse obtenerConsolidado() {
-        BigDecimal gramosRojo = transaccionG2Repository.sumPesoFundidoByTipoOro("ROJO");
-        BigDecimal dineroRojo = transaccionG2Repository.sumTotalPagadoByTipoOro("ROJO");
-        BigDecimal gramosVerde = transaccionG2Repository.sumPesoFundidoByTipoOro("VERDE");
-        BigDecimal dineroVerde = transaccionG2Repository.sumTotalPagadoByTipoOro("VERDE");
+    public DashboardResponse obtenerConsolidado(Long idCentroAcopio) {
+        BigDecimal gramosRojo = idCentroAcopio == null
+                ? transaccionG2Repository.sumPesoFundidoByTipoOro("ROJO")
+                : transaccionG2Repository.sumPesoFundidoByCentroAndTipoOro(idCentroAcopio, "ROJO");
+        BigDecimal dineroRojo = idCentroAcopio == null
+                ? transaccionG2Repository.sumTotalPagadoByTipoOro("ROJO")
+                : transaccionG2Repository.sumTotalPagadoByCentroAndTipoOro(idCentroAcopio, "ROJO");
+        BigDecimal gramosVerde = idCentroAcopio == null
+                ? transaccionG2Repository.sumPesoFundidoByTipoOro("VERDE")
+                : transaccionG2Repository.sumPesoFundidoByCentroAndTipoOro(idCentroAcopio, "VERDE");
+        BigDecimal dineroVerde = idCentroAcopio == null
+                ? transaccionG2Repository.sumTotalPagadoByTipoOro("VERDE")
+                : transaccionG2Repository.sumTotalPagadoByCentroAndTipoOro(idCentroAcopio, "VERDE");
 
         return new DashboardResponse(
                 gramosRojo,

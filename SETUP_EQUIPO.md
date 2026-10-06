@@ -21,7 +21,7 @@ docker compose -f compose-dev.yml up -d
 docker compose -f compose-dev.yml ps
 ```
 
-Espere hasta que `bomerp-oracle` aparezca como `healthy`. El entorno académico local usa:
+Espere hasta que `sitra-oro-oracle` aparezca como `healthy`. El entorno académico local usa:
 
 - PDB: `XEPDB1`
 - usuario: `BOMERP_APP`
@@ -29,17 +29,19 @@ Espere hasta que `bomerp-oracle` aparezca como `healthy`. El entorno académico 
 - puerto: `1521`
 
 Hibernate usa `ddl-auto: update` y crea/actualiza las cinco tablas del usuario ejecutor a partir
-de las entidades. El volumen `oracle-data` conserva los datos.
+de las entidades. El Compose usa el volumen `sitra-oro-backend-dev_oracle-data`. El volumen
+anterior `bomerp-backend-dev_oracle-data` debe conservarse como respaldo hasta validar la aplicación.
+No ejecute `docker compose down -v`.
 
 ## 2. Índices y datos iniciales de S5
 
 Después de arrancar el backend una primera vez:
 
 ```powershell
-docker cp ..\..\bd2\S05_indices.sql bomerp-oracle:/tmp/indices.sql
-docker cp ..\..\bd2\S05_seed_demo.sql bomerp-oracle:/tmp/seed.sql
-docker exec bomerp-oracle sqlplus -S BOMERP_APP/123456@//localhost:1521/XEPDB1 @/tmp/indices.sql
-docker exec bomerp-oracle sqlplus -S BOMERP_APP/123456@//localhost:1521/XEPDB1 @/tmp/seed.sql
+docker cp ..\..\bd2\S05_indices.sql sitra-oro-oracle:/tmp/indices.sql
+docker cp ..\..\bd2\S05_seed_demo.sql sitra-oro-oracle:/tmp/seed.sql
+docker exec sitra-oro-oracle sqlplus -S BOMERP_APP/123456@//localhost:1521/XEPDB1 @/tmp/indices.sql
+docker exec sitra-oro-oracle sqlplus -S BOMERP_APP/123456@//localhost:1521/XEPDB1 @/tmp/seed.sql
 ```
 
 El seed es idempotente para parámetros y mineros. Las compras y liquidaciones se crean mediante

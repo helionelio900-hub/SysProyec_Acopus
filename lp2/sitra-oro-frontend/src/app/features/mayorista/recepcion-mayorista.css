@@ -3,6 +3,10 @@
 .reception-form {
   margin-top: 1rem;
 }
+.reception-stock {
+  font-weight: 800;
+  color: #123557;
+}
 .reception-meta {
   margin: 1.4rem 0;
 }

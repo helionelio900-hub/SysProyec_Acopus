@@ -51,8 +51,9 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        pathMatch: 'full',
-        redirectTo: 'recepcion',
+        title: 'Vista previa resumen | SITRA-ORO',
+        loadComponent: () =>
+          import('./features/mayorista/inicio-mayorista').then((m) => m.InicioMayorista),
       },
       {
         path: 'centros',
@@ -135,8 +136,11 @@ export const routes: Routes = [
       },
       {
         path: 'mayorista',
-        pathMatch: 'full',
-        redirectTo: 'mayorista/recepcion',
+        title: 'Resumen mayorista | SITRA-ORO',
+        canActivate: [rolGuard],
+        data: { roles: ['G1_MAYORISTA'] },
+        loadComponent: () =>
+          import('./features/mayorista/inicio-mayorista').then((m) => m.InicioMayorista),
       },
       {
         path: 'mayorista/centros',

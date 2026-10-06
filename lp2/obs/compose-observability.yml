@@ -1,3 +1,5 @@
+name: sitra-oro-observability-dev
+
 services:
   prometheus:
     image: prom/prometheus:v3.14.0

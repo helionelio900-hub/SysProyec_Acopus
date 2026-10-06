@@ -20,7 +20,9 @@ export class Layout {
           { ruta: '/acopio/solicitudes', texto: 'Cuentas por aprobar' },
         ]
       : [
+          { ruta: '/mayorista', texto: 'Resumen' },
           { ruta: '/mayorista/recepcion', texto: 'Compra al acopiador' },
+          { ruta: '/mayorista/liquidaciones', texto: 'Liquidaciones' },
           { ruta: '/mayorista/consolidacion', texto: 'Lotes para exportación' },
           { ruta: '/mayorista/centros', texto: 'Centros y cuentas' },
         ],

@@ -14,42 +14,77 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Positive;
+import org.springframework.validation.annotation.Validated;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Request;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Response;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionReporte;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.RecepcionMayoristaRequest;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.RecepcionMayoristaResponse;
+import pe.edu.upeu.sitraoro.acopio.mayorista.dto.PrecioReferencialResponse;
 import pe.edu.upeu.sitraoro.acopio.mayorista.entity.EstadoLiquidacion;
 import pe.edu.upeu.sitraoro.acopio.mayorista.service.MayoristaService;
-import pe.edu.upeu.sitraoro.acopio.mayorista.service.RecepcionMayoristaService;
+import pe.edu.upeu.sitraoro.acopio.mayorista.service.RecepcionMayoristaServiceImpl;
+import pe.edu.upeu.sitraoro.acopio.mayorista.service.PrecioReferencialService;
+import pe.edu.upeu.sitraoro.acopio.parametros.service.ParametrosSistemaService;
 import pe.edu.upeu.sitraoro.exception.ApiErrorResponse;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/mayorista")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "Módulo 4: Mayorista G1")
 public class MayoristaController {
 
     private final MayoristaService mayoristaService;
-    private final RecepcionMayoristaService recepcionMayoristaService;
+    private final RecepcionMayoristaServiceImpl recepcionMayoristaService;
+    private final PrecioReferencialService precioReferencialService;
+    private final ParametrosSistemaService parametrosSistemaService;
+    private final pe.edu.upeu.sitraoro.acopio.mayorista.service.LoteExportacionService loteExportacionService;
+    @PostMapping("/recepciones/lote-exportacion")
+    public pe.edu.upeu.sitraoro.acopio.mayorista.dto.LoteExportacionResponse enviarRecepciones(@RequestBody List<Long> ids) {
+        return loteExportacionService.crearDesdeRecepciones(ids);
+    }
+    private final pe.edu.upeu.sitraoro.acopio.parametros.service.CotizacionColorService cotizacionColorService;
+
+    @PostMapping("/cotizaciones-color")
+    public List<pe.edu.upeu.sitraoro.acopio.parametros.service.CotizacionColorService.Precio> publicarColores(
+            @RequestParam @Positive @Digits(integer = 10, fraction = 2) BigDecimal onza,
+            @RequestParam @Positive @Digits(integer = 6, fraction = 4) BigDecimal dolar,
+            @RequestParam @Digits(integer = 3, fraction = 4) BigDecimal exportacionRojo,
+            @RequestParam @Digits(integer = 3, fraction = 4) BigDecimal exportacionVerde) {
+        return cotizacionColorService.publicar(onza, dolar, exportacionRojo, exportacionVerde);
+    }
+
+    @GetMapping("/precio-referencial")
+    @Operation(summary = "Calcular precio referencial por gramo sin aplicar ley, descuento ni pago")
+    public PrecioReferencialResponse precioReferencial(
+            @RequestParam @Positive @Digits(integer = 8, fraction = 2) BigDecimal cotizacionOnzaUsd,
+            @RequestParam @Positive @Digits(integer = 2, fraction = 4) BigDecimal tipoCambioUsdPen) {
+        return precioReferencialService.calcular(cotizacionOnzaUsd, tipoCambioUsdPen);
+    }
+
+    @PostMapping("/precio-referencial")
+    @Operation(summary = "Publicar el precio referencial en soles para el cotizador del inicio")
+    public PrecioReferencialResponse publicarPrecioReferencial(
+            @RequestParam @Positive @Digits(integer = 8, fraction = 2) BigDecimal cotizacionOnzaUsd,
+            @RequestParam @Positive @Digits(integer = 2, fraction = 4) BigDecimal tipoCambioUsdPen) {
+        PrecioReferencialResponse resultado = precioReferencialService.calcular(cotizacionOnzaUsd, tipoCambioUsdPen);
+        parametrosSistemaService.publicarCotizacion(cotizacionOnzaUsd, tipoCambioUsdPen);
+        return resultado;
+    }
 
     @GetMapping("/recepciones")
     @Operation(summary = "Listar registros de compra recibidos del acopiador")
     public List<RecepcionMayoristaResponse> listarRecepciones(
             @RequestParam(required = false) Long idCentroAcopio) {
         return recepcionMayoristaService.listar(idCentroAcopio);
-    }
-
-    @PostMapping("/recepciones")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Guardar un registro de compra mayorista")
-    public RecepcionMayoristaResponse registrarRecepcion(
-            @Valid @RequestBody RecepcionMayoristaRequest request) {
-        return recepcionMayoristaService.registrar(request);
     }
 
     @PutMapping("/recepciones/{id}")
@@ -67,21 +102,15 @@ public class MayoristaController {
     }
 
     @PostMapping("/liquidaciones")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Registrar liquidación cabecera-detalle con descuento de stock acumulado")
+    @Operation(summary = "Liquidación de pago no disponible hasta definir su regla financiera")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Liquidación semanal registrada",
-                    content = @Content(schema = @Schema(implementation = LiquidacionG1Response.class))),
             @ApiResponse(responseCode = "400", description = "Solicitud o detalle inválido",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "El detalle no coincide exactamente con el stock pendiente",
+            @ApiResponse(responseCode = "409", description = "El pago al acopiador aún no tiene una regla definida",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     public ResponseEntity<LiquidacionG1Response> liquidarSemanal(@Valid @RequestBody LiquidacionG1Request request) {
-        log.info("Iniciando procesamiento de liquidación cabecera-detalle para acopiador: {}", request.nombreAcopiadorG2());
-        LiquidacionG1Response response = mayoristaService.procesarLiquidacionSemanal(request);
-        log.info("Liquidación registrada exitosamente con ID: {}, total: S/ {}", response.idLiquidacionG1(), response.totalPagadoG2Pen());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.ok(mayoristaService.procesarLiquidacionSemanal(request));
     }
 
     @GetMapping("/liquidaciones")

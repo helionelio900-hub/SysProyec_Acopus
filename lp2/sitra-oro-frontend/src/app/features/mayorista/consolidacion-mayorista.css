@@ -31,8 +31,40 @@
 .export-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(240px, 0.36fr);
-  align-items: center;
+  align-items: start;
   gap: 1.25rem;
+}
+.export-date-actions,
+.export-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.export-form-actions {
+  margin-top: 1rem;
+}
+.export-form-actions span {
+  margin-right: auto;
+  color: #66768b;
+  font-size: 0.8rem;
+}
+.export-check {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #bd8412;
+}
+.export-saved {
+  margin-top: 1.25rem;
+}
+.export-detail-row td {
+  background: #f8fafc;
+  line-height: 1.6;
+}
+.export-detail-row ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1.2rem;
 }
 .export-lot-panel {
   min-width: 0;
@@ -43,7 +75,7 @@
 }
 .export-table {
   width: 100%;
-  min-width: 690px;
+  min-width: 740px;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -188,13 +220,15 @@
   .export-date-field {
     width: 100%;
   }
-  .export-date-row button {
+  .export-date-actions,
+  .export-date-row button,
+  .export-form-actions button {
     width: 100%;
   }
   .export-lot-panel {
     padding: 0.65rem !important;
   }
   .export-table {
-    min-width: 620px;
+    min-width: 740px;
   }
 }

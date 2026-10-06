@@ -3,7 +3,7 @@ package pe.edu.upeu.sitraoro.acopio.minero.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pe.edu.upeu.sitraoro.acopio.mayorista.service.CentroAcopioService;
+import pe.edu.upeu.sitraoro.acopio.mayorista.service.CentroAcopioServiceImpl;
 import pe.edu.upeu.sitraoro.acopio.parametros.dto.MineroRequest;
 import pe.edu.upeu.sitraoro.acopio.parametros.entity.Minero;
 import pe.edu.upeu.sitraoro.acopio.parametros.service.MineroService;
@@ -18,7 +18,7 @@ import pe.edu.upeu.sitraoro.acopio.minero.dto.*;
 public class MineroPortalServiceImpl implements MineroPortalService {
     private final MineroService mineroService;
     private final CuentaAccesoService cuentaAccesoService;
-    private final CentroAcopioService centroAcopioService;
+    private final CentroAcopioServiceImpl centroAcopioService;
 
     @Override @Transactional
     public RegistroMineroResponse registrar(RegistroMineroRequest request) {

@@ -2,6 +2,7 @@ package pe.edu.upeu.sitraoro.acopio.mayorista.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public record RecepcionMayoristaResponse(
         Long idRecepcion,
@@ -11,7 +12,8 @@ public record RecepcionMayoristaResponse(
         FilaOro rojo,
         FilaOro verde,
         String descuento,
-        String total
+        String total,
+        List<Long> idsComprasAcopiador
 ) {
     public record FilaOro(
             BigDecimal pesoSinFundirG,

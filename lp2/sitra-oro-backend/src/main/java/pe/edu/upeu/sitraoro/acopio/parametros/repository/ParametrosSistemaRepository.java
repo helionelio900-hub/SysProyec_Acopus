@@ -7,5 +7,5 @@ import java.util.Optional;
 
 @Repository
 public interface ParametrosSistemaRepository extends JpaRepository<ParametrosSistema, Long> {
-    Optional<ParametrosSistema> findFirstByEstadoOrderByFechaDesc(String estado);
+    Optional<ParametrosSistema> findFirstByEstadoOrderByFechaDescIdParametroDesc(String estado);
 }

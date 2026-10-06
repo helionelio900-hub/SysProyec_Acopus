@@ -26,19 +26,30 @@
     <div class="section-intro">
       <span class="eyebrow eyebrow-dark">COTIZACIÓN REFERENCIAL</span>
       <h2>¿Cuánto podría valer<br />lo que tienes?</h2>
-      <p>Ingresa el peso aproximado y consulta el cálculo con el precio vigente del sistema.</p>
+      <p>Consulta el precio referencial en soles publicado por el mayorista y calcula un estimado con tu peso aproximado.</p>
       <p class="honesty-note"><span aria-hidden="true">ⓘ</span> Es solo una referencia. El monto final se determina en el acopio al pesar y evaluar el mineral.</p>
     </div>
     <div class="quote-card">
       <div class="quote-card-top"><span class="quote-icon">Au</span><div><strong>Haz tu cálculo</strong><small>No necesitas registrarte</small></div><span class="estimate-label">ESTIMADO</span></div>
+      <div class="quote-price" role="status">
+        <div>
+          <span>Precio referencial publicado</span>
+          @if (precioReferencialPen(); as precio) {
+            <strong>{{ precio | currency:'PEN':'symbol':'1.2-2' }} <small>por gramo</small></strong>
+          } @else {
+            <strong class="quote-price-pending">{{ cargandoPrecio() ? 'Consultando precio…' : errorPrecio() }}</strong>
+          }
+        </div>
+        <button type="button" class="quote-price-refresh" (click)="cargarPrecio()" [disabled]="cargandoPrecio()">Actualizar</button>
+      </div>
       <label for="weight">¿Cuánto pesa aproximadamente?</label>
-      <div class="weight-input"><input id="weight" name="pesoBrutoGramos" type="number" min="0.01" step="0.01" inputmode="decimal" autocomplete="off" placeholder="Ej. 25.0…" [ngModel]="peso()" (ngModelChange)="peso.set($event)" (keydown.enter)="consultarPrecio()" /><span>gramos</span></div>
-      <button class="button button-dark" type="button" (click)="consultarPrecio()" [disabled]="cotizando()">{{ cotizando() ? 'Calculando…' : 'Ver mi estimado' }} <span aria-hidden="true">→</span></button>
+      <label for="color-oro">Color del oro</label><select id="color-oro" [ngModel]="color()" (ngModelChange)="cambiarColor($event)"><option value="ROJO">Rojo</option><option value="VERDE">Verde</option></select><div class="weight-input"><input id="weight" name="pesoBrutoGramos" type="number" min="0.01" step="0.01" inputmode="decimal" autocomplete="off" placeholder="Ej. 25.0…" [ngModel]="peso()" (ngModelChange)="peso.set($event)" (keydown.enter)="consultarPrecio()" /><span>gramos</span></div>
+      <button class="button button-dark" type="button" (click)="consultarPrecio()" [disabled]="cotizando() || precioReferencialPen() === null">{{ cotizando() ? 'Calculando…' : 'Ver mi estimado' }} <span aria-hidden="true">→</span></button>
       @if (errorCotizacion()) { <p class="form-error" role="alert">{{ errorCotizacion() }}</p> }
       @if (cotizacion(); as resultado) {
         <div class="quote-result" aria-live="polite">
           <div><span>Estimado referencial</span><strong>{{ resultado.montoEstimadoTotalPen | currency:'PEN':'symbol':'1.2-2' }}</strong></div>
-          <div class="result-details"><span>Precio del día <b>{{ resultado.precioGramoDiaPen | currency:'PEN':'symbol':'1.2-2' }}/g</b></span><span>Peso neto estimado <b>{{ resultado.pesoNetoEstimadoGramos | number:'1.2-2' }} g</b></span></div>
+          <div class="result-details"><span>Referencia por gramo <b>{{ resultado.precioGramoReferencialPen | currency:'PEN':'symbol':'1.2-2' }}/g</b></span><span>Peso ingresado <b>{{ resultado.pesoBrutoGramos | number:'1.2-2' }} g</b></span></div>
           <small>{{ resultado.mensaje }}</small>
         </div>
       }

@@ -11,9 +11,9 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record LiquidacionG1Request(
-    @NotBlank(message = "El nombre del acopiador G2 es obligatorio")
-    @Size(max = 150)
-    String nombreAcopiadorG2,
+    @NotNull(message = "El centro de acopio es obligatorio")
+    @Positive(message = "El centro de acopio debe ser válido")
+    Long idCentroAcopio,
 
     @NotNull(message = "La cotización de la onza en USD es obligatoria")
     @Positive(message = "La cotización de la onza debe ser mayor a cero")

@@ -3,15 +3,14 @@
     <div>
       <span class="eyebrow">MAYORISTA · PAGO AL ACOPIADOR</span>
       <h1>Liquidación al acopiador</h1>
-      <p>La operación financiera parte del peso verificado y de la ley ya registrados en planta.</p>
+      <p>Consulta un precio referencial por gramo y el historial de liquidaciones registradas.</p>
     </div>
-    <span class="major-status pending">Nuevo cálculo pendiente</span>
+    <span class="major-status ready">Precio referencial disponible</span>
   </header>
   <div class="major-notice">
     <span aria-hidden="true">ⓘ</span>
     <p>
-      La fórmula exacta de liquidación y el criterio de descuento siguen pendientes de definición.
-      Por ahora puedes consultar el historial, pero no registrar una liquidación con el flujo nuevo.
+      Publica precios vigentes por color. El minero ve soles por gramo y el acopiador los usa al registrar compras.
     </p>
   </div>
   @if (error()) {
@@ -19,39 +18,15 @@
   }
 
   <div class="major-grid liquidation-layout">
-    <section class="panel" aria-labelledby="base-title">
+    <section class="panel major-span" aria-labelledby="mercado-title">
       <div class="major-card-head">
         <span class="major-number">01</span>
         <div>
-          <h2 id="base-title">Base técnica</h2>
-          <p>
-            Se tomará de la recepción y del análisis de ley; no se ingresará de nuevo en esta
-            pantalla.
-          </p>
+          <h2 id="mercado-title">Cotización de oro rojo y verde</h2>
+          <p>Ingresa los valores del mercado, revisa el precio de cada color y publica la cotización.</p>
         </div>
       </div>
-      <div class="technical-source">
-        <span>Registro técnico asociado</span><strong>Aún no disponible</strong>
-        <p>
-          Cuando exista una recepción guardada, aquí se vinculará su peso verificado y la ley
-          certificada.
-        </p>
-        <a
-          class="major-view-link"
-          [routerLink]="vistaPrevia ? '/vista-previa/mayorista/recepcion' : '/mayorista/recepcion'"
-          >Ver recepción y proceso →</a
-        >
-      </div>
-    </section>
-    <section class="panel" aria-labelledby="mercado-title">
-      <div class="major-card-head">
-        <span class="major-number">02</span>
-        <div>
-          <h2 id="mercado-title">Variables económicas</h2>
-          <p>Se aplican al registro técnico seleccionado para obtener la liquidación.</p>
-        </div>
-      </div>
-      <form [formGroup]="form" class="market-fields">
+      <form [formGroup]="form" (ngSubmit)="calcularPrecio()" class="market-fields">
         <label class="field"
           >Cotización de onza Troy <small>USD / oz</small
           ><input type="number" min="0.01" step="0.01" formControlName="cotizacionOnzaUsd"
@@ -60,37 +35,33 @@
           >Tipo de cambio <small>PEN por USD</small
           ><input type="number" min="0.0001" step="0.0001" formControlName="tipoCambioUsdPen"
         /></label>
-        <div class="major-readonly">
-          <span>Descuento comercial aplicable</span><strong>Pendiente de criterio oficial</strong>
+        <div class="quote-table-wrap">
+          <table class="quote-table">
+            <caption>Vista previa de la cotización por gramo</caption>
+            <thead><tr><th>Color</th><th>Exportación (%)</th><th>USD / g</th><th>Soles / g</th></tr></thead>
+            <tbody>
+              @for (color of colores; track color) {
+                <tr [class.quote-red]="color === 'ROJO'" [class.quote-green]="color === 'VERDE'">
+                  <td><strong>{{ color === 'ROJO' ? 'Rojo' : 'Verde' }}</strong></td>
+                  <td><input type="number" min="0" max="100" step="0.0001" [attr.aria-label]="'Exportación para ' + color" [formControlName]="color === 'ROJO' ? 'exportacionRojo' : 'exportacionVerde'" /></td>
+                  <td>{{ precioVista(color, 'USD') }}</td><td><strong>{{ precioVista(color, 'PEN') }}</strong></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="quote-actions"><small>La vista previa cambia al escribir. Los precios vigentes cambian al publicar.</small>
+          <button mat-flat-button class="button-primary" type="submit" [disabled]="calculandoPrecio() || form.invalid">{{ calculandoPrecio() ? 'Publicando…' : 'Publicar cotización' }}</button>
         </div>
       </form>
-    </section>
-    <section class="panel major-span" aria-labelledby="resultado-title">
-      <div class="major-card-head">
-        <span class="major-number">03</span>
-        <div>
-          <h2 id="resultado-title">Resultado y pago al acopiador</h2>
-          <p>Se mostrará únicamente después de aplicar la regla de negocio homologada.</p>
-        </div>
-      </div>
-      <div class="major-grid major-grid-three result-grid">
-        <div class="major-result">
-          <span>Subtotal en dólares</span><strong>—</strong><span>USD</span>
-        </div>
-        <div class="major-result">
-          <span>Subtotal en soles</span><strong>—</strong><span>PEN</span>
-        </div>
-        <div class="major-result">
-          <span>Total liquidado al acopiador</span><strong>—</strong><span>PEN</span>
-        </div>
-      </div>
-      <div class="major-action-row">
-        <span class="major-action-hint"
-          >El pago también debe quedar asentado como operación independiente del pago al
-          minero.</span
-        ><button mat-flat-button class="button-primary" type="button" disabled>
-          Registrar liquidación
-        </button>
+      @if (errorPrecio()) {
+        <p class="feedback error" role="alert">{{ errorPrecio() }}</p>
+      }
+      <h3>Cotización publicada</h3>
+      <div class="published-prices">
+      @for (precio of preciosColor(); track precio.color) {
+        <div class="major-result"><span>Oro {{ precio.color === 'ROJO' ? 'rojo' : 'verde' }} · soles por gramo</span><strong>{{ dinero(precio.precioGramoPen) }}</strong><small>Publicado: {{ precio.fechaPublicacion | date:'short' }}</small></div>
+      } @empty { <p>Todavía no hay cotizaciones publicadas.</p> }
       </div>
     </section>
   </div>
@@ -98,8 +69,8 @@
   <section class="major-section" aria-labelledby="historial-title">
     <div class="major-section-head">
       <div>
-        <span class="major-kicker">REGISTROS EXISTENTES</span>
-        <h2 id="historial-title">Historial actual</h2>
+        <span class="major-kicker">CONSULTA CONECTADA AL BACKEND</span>
+        <h2 id="historial-title">Reporte de liquidaciones</h2>
         <p>
           @if (vistaPrevia) {
             Importes ficticios para demostrar el historial; no representan una fórmula aprobada.
@@ -108,10 +79,32 @@
           }
         </p>
       </div>
-      <button mat-stroked-button class="button-secondary" type="button" (click)="cargar()">
-        Actualizar historial
+    </div>
+    <div class="report-filters">
+      <label class="field">Estado
+        <select [value]="estado()" (change)="cambiarEstado($event)">
+          <option value="">Todos</option>
+          <option value="REGISTRADA">Registrada</option>
+          <option value="ANULADA">Anulada</option>
+        </select>
+      </label>
+      <label class="field">Desde
+        <input type="date" [value]="desde()" (change)="cambiarDesde($event)" />
+      </label>
+      <label class="field">Hasta
+        <input type="date" [value]="hasta()" (change)="cambiarHasta($event)" />
+      </label>
+      <button mat-stroked-button class="button-secondary" type="button" (click)="cargar()" [disabled]="cargando()">
+        Consultar reporte
       </button>
     </div>
+    @if (reporte(); as datos) {
+      <div class="major-grid major-grid-three result-grid" aria-label="Resumen de liquidaciones">
+        <div class="major-result"><span>Liquidaciones</span><strong>{{ datos.agregado.totalLiquidaciones }}</strong></div>
+        <div class="major-result"><span>Monto total</span><strong>{{ dinero(datos.agregado.montoTotal) }}</strong></div>
+        <div class="major-result"><span>Promedio por liquidación</span><strong>{{ dinero(datos.agregado.ticketPromedio) }}</strong></div>
+      </div>
+    }
     @if (cargando()) {
       <p class="loading-state" role="status">Cargando liquidaciones…</p>
     } @else if (liquidaciones().length) {

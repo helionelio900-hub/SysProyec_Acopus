@@ -1,0 +1,10 @@
+-- Relaciona cada compra del acopiador con una sola recepción del mayorista.
+-- Ejecutar una vez en BOMERP_APP antes de iniciar el backend actualizado.
+-- Las compras y recepciones históricas conservan su estado sin asociación inventada.
+WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+ALTER TABLE TRANSACCIONES_G2 ADD (ID_RECEPCION_MAYORISTA NUMBER);
+ALTER TABLE TRANSACCIONES_G2 ADD CONSTRAINT FK_G2_RECEPCION_MAYORISTA
+    FOREIGN KEY (ID_RECEPCION_MAYORISTA)
+    REFERENCES MAYORISTA_RECEPCIONES(ID_RECEPCION);
+CREATE INDEX IX_G2_RECEPCION_MAYORISTA ON TRANSACCIONES_G2(ID_RECEPCION_MAYORISTA);

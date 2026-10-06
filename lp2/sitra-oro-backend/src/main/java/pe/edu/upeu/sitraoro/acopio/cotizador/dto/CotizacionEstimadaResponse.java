@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 
 public record CotizacionEstimadaResponse(
     BigDecimal pesoBrutoGramos,
-    BigDecimal porcentajeMermaEstimada,
-    BigDecimal pesoNetoEstimadoGramos,
-    BigDecimal precioGramoDiaPen,
+    BigDecimal precioGramoReferencialPen,
     BigDecimal montoEstimadoTotalPen,
     String mensaje
 ) {}

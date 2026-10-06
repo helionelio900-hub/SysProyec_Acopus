@@ -13,9 +13,12 @@ import pe.edu.upeu.sitraoro.acopio.mayorista.dto.DetalleLiquidacionResponse;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Request;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Response;
 import pe.edu.upeu.sitraoro.acopio.mayorista.service.MayoristaService;
-import pe.edu.upeu.sitraoro.acopio.mayorista.service.RecepcionMayoristaService;
+import pe.edu.upeu.sitraoro.acopio.mayorista.service.RecepcionMayoristaServiceImpl;
+import pe.edu.upeu.sitraoro.acopio.mayorista.service.PrecioReferencialService;
+import pe.edu.upeu.sitraoro.acopio.acopiador.service.AcopiadorService;
 import pe.edu.upeu.sitraoro.exception.GlobalExceptionHandler;
 import pe.edu.upeu.sitraoro.exception.StockInsuficienteException;
+import pe.edu.upeu.sitraoro.exception.ConflictException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
@@ -42,13 +45,19 @@ class MayoristaControllerTest {
     private MayoristaService mayoristaService;
 
     @MockitoBean
-    private RecepcionMayoristaService recepcionMayoristaService;
+    private RecepcionMayoristaServiceImpl recepcionMayoristaService;
+
+    @MockitoBean
+    private AcopiadorService acopiadorService;
+
+    @MockitoBean
+    private PrecioReferencialService precioReferencialService;
 
     @Test
-    @DisplayName("POST /api/v1/mayorista/liquidaciones - Caso de Éxito Cabecera-Detalle (201 Created)")
+    @DisplayName("POST /api/v1/mayorista/liquidaciones - Pago no definido (409 Conflict)")
     void liquidarSemanal_Exito_201() throws Exception {
         LiquidacionG1Request request = new LiquidacionG1Request(
-                "Acopiador Central Juliaca",
+                1L,
                 new BigDecimal("2650.00"),
                 new BigDecimal("3.7500"),
                 List.of(
@@ -58,6 +67,7 @@ class MayoristaControllerTest {
         );
 
         LiquidacionG1Response response = new LiquidacionG1Response(
+                1L,
                 1L,
                 "Acopiador Central Juliaca",
                 "REGISTRADA",
@@ -72,23 +82,21 @@ class MayoristaControllerTest {
                 )
         );
 
-        when(mayoristaService.procesarLiquidacionSemanal(any(LiquidacionG1Request.class))).thenReturn(response);
+        when(mayoristaService.procesarLiquidacionSemanal(any(LiquidacionG1Request.class)))
+                .thenThrow(new ConflictException("El cálculo del pago al acopiador no está definido."));
 
         mockMvc.perform(post("/api/v1/mayorista/liquidaciones")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.idLiquidacionG1").value(1))
-                .andExpect(jsonPath("$.estado").value("REGISTRADA"))
-                .andExpect(jsonPath("$.pesoTotalFundidoG").value(80.000))
-                .andExpect(jsonPath("$.detalles.length()").value(2));
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("El cálculo del pago al acopiador no está definido."));
     }
 
     @Test
     @DisplayName("POST /api/v1/mayorista/liquidaciones - Caso de Rollback por Cierre que no Coincide con el Stock (409 Conflict)")
     void liquidarSemanal_CierreNoCoincideConStock_Rollback409() throws Exception {
         LiquidacionG1Request request = new LiquidacionG1Request(
-                "Acopiador Central Juliaca",
+                1L,
                 new BigDecimal("2650.00"),
                 new BigDecimal("3.7500"),
                 List.of(
@@ -115,7 +123,7 @@ class MayoristaControllerTest {
     @DisplayName("POST /api/v1/mayorista/liquidaciones - Tipo de oro inválido (400 Bad Request)")
     void liquidarSemanal_TipoOroInvalido_400() throws Exception {
         LiquidacionG1Request request = new LiquidacionG1Request(
-                "Acopiador Central Juliaca",
+                1L,
                 new BigDecimal("2650.00"),
                 new BigDecimal("3.7500"),
                 List.of(new DetalleLiquidacionRequest("AMARILLO", new BigDecimal("10.000")))

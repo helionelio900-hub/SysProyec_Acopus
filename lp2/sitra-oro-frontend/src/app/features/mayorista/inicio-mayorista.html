@@ -95,7 +95,7 @@
           </div>
         </div>
         <div class="workflow-footer">
-          <span class="major-status pending">Registro pendiente</span
+          <span class="major-status ready">{{ vistaPrevia ? 'Solo visualización' : 'Disponible' }}</span
           ><a
             class="major-view-link"
             [routerLink]="
@@ -129,11 +129,11 @@
           <span class="major-number">04</span>
           <div>
             <h2>Lotes para exportación</h2>
-            <p>Registra el peso fundido y la lectura decimal de cada lote.</p>
+            <p>Selecciona liquidaciones existentes para formar y preparar cada lote.</p>
           </div>
         </div>
         <div class="workflow-footer">
-          <span class="major-status pending">Ficha pendiente</span
+          <span class="major-status ready">{{ vistaPrevia ? 'Solo visualización' : 'Disponible' }}</span
           ><a
             class="major-view-link"
             [routerLink]="

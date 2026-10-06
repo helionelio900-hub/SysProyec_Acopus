@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from './api.service';
+import { environment } from '../../../environments/environment';
 
 export interface ResumenDashboard {
   sumatoriaGramosOroRojo: number;
@@ -20,6 +20,44 @@ export interface TransaccionAcopio {
   precioAplicadoPen: number;
   totalPagadoPen: number;
   fechaTransaccion: string;
+  idRecepcionMayorista: number | null;
+  idLiquidacionG1: number | null;
+  anulada: boolean;
+}
+export interface AjusteCompra {
+  idAjuste: number;
+  idTransaccionG2: number;
+  idCentroAcopio: number;
+  idMinero: number;
+  idRecepcionMayorista: number | null;
+  idLiquidacionG1: number | null;
+  tipo: 'EDICION' | 'ANULACION';
+  estado: 'PENDIENTE_MINERO' | 'PENDIENTE_MAYORISTA' | 'APROBADO' | 'RECHAZADO_MINERO' | 'RECHAZADO_MAYORISTA';
+  motivo: string;
+  tipoOroAnterior: 'ROJO' | 'VERDE';
+  pesoSinFundirAnterior: number;
+  pesoFundidoAnterior: number;
+  precioAnterior: number;
+  totalAnterior: number;
+  tipoOroNuevo: 'ROJO' | 'VERDE' | null;
+  pesoSinFundirNuevo: number | null;
+  pesoFundidoNuevo: number | null;
+  precioNuevo: number | null;
+  totalNuevo: number | null;
+  solicitadoPor: string;
+  fechaSolicitud: string;
+  fechaDecisionMinero: string | null;
+  decididoPorMinero: string | null;
+  fechaDecisionMayorista: string | null;
+  decididoPorMayorista: string | null;
+}
+export interface SolicitarAjusteCompra {
+  tipo: 'EDICION' | 'ANULACION';
+  motivo: string;
+  tipoOroNuevo?: 'ROJO' | 'VERDE';
+  pesoSinFundirNuevo?: number;
+  pesoFundidoNuevo?: number;
+  precioNuevo?: number;
 }
 export interface CrearTransaccion {
   idMinero: number;
@@ -27,6 +65,9 @@ export interface CrearTransaccion {
   pesoFundidoNetoG: number;
   tipoOro: 'ROJO' | 'VERDE';
   precioAplicadoPen?: number | null;
+}
+export interface EnviarComprasMayorista {
+  idsComprasAcopiador: number[];
 }
 export interface AcumuladosAcopio {
   totalGramosRojo: number;
@@ -56,6 +97,10 @@ export interface CrearCentro {
   documentoAcopiador: string;
   claveInicialAcopiador: string;
 }
+export interface ZonaAcopio {
+  idZona: number;
+  nombre: string;
+}
 export interface FilaRecepcionMayorista {
   pesoSinFundirG: number | null;
   pesoFundidoG: number | null;
@@ -73,14 +118,18 @@ export interface RecepcionMayorista {
   verde: FilaRecepcionMayorista;
   descuento: string;
   total: string;
+  idsComprasAcopiador: number[];
+}
+export interface ReporteEntregasAcopiador {
+  totalRecepciones: number;
+  pesoRojoFundidoG: number;
+  pesoVerdeFundidoG: number;
+  items: RecepcionMayorista[];
 }
 export type CrearRecepcionMayorista = Omit<RecepcionMayorista, 'idRecepcion' | 'nombreAcopiador'>;
-export interface DetalleLiquidacion {
-  tipoOro: 'ROJO' | 'VERDE';
-  pesoFundidoG: number;
-}
 export interface Liquidacion {
   idLiquidacionG1: number;
+  idCentroAcopio: number;
   nombreAcopiadorG2: string;
   estado: string;
   pesoTotalFundidoG: number;
@@ -96,6 +145,25 @@ export interface Liquidacion {
     subtotalPen: number;
   }[];
 }
+export interface PartidaLoteExportacion {
+  idLiquidacionG1: number;
+  nombreAcopiadorG2: string;
+  pesoFundidoG: number;
+  lecturaDecimal: number;
+}
+export interface LoteExportacion {
+  recepciones?: { idRecepcion: number; nombreAcopiador: string; pesoRojoG: number; pesoVerdeG: number }[];
+  idLote: number;
+  fecha: string;
+  estado: 'BORRADOR' | 'PREPARADO';
+  pesoTotalFundidoG: number;
+  fechaPreparacion: string | null;
+  partidas: PartidaLoteExportacion[];
+}
+export interface GuardarLoteExportacion {
+  fecha: string;
+  partidas: { idLiquidacionG1: number; lecturaDecimal: number }[];
+}
 export interface ReporteLiquidaciones {
   agregado: { totalLiquidaciones: number; montoTotal: number; ticketPromedio: number };
   liquidaciones: {
@@ -106,13 +174,18 @@ export interface ReporteLiquidaciones {
     cantidadDetalles: number;
   }[];
 }
+export interface PrecioReferencial {
+  cotizacionOnzaUsd: number;
+  tipoCambioUsdPen: number;
+  precioGramoUsd: number;
+  precioGramoPen: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class OperacionesService {
   private readonly http = inject(HttpClient);
-  private readonly api = inject(ApiService);
   private url(path: string): string {
-    return this.api.buildUrl(path);
+    return `${environment.apiBaseUrl}${path}`;
   }
 
   dashboard(): Observable<ResumenDashboard> {
@@ -144,14 +217,37 @@ export class OperacionesService {
   crearCentro(request: CrearCentro): Observable<CentroAcopio> {
     return this.http.post<CentroAcopio>(this.url('/api/v1/mayorista/centros-acopio'), request);
   }
+  zonasAcopio(): Observable<ZonaAcopio[]> {
+    return this.http.get<ZonaAcopio[]>(this.url('/api/v1/mayorista/zonas-acopio'));
+  }
+  crearZonaAcopio(nombre: string): Observable<ZonaAcopio> {
+    return this.http.post<ZonaAcopio>(this.url('/api/v1/mayorista/zonas-acopio'), { nombre });
+  }
+  eliminarZonaAcopio(id: number): Observable<void> {
+    return this.http.delete<void>(this.url(`/api/v1/mayorista/zonas-acopio/${id}`));
+  }
   recepcionesMayorista(idCentroAcopio?: number | null): Observable<RecepcionMayorista[]> {
     const params = idCentroAcopio == null
       ? undefined
       : new HttpParams().set('idCentroAcopio', idCentroAcopio);
     return this.http.get<RecepcionMayorista[]>(this.url('/api/v1/mayorista/recepciones'), { params });
   }
-  registrarRecepcionMayorista(request: CrearRecepcionMayorista): Observable<RecepcionMayorista> {
-    return this.http.post<RecepcionMayorista>(this.url('/api/v1/mayorista/recepciones'), request);
+  enviarComprasMayorista(request: EnviarComprasMayorista): Observable<RecepcionMayorista> {
+    return this.http.post<RecepcionMayorista>(this.url('/api/v1/acopio/entregas-mayorista'), request);
+  }
+  reporteEntregasAcopiador(desde?: string, hasta?: string): Observable<ReporteEntregasAcopiador> {
+    let params = new HttpParams();
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
+    return this.http.get<ReporteEntregasAcopiador>(
+      this.url('/api/v1/acopio/entregas-mayorista/resumen'), { params },
+    );
+  }
+  ajustesAcopiador(): Observable<AjusteCompra[]> {
+    return this.http.get<AjusteCompra[]>(this.url('/api/v1/acopio/ajustes'));
+  }
+  solicitarAjusteCompra(id: number, request: SolicitarAjusteCompra): Observable<AjusteCompra> {
+    return this.http.post<AjusteCompra>(this.url(`/api/v1/acopio/compras/${id}/ajustes`), request);
   }
   actualizarRecepcionMayorista(
     id: number,
@@ -165,20 +261,50 @@ export class OperacionesService {
   eliminarRecepcionMayorista(id: number): Observable<void> {
     return this.http.delete<void>(this.url(`/api/v1/mayorista/recepciones/${id}`));
   }
-  liquidaciones(estado?: string): Observable<Liquidacion[]> {
+  liquidaciones(estado?: string, desde?: string, hasta?: string): Observable<Liquidacion[]> {
     let params = new HttpParams().set('ordenarPor', 'fechaLiquidacion').set('direccion', 'DESC');
     if (estado) params = params.set('estado', estado);
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
     return this.http.get<Liquidacion[]>(this.url('/api/v1/mayorista/liquidaciones'), { params });
   }
-  reporteLiquidaciones(): Observable<ReporteLiquidaciones> {
-    return this.http.get<ReporteLiquidaciones>(this.url('/api/v1/mayorista/liquidaciones/resumen'));
+  reporteLiquidaciones(estado?: string, desde?: string, hasta?: string): Observable<ReporteLiquidaciones> {
+    let params = new HttpParams();
+    if (estado) params = params.set('estado', estado);
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
+    return this.http.get<ReporteLiquidaciones>(this.url('/api/v1/mayorista/liquidaciones/resumen'), { params });
   }
-  crearLiquidacion(request: {
-    nombreAcopiadorG2: string;
-    cotizacionOnzaUsd: number;
-    tipoCambioUsdPen: number;
-    detalles: DetalleLiquidacion[];
-  }): Observable<Liquidacion> {
-    return this.http.post<Liquidacion>(this.url('/api/v1/mayorista/liquidaciones'), request);
+  cotizacionesColor(): Observable<{ color: string; precioGramoPen: number; fechaPublicacion: string }[]> {
+    return this.http.get<{ color: string; precioGramoPen: number; fechaPublicacion: string }[]>(this.url('/api/v1/cotizador/colores'));
+  }
+  publicarColores(onza: number, dolar: number, exportacionRojo: number, exportacionVerde: number) {
+    return this.http.post<{ color: string; precioGramoPen: number; fechaPublicacion: string }[]>(this.url('/api/v1/mayorista/cotizaciones-color'), {}, {
+      params: { onza, dolar, exportacionRojo, exportacionVerde },
+    });
+  }
+  precioReferencial(cotizacionOnzaUsd: number, tipoCambioUsdPen: number): Observable<PrecioReferencial> {
+    const params = new HttpParams()
+      .set('cotizacionOnzaUsd', cotizacionOnzaUsd)
+      .set('tipoCambioUsdPen', tipoCambioUsdPen);
+    return this.http.post<PrecioReferencial>(this.url('/api/v1/mayorista/precio-referencial'), {}, { params });
+  }
+  lotesExportacion(): Observable<LoteExportacion[]> {
+    return this.http.get<LoteExportacion[]>(this.url('/api/v1/mayorista/lotes-exportacion'));
+  }
+  enviarRecepcionesALote(ids: number[]): Observable<LoteExportacion> {
+    return this.http.post<LoteExportacion>(this.url('/api/v1/mayorista/recepciones/lote-exportacion'), ids);
+  }
+  crearLoteExportacion(request: GuardarLoteExportacion): Observable<LoteExportacion> {
+    return this.http.post<LoteExportacion>(this.url('/api/v1/mayorista/lotes-exportacion'), request);
+  }
+  actualizarLoteExportacion(id: number, request: GuardarLoteExportacion): Observable<LoteExportacion> {
+    return this.http.put<LoteExportacion>(this.url(`/api/v1/mayorista/lotes-exportacion/${id}`), request);
+  }
+  eliminarLoteExportacion(id: number): Observable<void> {
+    return this.http.delete<void>(this.url(`/api/v1/mayorista/lotes-exportacion/${id}`));
+  }
+  prepararLoteExportacion(id: number): Observable<LoteExportacion> {
+    return this.http.post<LoteExportacion>(this.url(`/api/v1/mayorista/lotes-exportacion/${id}/preparar`), {});
   }
 }

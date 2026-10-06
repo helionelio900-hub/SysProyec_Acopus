@@ -13,19 +13,6 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>sitra-oro-backend</name>
 	<description>SITRA-ORO - Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
 	<properties>
 		<java.version>21</java.version>
 		<spring-modulith.version>2.0.7</spring-modulith.version>

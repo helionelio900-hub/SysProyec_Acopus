@@ -6,12 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.CentroAcopioRequest;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.CentroAcopioResponse;
-import pe.edu.upeu.sitraoro.acopio.mayorista.service.CentroAcopioService;
+import pe.edu.upeu.sitraoro.acopio.mayorista.service.CentroAcopioServiceImpl;
 import java.util.List;
 
 @RestController @RequiredArgsConstructor
 public class CentroAcopioController {
-    private final CentroAcopioService centroAcopioService;
+    private final CentroAcopioServiceImpl centroAcopioService;
 
     @PostMapping("/api/v1/mayorista/centros-acopio") @ResponseStatus(HttpStatus.CREATED)
     public CentroAcopioResponse crear(@Valid @RequestBody CentroAcopioRequest request) {

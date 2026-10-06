@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public record RecepcionMayoristaRequest(
         @NotNull LocalDate fecha,
@@ -12,7 +13,8 @@ public record RecepcionMayoristaRequest(
         @NotNull @Valid FilaOro rojo,
         @NotNull @Valid FilaOro verde,
         @Size(max = 100) String descuento,
-        @Size(max = 100) String total
+        @Size(max = 100) String total,
+        @NotNull @Size(max = 200) List<@NotNull @Positive Long> idsComprasAcopiador
 ) {
     public record FilaOro(
             @DecimalMin("0.0") @Digits(integer = 7, fraction = 3) BigDecimal pesoSinFundirG,

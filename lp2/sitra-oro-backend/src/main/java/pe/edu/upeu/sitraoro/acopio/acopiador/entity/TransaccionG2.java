@@ -45,6 +45,15 @@ public class TransaccionG2 {
     @Column(name = "ID_LIQUIDACION_G1")
     private Long idLiquidacionG1;
 
+    @Column(name = "ID_RECEPCION_MAYORISTA")
+    private Long idRecepcionMayorista;
+
+    @Column(name = "ID_CENTRO_ACOPIO", nullable = false)
+    private Long idCentroAcopio;
+
+    @Column(name = "ANULADA", nullable = false)
+    private boolean anulada;
+
     @PrePersist
     public void prePersist() {
         if (fechaTransaccion == null) {

@@ -87,7 +87,7 @@ class ApiU1IntegrationTest {
     @Test
     void detalleNuloYPesoCeroSeRechazanAntesDePersistir() throws Exception {
         String plantilla = """
-                {"nombreAcopiadorG2":"Prueba","cotizacionOnzaUsd":2650,"tipoCambioUsdPen":3.75,"detalles":[%s]}
+                {"idCentroAcopio":1,"cotizacionOnzaUsd":2650,"tipoCambioUsdPen":3.75,"detalles":[%s]}
                 """;
         for (String detalle : new String[]{"null", "{\"tipoOro\":\"ROJO\",\"pesoFundidoG\":0}"}) {
             mvc.perform(post("/api/v1/mayorista/liquidaciones").with(mayorista()).contentType("application/json")
@@ -112,6 +112,7 @@ class ApiU1IntegrationTest {
 
     private static RequestPostProcessor acopiador() {
         return org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt()
+                .jwt(token -> token.claim("idCentroAcopio", 1L))
                 .authorities(new SimpleGrantedAuthority("ROLE_G2_ACOPIADOR"));
     }
 

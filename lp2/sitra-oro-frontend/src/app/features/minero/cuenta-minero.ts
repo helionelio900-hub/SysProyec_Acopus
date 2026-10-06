@@ -59,6 +59,8 @@ export class CuentaMinero implements OnInit {
     if (this.modo === 'registro') {
       this.cargarCentros();
     } else {
+      this.form.controls.clave.setValidators([Validators.required, Validators.maxLength(64)]);
+      this.form.controls.clave.updateValueAndValidity();
       this.form.controls.nombresApellidos.clearValidators();
       this.form.controls.telefono.clearValidators();
       this.form.controls.zonaProcedencia.clearValidators();

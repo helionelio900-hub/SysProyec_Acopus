@@ -8,5 +8,5 @@ import pe.edu.upeu.sitraoro.acopio.parametros.dto.DashboardResponse;
  */
 public interface DashboardAcopioPort {
 
-    DashboardResponse obtenerConsolidado();
+    DashboardResponse obtenerConsolidado(Long idCentroAcopio);
 }

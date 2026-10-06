@@ -1,13 +1,19 @@
 <section class="workspace mayorista-workspace reception-workspace">
   <header class="page-head">
     <div>
-      <span class="eyebrow">MAYORISTA · ENTREGA DEL ACOPIADOR</span>
-      <h1>Registro de compra al acopiador</h1>
+      <span class="eyebrow">MAYORISTA · ENTREGAS RECIBIDAS</span>
+      <h1>Recepciones enviadas por el acopiador</h1>
       <p>
-        Rojo y verde se pesan por separado. La merma muestra la diferencia entre el peso sin fundir
-        y el fundido.
+        Aquí aparecen únicamente las compras que el acopiador decidió entregar. Los pesos rojos y verdes
+        llegan sumados por separado; completa los datos observados de la recepción.
       </p>
     </div>
+    @if (!vistaPrevia) {
+      <button mat-stroked-button class="button-secondary" type="button"
+        (click)="actualizarDatos()" [disabled]="cargando()">
+        {{ cargando() ? 'Actualizando…' : 'Actualizar datos' }}
+      </button>
+    }
   </header>
   <div class="major-notice info" role="status">
     <span aria-hidden="true">ⓘ</span>
@@ -15,27 +21,28 @@
       @if (vistaPrevia) {
         Vista de demostración: los cambios desaparecen al recargar.
       } @else {
-        Las recepciones se guardan en el sistema y quedan disponibles para consulta.
+        Los envíos del acopiador aparecerán aquí. Selecciona «Completar» para registrar los valores observados.
       }
     </p>
   </div>
   @if (error()) {
     <p class="feedback error" role="alert">{{ error() }}</p>
   }
+  @if (vistaPrevia || editandoId() !== null) {
   <form [formGroup]="form" (ngSubmit)="guardar()" class="reception-form">
     <section class="panel" aria-labelledby="registro-title">
       <div class="major-card-head">
         <span class="major-number">01</span>
         <div>
-          <h2 id="registro-title">Entrega y pago del material</h2>
-          <p>Registra únicamente los datos observados; el sistema no aplica una fórmula de pago.</p>
+          <h2 id="registro-title">Datos de la recepción</h2>
+          <p>El peso fundido del acopiador llega como peso sin fundir de esta recepción. Registra aquí la nueva fundición del mayorista.</p>
         </div>
       </div>
       <div class="major-grid reception-meta">
         <label class="field">Fecha <input type="date" formControlName="fecha" /></label>
         <label class="field"
           >Centro de acopio
-          <select formControlName="idCentroAcopio" required>
+          <select formControlName="idCentroAcopio" required [disabled]="editandoId() !== null">
             <option [ngValue]="0" disabled>Selecciona un centro de acopio</option>
             @if (vistaPrevia) {
               <option [ngValue]="1">Centro de acopio de ejemplo · Vista de demostración</option>
@@ -61,13 +68,13 @@
           <thead>
             <tr>
               <th scope="col">Color</th>
-              <th scope="col">Peso sin fundir (g)</th>
-              <th scope="col">Peso fundido (g)</th>
-              <th scope="col">Merma (g)</th>
+              <th scope="col">Peso sin fundir recibido (g)</th>
+              <th scope="col">Peso fundido del mayorista (g)</th>
+              <th scope="col">Merma del mayorista (g)</th>
               <th scope="col">Onza</th>
               <th scope="col">Dólar</th>
-              <th scope="col">Exportación</th>
-              <th scope="col">Pago material</th>
+              <th scope="col">Exportación (%)</th><th scope="col">USD / g</th><th scope="col">Soles / g</th>
+              <th scope="col">Pago material total (S/)</th>
             </tr>
           </thead>
           <tbody>
@@ -79,6 +86,7 @@
                   type="number"
                   min="0"
                   step="0.001"
+                  [readOnly]="!vistaPrevia && !permiteEditarPesosManualmente()"
                   formControlName="pesoSinFundirG"
                 />
               </td>
@@ -94,8 +102,8 @@
               <td class="merma">{{ merma('rojo') }}</td>
               <td><input aria-label="Onza para rojo" formControlName="onza" /></td>
               <td><input aria-label="Dólar para rojo" formControlName="dolar" /></td>
-              <td><input aria-label="Exportación para rojo" formControlName="exportacion" /></td>
-              <td><input aria-label="Pago material rojo" formControlName="pagoMaterial" /></td>
+              <td><input aria-label="Exportación para rojo" formControlName="exportacion" />@if (form.controls.rojo.controls.exportacion.invalid) { <small>Porcentaje de 0 a 100.</small> }</td><td>{{ preciosPorGramo().rojo.usd || '—' }}</td><td>{{ preciosPorGramo().rojo.soles || '—' }}</td>
+              <td><input aria-label="Pago material rojo en soles" formControlName="pagoMaterial" readonly placeholder="Automático" /></td>
             </tr>
             <tr formGroupName="verde" class="row-verde">
               <th scope="row"><span class="color-tag verde">Verde</span></th>
@@ -105,6 +113,7 @@
                   type="number"
                   min="0"
                   step="0.001"
+                  [readOnly]="!vistaPrevia && !permiteEditarPesosManualmente()"
                   formControlName="pesoSinFundirG"
                 />
               </td>
@@ -120,29 +129,29 @@
               <td class="merma">{{ merma('verde') }}</td>
               <td><input aria-label="Onza para verde" formControlName="onza" /></td>
               <td><input aria-label="Dólar para verde" formControlName="dolar" /></td>
-              <td><input aria-label="Exportación para verde" formControlName="exportacion" /></td>
-              <td><input aria-label="Pago material verde" formControlName="pagoMaterial" /></td>
+              <td><input aria-label="Exportación para verde" formControlName="exportacion" />@if (form.controls.verde.controls.exportacion.invalid) { <small>Porcentaje de 0 a 100.</small> }</td><td>{{ preciosPorGramo().verde.usd || '—' }}</td><td>{{ preciosPorGramo().verde.soles || '—' }}</td>
+              <td><input aria-label="Pago material verde en soles" formControlName="pagoMaterial" readonly placeholder="Automático" /></td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="reception-summary">
+        <label class="field">Total de material (S/)<input [value]="subtotalMaterial()" readonly /></label>
         <label class="field"
-          >Descuento <input formControlName="descuento" placeholder="Registro manual"
+          >Adelanto a descontar (S/) <input formControlName="descuento" placeholder="0.00"
         /></label>
         <label class="field"
-          >Total <input formControlName="total" placeholder="Registro manual"
+          >Total final (S/) <input formControlName="total" readonly placeholder="Automático"
         /></label>
       </div>
       <p class="reception-footnote">
-        Los importes se anotan manualmente. No se calcula ni se publica una fórmula general de
-        liquidación.
+        Total final = pago de oro rojo + pago de oro verde − adelanto en soles.
       </p>
       <div class="major-action-row">
         <span class="major-action-hint">{{
           vistaPrevia
             ? 'Solo demostración: no hay guardado permanente.'
-            : 'Los importes quedan registrados tal como los ingreses.'
+        : 'Compras recibidas: ' + (registroEditando()?.idsComprasAcopiador?.length ?? 0) + '. Los importes quedan registrados tal como los ingreses.'
         }}</span>
         <button
           mat-stroked-button
@@ -151,7 +160,7 @@
           (click)="limpiar()"
           [disabled]="guardando()"
         >
-          Limpiar
+          Cancelar edición
         </button>
         <button
           mat-flat-button
@@ -163,13 +172,14 @@
             guardando()
               ? 'Guardando…'
               : editandoId() === null
-                ? 'Guardar registro'
-                : 'Actualizar registro'
+                ? 'Guardar ejemplo'
+                : 'Guardar recepción'
           }}
         </button>
       </div>
     </section>
   </form>
+  }
   @if (!vistaPrevia) {
     <section class="panel reception-filter" aria-label="Filtro de recepciones">
       <label for="filtro-centro-recepciones">Filtrar registros por centro de acopio</label>
@@ -193,27 +203,37 @@
     <p class="loading-state" role="status">Cargando recepciones guardadas…</p>
   } @else if (registros().length) {
     <section class="panel reception-records" aria-label="Registros de compra">
-      <h2>Registros de compra</h2>
+      <h2>Entregas recibidas</h2>
+      <p>Marca las recepciones que quieres incluir en un lote. Las demás permanecen aquí.</p>
+      <button mat-flat-button type="button" [disabled]="!seleccionExportacion().length || enviandoLote()" (click)="enviarALotes()">{{ enviandoLote() ? 'Guardando lote…' : 'Enviar a lotes de exportación' }} ({{ seleccionExportacion().length }})</button>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
+              <th>Exportar</th>
               <th>Fecha</th>
               <th>Acopiador</th>
-              <th>Rojo fundido</th>
-              <th>Verde fundido</th>
+              <th>Rojo recibido</th>
+              <th>Rojo fundido por mayorista</th>
+              <th>Verde recibido</th>
+              <th>Verde fundido por mayorista</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             @for (registro of registros(); track registro.idRecepcion) {
               <tr>
+                <td>@if (recepcionesEnLote().includes(registro.idRecepcion)) { <span>En lote</span> } @else {
+                  <input type="checkbox" [attr.aria-label]="'Exportar recepción ' + registro.idRecepcion" [checked]="seleccionExportacion().includes(registro.idRecepcion)" [disabled]="enviandoLote()" (change)="seleccionarExportacion(registro.idRecepcion, $any($event.target).checked)" />
+                }</td>
                 <td>{{ registro.fecha }}</td>
                 <td>{{ registro.nombreAcopiador }}</td>
+                <td>{{ registro.rojo.pesoSinFundirG ?? '—' }} g</td>
                 <td>{{ registro.rojo.pesoFundidoG ?? '—' }} g</td>
+                <td>{{ registro.verde.pesoSinFundirG ?? '—' }} g</td>
                 <td>{{ registro.verde.pesoFundidoG ?? '—' }} g</td>
                 <td class="record-actions">
-                  <button type="button" (click)="editar(registro)">Editar</button>
+                  <button type="button" (click)="editar(registro)">Completar</button>
                   <button type="button" (click)="eliminar(registro.idRecepcion)">Eliminar</button>
                 </td>
               </tr>
@@ -225,9 +245,9 @@
   } @else {
     <p class="empty-state">
       @if (centroFiltrado() !== null) {
-        No hay registros de compra para el centro seleccionado.
+        No hay entregas del acopiador para el centro seleccionado.
       } @else {
-        Aún no hay registros de compra. Completa el formulario para guardar el primero.
+        Aún no hay entregas enviadas. El acopiador debe seleccionar las compras y enviarlas desde su módulo.
       }
     </p>
   }

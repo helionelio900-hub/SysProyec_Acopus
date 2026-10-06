@@ -1,20 +1,63 @@
-site_name: SITRA-ORO · Unidad I
-site_description: Evidencia técnica y sustentación del backend REST
+site_name: SITRA-ORO · ERP Acopio
+site_description: Entorno integrado de desarrollo académico para el sistema de acopio y liquidación de oro (ADS, BD2 y LP2).
+site_author: Equipo 05 · SITRA-ORO
 site_url: https://helionelio900-hub.github.io/SysProyec_Acopus/
-docs_dir: docs/proyecto-integrador/u1
+repo_url: https://github.com/helionelio900-hub/SysProyec_Acopus
+repo_name: helionelio900-hub/SysProyec_Acopus
+
+docs_dir: docs
 site_dir: site
+
 theme:
-  name: mkdocs
-  locale: es
-plugins:
-  - search
-  - redirects:
-      redirect_maps:
-        index.md: lp2-demo.md
+  name: material
+  language: es
+  features:
+    - navigation.tabs
+    - navigation.top
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Cambiar a modo oscuro
+    - scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Cambiar a modo claro
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - toc:
+      permalink: true
+
 nav:
-  - Producto y contrato REST: lp2-demo.md
-  - Comunicación entre módulos: lp2-comunicacion-modulos.md
-  - Verificación: verificacion-u1.md
-exclude_docs: |
-  guion-sustentacion.md
-  sustentacion-helio.md
+  - Inicio: DOCUMENTO_MAESTRO_CONTEXTO_FUNCIONAL_SITRA_ORO.md
+  - Dominio y Arquitectura:
+      - Especificación de Dominio: INFORME_TECNICO_ESPECIFICACION_DOMINIO_SITRA_ORO.md
+      - Requerimientos: INFORME_REQUERIMIENTOS_SISTEMA_ACOPIO_ORO.md
+  - ADS:
+      - S01/S07 · Diagrama de Clases y Decisiones: ads/TABLAS_DECISIONES_DISENO_CLASES_SITRA_ORO.md
+      - S03 · Principios SOLID: S03_ADS_Equipo05_CalisayaHelio.md
+  - LP2:
+      - I. Base REST y Modelado:
+          - S01 · Arquitectura Backend: S01_LP2_Equipo05_CalisayaHelio.md
+          - S02 · CRUD Minero: S02_LP2_Equipo05_CalisayaHelio.md
+          - S03 · Objetos Relacionados: S03_LP2_Equipo05_CalisayaHelio.md
+          - S04 · Comunicación Intermodular: S04_LP2_Equipo05_CalisayaHelio.md
+          - S05 · Verificación y CORS: S05_LP2_Equipo05_CalisayaHelio.md
+      - II. SPA y Transaccionalidad:
+          - S07 · Arquitectura SPA: S07_LP2_Equipo05_CalisayaHelio.md
+          - S08 · CRUD de Tablas Dependientes: S08_LP2_Equipo05_FaijoCalisayaHelioPaul.md
+          - S09 · Formularios Transaccionales: S09_LP2_Equipo05_FaijoCalisayaHelioPaul.md

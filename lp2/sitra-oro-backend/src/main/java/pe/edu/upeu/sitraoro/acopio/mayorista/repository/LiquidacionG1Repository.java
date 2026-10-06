@@ -4,6 +4,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionResumen;
@@ -13,9 +14,14 @@ import pe.edu.upeu.sitraoro.acopio.mayorista.entity.LiquidacionG1;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import jakarta.persistence.LockModeType;
 
 @Repository
 public interface LiquidacionG1Repository extends JpaRepository<LiquidacionG1, Long> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT l FROM LiquidacionG1 l WHERE l.idLiquidacionG1 = :id")
+    Optional<LiquidacionG1> bloquearPorId(@Param("id") Long id);
 
     @Override
     @EntityGraph(attributePaths = "detalles")

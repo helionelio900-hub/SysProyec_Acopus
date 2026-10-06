@@ -3,7 +3,7 @@ services:
   oracle:
     # Oracle XE 21c: la PDB se llama XEPDB1, igual que en application-dev.yml.
     image: gvenzl/oracle-xe:21-slim
-    container_name: bomerp-oracle
+    container_name: sitra-oro-oracle
     restart: unless-stopped
     ports:
       - "1522:1521"
@@ -21,3 +21,6 @@ services:
       start_period: 60s
 volumes:
   oracle-data:
+    # Copia SITRA del volumen anterior; conservar el original como respaldo hasta validar.
+    external: true
+    name: sitra-oro-backend-dev_oracle-data

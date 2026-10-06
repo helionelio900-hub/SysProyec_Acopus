@@ -37,7 +37,7 @@ management:
       show-details: always
 sitraoro:
   cors:
-    allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:4200}
+    allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:4200,http://127.0.0.1:4200}
   security:
     jwt:
       secret: ${SITRAORO_JWT_SECRET:}
