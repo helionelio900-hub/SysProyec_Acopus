@@ -164,11 +164,21 @@ El backend filtra por fecha las operaciones con partidas analizadas. Devuelve ca
 
 ## 3. Error o hallazgo técnico
 
-En la primera implementación de Mayorista, los importes se actualizaban mediante una llamada al endpoint de cálculo y quedaban en un `signal`. El formulario tenía cálculos automáticos, pero no acreditaba específicamente los derivados con `computed` que exige S09. Se incorporó un estado reactivo del formulario y un `computed` para los precios por línea y el total.
+### Evidencia de sustentación: error de compilación y fecha del trabajo
 
-También se detectó que el promedio mostrado en exportación era un cálculo de la interfaz, sin filtro de fechas ni endpoint específico de agregados para las compras actuales. Se añadió Reporte de compras y el endpoint `/recepciones-ley/resumen`. Así se mantuvo el flujo del negocio mientras se completaban los requisitos técnicos de la sesión.
+![Pantalla completa del error Angular NG2008 con fecha del sistema domingo 11 de octubre y hora 21:52](img_S09_Mayorista/captura-08-hallazgo-fecha.png)
 
-Para proteger el resultado comercial, el cálculo visual conserva las escalas y el redondeo del servidor. La confirmación solo se habilita cuando ambos resultados coinciden; el backend continúa recalculando y guardando los importes.
+**Explicación:** esta captura documenta un error real de integración del frontend. Angular muestra `NG2008: Could not find stylesheet file './registro-ponderacion.css'` y señala la referencia `styleUrl` en `registro-ponderacion.ts`. El compilador no podía localizar la hoja de estilos del componente de ponderación; por eso fallaba la generación del paquete. Para resolverlo se comprobó el archivo CSS y su referencia en la carpeta del componente, y se reinició el servidor de desarrollo para cargar la versión actual. El archivo está actualmente presente y versionado en el repositorio.
+
+**Fecha y hora de la sustentación:** la imagen incluye el calendario de Windows con “domingo, 11 de octubre” y el reloj del sistema a las **21:52**. Los mensajes de compilación contienen fechas **2026-10-12T02:04:50Z**, **02:04:51Z** y **02:06:23Z**. La letra `Z` indica UTC: esas horas corresponden a las **21:04–21:06 del 11/10/2026 en Lima (UTC−05:00)**. Por tanto, que los logs indiquen el día 12 y el calendario local el día 11 es coherente con la diferencia horaria.
+
+Esta imagen respalda el diagnóstico y aporta contexto temporal del trabajo. Es evidencia complementaria; no convierte las capturas anteriores sin fecha completa en imágenes que la muestren ni acredita por sí sola un usuario personal.
+
+### Adecuación del formulario a S09
+
+En la primera implementación, los importes se actualizaban mediante una llamada al endpoint de cálculo y quedaban en un `signal`. El formulario tenía cálculos automáticos, pero no acreditaba específicamente los derivados con `computed`. Se incorporó el estado reactivo del formulario y un `computed` para los precios por línea y el total, conservando las escalas y el redondeo del servidor.
+
+También se incorporó Reporte de compras y el endpoint `/recepciones-ley/resumen`, porque el promedio de exportación no constituía una consulta de agregados con fechas. El backend sigue validando y recalculando antes de guardar; el formulario solo permite confirmar cuando el cálculo visual coincide con el del servidor.
 
 ## 4. Reflexión técnica breve
 
