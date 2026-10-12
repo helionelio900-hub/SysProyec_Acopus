@@ -59,4 +59,19 @@
       <p>Cuando un minero cree una cuenta y elija este centro, podrás revisar aquí su solicitud.</p>
     </div>
   }
+  <div class="panel">
+    <h2>Solicitudes de entrega de oro</h2>
+    <p>Los pesos enviados por el minero son estimados. Confirma el peso recibido y el fundido al registrar la compra.</p>
+    @for (entrega of entregas(); track entrega.ID_SOLICITUD) {
+      <div class="panel">
+        <h3>#{{ entrega.ID_SOLICITUD }} · {{ entrega.NOMBRES_APELLIDOS }} · {{ entrega.ESTADO }}</h3>
+        @for (partida of entrega.PARTIDAS; track partida.NUMERO) {
+          <p>Partida {{ partida.NUMERO }} · {{ partida.COLOR }} · Peso crudo: {{ partida.PESO_CRUDO | numeroClaro:'1.0-3' }} g · Oro estimado: {{ partida.PESO_ESTIMADO | numeroClaro:'1.0-3' }} g</p>
+        }
+        @if (entrega.ESTADO === 'PENDIENTE') {
+          <button mat-flat-button class="button-primary" type="button" [disabled]="aceptando() !== null" (click)="aceptarEntrega(entrega)">Aceptar solicitud de entrega</button>
+        }
+      </div>
+    } @empty { <p>No hay solicitudes de entrega.</p> }
+  </div>
 </section>

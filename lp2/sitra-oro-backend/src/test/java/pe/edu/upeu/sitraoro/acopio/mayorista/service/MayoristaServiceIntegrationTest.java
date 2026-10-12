@@ -104,9 +104,9 @@ class MayoristaServiceIntegrationTest {
         assertNotNull(creado.idRecepcion());
         assertEquals(centro.getIdCentroAcopio(), creado.idCentroAcopio());
         assertEquals(centro.getNombre() + " · " + centro.getZona(), creado.nombreAcopiador());
-        assertEquals(0, new BigDecimal("2.000").compareTo(creado.rojo().pesoSinFundirG()));
+        assertEquals(0, new BigDecimal("1.000").compareTo(creado.rojo().pesoSinFundirG()));
         assertEquals(0, new BigDecimal("1.000").compareTo(creado.rojo().pesoFundidoG()));
-        assertEquals(0, new BigDecimal("6.000").compareTo(creado.verde().pesoSinFundirG()));
+        assertEquals(0, new BigDecimal("5.000").compareTo(creado.verde().pesoSinFundirG()));
         assertEquals(0, new BigDecimal("5.000").compareTo(creado.verde().pesoFundidoG()));
         assertNull(transaccionG2Repository.findById(noEntregada.getIdTransaccionG2()).orElseThrow()
                 .getIdRecepcionMayorista());
@@ -143,10 +143,10 @@ class MayoristaServiceIntegrationTest {
                 centroId, List.of(rojo.getIdTransaccionG2(), verde.getIdTransaccionG2()));
 
         assertEquals(List.of(rojo.getIdTransaccionG2(), verde.getIdTransaccionG2()), entrega.idsComprasAcopiador());
-        assertEquals(0, new BigDecimal("2.000").compareTo(entrega.rojo().pesoFundidoG()));
-        assertEquals(0, new BigDecimal("3.000").compareTo(entrega.rojo().pesoSinFundirG()));
-        assertEquals(0, new BigDecimal("3.000").compareTo(entrega.verde().pesoFundidoG()));
-        assertEquals(0, new BigDecimal("4.000").compareTo(entrega.verde().pesoSinFundirG()));
+        assertEquals(0, new BigDecimal("2.000").compareTo(entrega.rojo().pesoSinFundirG()));
+        assertNull(entrega.rojo().pesoFundidoG());
+        assertEquals(0, new BigDecimal("3.000").compareTo(entrega.verde().pesoSinFundirG()));
+        assertNull(entrega.verde().pesoFundidoG());
         assertNull(transaccionG2Repository.findById(reservado.getIdTransaccionG2()).orElseThrow()
                 .getIdRecepcionMayorista());
     }
@@ -156,8 +156,9 @@ class MayoristaServiceIntegrationTest {
                 fecha,
                 idCentro,
                 new RecepcionMayoristaRequest.FilaOro(
-                        new BigDecimal("99.000"), new BigDecimal("88.000"), "", "", "", ""),
-                new RecepcionMayoristaRequest.FilaOro(null, null, "", "", "", ""),
+                        null, new BigDecimal("1.000"), "", "", "", ""),
+                new RecepcionMayoristaRequest.FilaOro(
+                        null, new BigDecimal("5.000"), "", "", "", ""),
                 "",
                 "",
                 comprasRecepcionIds);

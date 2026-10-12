@@ -19,11 +19,14 @@ public class MineroServiceImpl implements MineroService {
 
     private final MineroRepository mineroRepository;
     private final MineroMapper mineroMapper;
+    private final pe.edu.upeu.sitraoro.seguridad.repository.CuentaAccesoRepository cuentas;
 
     @Override
     @Transactional(readOnly = true)
     public List<MineroResponse> listar() {
-        return mineroRepository.findAll().stream()
+        Long centro = centroActual();
+        return (centro == null ? mineroRepository.findAll() : mineroRepository.vinculados(centro)).stream()
+                .filter(m -> centro == null || cuentaHabilitada(m))
                 .map(mineroMapper::toResponse)
                 .toList();
     }
@@ -49,7 +52,16 @@ public class MineroServiceImpl implements MineroService {
     @Override
     @Transactional
     public MineroResponse crear(MineroRequest request) {
+        return crearEnCentro(request, centroActual());
+    }
+
+    @Override
+    @Transactional
+    public MineroResponse crearEnCentro(MineroRequest request, Long idCentro) {
         Minero minero = mineroMapper.toEntity(request);
+        Long actual = centroActual();
+        if (actual != null && !actual.equals(idCentro)) throw new org.springframework.security.access.AccessDeniedException("Centro de acopio no autorizado");
+        minero.setIdCentroAcopio(idCentro);
         return mineroMapper.toResponse(mineroRepository.save(minero));
     }
 
@@ -71,7 +83,27 @@ public class MineroServiceImpl implements MineroService {
     }
 
     private Minero buscarOFallar(Long idMinero) {
-        return mineroRepository.findById(idMinero)
+        Minero minero = mineroRepository.findById(idMinero)
                 .orElseThrow(() -> new ResourceNotFoundException("Minero no encontrado: " + idMinero));
+        Long centro = centroActual();
+        if (centro != null && !centro.equals(minero.getIdCentroAcopio()) && mineroRepository.entregasAceptadas(idMinero,centro)==0)
+            throw new ResourceNotFoundException("Minero no encontrado en tu centro de acopio");
+        if (centro != null && !cuentaHabilitada(minero))
+            throw new ResourceNotFoundException("El minero está pendiente de aprobación");
+        return minero;
+    }
+
+    private boolean cuentaHabilitada(Minero minero) {
+        return cuentas.findByDocumentoIdentidad(minero.getDocumentoIdentidad())
+                .map(c -> c.isActivo()).orElse(true);
+    }
+
+    private Long centroActual() {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getAuthorities().stream().noneMatch(a -> "ROLE_G2_ACOPIADOR".equals(a.getAuthority()))) return null;
+        if (!(auth.getPrincipal() instanceof org.springframework.security.oauth2.jwt.Jwt jwt)
+                || !(jwt.getClaim("idCentroAcopio") instanceof Number id))
+            throw new org.springframework.security.access.AccessDeniedException("La cuenta no tiene centro de acopio asignado");
+        return id.longValue();
     }
 }

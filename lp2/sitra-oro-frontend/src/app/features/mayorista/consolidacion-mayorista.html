@@ -1,192 +1,65 @@
 <section class="workspace mayorista-workspace export-workspace">
   <header class="page-head export-head">
-    <div>
-      <span class="eyebrow">MAYORISTA · CONSOLIDACIÓN</span>
-      <h1>Lotes para exportación</h1>
-      <p>Selecciona liquidaciones ya registradas para reunir su peso fundido en un lote.</p>
-    </div>
+    <div><span class="eyebrow">MAYORISTA · EXPORTACIÓN</span><h1>Lotes para exportación</h1></div>
   </header>
-
-  <p class="major-notice info export-notice" role="status">
-    <span aria-hidden="true">ⓘ</span>
-    <span>
-      @if (vistaPrevia) {
-        Vista de demostración: los cambios son temporales.
-      } @else {
-        Los borradores se guardan en el backend. «Preparar envío» registra el lote como preparado;
-        el despacho al exportador se realiza fuera del sistema.
-      }
-    </span>
-  </p>
-  @if (error()) {
-    <p class="feedback error" role="alert">{{ error() }}</p>
-  }
-  @if (mensaje()) {
-    <p class="feedback" role="status">{{ mensaje() }}</p>
-  }
-
-  <div class="export-date-row">
-    <label class="field export-date-field">
-      Fecha del lote
-      <input type="date" [value]="fecha()" (change)="cambiarFecha($event)" />
-    </label>
-    <div class="export-date-actions">
-      @if (!vistaPrevia) {
-        <button mat-stroked-button class="button-secondary" type="button" (click)="cargar()" [disabled]="cargando()">
-          Actualizar datos
-        </button>
-      }
-      <button mat-stroked-button class="button-secondary" type="button" (click)="limpiar()">
-        Nuevo lote
-      </button>
-    </div>
-  </div>
-
-  <div class="export-layout">
-    <section class="panel export-lot-panel" aria-label="Liquidaciones disponibles">
-      <h2>Liquidaciones disponibles</h2>
-      <p class="major-lede">El peso viene de cada liquidación. Registra su lectura decimal sin calcular una ley combinada.</p>
-      @if (cargando()) {
-        <p class="loading-state" role="status">Consultando liquidaciones y lotes…</p>
-      } @else if (disponibles().length) {
-        <div class="table-wrap export-table-wrap">
-          <table class="export-table">
-            <caption class="major-visually-hidden">Liquidaciones que se pueden integrar al lote</caption>
-            <thead>
-              <tr>
-                <th scope="col">Incluir</th>
-                <th scope="col">Liquidación</th>
-                <th scope="col">Acopiador</th>
-                <th scope="col">Peso fundido</th>
-                <th scope="col">Lectura decimal</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (liquidacion of disponibles(); track liquidacion.idLiquidacionG1) {
-                <tr>
-                  <td>
-                    <input
-                      #selector
-                      class="export-check"
-                      type="checkbox"
-                      [attr.aria-label]="'Incluir liquidación ' + liquidacion.idLiquidacionG1"
-                      [checked]="seleccion()[liquidacion.idLiquidacionG1]?.activa ?? false"
-                      (change)="elegir(liquidacion.idLiquidacionG1, selector.checked)"
-                    />
-                  </td>
-                  <td><strong>#{{ liquidacion.idLiquidacionG1 }}</strong></td>
-                  <td>{{ liquidacion.nombreAcopiadorG2 }}</td>
-                  <td>{{ gramos(liquidacion.pesoTotalFundidoG) }} g</td>
-                  <td>
-                    <input
-                      class="table-input"
-                      type="number"
-                      min="0"
-                      step="0.000001"
-                      placeholder="0.000000"
-                      [attr.aria-label]="'Lectura decimal de liquidación ' + liquidacion.idLiquidacionG1"
-                      [value]="seleccion()[liquidacion.idLiquidacionG1]?.lectura ?? ''"
-                      [disabled]="!(seleccion()[liquidacion.idLiquidacionG1]?.activa ?? false)"
-                      (input)="cambiarLectura(liquidacion.idLiquidacionG1, $event)"
-                    />
-                  </td>
-                </tr>
-              }
-            </tbody>
-            <tfoot>
-              <tr>
-                <th colspan="4" scope="row">Peso seleccionado</th>
-                <td class="export-total">{{ gramos(pesoSeleccionado()) }} g</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      } @else {
-        <p class="empty-state export-empty">
-          No hay liquidaciones vigentes disponibles. Registra liquidaciones o revisa los lotes ya creados.
-        </p>
-      }
-      <div class="export-form-actions">
-        <span>Selecciona al menos dos liquidaciones y completa sus lecturas.</span>
-        <button mat-flat-button class="button-primary" type="button" [disabled]="guardando() || !puedeGuardar()" (click)="guardar()">
-          {{ guardando() ? 'Guardando…' : editandoId() === null ? 'Guardar borrador' : 'Actualizar borrador' }}
-        </button>
-      </div>
-    </section>
-
-    <aside class="panel export-destination" aria-labelledby="export-destination-title">
-      <span class="export-destination-icon" aria-hidden="true">➜</span>
-      <h2 id="export-destination-title">Preparar para exportación</h2>
-      <p>Guarda el borrador con sus liquidaciones y lecturas antes de prepararlo.</p>
-      <p>El lote preparado conserva esas partidas y ya no se puede editar ni eliminar.</p>
-      <button
-        mat-flat-button
-        class="button-primary"
-        type="button"
-        [disabled]="guardando() || !puedePrepararEnvio()"
-        (click)="prepararEnvio()"
-      >
-        Preparar envío
-      </button>
-    </aside>
-  </div>
-
-  <section class="panel export-saved" aria-label="Lotes guardados">
-    <h2>Lotes guardados</h2>
-    @if (lotes().length) {
+  @if (error()) { <p class="feedback error" role="alert">{{ error() }}</p> }
+  @if (!vistaPrevia) { <app-registro-ponderacion /> }
+  <section class="panel export-saved" aria-label="Lotes para exportación">
+    <h2>Lotes registrados</h2>
+    @if (loteEditor(); as editor) {
+      <section class="editor-exportacion">
+        <h3>Editar lote #{{ editor.idLote }}</h3>
+        <label>Fecha <input type="date" [ngModel]="fechaEditor()" (ngModelChange)="fechaEditor.set($event)" [disabled]="guardando()" /></label>
+        <p>Selecciona los lotes recibidos que forman este registro. Sus pesos y leyes conservan el análisis original.</p>
+        @for (opcion of opcionesEditor(); track opcion.idRecepcion) {
+          <label class="opcion-recepcion"><input type="checkbox" [checked]="idsEditor().includes(opcion.idRecepcion)" [disabled]="guardando()" (change)="elegirLoteEditor(opcion.idRecepcion,$any($event.target).checked)" /> #{{ opcion.idRecepcion }} · {{ opcion.nombreAcopiador }} · {{ opcion.pesoFundidoG | numeroClaro:'1.0-3' }} g</label>
+        }
+        <button type="button" (click)="guardarLoteEditor()" [disabled]="guardando() || !idsEditor().length || !fechaEditor()">Guardar cambios</button>
+        <button type="button" (click)="loteEditor.set(null)" [disabled]="guardando()">Cancelar</button>
+      </section>
+    }
+    @if (cargando()) { <p role="status">Cargando lotes…</p> }
+    @else if (lotes().length) {
       <div class="table-wrap export-table-wrap">
         <table class="export-table">
-          <thead>
-            <tr>
-              <th>Lote</th>
-              <th>Fecha</th>
-              <th>Registros</th>
-              <th>Peso total</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
+          <thead><tr><th>N.º de lote</th><th>Fecha</th><th>Peso fundido (g)</th><th>Lectura (decimal)</th><th>Acciones</th></tr></thead>
           <tbody>
             @for (lote of lotes(); track lote.idLote) {
-              <tr>
-                <td><strong>Lote {{ lote.idLote }}</strong></td>
-                <td>{{ lote.fecha }}</td>
-                <td>{{ lote.partidas.length + (lote.recepciones?.length ?? 0) }}</td>
-                <td>{{ gramos(lote.pesoTotalFundidoG) }} g</td>
-                <td>{{ lote.estado === 'PREPARADO' ? 'Preparado' : 'Borrador' }}</td>
-                <td class="export-actions">
-                  <button mat-stroked-button class="button-secondary" type="button" (click)="alternarDetalle(lote.idLote)" [attr.aria-expanded]="detalleId() === lote.idLote">
-                    {{ detalleId() === lote.idLote ? 'Ocultar detalle' : 'Ver detalle' }}
-                  </button>
-                  @if (lote.estado === 'BORRADOR') {
-                    @if (!lote.recepciones?.length) { <button mat-stroked-button class="button-secondary" type="button" (click)="editar(lote)">Editar</button> }
-                    <button mat-stroked-button class="button-delete" type="button" (click)="eliminar(lote)">Eliminar</button>
-                  } @else {
-                    <span class="major-status">Cerrado</span>
-                  }
-                </td>
-              </tr>
-              @if (detalleId() === lote.idLote) {
-                <tr class="export-detail-row">
-                  <td colspan="6">
-                    <strong>Partidas del lote {{ lote.idLote }}</strong>
-                    <ul>
-                      @for (recepcion of lote.recepciones ?? []; track recepcion.idRecepcion) {
-                        <li>Recepción #{{ recepcion.idRecepcion }} · {{ recepcion.nombreAcopiador }} · rojo fundido {{ gramos(recepcion.pesoRojoG) }} g · verde fundido {{ gramos(recepcion.pesoVerdeG) }} g · total {{ gramos(recepcion.pesoRojoG + recepcion.pesoVerdeG) }} g</li>
-                      }
-                      @for (partida of lote.partidas; track partida.idLiquidacionG1) {
-                        <li>Liquidación #{{ partida.idLiquidacionG1 }} · {{ partida.nombreAcopiadorG2 }} · {{ gramos(partida.pesoFundidoG) }} g · lectura {{ partida.lecturaDecimal }}</li>
-                      }
-                    </ul>
-                  </td>
-                </tr>
+              @for (fila of filasPorLey(lote); track $index) {
+                <tr><td><strong>#{{ lote.idLote }}</strong></td><td>{{ lote.fecha }}</td>
+                  <td>{{ gramos(fila.peso) }}</td><td>@if (fila.ley === null) { Sin ley registrada } @else { {{ fila.ley / 100 | numeroClaro:'1.4-4' }} }</td>
+                  <td class="acciones-lote">
+                    <button type="button" (click)="editarLote(lote)" [disabled]="guardando() || lote.estado !== 'BORRADOR' || !lote.recepciones?.length">Editar</button>
+                    <button type="button" class="eliminar-lote" (click)="loteEliminar.set(lote)" [disabled]="guardando() || lote.estado !== 'BORRADOR'">Eliminar</button>
+                    @if (lote.estado === 'PREPARADO') { <small>Preparado · cerrado</small> }
+                  </td></tr>
               }
             }
           </tbody>
         </table>
       </div>
-    } @else {
-      <p class="empty-state export-empty">Todavía no hay lotes guardados.</p>
-    }
+      <div class="ponderacion-resultados" aria-live="polite">
+        <div><span>Total peso bruto</span><strong>{{ promedioExportacion().peso | numeroClaro:'1.0-3' }} g</strong></div>
+        <div><span>Lectura promedio bruto</span><strong>@if (promedioExportacion().lectura === null) { — } @else { {{ promedioExportacion().lectura | numeroClaro:'1.7-7' }} }</strong></div>
+        <div class="fundido-final">
+          <label for="export-final-weight">Fundido (g)</label>
+          <input id="export-final-weight" type="number" inputmode="decimal" min="0" step="0.001" [max]="promedioExportacion().peso"
+            placeholder="0.0" [ngModel]="pesoFundidoFinal()" (ngModelChange)="pesoFundidoFinal.set($event)" [attr.aria-invalid]="fundidoInvalido()" />
+          @if (fundidoInvalido()) { <p role="alert">Ingresa hasta 3 decimales y un peso entre 0 y {{ promedioExportacion().peso | numeroClaro:'1.0-3' }} g.</p> }
+        </div>
+        <div class="merma-final"><span>Merma (g)</span><strong>{{ mermaFinal() | numeroClaro:'1.0-3' }} g</strong></div>
+      </div>
+      <p class="fundicion-nota">El peso bruto reúne los pesos registrados antes de esta nueva fundición. La merma se calcula al ingresar el peso fundido.</p>
+      @if (promedioExportacion().incompletos) {
+        <p class="feedback">Hay lotes sin ley registrada. Completa sus leyes para obtener el promedio de todos los pesos.</p>
+      }
+      <button mat-stroked-button class="imprimir-promedio" type="button" [disabled]="fundidoInvalido() || promedioExportacion().lectura === null" (click)="imprimirPromedio()">Imprimir promedio total bruto</button>
+    } @else { <p class="empty-state export-empty">Todavía no hay lotes guardados.</p> }
   </section>
+  @if (loteEliminar(); as lote) {
+    <div class="modal-backdrop"><section class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-lot-title" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" (keydown.escape)="!guardando() && loteEliminar.set(null)">
+      <span class="modal-kicker">ELIMINAR BORRADOR</span><h2 id="delete-lot-title">¿Eliminar el lote #{{ lote.idLote }}?</h2><p>Se elimina el borrador de exportación. Los lotes recibidos quedarán disponibles para otra consolidación.</p>
+      <div class="modal-actions"><button type="button" cdkFocusInitial [disabled]="guardando()" (click)="loteEliminar.set(null)">Cancelar</button><button class="danger-button" type="button" [disabled]="guardando()" (click)="eliminar(lote)">{{ guardando() ? 'Eliminando…' : 'Eliminar borrador' }}</button></div>
+    </section></div>
+  }
 </section>

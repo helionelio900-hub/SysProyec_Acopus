@@ -34,11 +34,11 @@ export class InicioAcopio implements OnInit {
     });
   }
   protected dinero(valor: number | null | undefined): string {
-    return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(
+    return new Intl.NumberFormat('es-PE', { useGrouping: false, style: 'currency', currency: 'PEN' }).format(
       valor ?? 0,
     );
   }
   protected gramos(valor: number | null | undefined): string {
-    return `${new Intl.NumberFormat('es-PE', { maximumFractionDigits: 3 }).format(valor ?? 0)} g`;
+    return `${new Intl.NumberFormat('en-US', { useGrouping: false, maximumFractionDigits: 3 }).format(valor ?? 0)} g`;
   }
 }

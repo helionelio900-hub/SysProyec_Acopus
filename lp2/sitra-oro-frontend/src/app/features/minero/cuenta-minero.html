@@ -47,6 +47,8 @@
       }
 
       @if (modo === 'registro') {
+        @if (consultandoDni()) { <small role="status">Consultando DNI…</small> }
+        @if (estadoDni()) { <small role="status">{{ estadoDni() }}</small> }
         <label for="full-name">Nombres y apellidos</label>
         <input
           id="full-name"

@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.Positive;
 import org.springframework.validation.annotation.Validated;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionG1Request;
@@ -58,8 +59,10 @@ public class MayoristaController {
             @RequestParam @Positive @Digits(integer = 10, fraction = 2) BigDecimal onza,
             @RequestParam @Positive @Digits(integer = 6, fraction = 4) BigDecimal dolar,
             @RequestParam @Digits(integer = 3, fraction = 4) BigDecimal exportacionRojo,
-            @RequestParam @Digits(integer = 3, fraction = 4) BigDecimal exportacionVerde) {
-        return cotizacionColorService.publicar(onza, dolar, exportacionRojo, exportacionVerde);
+            @RequestParam @Digits(integer = 3, fraction = 4) BigDecimal exportacionVerde,
+            @RequestParam(defaultValue="90") @Positive @DecimalMax("100") @Digits(integer=3,fraction=4) BigDecimal leyRojo,
+            @RequestParam(defaultValue="80") @Positive @DecimalMax("100") @Digits(integer=3,fraction=4) BigDecimal leyVerde) {
+        return cotizacionColorService.publicar(onza, dolar, exportacionRojo, exportacionVerde, leyRojo, leyVerde);
     }
 
     @GetMapping("/precio-referencial")

@@ -32,6 +32,17 @@ class MineroModuleIntegrationTest {
                 null, null, true);
         String tokenMayorista = iniciarSesion("90000001", claveMayorista);
 
+        mvc.perform(post("/api/v1/mayorista/zonas-acopio")
+                        .header("Authorization", "Bearer " + tokenMayorista)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombre\":\"La Rinconada\"}"))
+                .andExpect(status().isCreated());
+        mvc.perform(post("/api/v1/mayorista/zonas-acopio")
+                        .header("Authorization", "Bearer " + tokenMayorista)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nombre\":\"Ananea\"}"))
+                .andExpect(status().isCreated());
+
         String centroJson = mvc.perform(post("/api/v1/mayorista/centros-acopio")
                         .header("Authorization", "Bearer " + tokenMayorista)
                         .contentType(MediaType.APPLICATION_JSON)

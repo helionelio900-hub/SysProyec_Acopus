@@ -12,6 +12,7 @@ public interface MineroService {
     Minero obtenerEntidad(Long idMinero);
     Optional<Minero> obtenerEntidadPorDocumento(String documentoIdentidad);
     MineroResponse crear(MineroRequest request);
+    MineroResponse crearEnCentro(MineroRequest request, Long idCentro);
     MineroResponse actualizar(Long idMinero, MineroRequest request);
     void eliminar(Long idMinero);
 }

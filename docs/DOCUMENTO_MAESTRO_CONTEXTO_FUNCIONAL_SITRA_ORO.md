@@ -185,6 +185,8 @@ SITRA-ORO está constituido por **cinco módulos internos**, cada uno con respon
      * **Pago Total Liquidado** al Acopiador.
   9. **Pago al Acopiador:** Se asienta el desembolso hacia el Acopiador (flujo financiero totalmente independiente del pago a mineros).
 
+**Decisión para la Unidad II:** La pantalla del Mayorista puede mostrar un precio de referencia por gramo calculado únicamente como `(cotización de la onza Troy en USD × tipo de cambio PEN/USD) ÷ 31,1035`. La referencia no usa ley, descuento ni condiciones comerciales confidenciales; tampoco constituye una liquidación o un pago. Hasta que exista una regla financiera autorizada, el sistema no registra nuevas liquidaciones de pago. El historial existente permanece consultable.
+
 ---
 
 ### 5.4 Consolidación de Lotes (CRUD Interno de Mayorista)
@@ -301,7 +303,7 @@ En estricto cumplimiento de la regla de no inventar requerimientos, las siguient
 | Componente | Estado Actual (Previo) | Estado Requerido (Auditado) | Acción Técnica |
 | :--- | :--- | :--- | :--- |
 | **Entidad Minero** | Ubicada erróneamente en `parametros` | Pertenece al módulo `acopiador` | Migrar paquete Java, DTOs y controladores hacia `acopio.acopiador`. |
-| **Diferencial Verde** | `MayoristaServiceImpl` aplica `1.05` (+5%) rígido | Regla descartada por el negocio | Eliminar el recargo fijo del 5% y parametrizar según definición formal. |
+| **Diferencial Verde** | Se eliminó el recargo rígido de `MayoristaServiceImpl`; el alta de pagos devuelve 409 | Regla comercial reservada | Mantener solo el precio referencial público hasta disponer de una definición autorizada. |
 | **Entidades Mayorista** | Sin campos para Ley, Descuento ni USD | Requiere campos: `ley`, `descuento`, `resultadoUsd`, `resultadoPen` | Actualizar entidades JPA, DTOs y scripts de base de datos (`bd2/`). |
 | **Proceso Físico** | Salto directo de pesaje a liquidación | Incluir ciclo: Enfriamiento $\rightarrow$ Limpieza $\rightarrow$ Análisis $\rightarrow$ Ley | Modelar estados de procesamiento físico en el flujo del Mayorista. |
 | **Consolidación** | No existe interfaz ni endpoint específico | CRUD interno en Mayorista basado en selección por Peso + Ley | Diseñar entidad `ConsolidacionLote` y endpoints correspondientes dentro de Mayorista. |

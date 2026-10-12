@@ -7,12 +7,17 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import pe.edu.upeu.sitraoro.seguridad.config.SecurityConfig;
+import pe.edu.upeu.sitraoro.acopio.acopiador.dto.CompraG2Response;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.AcumuladosG2Response;
+import pe.edu.upeu.sitraoro.acopio.acopiador.dto.EntregaMayoristaResponse;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.TransaccionG2Request;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.TransaccionG2Response;
 import pe.edu.upeu.sitraoro.acopio.acopiador.service.AcopiadorService;
-import pe.edu.upeu.sitraoro.acopio.mayorista.dto.RecepcionMayoristaResponse;
-import pe.edu.upeu.sitraoro.acopio.mayorista.service.RecepcionMayoristaServiceImpl;
+import pe.edu.upeu.sitraoro.acopio.acopiador.service.EntregaMayoristaPort;
 import pe.edu.upeu.sitraoro.acopio.parametros.dto.MineroResumen;
 import pe.edu.upeu.sitraoro.exception.ResourceNotFoundException;
 import tools.jackson.databind.ObjectMapper;
@@ -33,8 +38,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AcopiadorController.class)
+@Import({SecurityConfig.class, AcopiadorControllerTest.SeguridadMvc.class})
 @WithMockUser(roles = "G2_ACOPIADOR")
 class AcopiadorControllerTest {
+    @TestConfiguration
+    @EnableWebSecurity
+    static class SeguridadMvc {}
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,14 +55,71 @@ class AcopiadorControllerTest {
     private AcopiadorService acopiadorService;
 
     @MockitoBean
-    private RecepcionMayoristaServiceImpl recepcionMayoristaService;
+    private EntregaMayoristaPort entregaMayoristaPort;
+
+    @Test
+    void registrarCompraConDetalles_recibeUnaCabeceraYVariasPartidas() throws Exception {
+        var minero = new MineroResumen(1L, "45892011", "Juan Pérez");
+        var fecha = LocalDateTime.now();
+        when(acopiadorService.registrarCompraConDetalles(any(), eq(1L))).thenReturn(new CompraG2Response(
+                7L, minero, fecha, new BigDecimal("10100.00"), List.of(
+                new TransaccionG2Response(20L, minero, new BigDecimal("10"), new BigDecimal("10"), "ROJO",
+                        new BigDecimal("350"), new BigDecimal("3500"), fecha, null, null, false, 7L),
+                new TransaccionG2Response(21L, minero, new BigDecimal("20"), new BigDecimal("20"), "VERDE",
+                        new BigDecimal("330"), new BigDecimal("6600"), fecha, null, null, false, 7L))));
+        mockMvc.perform(post("/api/v1/acopio/compras")
+                .with(jwt().jwt(token -> token.claim("idCentroAcopio", 1L))
+                        .authorities(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_G2_ACOPIADOR")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"idMinero":1,"detalles":[
+                      {"tipoOro":"ROJO","pesoSinFundirG":10,"pesoFundidoNetoG":10,"precioAplicadoPen":350},
+                      {"tipoOro":"VERDE","pesoSinFundirG":20,"pesoFundidoNetoG":20,"precioAplicadoPen":330}
+                    ]}
+                    """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.idCompraG2").value(7))
+                .andExpect(jsonPath("$.detalles.length()").value(2))
+                .andExpect(jsonPath("$.detalles[1].idCompraG2").value(7))
+                .andExpect(jsonPath("$.totalPagadoPen").value(10100));
+    }
+
+    @Test
+    void compraSinPartidas_esRechazadaAntesDelServicio() throws Exception {
+        mockMvc.perform(post("/api/v1/acopio/compras")
+                .with(jwt().jwt(token -> token.claim("idCentroAcopio", 1L))
+                        .authorities(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_G2_ACOPIADOR")))
+                .contentType(MediaType.APPLICATION_JSON).content("{\"idMinero\":1,\"detalles\":[]}"))
+                .andExpect(status().isBadRequest());
+        verify(acopiadorService, org.mockito.Mockito.never()).registrarCompraConDetalles(any(), any());
+    }
+
+    @Test
+    void compraConPesoInvalido_esRechazadaAntesDelServicio() throws Exception {
+        mockMvc.perform(post("/api/v1/acopio/compras")
+                .with(jwt().jwt(token -> token.claim("idCentroAcopio", 1L))
+                        .authorities(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_G2_ACOPIADOR")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"idMinero":1,"detalles":[{"tipoOro":"ROJO","pesoSinFundirG":1.0001,"pesoFundidoNetoG":0,"precioAplicadoPen":10}]}
+                    """))
+                .andExpect(status().isBadRequest());
+        verify(acopiadorService, org.mockito.Mockito.never()).registrarCompraConDetalles(any(), any());
+    }
+
+    @Test
+    void mineroNoPuedeConsultarComprasDelAcopiador() throws Exception {
+        mockMvc.perform(get("/api/v1/acopio/compras")
+                .with(jwt().authorities(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_MINERO"))))
+                .andExpect(status().isForbidden());
+    }
 
     @Test
     void enviarComprasSeleccionadas_creaEntregaParaCentroDeLaSesion() throws Exception {
-        when(recepcionMayoristaService.registrarDesdeAcopiador(1L, List.of(10L, 12L)))
-                .thenReturn(new RecepcionMayoristaResponse(5L, LocalDate.now(), 1L, "Centro · Ananea",
-                        new RecepcionMayoristaResponse.FilaOro(new BigDecimal("2.000"), new BigDecimal("1.800"), "", "", "", ""),
-                        new RecepcionMayoristaResponse.FilaOro(null, null, "", "", "", ""), "", "", List.of(10L, 12L)));
+        when(entregaMayoristaPort.registrarDesdeAcopiador(1L, List.of(10L, 12L)))
+                .thenReturn(new EntregaMayoristaResponse(5L, LocalDate.now(), 1L, "Centro · Ananea",
+                        new EntregaMayoristaResponse.FilaOro(new BigDecimal("2.000"), new BigDecimal("1.800"), "", "", "", ""),
+                        new EntregaMayoristaResponse.FilaOro(null, null, "", "", "", ""), "", "", List.of(10L, 12L)));
 
         mockMvc.perform(post("/api/v1/acopio/entregas-mayorista")
                         .with(jwt().jwt(token -> token.claim("idCentroAcopio", 1L))
@@ -64,7 +130,7 @@ class AcopiadorControllerTest {
                 .andExpect(jsonPath("$.idRecepcion").value(5))
                 .andExpect(jsonPath("$.rojo.pesoFundidoG").value(1.8));
 
-        verify(recepcionMayoristaService).registrarDesdeAcopiador(1L, List.of(10L, 12L));
+        verify(entregaMayoristaPort).registrarDesdeAcopiador(1L, List.of(10L, 12L));
     }
 
     @Test

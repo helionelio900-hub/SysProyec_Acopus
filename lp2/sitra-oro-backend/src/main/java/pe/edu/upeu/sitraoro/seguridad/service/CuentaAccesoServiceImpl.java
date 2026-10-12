@@ -14,6 +14,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CuentaAccesoServiceImpl implements CuentaAccesoService {
+    private final pe.edu.upeu.sitraoro.acopio.parametros.repository.MineroRepository mineros;
 
     private final CuentaAccesoRepository repository;
     private final PasswordEncoder passwordEncoder;
@@ -85,6 +86,10 @@ public class CuentaAccesoServiceImpl implements CuentaAccesoService {
                 || !idCentroAcopio.equals(cuenta.getIdCentroAcopioPreferido())) {
             throw new IllegalArgumentException("La solicitud no está pendiente para este centro de acopio");
         }
+        var minero = mineros.findById(cuenta.getIdMinero()).orElseThrow(() -> new IllegalArgumentException("Minero no encontrado"));
+        if (minero.getIdCentroAcopio() != null && !idCentroAcopio.equals(minero.getIdCentroAcopio()))
+            throw new IllegalArgumentException("El minero pertenece a otro centro de acopio");
+        minero.setIdCentroAcopio(idCentroAcopio);
         cuenta.setActivo(true);
     }
 

@@ -62,7 +62,88 @@
           </form>
         </article>
       </div>
-      <a class="quote-link" routerLink="/">Consultar un estimado de mi oro <span>↗</span></a>
+      <article class="info-card gold-card">
+        <span class="card-kicker">EL VALOR DE TU ORO</span>
+        <h2>Consulta cuánto vale tu oro</h2>
+        <p>Ingresa el peso y elige el color para consultar la cotización vigente.</p>
+        <form class="gold-form" [formGroup]="consultaOro" (ngSubmit)="consultarOro()">
+          <div>
+            <label for="gold-color">Color del oro</label>
+            <select id="gold-color" formControlName="color" (change)="estimado.set(null)">
+              <option value="ROJO">Oro rojo</option>
+              <option value="VERDE">Oro verde</option>
+            </select>
+          </div>
+          <div>
+            <label for="gold-weight">Peso del oro (g)</label>
+            <input id="gold-weight" type="number" inputmode="decimal" min="0.001" step="0.001"
+              formControlName="peso" (input)="estimado.set(null)" />
+          </div>
+          <button class="save-button" type="submit" [disabled]="consultando()">
+            {{ consultando() ? 'Consultando…' : 'Consultar valor' }} <span>→</span>
+          </button>
+        </form>
+        <div aria-live="polite">
+          @if (estimado(); as resultado) {
+            <div class="gold-result">
+              <span>Valor estimado de tu oro</span>
+              <strong>S/ {{ resultado.montoEstimadoTotalPen | numeroClaro:'1.2-2' }}</strong>
+              <p>{{ resultado.pesoBrutoGramos | numeroClaro:'1.0-3' }} g ·
+                S/ {{ resultado.precioGramoReferencialPen | numeroClaro:'1.2-2' }} por gramo</p>
+            </div>
+          }
+        </div>
+        @if (errorCotizacion()) {
+          <p class="alert" role="alert">{{ errorCotizacion() }}</p>
+        }
+        <p class="quote-note">El importe es referencial. El acopio confirma el peso y el precio final al registrar la compra.</p>
+      </article>
+    }
+    @if (perfil()) {
+      <article class="info-card gold-card">
+        <span class="card-kicker">ENTREGA AL ACOPIADOR</span>
+        <h2>Envía tu solicitud con varias partidas</h2>
+        <p>El peso crudo es lo que entregarás. El peso del oro estimado es lo que esperas obtener después de fundir.</p>
+        <form [formGroup]="entregaForm" (ngSubmit)="enviarEntrega()">
+          <fieldset [disabled]="enviando()" class="delivery-fields">
+            <label for="delivery-center">Acopio que recibirá esta solicitud</label>
+            <select id="delivery-center" formControlName="idCentroAcopio">
+              <option [ngValue]="0">Elige un acopio</option>
+              @for (centro of centros(); track centro.idCentroAcopio) {
+                <option [ngValue]="centro.idCentroAcopio">{{ centro.nombre }} · {{ centro.zona }}</option>
+              }
+            </select>
+            <div formArrayName="partidas">
+              @for (partida of entregaForm.controls.partidas.controls; track partida; let i = $index) {
+                <div class="delivery-partida" [formGroupName]="i">
+                  <h3>Partida {{ i + 1 }}</h3>
+                  <div class="gold-form">
+                    <div><label [for]="'delivery-color-'+i">Color del oro</label>
+                      <select [id]="'delivery-color-'+i" formControlName="color"><option value="ROJO">Oro rojo</option><option value="VERDE">Oro verde</option></select></div>
+                    <div><label [for]="'raw-weight-'+i">Peso crudo (g)</label>
+                      <input [id]="'raw-weight-'+i" type="number" min="0.001" step="0.001" inputmode="decimal" formControlName="pesoCrudo" /></div>
+                    <div><label [for]="'estimated-weight-'+i">Peso del oro estimado (g)</label>
+                      <input [id]="'estimated-weight-'+i" type="number" min="0.001" step="0.001" inputmode="decimal" formControlName="pesoEstimado" /></div>
+                  </div>
+                  <button type="button" class="partida-button" [disabled]="entregaForm.controls.partidas.length === 1" (click)="quitarPartida(i)">Quitar partida {{ i + 1 }}</button>
+                </div>
+              }
+            </div>
+            <button type="button" class="partida-button" [disabled]="entregaForm.controls.partidas.length >= 200" (click)="agregarPartida()">+ Agregar partida</button>
+            <button type="submit" class="save-button">{{ enviando() ? 'Enviando…' : 'Enviar solicitud al acopio' }} <span>→</span></button>
+          </fieldset>
+        </form>
+        @if (entregaMensaje()) { <p role="status">{{ entregaMensaje() }}</p> }
+        <h2>Mis solicitudes de entrega</h2>
+        @for (entrega of entregas(); track entrega.ID_SOLICITUD) {
+          <div class="delivery-partida">
+            <h3>Solicitud #{{ entrega.ID_SOLICITUD }} · {{ entrega.CENTRO }} · {{ entrega.ESTADO }}</h3>
+            @for (partida of entrega.PARTIDAS; track partida.NUMERO) {
+              <p>{{ partida.COLOR }} · Crudo: {{ partida.PESO_CRUDO | numeroClaro:'1.0-3' }} g · Oro estimado: {{ partida.PESO_ESTIMADO | numeroClaro:'1.0-3' }} g</p>
+            }
+          </div>
+        } @empty { <p>Todavía no has enviado solicitudes de entrega.</p> }
+      </article>
     }
     @if (error()) {
       <p class="alert" role="alert">{{ error() }} <a routerLink="/ingresar">Iniciar sesión</a></p>

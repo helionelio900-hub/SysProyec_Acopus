@@ -15,6 +15,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LoteExportacionController {
     private final LoteExportacionService service;
+    public record EditarRecepciones(@jakarta.validation.constraints.NotNull java.time.LocalDate fecha,
+      @jakarta.validation.constraints.NotEmpty @jakarta.validation.constraints.Size(max=200) List<@jakarta.validation.constraints.NotNull @jakarta.validation.constraints.Positive Long> ids) {}
+    @PutMapping("/{id}/recepciones")
+    public LoteExportacionResponse editarRecepciones(@PathVariable Long id,@Valid @RequestBody EditarRecepciones request) {
+        return service.editarRecepciones(id,request.fecha(),request.ids());
+    }
 
     @GetMapping
     public List<LoteExportacionResponse> listar() {

@@ -3,7 +3,7 @@
     <div>
       <span class="eyebrow">MAYORISTA · PAGO AL ACOPIADOR</span>
       <h1>Liquidación al acopiador</h1>
-      <p>Consulta un precio referencial por gramo y el historial de liquidaciones registradas.</p>
+      <p>Calcula y publica la cotización por gramo para el minero y el acopiador.</p>
     </div>
     <span class="major-status ready">Precio referencial disponible</span>
   </header>
@@ -13,9 +13,7 @@
       Publica precios vigentes por color. El minero ve soles por gramo y el acopiador los usa al registrar compras.
     </p>
   </div>
-  @if (error()) {
-    <p class="feedback error" role="alert">{{ error() }}</p>
-  }
+
 
   <div class="major-grid liquidation-layout">
     <section class="panel major-span" aria-labelledby="mercado-title">
@@ -38,11 +36,12 @@
         <div class="quote-table-wrap">
           <table class="quote-table">
             <caption>Vista previa de la cotización por gramo</caption>
-            <thead><tr><th>Color</th><th>Exportación (%)</th><th>USD / g</th><th>Soles / g</th></tr></thead>
+            <thead><tr><th>Color</th><th>Ley (%)</th><th>Exportación (%)</th><th>USD / g</th><th>Soles / g</th></tr></thead>
             <tbody>
               @for (color of colores; track color) {
                 <tr [class.quote-red]="color === 'ROJO'" [class.quote-green]="color === 'VERDE'">
                   <td><strong>{{ color === 'ROJO' ? 'Rojo' : 'Verde' }}</strong></td>
+                  <td><input type="number" min="0.0001" max="100" step="0.0001" [attr.aria-label]="'Ley para oro ' + color" [formControlName]="color === 'ROJO' ? 'leyRojo' : 'leyVerde'" /></td>
                   <td><input type="number" min="0" max="100" step="0.0001" [attr.aria-label]="'Exportación para ' + color" [formControlName]="color === 'ROJO' ? 'exportacionRojo' : 'exportacionVerde'" /></td>
                   <td>{{ precioVista(color, 'USD') }}</td><td><strong>{{ precioVista(color, 'PEN') }}</strong></td>
                 </tr>
@@ -66,87 +65,4 @@
     </section>
   </div>
 
-  <section class="major-section" aria-labelledby="historial-title">
-    <div class="major-section-head">
-      <div>
-        <span class="major-kicker">CONSULTA CONECTADA AL BACKEND</span>
-        <h2 id="historial-title">Reporte de liquidaciones</h2>
-        <p>
-          @if (vistaPrevia) {
-            Importes ficticios para demostrar el historial; no representan una fórmula aprobada.
-          } @else {
-            Estos registros no incluyen ley certificada ni descuento en la respuesta disponible.
-          }
-        </p>
-      </div>
-    </div>
-    <div class="report-filters">
-      <label class="field">Estado
-        <select [value]="estado()" (change)="cambiarEstado($event)">
-          <option value="">Todos</option>
-          <option value="REGISTRADA">Registrada</option>
-          <option value="ANULADA">Anulada</option>
-        </select>
-      </label>
-      <label class="field">Desde
-        <input type="date" [value]="desde()" (change)="cambiarDesde($event)" />
-      </label>
-      <label class="field">Hasta
-        <input type="date" [value]="hasta()" (change)="cambiarHasta($event)" />
-      </label>
-      <button mat-stroked-button class="button-secondary" type="button" (click)="cargar()" [disabled]="cargando()">
-        Consultar reporte
-      </button>
-    </div>
-    @if (reporte(); as datos) {
-      <div class="major-grid major-grid-three result-grid" aria-label="Resumen de liquidaciones">
-        <div class="major-result"><span>Liquidaciones</span><strong>{{ datos.agregado.totalLiquidaciones }}</strong></div>
-        <div class="major-result"><span>Monto total</span><strong>{{ dinero(datos.agregado.montoTotal) }}</strong></div>
-        <div class="major-result"><span>Promedio por liquidación</span><strong>{{ dinero(datos.agregado.ticketPromedio) }}</strong></div>
-      </div>
-    }
-    @if (cargando()) {
-      <p class="loading-state" role="status">Cargando liquidaciones…</p>
-    } @else if (liquidaciones().length) {
-      <div class="table-wrap">
-        <table>
-          <caption class="major-visually-hidden">
-            Liquidaciones existentes
-          </caption>
-          <thead>
-            <tr>
-              <th>N.º</th>
-              <th>Fecha</th>
-              <th>Acopiador</th>
-              <th>Estado</th>
-              <th>Peso registrado</th>
-              <th>Total registrado</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of liquidaciones(); track item.idLiquidacionG1) {
-              <tr>
-                <td>
-                  <strong>#{{ item.idLiquidacionG1 }}</strong>
-                </td>
-                <td>{{ item.fechaLiquidacion | date: 'short' }}</td>
-                <td>{{ item.nombreAcopiadorG2 }}</td>
-                <td>{{ item.estado }}</td>
-                <td>{{ gramos(item.pesoTotalFundidoG) }}</td>
-                <td>{{ dinero(item.totalPagadoG2Pen) }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    } @else {
-      <p class="empty-state">
-        {{
-          vistaPrevia
-            ? 'Vista previa sin datos de liquidaciones.'
-            : 'Aún no hay liquidaciones registradas.'
-        }}
-      </p>
-    }
-  </section>
 </section>

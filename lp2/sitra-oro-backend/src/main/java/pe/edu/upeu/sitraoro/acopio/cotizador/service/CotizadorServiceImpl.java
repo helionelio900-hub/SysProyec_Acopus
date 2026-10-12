@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.sitraoro.acopio.cotizador.dto.CotizacionEstimadaResponse;
-import pe.edu.upeu.sitraoro.acopio.parametros.dto.ParametrosVigentes;
+import pe.edu.upeu.sitraoro.acopio.parametros.dto.CotizacionPublicada;
 import pe.edu.upeu.sitraoro.acopio.parametros.service.ParametrosSistemaService;
+import pe.edu.upeu.sitraoro.exception.ResourceNotFoundException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -13,30 +14,31 @@ import java.math.RoundingMode;
 @Service
 @RequiredArgsConstructor
 public class CotizadorServiceImpl implements CotizadorService {
+    private static final BigDecimal GRAMOS_POR_ONZA_TROY = new BigDecimal("31.1035");
 
     private final ParametrosSistemaService parametrosSistemaService;
 
     @Override
     @Transactional(readOnly = true)
+    public BigDecimal precioReferencialPorGramo() {
+        CotizacionPublicada cotizacion = parametrosSistemaService.obtenerCotizacionPublicada()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "El mayorista aún no publicó un precio referencial"));
+        return cotizacion.cotizacionOnzaUsd().multiply(cotizacion.tipoCambioUsdPen())
+                .divide(GRAMOS_POR_ONZA_TROY, 2, RoundingMode.HALF_UP);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public CotizacionEstimadaResponse calcularCotizacionEstimada(BigDecimal pesoBrutoGramos) {
-        ParametrosVigentes parametros = parametrosSistemaService.obtenerVigentes();
-        BigDecimal porcentajeMerma = parametros.porcentajeMermaEst();
-        BigDecimal precioDia = parametros.precioDiarioGramoPen();
-
-        // Fórmula: Peso Neto Estimado = Peso Bruto * (1 - %Merma / 100)
-        BigDecimal factorMerma = BigDecimal.ONE.subtract(porcentajeMerma.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
-        BigDecimal pesoNetoEst = pesoBrutoGramos.multiply(factorMerma).setScale(3, RoundingMode.HALF_UP);
-
-        // Monto Estimado = Peso Neto Estimado * Precio Diario
-        BigDecimal montoTotalEst = pesoNetoEst.multiply(precioDia).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal precioGramo = precioReferencialPorGramo();
+        BigDecimal montoTotalEst = pesoBrutoGramos.multiply(precioGramo).setScale(2, RoundingMode.HALF_UP);
 
         return new CotizacionEstimadaResponse(
             pesoBrutoGramos,
-            porcentajeMerma,
-            pesoNetoEst,
-            precioDia,
+            precioGramo,
             montoTotalEst,
-            "Cotización estimativa rápida. Esta sesión concluye al mostrar el resultado (no persiste transacción en BD)."
+            "Estimado con el precio referencial publicado por el mayorista. No es el pago final ni registra una venta."
         );
     }
 }

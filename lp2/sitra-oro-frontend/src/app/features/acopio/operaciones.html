@@ -2,19 +2,14 @@
   <header class="page-head acopio-head">
     <div>
       <span class="eyebrow">OPERACIONES · RECEPCIÓN DE ORO</span>
-      <h1>Registrar entrega</h1>
-      <p>Registra al minero, clasifica su oro y confirma el peso recibido en el centro de acopio.</p>
+      <h1>Operaciones del acopio</h1>
+      <p>Registra compras de oro, prepara su entrega al mayorista y consulta el historial.</p>
     </div>
     <button mat-stroked-button class="button-secondary" type="button" (click)="cargar()">
       Actualizar datos
     </button>
   </header>
-  <section class="panel" aria-label="Cotización vigente del mayorista">
-    <h2>Precios vigentes por gramo</h2>
-    @for (precio of cotizacionesColor(); track precio.color) {
-      <p>Oro {{ precio.color === 'ROJO' ? 'rojo' : 'verde' }}: <strong>{{ dinero(precio.precioGramoPen) }}/g</strong> · {{ precio.fechaPublicacion | date:'short' }}</p>
-    } @empty { <p>El mayorista aún no publicó los precios. Puedes registrar un precio especial en soles por gramo.</p> }
-  </section>
+
 
   @if (error()) {
     <p class="feedback error" role="alert">{{ error() }}</p>
@@ -23,123 +18,18 @@
     <p class="feedback success" role="status">{{ mensaje() }}</p>
   }
 
-  <div class="purchase-layout">
-    <section class="panel purchase-panel" aria-labelledby="form-title">
-      <div class="panel-heading">
-        <div class="step-mark" aria-hidden="true">01</div>
-        <div>
-          <span class="panel-kicker">NUEVA OPERACIÓN</span>
-          <h2 id="form-title">Datos de la entrega</h2>
-        </div>
-      </div>
-
-      @if (cargandoMineros()) {
-        <p class="notice" role="status">Cargando mineros…</p>
-      } @else if (errorMineros()) {
-        <p class="feedback error" role="alert">{{ errorMineros() }}</p>
-        <button mat-stroked-button type="button" (click)="actualizarMineros()">Reintentar carga de mineros</button>
-      } @else if (!mineros().length) {
-        <p class="notice">No hay mineros registrados. Registra un minero antes de ingresar una entrega.</p>
-      }
-
-      <form [formGroup]="form" (ngSubmit)="registrar()" class="form-grid">
-        <label class="field field-wide">
-          <span>Minero</span>
-          <select formControlName="idMinero" [attr.aria-invalid]="form.controls.idMinero.invalid && form.controls.idMinero.touched">
-            <option [ngValue]="0">Selecciona al minero</option>
-            @for (minero of mineros(); track minero.idMinero) {
-              <option [ngValue]="minero.idMinero">
-                {{ minero.nombresApellidos }} · {{ minero.documentoIdentidad }}
-              </option>
-            }
-          </select>
-          @if (form.controls.idMinero.invalid && form.controls.idMinero.touched) {
-            <small class="field-error" role="alert">Selecciona un minero para registrar la entrega.</small>
-          }
-        </label>
-
-        <fieldset class="gold-choice field-wide">
-          <legend>Clasificación del oro</legend>
-          <div class="gold-options">
-            <label class="gold-option" [class.selected]="form.controls.tipoOro.value === 'ROJO'">
-              <input type="radio" value="ROJO" formControlName="tipoOro" />
-              <span class="gold-dot red-dot" aria-hidden="true"></span>
-              <span><strong>Oro rojo</strong><small>Según la clasificación del acopio</small></span>
-            </label>
-            <label class="gold-option" [class.selected]="form.controls.tipoOro.value === 'VERDE'">
-              <input type="radio" value="VERDE" formControlName="tipoOro" />
-              <span class="gold-dot green-dot" aria-hidden="true"></span>
-              <span><strong>Oro verde</strong><small>Según la clasificación del acopio</small></span>
-            </label>
-          </div>
-        </fieldset>
-
-        <label class="field">
-          <span>Peso sin fundir <small>gramos</small></span>
-          <input type="number" min="0.001" step="0.001" formControlName="pesoSinFundirG" />
-        </label>
-        <label class="field">
-          <span>Peso fundido neto <small>gramos</small></span>
-          <input type="number" min="0.001" step="0.001" formControlName="pesoFundidoNetoG" />
-        </label>
-        @if (form.controls.pesoSinFundirG.value > 0 && form.controls.pesoFundidoNetoG.value > form.controls.pesoSinFundirG.value) {
-          <p class="notice field-wide" role="status">El segundo pesaje supera al primero. Revisa la medición; ambos valores quedarán registrados para trazabilidad.</p>
-        }
-
-        <div class="exception-panel field-wide">
-          <label class="exception-toggle">
-            <input type="checkbox" formControlName="aplicarAjuste" />
-            <span class="switch-visual" aria-hidden="true"></span>
-            <span class="exception-copy">
-              <strong>El oro está fuera de los rangos rojo y verde</strong>
-              <small>Activa esta opción solo para ingresar un precio excepcional antes de registrar.</small>
-            </span>
-          </label>
-          @if (form.controls.aplicarAjuste.value) {
-            <label class="field adjustment-field">
-              <span>Precio excepcional <small>S/ por gramo</small></span>
-              <input type="number" min="0.01" step="0.01" formControlName="precioAjustePen" />
-              <small>El precio ingresado se enviará al backend para esta operación.</small>
-            </label>
-          } @else {
-            <p class="system-price-note">Se aplicará la tarifa vigente configurada para el sistema.</p>
-          }
-        </div>
-
-        <div class="submit-row field-wide">
-          <span class="secure-note"><span aria-hidden="true">●</span> El cálculo se confirma al guardar</span>
-          <button mat-flat-button class="button-primary" [disabled]="guardando() || cargandoMineros() || !!errorMineros() || !mineros().length">
-            {{ guardando() ? 'Registrando…' : 'Registrar entrega' }}
-          </button>
-        </div>
-      </form>
-    </section>
-
-    <aside class="panel summary-panel" aria-labelledby="summary-title" aria-live="polite">
-      <div class="summary-topline"><span class="summary-icon" aria-hidden="true">S/</span><span>RESUMEN DE PAGO</span></div>
-      <h2 id="summary-title">Liquidación de esta entrega</h2>
-      @if (ultimoResultado(); as resultado) {
-        <div class="summary-confirmed">
-          <span class="confirmed-label">Compra #{{ resultado.idTransaccionG2 }} confirmada</span>
-          <div class="summary-line"><span>Precio aplicado / gramo</span><strong>{{ dinero(resultado.precioAplicadoPen) }}</strong></div>
-          <div class="summary-line"><span>Peso fundido neto</span><strong>{{ gramos(resultado.pesoFundidoNetoG) }}</strong></div>
-          <div class="summary-total"><span>Total pagado al minero</span><strong>{{ dinero(resultado.totalPagadoPen) }}</strong></div>
-          <p class="summary-footnote">Importes calculados y devueltos por el sistema.</p>
-        </div>
-      } @else {
-        <div class="summary-pending" aria-live="polite">
-          <span class="pending-icon" aria-hidden="true">⌁</span>
-          <strong>El importe aparecerá aquí</strong>
-          <p>Completa los datos y registra la entrega. El precio y el total se mostrarán cuando el sistema confirme la operación.</p>
-        </div>
-        <div class="summary-line"><span>Tarifa por gramo</span><strong>Por confirmar</strong></div>
-        <div class="summary-line"><span>Total para el minero</span><strong>Por confirmar</strong></div>
-      }
-      <div class="summary-divider"></div>
-      <p class="summary-policy"><span aria-hidden="true">ⓘ</span> El resumen es informativo. El importe definitivo corresponde al cálculo confirmado por el sistema.</p>
-    </aside>
-  </div>
-
+  <nav class="operations-nav" aria-label="Secciones de operaciones">
+    @for (seccion of secciones; track seccion.id) {
+      <button type="button" [class.active]="seccionActiva() === seccion.id"
+        [attr.aria-current]="seccionActiva() === seccion.id ? 'page' : null"
+        [disabled]="guardando()"
+        (click)="seccionActiva.set(seccion.id); registroDesdeEntrega.set(false)">{{ seccion.nombre }}</button>
+    }
+  </nav>
+  @if (seccionActiva() === 'recepcion') {
+    <app-entregas-recibidas (aceptada)="actualizarMineros(); cargar()" (registrarCompra)="abrirCompraSolicitada($event)" />
+  }
+  <div [hidden]="seccionActiva() !== 'entrega'">
   @if (acumulados(); as stock) {
     <section class="stock-section" aria-label="Stock acumulado pendiente">
       <div class="section-heading"><div><span class="panel-kicker">CONTROL DE EXISTENCIAS</span><h2>Stock pendiente de envío al mayorista</h2></div></div>
@@ -152,23 +42,151 @@
 
   <section class="recent-section" aria-labelledby="recent-title">
     <div class="section-heading recent-heading">
-      <div><span class="panel-kicker">REGISTRO SEMANAL DEL ACOPIADOR</span><h2 id="recent-title">Seleccionar oro para enviar</h2></div>
-      <span class="record-count">{{ comprasActivas().length }} compras activas</span>
+      <div><span class="panel-kicker">ENVÍO AL MAYORISTA</span><h2 id="recent-title">Preparar entrega</h2><p>Elige las compras disponibles, revisa los pesos y confirma el envío.</p></div>
+      <button mat-flat-button class="button-primary" type="button" (click)="abrirRegistroDesdeEntrega()"
+        [disabled]="registroDesdeEntrega() || guardando() || enviandoMayorista()">Agregar compra</button>
     </div>
+    @if (registroDesdeEntrega() && seccionActiva() === 'entrega') {
+      <section class="compact-purchase" aria-labelledby="compact-purchase-title">
+        <div class="compact-purchase-heading"><div><h3 id="compact-purchase-title">Nueva compra al minero</h3><p>Selecciona al minero una vez y agrega todas las partidas de oro que entrega.</p></div></div>
+        <form [formGroup]="form" (ngSubmit)="registrar()">
+          <div class="purchase-header-fields">
+            <label>Minero
+              <select formControlName="idMinero"><option [ngValue]="0">Seleccionar minero</option>
+                @for (minero of mineros(); track minero.idMinero) { <option [ngValue]="minero.idMinero">{{ minero.nombresApellidos }} · {{ minero.documentoIdentidad }}</option> }
+              </select>
+            </label>
+            <p>La fecha y el número de compra se asignan al guardar. Todas las partidas pertenecen a esta compra.</p>
+          </div>
+          <div class="selection-table-heading purchase-detail-heading">
+            @if (solicitudesDelMinero().length > 1) {
+              <label>Solicitud aceptada
+                <select [value]="solicitudCompra()?.ID_SOLICITUD ?? 0" (change)="seleccionarSolicitud(+$any($event.target).value)">
+                  <option value="0">Elige la solicitud que vas a comprar</option>
+                  @for (solicitud of solicitudesDelMinero(); track solicitud.ID_SOLICITUD) {
+                    <option [value]="solicitud.ID_SOLICITUD">Solicitud #{{ solicitud.ID_SOLICITUD }} · {{ solicitud.PARTIDAS.length }} partidas</option>
+                  }
+                </select>
+              </label>
+            }
+            @if (solicitudCompra(); as solicitud) {
+              <p class="notice">Partidas cargadas de la solicitud #{{ solicitud.ID_SOLICITUD }}. Confirma el peso recibido y el fundido real antes de guardar.</p>
+            }
+            @if (errorSolicitudesCompra()) { <p class="feedback error" role="alert">{{ errorSolicitudesCompra() }}</p> }
+            <div><h4>Partidas de esta compra · {{ partidasCompra.length }}</h4><p>Registra cada peso y precio en su propia fila.</p></div>
+            <button mat-stroked-button type="button" (click)="agregarPartida()" [disabled]="guardando() || partidasCompra.length >= 200">+ Agregar partida</button>
+          </div>
+          <div formArrayName="detalles" class="purchase-partidas">
+            @for (partida of partidasCompra.controls; track partida; let i = $index) {
+              <div class="purchase-partida" [formGroupName]="i">
+                <div class="partida-heading"><strong>Partida {{ i + 1 }}</strong><button mat-stroked-button type="button" (click)="quitarPartida(i)" [disabled]="guardando() || partidasCompra.length === 1" [attr.aria-label]="'Quitar partida ' + (i + 1)">Quitar</button></div>
+                <div class="partida-fields">
+                  <label>Grupo del historial<select formControlName="tipoOro"><option value="ROJO">Rojo</option><option value="VERDE">Verde</option></select></label>
+                  <label>Peso recibido (g)<input type="number" min="0.001" max="9999999.999" step="0.001" formControlName="pesoSinFundirG" /></label>
+                  <label>Peso fundido (g)<input type="number" min="0.001" max="9999999.999" step="0.001" formControlName="pesoFundidoNetoG" /></label>
+                  <label>Precio por gramo (S/)
+                    @if (partida.controls.aplicarAjuste.value) {
+                      <input type="number" min="0.01" max="99999999.99" step="0.01" formControlName="precioAjustePen" />
+                    } @else {
+                      <input type="text" readonly [value]="resumenCompra().lineas[i].precio === undefined ? 'Sin precio publicado' : dinero(resumenCompra().lineas[i].precio!)" />
+                    }
+                  </label>
+                  <div class="partida-importe"><span>Importe estimado</span><strong>{{ dinero(resumenCompra().lineas[i].importe) }}</strong></div>
+                </div>
+                <label class="compact-price-option"><input type="checkbox" formControlName="aplicarAjuste" /> Usar precio excepcional para esta partida</label>
+                @if (partida.touched && partida.invalid) { <p class="field-error" role="alert">Completa ambos pesos mayores que cero (hasta 3 decimales) y un precio válido (hasta 2 decimales).</p> }
+                @if (partida.controls.pesoSinFundirG.value > 0 && partida.controls.pesoFundidoNetoG.value > partida.controls.pesoSinFundirG.value) { <p class="notice">El peso fundido supera al peso recibido. Revisa esta partida.</p> }
+              </div>
+            }
+          </div>
+          <div class="purchase-save-summary" aria-live="polite">
+            <div><span>{{ partidasCompra.length }} partida(s) · {{ gramos(resumenCompra().peso) }} fundidos</span><strong>Total estimado: {{ dinero(resumenCompra().total) }}</strong><small>El sistema confirma el precio y el importe de cada partida al guardar.</small></div>
+            <div class="purchase-save-actions"><button mat-stroked-button type="button" [disabled]="guardando()" (click)="registroDesdeEntrega.set(false)">Cancelar</button><button mat-flat-button class="button-primary" type="submit" [disabled]="guardando() || cargandoMineros() || !!errorMineros() || !mineros().length">{{ guardando() ? 'Guardando…' : 'Revisar y guardar compra' }}</button></div>
+          </div>
+          @if (cargandoMineros()) { <p class="notice" role="status">Cargando mineros…</p> }
+          @if (errorMineros()) { <p class="feedback error" role="alert">{{ errorMineros() }}</p><button mat-stroked-button type="button" (click)="actualizarMineros()">Reintentar carga</button> }
+          @if (!cargandoMineros() && !errorMineros() && !mineros().length) { <p class="notice">Registra un minero antes de agregar una compra.</p> }
+          @if (form.controls.idMinero.touched && form.controls.idMinero.invalid) { <p class="field-error" role="alert">Selecciona un minero.</p> }
+        </form>
+      </section>
+    }
+    <p class="delivery-instructions">Marca las compras disponibles que quieres enviar. Los pesos se suman automáticamente.</p>
+    @if (cargando()) {
+      <p class="loading-state" role="status">Cargando compras…</p>
+    } @else if (errorTransacciones()) {
+      <p class="feedback error" role="alert">{{ errorTransacciones() }}</p>
+    } @else {
+        <section class="color-selection-group" aria-label="Compras disponibles para la entrega">
+          <div class="selection-table-heading">
+            <h3>Compras disponibles · {{ comprasDisponibles().length }}</h3>
+            <p>Peso fundido seleccionado: <strong>{{ gramos(pesoSeleccionado().total) }}</strong></p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Enviar</th><th>Color</th><th>Compra / partida</th><th>Minero</th><th>Peso fundido</th><th>Precio / g</th><th>Importe</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody>
+                @for (compra of comprasDisponibles(); track compra.idTransaccionG2) {
+                  <tr [class.delivery-selected]="comprasSeleccionadas().includes(compra.idTransaccionG2)">
+                    <td><input type="checkbox" [attr.aria-label]="'Enviar compra #' + compra.idTransaccionG2"
+                      [checked]="comprasSeleccionadas().includes(compra.idTransaccionG2)"
+                      [disabled]="enviandoMayorista() || !puedeSeleccionarParaMayorista(compra) || (!comprasSeleccionadas().includes(compra.idTransaccionG2) && lineasEnvio.length >= 200 && !lineasEnvio.value.includes(0))"
+                      (change)="seleccionarCompra(compra, $any($event.target).checked)" /></td>
+                    <td><span class="tag-color" [class.rojo]="compra.tipoOro === 'ROJO'" [class.verde]="compra.tipoOro === 'VERDE'">{{ compra.tipoOro === 'ROJO' ? '🔴 Rojo' : '🟢 Verde' }}</span></td>
+                    <td><strong>{{ compra.idCompraG2 ? 'Compra #' + compra.idCompraG2 : 'Registro anterior' }}</strong><small class="delivery-secondary">Partida #{{ compra.idTransaccionG2 }} · {{ compra.fechaTransaccion | date:'short' }}</small></td>
+                    <td><strong>{{ compra.minero.nombresApellidos }}</strong><small class="delivery-secondary">{{ compra.minero.documentoIdentidad }}</small></td>
+                    <td>{{ gramos(compra.pesoFundidoNetoG) }}</td>
+                    <td>{{ dinero(compra.precioAplicadoPen) }}</td>
+                    <td class="amount-cell">{{ dinero(compra.totalPagadoPen) }}</td>
+                    <td>{{ compra.idRecepcionMayorista !== null ? 'Enviado al mayorista' : compra.idLiquidacionG1 !== null ? 'Vinculada a liquidación' : 'Disponible' }}</td>
+                    <td class="purchase-row-actions">
+                      <button type="button" class="edit-purchase-button" [disabled]="guardando() || enviandoMayorista() || enviandoAjuste()" (click)="iniciarAjuste(compra, 'EDICION')">Editar</button>
+                      <button type="button" class="delete-purchase-button" [disabled]="guardando() || enviandoMayorista() || enviandoAjuste()" (click)="iniciarAjuste(compra, 'ANULACION')">Anular</button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="9">No hay compras disponibles para preparar una entrega.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+    }
     <div class="handoff-panel" aria-label="Seleccionar compras que se enviarán al mayorista">
       <div class="handoff-copy">
         <span class="panel-kicker">DETALLE DE LA ENTREGA</span>
         <strong>{{ pesoSeleccionado().lineas.length }} compra(s) seleccionada(s)</strong>
         <span>Rojo {{ gramos(pesoSeleccionado().rojo) }} · Verde {{ gramos(pesoSeleccionado().verde) }} · Total {{ gramos(pesoSeleccionado().total) }}</span>
         <small>Merma referencial calculada en pantalla: {{ gramos(pesoSeleccionado().mermaTotal) }}. No se envía al mayorista.</small>
-        <small>Marca los registros rojos y verdes que autorizas entregar. Las demás siguen en tu registro.</small>
+        <small>Elige las compras que autorizas entregar. Las demás siguen en tu registro.</small>
       </div>
       <button mat-flat-button class="button-primary" type="button"
-        [disabled]="lineasEnvio.invalid || enviandoMayorista()"
+        [disabled]="lineasEnvio.invalid || enviandoMayorista() || guardando() || enviandoAjuste()"
         (click)="enviarAlMayorista()">
         {{ enviandoMayorista() ? 'Enviando…' : 'Confirmar y enviar al mayorista' }}
       </button>
     </div>
+  </section>
+  </div>
+  <section class="recent-section" [hidden]="seccionActiva() !== 'historial'" aria-label="Historial de compras">
+    <div class="section-heading"><div><span class="panel-kicker">REGISTROS DEL ACOPIO</span><h2>Historial de compras</h2><p>Consulta las compras registradas, sus importes y su estado de envío.</p></div><span class="record-count">{{ cargando() ? 'Cargando…' : errorTransacciones() ? 'Carga pendiente' : comprasActivas().length + ' partidas activas' }}</span></div>
+    @if (errorTransacciones()) { <p class="feedback error" role="alert">{{ errorTransacciones() }}</p> }
+    @if (errorCompras()) { <p class="feedback error" role="alert">{{ errorCompras() }}</p> }
+    @if (comprasRegistradas().length) {
+      <div class="purchase-history">
+        <h3>Compras con sus partidas</h3>
+        @for (cabecera of comprasRegistradas(); track cabecera.idCompraG2) {
+          <details class="purchase-history-item">
+            <summary><span><strong>Compra #{{ cabecera.idCompraG2 }} · {{ cabecera.minero.nombresApellidos }}</strong><small>{{ cabecera.fechaCompra | date:'short' }} · {{ cabecera.detalles.length }} partida(s)</small></span><strong>{{ dinero(cabecera.totalPagadoPen) }}</strong></summary>
+            <div class="table-wrap"><table><thead><tr><th>Partida</th><th>Grupo</th><th>Peso recibido</th><th>Peso fundido</th><th>Precio / g</th><th>Importe</th><th>Estado</th></tr></thead><tbody>
+              @for (partida of cabecera.detalles; track partida.idTransaccionG2) {
+                <tr><td>#{{ partida.idTransaccionG2 }}</td><td>{{ partida.tipoOro === 'ROJO' ? 'Rojo' : 'Verde' }}</td><td>{{ gramos(partida.pesoSinFundirG) }}</td><td>{{ gramos(partida.pesoFundidoNetoG) }}</td><td>{{ dinero(partida.precioAplicadoPen) }}</td><td>{{ dinero(partida.totalPagadoPen) }}</td><td>{{ partida.anulada ? 'Anulada' : partida.idRecepcionMayorista !== null ? 'Enviada al mayorista' : partida.idLiquidacionG1 !== null ? 'Liquidada' : 'Disponible' }}</td></tr>
+              }
+            </tbody></table></div>
+            <p class="purchase-history-note">Total vigente de partidas no anuladas. Las partidas anuladas permanecen visibles para trazabilidad.</p>
+          </details>
+        }
+      </div>
+    }
     @if (cargando()) {
       <p class="loading-state" role="status">Cargando compras…</p>
     }
@@ -176,15 +194,14 @@
       @for (color of coloresEnvio; track color) {
       <div class="color-selection-group">
         <h3>Oro {{ color === 'ROJO' ? 'rojo' : 'verde' }} · {{ comprasPorColor(color).length }} registros</h3>
-        <p>Peso fundido seleccionado: <strong>{{ gramos(color === 'ROJO' ? pesoSeleccionado().rojo : pesoSeleccionado().verde) }}</strong></p>
       <div class="table-wrap">
           <table>
           <caption class="visually-hidden">Compras del acopiador, separadas por color y estado de envío</caption>
-          <thead><tr><th>Enviar</th><th>Fecha</th><th>Minero</th><th>Tipo de oro</th><th>Peso neto</th><th>Precio / g</th><th>Total pagado</th><th>Estado</th><th>Acción</th></tr></thead>
+          <thead><tr><th>Compra</th><th>Fecha</th><th>Minero</th><th>Tipo de oro</th><th>Peso neto</th><th>Precio / g</th><th>Total pagado</th><th>Estado</th></tr></thead>
           <tbody>
             @for (item of comprasPorColor(color); track item.idTransaccionG2) {
               <tr>
-                <td><input type="checkbox" [attr.aria-label]="'Enviar registro #' + item.idTransaccionG2" [checked]="comprasSeleccionadas().includes(item.idTransaccionG2)" [disabled]="!puedeSeleccionarParaMayorista(item) || enviandoMayorista() || (!comprasSeleccionadas().includes(item.idTransaccionG2) && comprasSeleccionadas().length >= 200)" (change)="seleccionarCompra(item, $any($event.target).checked)"></td>
+                <td>#{{ item.idTransaccionG2 }}</td>
                 <td>{{ item.fechaTransaccion | date: 'short' }}</td>
                 <td><strong>{{ item.minero.nombresApellidos }}</strong><small>{{ item.minero.documentoIdentidad }}</small></td>
                 <td><span class="type-badge" [class.type-red]="item.tipoOro === 'ROJO'" [class.type-green]="item.tipoOro === 'VERDE'">{{ item.tipoOro === 'ROJO' ? 'Rojo' : 'Verde' }}</span></td>
@@ -196,14 +213,7 @@
                     <small>Ajuste #{{ ajuste.idAjuste }}: {{ ajuste.estado.replaceAll('_', ' ').toLowerCase() }}</small>
                   }
                 </td>
-                <td>
-                  @if (!item.anulada) {
-                    <button type="button" class="edit-purchase-button" (click)="iniciarAjuste(item, 'EDICION')">Editar</button>
-                    <button type="button" class="delete-purchase-button" (click)="iniciarAjuste(item, 'ANULACION')">Eliminar</button>
-                  } @else {
-                    <span class="protected-purchase">Eliminada</span>
-                  }
-                </td>
+
               </tr>
             }
           </tbody>
@@ -211,7 +221,7 @@
       </div>
       </div>
       }
-    } @else if (!cargando()) {
+    } @else if (!cargando() && !errorTransacciones()) {
       <div class="empty-state"><span aria-hidden="true">◷</span><strong>No hay compras activas</strong><p>Cuando registres una compra, aparecerá aquí.</p></div>
     }
     @if (comprasEliminadas().length) {
@@ -236,10 +246,47 @@
         </div>
       </details>
     }
-    <section class="panel report-panel" aria-labelledby="report-title">
-      <span class="panel-kicker">CONSULTA CONECTADA AL BACKEND</span>
+
+  </section>
+    @if (seccionActiva() === 'entrega' && compraAjuste(); as compra) {
+      <section class="panel adjustment-panel" aria-labelledby="adjustment-title">
+        <h3 id="adjustment-title">{{ tipoAjuste() === 'EDICION' ? 'Editar' : 'Anular' }} compra #{{ compra.idTransaccionG2 }}</h3>
+        <p>El acopiador registra el motivo y la compra original queda en el historial.</p>
+        @if (tipoAjuste() === 'ANULACION') {
+          <p>Al confirmar la anulación, la compra deja de estar disponible y conserva su historial. Las entregas ya registradas mantienen sus datos originales.</p>
+        } @else if (compra.idLiquidacionG1 !== null || compra.idRecepcionMayorista !== null) {
+          <p>La corrección se registra al guardar. La recepción o liquidación ya guardada conserva los datos de cuando se recibió.</p>
+        } @else {
+          <p>Esta compra aún no se envió. La corrección se aplicará al guardar.</p>
+        }
+        <form [formGroup]="formAjuste" (ngSubmit)="solicitarAjuste()" class="adjustment-grid">
+          @if (tipoAjuste() === 'EDICION') {
+            <label>Color
+              <select formControlName="tipoOroNuevo"><option value="ROJO">Rojo</option><option value="VERDE">Verde</option></select>
+            </label>
+            <label>Peso sin fundir (g)<input type="number" step="0.001" min="0.001" formControlName="pesoSinFundirNuevo" /></label>
+            <label>Peso fundido (g)<input type="number" step="0.001" min="0.001" formControlName="pesoFundidoNuevo" /></label>
+            <label>Precio por gramo (S/)<input type="number" step="0.01" min="0.01" formControlName="precioNuevo" /></label>
+          }
+          <label class="adjustment-reason">Motivo de la {{ tipoAjuste() === 'EDICION' ? 'corrección' : 'anulación' }}
+            <textarea formControlName="motivo" rows="3" maxlength="500" placeholder="Explica qué dato debe corregirse y por qué"></textarea>
+          </label>
+          @if (formAjuste.controls.motivo.touched && formAjuste.controls.motivo.invalid) {
+            <small class="field-error">Escribe un motivo de al menos 8 caracteres.</small>
+          }
+          <div class="adjustment-actions">
+            <button type="button" class="button-secondary" (click)="cancelarAjuste()">Cancelar</button>
+            <button type="submit" class="button-primary" [disabled]="enviandoAjuste()">
+              {{ enviandoAjuste() ? 'Guardando…' : tipoAjuste() === 'ANULACION' ? 'Anular compra' : 'Guardar cambio' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+    <section [hidden]="seccionActiva() !== 'reporte'" class="panel report-panel" aria-labelledby="report-title">
+      <span class="panel-kicker">ENTREGAS REGISTRADAS</span>
       <h3 id="report-title">Reporte de entregas al mayorista</h3>
-      <p>Consulta recepciones del centro autenticado y sus pesos por color.</p>
+      <p>Filtra por fechas las entregas de tu centro de acopio y consulta sus pesos por color.</p>
       <div class="report-filters">
         <label>Desde<input #reporteDesde type="date" /></label>
         <label>Hasta<input #reporteHasta type="date" /></label>
@@ -262,40 +309,42 @@
         </table></div>
       }
     </section>
-    @if (compraAjuste(); as compra) {
-      <section class="panel adjustment-panel" aria-labelledby="adjustment-title">
-        <h3 id="adjustment-title">{{ tipoAjuste() === 'EDICION' ? 'Editar' : 'Eliminar' }} compra #{{ compra.idTransaccionG2 }}</h3>
-        <p>El acopiador registra el motivo y la compra original queda en el historial.</p>
-        @if (tipoAjuste() === 'ANULACION') {
-          <p>La eliminación se registra al guardar, sin pedir aprobación. Las recepciones y liquidaciones ya guardadas conservan sus datos originales.</p>
-        } @else if (compra.idLiquidacionG1 !== null || compra.idRecepcionMayorista !== null) {
-          <p>La corrección se registra al guardar. La recepción o liquidación ya guardada conserva los datos de cuando se recibió.</p>
-        } @else {
-          <p>Esta compra aún no se envió. La corrección se aplicará al guardar.</p>
-        }
-        <form [formGroup]="formAjuste" (ngSubmit)="solicitarAjuste()" class="adjustment-grid">
-          @if (tipoAjuste() === 'EDICION') {
-            <label>Color
-              <select formControlName="tipoOroNuevo"><option value="ROJO">Rojo</option><option value="VERDE">Verde</option></select>
-            </label>
-            <label>Peso sin fundir (g)<input type="number" step="0.001" min="0.001" formControlName="pesoSinFundirNuevo" /></label>
-            <label>Peso fundido (g)<input type="number" step="0.001" min="0.001" formControlName="pesoFundidoNuevo" /></label>
-            <label>Precio por gramo (S/)<input type="number" step="0.01" min="0.01" formControlName="precioNuevo" /></label>
-          }
-          <label class="adjustment-reason">Motivo de la {{ tipoAjuste() === 'EDICION' ? 'corrección' : 'eliminación' }}
-            <textarea formControlName="motivo" rows="3" maxlength="500" placeholder="Explica qué dato debe corregirse y por qué"></textarea>
-          </label>
-          @if (formAjuste.controls.motivo.touched && formAjuste.controls.motivo.invalid) {
-            <small class="field-error">Escribe un motivo de al menos 8 caracteres.</small>
-          }
-          <div class="adjustment-actions">
-            <button type="button" class="button-secondary" (click)="cancelarAjuste()">Cancelar</button>
-            <button type="submit" class="button-primary" [disabled]="enviandoAjuste()">
-              {{ enviandoAjuste() ? 'Guardando…' : tipoAjuste() === 'ANULACION' ? 'Eliminar compra' : 'Guardar cambio' }}
-            </button>
-          </div>
-        </form>
-      </section>
-    }
-  </section>
+  <dialog #confirmacionCompra class="delivery-confirmation" aria-labelledby="purchase-confirmation-title">
+    <header class="confirmation-heading"><div><span class="panel-kicker">COMPRA AL MINERO</span><h2 id="purchase-confirmation-title">Revisa la compra completa</h2></div><button type="button" class="confirmation-close" aria-label="Cerrar confirmación" (click)="cancelarRegistroCompra()">×</button></header>
+    <p><strong>{{ mineroCompra() }}</strong> · {{ partidasCompra.length }} partida(s) en una misma compra.</p>
+    <div class="confirmation-purchases">
+      @for (linea of resumenCompra().lineas; track $index) {
+        <div class="confirmation-purchase"><div><strong>Partida {{ $index + 1 }}</strong><span>{{ gramos(linea.peso) }} × {{ dinero(linea.precio ?? 0) }}/g</span></div><strong>{{ dinero(linea.importe) }}</strong></div>
+      }
+    </div>
+    <p class="purchase-confirmation-total">Total estimado <strong>{{ dinero(resumenCompra().total) }}</strong></p>
+    <p class="confirmation-note">Se guardarán todas las partidas juntas. El sistema calculará y confirmará los importes definitivos.</p>
+    <footer class="confirmation-actions"><button mat-stroked-button type="button" autofocus (click)="cancelarRegistroCompra()">Volver a revisar</button><button mat-flat-button class="button-primary" type="button" [disabled]="guardando() || form.invalid" (click)="confirmarRegistroCompra()">Confirmar compra</button></footer>
+  </dialog>
+  <dialog #confirmacionEntrega class="delivery-confirmation" aria-labelledby="delivery-confirmation-title" aria-describedby="delivery-confirmation-description">
+    <header class="confirmation-heading">
+      <div><span class="panel-kicker">SITRA-ORO · ENTREGA AL MAYORISTA</span><h2 id="delivery-confirmation-title">Revisa tu entrega</h2></div>
+      <button type="button" class="confirmation-close" aria-label="Cerrar confirmación" (click)="cancelarEnvioMayorista()">×</button>
+    </header>
+    <p id="delivery-confirmation-description">Vas a enviar {{ comprasSeleccionadas().length }} {{ comprasSeleccionadas().length === 1 ? 'compra' : 'compras' }}. Revisa el detalle antes de confirmar.</p>
+    <div class="confirmation-totals">
+      <div class="confirmation-red"><span>Oro rojo</span><strong>{{ gramos(pesoSeleccionado().rojo) }}</strong></div>
+      <div class="confirmation-green"><span>Oro verde</span><strong>{{ gramos(pesoSeleccionado().verde) }}</strong></div>
+      <div class="confirmation-total"><span>Peso total fundido</span><strong>{{ gramos(pesoSeleccionado().total) }}</strong></div>
+    </div>
+    <div class="confirmation-purchases">
+      @for (linea of pesoSeleccionado().lineas; track linea.compra.idTransaccionG2) {
+        <div class="confirmation-purchase">
+          <div><strong>Compra #{{ linea.compra.idTransaccionG2 }}</strong><span>{{ linea.compra.minero.nombresApellidos }}</span></div>
+          <span class="type-badge" [class.type-red]="linea.compra.tipoOro === 'ROJO'" [class.type-green]="linea.compra.tipoOro === 'VERDE'">{{ linea.compra.tipoOro === 'ROJO' ? 'Rojo' : 'Verde' }}</span>
+          <strong>{{ gramos(linea.compra.pesoFundidoNetoG) }}</strong>
+        </div>
+      }
+    </div>
+    <p class="confirmation-note">Al confirmar, estas compras quedarán vinculadas a la entrega y dejarán de aparecer como disponibles.</p>
+    <footer class="confirmation-actions">
+      <button mat-stroked-button type="button" autofocus (click)="cancelarEnvioMayorista()">Volver a revisar</button>
+      <button mat-flat-button class="button-primary" type="button" [disabled]="lineasEnvio.invalid || enviandoMayorista() || guardando() || enviandoAjuste() || cargando()" (click)="confirmarEnvioMayorista()">Confirmar y enviar</button>
+    </footer>
+  </dialog>
 </section>

@@ -34,17 +34,17 @@ public class MineroPortalServiceImpl implements MineroPortalService {
         if (requiereValidacionPresencial) {
             minero = registroExistente.get();
         } else {
-            var creado = mineroService.crear(new MineroRequest(request.documentoIdentidad(),
-                    request.nombresApellidos(), request.telefono(), request.zonaProcedencia()));
+            var creado = mineroService.crearEnCentro(new MineroRequest(request.documentoIdentidad(),
+                    request.nombresApellidos(), request.telefono(), request.zonaProcedencia()), request.idCentroAcopioPreferido());
             minero = mineroService.obtenerEntidad(creado.getIdMinero());
         }
 
         CuentaResumen cuenta = cuentaAccesoService.crearCuenta(request.documentoIdentidad(), request.clave(),
-                RolCuenta.MINERO, minero.getIdMinero(), request.idCentroAcopioPreferido(), !requiereValidacionPresencial);
+                RolCuenta.MINERO, minero.getIdMinero(), request.idCentroAcopioPreferido(), false);
         return new RegistroMineroResponse(minero.getIdMinero(), cuenta.documentoIdentidad(),
                 cuenta.activo() ? "ACTIVA" : "PENDIENTE_VALIDACION",
                 cuenta.activo() ? "Cuenta creada. La cotización es referencial y el precio final se define en el acopio al registrar la entrega."
-                        : "Tu registro ya existía en el sistema. Acércate con tu documento al centro elegido para validar tu identidad y activar la cuenta.");
+                        : "Tu solicitud está pendiente de aprobación. Acércate con tu documento al centro elegido para validar tu identidad y activar la cuenta.");
     }
 
     @Override @Transactional(readOnly = true)

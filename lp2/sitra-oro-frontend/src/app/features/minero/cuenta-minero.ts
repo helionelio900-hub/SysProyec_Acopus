@@ -1,5 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
@@ -42,6 +44,10 @@ export class CuentaMinero implements OnInit {
   protected readonly error = signal('');
   protected readonly resultado = signal('');
   protected readonly mostrarClave = signal(false);
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly consultandoDni = signal(false);
+  protected readonly estadoDni = signal('');
+  private nombreConsultado = '';
 
   protected readonly form = this.fb.nonNullable.group({
     documentoIdentidad: [
@@ -58,6 +64,24 @@ export class CuentaMinero implements OnInit {
   ngOnInit(): void {
     if (this.modo === 'registro') {
       this.cargarCentros();
+      this.form.controls.documentoIdentidad.valueChanges.pipe(
+        tap(() => {
+          if (this.nombreConsultado && this.form.controls.nombresApellidos.value === this.nombreConsultado)
+            this.form.controls.nombresApellidos.setValue('');
+          this.nombreConsultado = ''; this.estadoDni.set(''); this.consultandoDni.set(false);
+        }),
+        debounceTime(600), distinctUntilChanged(),
+        switchMap(dni => {
+          if (!/^\d{8}$/.test(dni)) return of(null);
+          this.consultandoDni.set(true);
+          return this.http.get<{ nombresApellidos: string }>(`${environment.apiBaseUrl}/api/v1/publico/identidad/dni/${dni}`)
+            .pipe(map(datos => this.form.controls.documentoIdentidad.value === dni ? datos : null),
+              catchError(() => { if (this.form.controls.documentoIdentidad.value === dni) this.estadoDni.set('No se pudo consultar el DNI. Puedes escribir tus nombres manualmente.'); return of(null); }));
+        }), takeUntilDestroyed(this.destroyRef),
+      ).subscribe(datos => {
+        this.consultandoDni.set(false);
+        if (datos) { this.nombreConsultado = datos.nombresApellidos; this.form.controls.nombresApellidos.setValue(datos.nombresApellidos); this.estadoDni.set('Nombre obtenido por consulta de DNI.'); }
+      });
     } else {
       this.form.controls.clave.setValidators([Validators.required, Validators.maxLength(64)]);
       this.form.controls.clave.updateValueAndValidity();

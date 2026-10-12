@@ -18,6 +18,9 @@ public class Minero {
     @Column(name = "ID_MINERO")
     private Long idMinero;
 
+    @Column(name = "ID_CENTRO_ACOPIO")
+    private Long idCentroAcopio;
+
     @Column(name = "DOCUMENTO_IDENTIDAD", nullable = false, unique = true, length = 15)
     private String documentoIdentidad;
 

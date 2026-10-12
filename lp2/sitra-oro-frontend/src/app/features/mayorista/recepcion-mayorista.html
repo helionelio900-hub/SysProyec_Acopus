@@ -1,254 +1,244 @@
-<section class="workspace mayorista-workspace reception-workspace">
+<section class="workspace mayorista-workspace">
   <header class="page-head">
-    <div>
-      <span class="eyebrow">MAYORISTA · ENTREGAS RECIBIDAS</span>
-      <h1>Recepciones enviadas por el acopiador</h1>
-      <p>
-        Aquí aparecen únicamente las compras que el acopiador decidió entregar. Los pesos rojos y verdes
-        llegan sumados por separado; completa los datos observados de la recepción.
-      </p>
+    <div><span class="eyebrow">MAYORISTA · ANÁLISIS Y VALORIZACIÓN</span>
+      <h1>Lotes recibidos por ley</h1>
+      <p>Registra las leyes de cada lote, su fundición y el importe a pagar al acopiador.</p>
     </div>
-    @if (!vistaPrevia) {
-      <button mat-stroked-button class="button-secondary" type="button"
-        (click)="actualizarDatos()" [disabled]="cargando()">
-        {{ cargando() ? 'Actualizando…' : 'Actualizar datos' }}
-      </button>
-    }
+    <button mat-stroked-button class="button-secondary" (click)="cargar()" [disabled]="cargando() || guardando() || !!editando()">Actualizar datos</button>
   </header>
-  <div class="major-notice info" role="status">
-    <span aria-hidden="true">ⓘ</span>
-    <p>
-      @if (vistaPrevia) {
-        Vista de demostración: los cambios desaparecen al recargar.
-      } @else {
-        Los envíos del acopiador aparecerán aquí. Selecciona «Completar» para registrar los valores observados.
+  @if (vistaPrevia) { <p class="major-notice info">Demostración con datos ficticios. Los cambios duran únicamente en esta vista.</p> }
+  <nav class="ley-nav" aria-label="Operaciones del mayorista">
+    <button [class.active]="seccion() === 'recepciones'" [attr.aria-current]="seccion() === 'recepciones' ? 'page' : null" [disabled]="!!editando() || guardando()" (click)="cambiarSeccion('recepciones')">1. Lotes recibidos <span>{{ pendientes() }}</span></button>
+    <button [class.active]="seccion() === 'exportacion'" [attr.aria-current]="seccion() === 'exportacion' ? 'page' : null" [disabled]="!!editando() || guardando()" (click)="cambiarSeccion('exportacion')">2. Preparar exportación <span>{{ valorizados() }}</span></button>
+    <button [class.active]="seccion() === 'historial'" [attr.aria-current]="seccion() === 'historial' ? 'page' : null" [disabled]="!!editando() || guardando()" (click)="cambiarSeccion('historial')">Historial por ley</button>
+  </nav>
+  @if (error()) { <p class="feedback error" role="alert">{{ error() }}</p> }
+  @if (mensaje()) { <p class="feedback" role="status">{{ mensaje() }}</p> }
+
+  @if (editando(); as lote) {
+    <form id="editor-lote" class="panel editor" [formGroup]="form" (ngSubmit)="revisar()">
+      @if (compraDirecta()) {
+        <p class="ayuda"><strong>N.º de registro:</strong> se asignará automáticamente al guardar la compra.</p>
       }
-    </p>
-  </div>
-  @if (error()) {
-    <p class="feedback error" role="alert">{{ error() }}</p>
-  }
-  @if (vistaPrevia || editandoId() !== null) {
-  <form [formGroup]="form" (ngSubmit)="guardar()" class="reception-form">
-    <section class="panel" aria-labelledby="registro-title">
-      <div class="major-card-head">
-        <span class="major-number">01</span>
-        <div>
-          <h2 id="registro-title">Datos de la recepción</h2>
-          <p>El peso fundido del acopiador llega como peso sin fundir de esta recepción. Registra aquí la nueva fundición del mayorista.</p>
-        </div>
-      </div>
-      <div class="major-grid reception-meta">
-        <label class="field">Fecha <input type="date" formControlName="fecha" /></label>
-        <label class="field"
-          >Centro de acopio
-          <select formControlName="idCentroAcopio" required [disabled]="editandoId() !== null">
-            <option [ngValue]="0" disabled>Selecciona un centro de acopio</option>
-            @if (vistaPrevia) {
-              <option [ngValue]="1">Centro de acopio de ejemplo · Vista de demostración</option>
-            } @else {
-              @for (centro of centros(); track centro.idCentroAcopio) {
-                <option [ngValue]="centro.idCentroAcopio">{{ etiquetaCentro(centro) }}</option>
-              }
-            }
-          </select>
-          @if (!vistaPrevia && centros().length === 0) {
-            <small>No hay centros activos. Primero registra un centro y su cuenta.</small>
+      <div class="editor-head"><div><span class="eyebrow">{{ compraDirecta() ? 'COMPRA DIRECTA AL MINERO' : origenesAcumulados().length ? 'ANÁLISIS DEL ACUMULADO' : 'LOTE RECIBIDO #' + lote.idRecepcion }}</span><h2>{{ lote.nombreAcopiador }}</h2>
+        <p>{{ lote.fecha | date:'dd/MM/yyyy' }} ·
+          @if (lote.pesoRojoSinFundirG || lote.pesoVerdeSinFundirG) {
+            <span>Clasificación del acopiador:
+              @if (lote.pesoRojoSinFundirG) { 🔴 <strong>{{ lote.pesoRojoSinFundirG | numeroClaro:'1.3-3' }} g Rojo</strong> }
+              @if (lote.pesoRojoSinFundirG && lote.pesoVerdeSinFundirG) { + }
+              @if (lote.pesoVerdeSinFundirG) { 🟢 <strong>{{ lote.pesoVerdeSinFundirG | numeroClaro:'1.3-3' }} g Verde</strong> }
+              · Suma sin fundir: <strong>{{ lote.pesoDeclaradoG | numeroClaro:'1.3-3' }} g</strong>
+            </span>
+          } @else {
+            Peso sin fundir declarado: <strong>{{ lote.pesoDeclaradoG | numeroClaro:'1.3-3' }} g</strong>
           }
-          @if (form.controls.idCentroAcopio.touched && form.controls.idCentroAcopio.invalid && centros().length > 0) {
-            <small>Selecciona un centro de acopio de la lista.</small>
-          }
-        </label>
-      </div>
-      <div class="table-wrap reception-table-wrap">
-        <table class="reception-table">
-          <caption class="major-visually-hidden">
-            Registro separado de oro rojo y verde
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Color</th>
-              <th scope="col">Peso sin fundir recibido (g)</th>
-              <th scope="col">Peso fundido del mayorista (g)</th>
-              <th scope="col">Merma del mayorista (g)</th>
-              <th scope="col">Onza</th>
-              <th scope="col">Dólar</th>
-              <th scope="col">Exportación (%)</th><th scope="col">USD / g</th><th scope="col">Soles / g</th>
-              <th scope="col">Pago material total (S/)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr formGroupName="rojo" class="row-rojo">
-              <th scope="row"><span class="color-tag rojo">Rojo</span></th>
-              <td>
-                <input
-                  aria-label="Peso sin fundir rojo en gramos"
-                  type="number"
-                  min="0"
-                  step="0.001"
-                  [readOnly]="!vistaPrevia && !permiteEditarPesosManualmente()"
-                  formControlName="pesoSinFundirG"
-                />
-              </td>
-              <td>
-                <input
-                  aria-label="Peso fundido rojo en gramos"
-                  type="number"
-                  min="0"
-                  step="0.001"
-                  formControlName="pesoFundidoG"
-                />
-              </td>
-              <td class="merma">{{ merma('rojo') }}</td>
-              <td><input aria-label="Onza para rojo" formControlName="onza" /></td>
-              <td><input aria-label="Dólar para rojo" formControlName="dolar" /></td>
-              <td><input aria-label="Exportación para rojo" formControlName="exportacion" />@if (form.controls.rojo.controls.exportacion.invalid) { <small>Porcentaje de 0 a 100.</small> }</td><td>{{ preciosPorGramo().rojo.usd || '—' }}</td><td>{{ preciosPorGramo().rojo.soles || '—' }}</td>
-              <td><input aria-label="Pago material rojo en soles" formControlName="pagoMaterial" readonly placeholder="Automático" /></td>
-            </tr>
-            <tr formGroupName="verde" class="row-verde">
-              <th scope="row"><span class="color-tag verde">Verde</span></th>
-              <td>
-                <input
-                  aria-label="Peso sin fundir verde en gramos"
-                  type="number"
-                  min="0"
-                  step="0.001"
-                  [readOnly]="!vistaPrevia && !permiteEditarPesosManualmente()"
-                  formControlName="pesoSinFundirG"
-                />
-              </td>
-              <td>
-                <input
-                  aria-label="Peso fundido verde en gramos"
-                  type="number"
-                  min="0"
-                  step="0.001"
-                  formControlName="pesoFundidoG"
-                />
-              </td>
-              <td class="merma">{{ merma('verde') }}</td>
-              <td><input aria-label="Onza para verde" formControlName="onza" /></td>
-              <td><input aria-label="Dólar para verde" formControlName="dolar" /></td>
-              <td><input aria-label="Exportación para verde" formControlName="exportacion" />@if (form.controls.verde.controls.exportacion.invalid) { <small>Porcentaje de 0 a 100.</small> }</td><td>{{ preciosPorGramo().verde.usd || '—' }}</td><td>{{ preciosPorGramo().verde.soles || '—' }}</td>
-              <td><input aria-label="Pago material verde en soles" formControlName="pagoMaterial" readonly placeholder="Automático" /></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="reception-summary">
-        <label class="field">Total de material (S/)<input [value]="subtotalMaterial()" readonly /></label>
-        <label class="field"
-          >Adelanto a descontar (S/) <input formControlName="descuento" placeholder="0.00"
-        /></label>
-        <label class="field"
-          >Total final (S/) <input formControlName="total" readonly placeholder="Automático"
-        /></label>
-      </div>
-      <p class="reception-footnote">
-        Total final = pago de oro rojo + pago de oro verde − adelanto en soles.
-      </p>
-      <div class="major-action-row">
-        <span class="major-action-hint">{{
-          vistaPrevia
-            ? 'Solo demostración: no hay guardado permanente.'
-        : 'Compras recibidas: ' + (registroEditando()?.idsComprasAcopiador?.length ?? 0) + '. Los importes quedan registrados tal como los ingreses.'
-        }}</span>
-        <button
-          mat-stroked-button
-          class="button-secondary"
-          type="button"
-          (click)="limpiar()"
-          [disabled]="guardando()"
-        >
-          Cancelar edición
-        </button>
-        <button
-          mat-flat-button
-          class="button-primary"
-          type="submit"
-          [disabled]="guardando() || (!vistaPrevia && centros().length === 0)"
-        >
-          {{
-            guardando()
-              ? 'Guardando…'
-              : editandoId() === null
-                ? 'Guardar ejemplo'
-                : 'Guardar recepción'
-          }}
-        </button>
-      </div>
-    </section>
-  </form>
-  }
-  @if (!vistaPrevia) {
-    <section class="panel reception-filter" aria-label="Filtro de recepciones">
-      <label for="filtro-centro-recepciones">Filtrar registros por centro de acopio</label>
-      <select
-        id="filtro-centro-recepciones"
-        #filtroCentro
-        [value]="centroFiltrado() ?? ''"
-        (change)="filtrarPorCentro(filtroCentro.value)"
-      >
-        <option value="">Todos los centros</option>
-        @for (centro of centros(); track centro.idCentroAcopio) {
-          <option [value]="centro.idCentroAcopio">{{ etiquetaCentro(centro) }}</option>
-        }
-      </select>
-    </section>
-  }
-  @if (mensaje()) {
-    <p class="feedback" role="status">{{ mensaje() }}</p>
-  }
-  @if (cargando()) {
-    <p class="loading-state" role="status">Cargando recepciones guardadas…</p>
-  } @else if (registros().length) {
-    <section class="panel reception-records" aria-label="Registros de compra">
-      <h2>Entregas recibidas</h2>
-      <p>Marca las recepciones que quieres incluir en un lote. Las demás permanecen aquí.</p>
-      <button mat-flat-button type="button" [disabled]="!seleccionExportacion().length || enviandoLote()" (click)="enviarALotes()">{{ enviandoLote() ? 'Guardando lote…' : 'Enviar a lotes de exportación' }} ({{ seleccionExportacion().length }})</button>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Exportar</th>
-              <th>Fecha</th>
-              <th>Acopiador</th>
-              <th>Rojo recibido</th>
-              <th>Rojo fundido por mayorista</th>
-              <th>Verde recibido</th>
-              <th>Verde fundido por mayorista</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (registro of registros(); track registro.idRecepcion) {
-              <tr>
-                <td>@if (recepcionesEnLote().includes(registro.idRecepcion)) { <span>En lote</span> } @else {
-                  <input type="checkbox" [attr.aria-label]="'Exportar recepción ' + registro.idRecepcion" [checked]="seleccionExportacion().includes(registro.idRecepcion)" [disabled]="enviandoLote()" (change)="seleccionarExportacion(registro.idRecepcion, $any($event.target).checked)" />
-                }</td>
-                <td>{{ registro.fecha }}</td>
-                <td>{{ registro.nombreAcopiador }}</td>
-                <td>{{ registro.rojo.pesoSinFundirG ?? '—' }} g</td>
-                <td>{{ registro.rojo.pesoFundidoG ?? '—' }} g</td>
-                <td>{{ registro.verde.pesoSinFundirG ?? '—' }} g</td>
-                <td>{{ registro.verde.pesoFundidoG ?? '—' }} g</td>
-                <td class="record-actions">
-                  <button type="button" (click)="editar(registro)">Completar</button>
-                  <button type="button" (click)="eliminar(registro.idRecepcion)">Eliminar</button>
+        </p>
+      </div><span class="major-status">{{ partidas.length }} partida(s)</span></div>
+      <p class="ayuda">Agrega una fila por cada ley analizada. Ley: escala de 0 a 100 (por ejemplo, 90). El porcentaje del exportador se registra por separado. Ingresa los pesos verificados por el mayorista.</p>
+      <div class="table-wrap" tabindex="0" aria-label="Partidas del lote, desplaza horizontalmente para ver todos los campos">
+        <table class="ley-table editor-table">
+          <thead><tr><th>N.º de Lote / Acopiador</th><th>Onza</th><th>Ley</th><th>Porcentaje</th><th>Tipo de cambio</th><th>Peso sin fundir</th><th>Peso fundido</th><th>Precio USD</th><th>Precio S/</th><th>Total a pagar</th><th></th></tr></thead>
+          <tbody formArrayName="detalles">
+            @for (fila of partidas.controls; track fila; let i = $index) {
+              <tr [formGroupName]="i">
+                <td class="lote-id">
+                  <div class="lote-color-col">
+                    <span class="lote-num">{{ compraDirecta() ? 'Nueva compra' : origenesAcumulados().length ? 'Acumulado' : '#' + lote.idRecepcion }}</span>
+                    @if (!compraDirecta() && lote.idCentroAcopio > 0) {
+                      <select formControlName="tipoOro" class="select-color-oro" [attr.aria-label]="'Tipo de oro de partida ' + (i + 1)">
+                        <option value="ROJO">🔴 Oro Rojo</option>
+                        <option value="VERDE">🟢 Oro Verde</option>
+                      </select>
+                    }
+                    <small>{{ lote.nombreAcopiador }}</small>
+                  </div>
                 </td>
+                <td><input type="number" formControlName="onza" min="0.0001" step="0.0001" placeholder="4000" [attr.aria-label]="'Onza de partida ' + (i + 1)" /></td>
+                <td><input type="number" class="input-ley" formControlName="ley" min="0.0001" max="100" step="0.0001" placeholder="90" [attr.aria-label]="'Ley de partida ' + (i + 1)" /></td>
+                <td><input type="number" formControlName="porcentaje" min="0" max="99.9999" step="0.0001" placeholder="0" [attr.aria-label]="'Porcentaje de partida ' + (i + 1)" /></td>
+                <td><input type="number" formControlName="tipoCambio" min="0.0001" step="0.0001" placeholder="3.75" [attr.aria-label]="'Tipo de cambio de partida ' + (i + 1)" /></td>
+                <td><input type="number" formControlName="pesoSinFundirG" min="0.001" step="0.001" placeholder="0.000" [attr.aria-label]="'Peso sin fundir de partida ' + (i + 1)" /></td>
+                <td><input type="number" formControlName="pesoFundidoG" min="0.001" step="0.001" placeholder="0.000" [attr.aria-label]="'Peso fundido de partida ' + (i + 1)" /></td>
+                <td class="numero">{{ calculo()?.detalles?.[i]?.precioUsd == null ? '—' : ('$' + (calculo()!.detalles[i].precioUsd | numeroClaro:'1.2-2')) }}</td>
+                <td class="numero">{{ calculo()?.detalles?.[i]?.precioPen == null ? '—' : ('S/ ' + (calculo()!.detalles[i].precioPen | numeroClaro:'1.2-2')) }}</td>
+                <td class="numero importe">{{ calculo()?.detalles?.[i]?.totalPen == null ? '—' : ('S/ ' + (calculo()!.detalles[i].totalPen | numeroClaro:'1.2-2')) }}</td>
+                <td><button type="button" class="quitar" [disabled]="partidas.length === 1 || guardando()" (click)="quitar(i)" [attr.aria-label]="'Quitar partida ' + (i + 1)">Quitar</button></td>
               </tr>
             }
           </tbody>
         </table>
       </div>
-    </section>
-  } @else {
-    <p class="empty-state">
-      @if (centroFiltrado() !== null) {
-        No hay entregas del acopiador para el centro seleccionado.
-      } @else {
-        Aún no hay entregas enviadas. El acopiador debe seleccionar las compras y enviarlas desde su módulo.
+      <div class="linea-agregar">
+        <button mat-stroked-button type="button" class="button-secondary" (click)="agregar()" [disabled]="partidas.length >= 200 || guardando()">+ Agregar partida</button>
+      </div>
+      @if (form.invalid && form.touched) { <p class="feedback error" role="alert">Completa los campos resaltados. Usa hasta 4 decimales para parámetros y 3 para pesos.</p> }
+      @if (errorCalculo()) { <p class="feedback error" role="alert">{{ errorCalculo() }}</p> }
+      <div class="pago-resumen">
+        <div><span>Total material</span><strong>{{ calculo() ? 'S/ ' + (calculo()!.subtotal | numeroClaro:'1.2-2') : '—' }}</strong></div>
+        <label>Adelanto (S/)<input type="number" min="0" step="0.01" formControlName="adelanto" /></label>
+        <div class="pago-final"><span>Total a pagar</span><strong>{{ calculo() ? 'S/ ' + (calculo()!.total | numeroClaro:'1.2-2') : '—' }}</strong></div>
+      </div>
+      <div class="form-actions">@if (calculando()) { <span role="status">Calculando importes…</span> }
+        <button mat-stroked-button type="button" class="button-secondary" [disabled]="guardando()" (click)="cancelar()">Cancelar</button>
+        <button mat-flat-button type="submit" class="button-primary" [disabled]="guardando() || calculando() || form.invalid || !calculo()">Revisar y registrar</button>
+      </div>
+    </form>
+  }
+
+  @if (!editando()) {
+    <section class="panel lista">
+      <div class="lista-head"><div><h2>{{ seccion() === 'historial' ? 'Historial de lotes por ley' : seccion() === 'exportacion' ? 'Lotes valorizados disponibles' : 'Entregas por acopiador' }}</h2>
+        <p>{{ seccion() === 'exportacion' ? 'Selecciona los lotes recibidos que reunirás en un lote de exportación.' : seccion() === 'historial' ? 'Consulta los lotes y sus partidas agrupados por acopiador.' : 'Todas las entregas de cada acopiador se suman en dos filas: oro rojo y oro verde.' }}</p></div>
+        <label class="busqueda">Buscar lote o acopiador<input type="search" [value]="filtro()" (input)="filtro.set($any($event.target).value)" placeholder="Número o nombre" /></label>
+        @if (seccion() === 'recepciones') {
+          <button mat-flat-button type="button" class="button-primary" [disabled]="guardando() || vistaPrevia" (click)="agregarCompraDirecta()">Agregar compra</button>
+        }
+      </div>
+      @if (cargando()) { <p class="empty-state" role="status">Cargando lotes recibidos…</p> }
+      @else if (error() && !registros().length) { <p class="empty-state">Actualiza los datos para volver a consultar los lotes.</p> }
+      @else if (!visibles().length) { <p class="empty-state">{{ seccion() === 'exportacion' ? 'No hay lotes valorizados disponibles. Completa primero las leyes en Lotes recibidos.' : 'No hay lotes que coincidan con esta consulta.' }}</p> }
+      @else if (seccion() === 'recepciones') {
+        <p class="ayuda">El peso fundido enviado por el acopiador se recibe como peso sin fundir del mayorista, antes de su nueva fundición.</p>
+        @for (grupo of gruposPorAcopiador(); track grupo.idCentroAcopio) {
+          <section class="resumen-acopiador">
+            <header><h3>{{ grupo.nombreAcopiador }}</h3><span>{{ grupo.totalLotes }} lotes recibidos</span></header>
+            <div class="table-wrap">
+              <table class="resumen-pesos" aria-label="Pesos acumulados del acopiador">
+                <thead><tr><th>Clasificación</th><th>Peso total recibido sin fundir (g)</th></tr></thead>
+                <tbody>
+                  @for (color of resumenColores(grupo.lotes); track color.tipo) {
+                    <tr [class.resumen-rojo]="color.tipo === 'ROJO'" [class.resumen-verde]="color.tipo === 'VERDE'">
+                      <th scope="row">{{ color.nombre }}</th><td><strong>{{ color.peso | numeroClaro:'1.0-3' }} g</strong></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div class="analisis-lotes"><button mat-flat-button type="button" class="button-primary" [disabled]="guardando() || !tienePendientes(grupo)" (click)="analizarAcumulado(grupo)">Analizar acumulado rojo y verde</button></div>
+          </section>
+        }
       }
-    </p>
+      @else {
+        <div class="table-wrap" tabindex="0" aria-label="Lotes y sus partidas por ley">
+          <table class="ley-table saved-table"><thead><tr>
+            @if (seccion() === 'exportacion') { <th>Incluir</th> }
+            <th>N.º de Lote / Acopiador</th><th>Onza</th><th>Ley</th><th>Porcentaje</th><th>Tipo de cambio</th><th>Peso (g)<small>Fundido / pendiente sin fundir</small></th><th>Precio USD</th><th>Precio S/</th><th>Total a pagar</th><th>Estado / acción</th>
+          </tr></thead><tbody>
+            @if (seccion() === 'historial' && modoVistaHistorial() === 'ley') {
+              @for (gLey of gruposPorLey(); track gLey.idLey) {
+                <tr class="grupo-ley"><td colspan="10"><div><span><span class="ley-tag">Ley {{ gLey.ley | numeroClaro:'1.0-4' }}</span> · Presente en <strong>{{ gLey.partidas.length }} lote(s)</strong> de acopiador · Peso total fundido: <strong>{{ gLey.totalPesoFundido | numeroClaro:'1.3-3' }} g</strong></span><span>Total pagado: <b>S/ {{ gLey.totalPagar | numeroClaro:'1.2-2' }}</b></span></div></td></tr>
+                @for (p of gLey.partidas; track p.idRecepcion) {
+                  <tr>
+                    <td class="lote-id">#{{ p.idRecepcion }}<small>{{ p.nombreAcopiador }}</small></td>
+                    <td>—</td>
+                    <td><span class="ley-tag">{{ gLey.ley | numeroClaro:'1.0-4' }}</span></td>
+                    <td colspan="2" class="pendiente">{{ p.fecha | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ p.pesoFundidoG | numeroClaro:'1.3-3' }} g</td>
+                    <td class="numero">${{ p.precioUsd | numeroClaro:'1.2-2' }}</td>
+                    <td class="numero">S/ {{ p.precioPen | numeroClaro:'1.2-2' }}</td>
+                    <td class="importe">S/ {{ p.totalPen | numeroClaro:'1.2-2' }}</td>
+                    <td><span class="major-status ready">Valorizado</span></td>
+                  </tr>
+                }
+              } @empty {
+                <tr><td colspan="10" class="empty-state">No hay leyes registradas en los lotes actuales.</td></tr>
+              }
+            } @else {
+              @for (grupo of gruposPorAcopiador(); track grupo.idCentroAcopio) {
+                <tr class="grupo-acopiador"><td [attr.colspan]="seccion() === 'exportacion' ? 11 : 10"><div><span><strong>Acopiador: {{ grupo.nombreAcopiador }}</strong> — {{ grupo.totalLotes }} lote(s) recibido(s) · Peso total fundido: <strong>{{ grupo.totalPesoFundido | numeroClaro:'1.3-3' }} g</strong></span>@if (grupo.totalPagar > 0) { <span>Total acumulado: <b>S/ {{ grupo.totalPagar | numeroClaro:'1.2-2' }}</b></span> }</div></td></tr>
+                @for (color of separarColores(grupo.lotes); track color.tipo) {
+                  <tr class="separador-color" [class.separador-rojo]="color.tipo === 'ROJO'" [class.separador-verde]="color.tipo === 'VERDE'"><th [attr.colspan]="seccion() === 'exportacion' ? 11 : 10" scope="colgroup">{{ color.nombre }} · {{ color.lotes.length }} lote(s)</th></tr>
+                @for (r of color.lotes; track r.idRecepcion) {
+                  @for (p of r.detalles; track p.idLey; let primero = $first) {
+                    <tr>
+                      @if (seccion() === 'exportacion') { <td>@if (primero) { <input type="checkbox" [checked]="seleccion().includes(r.idRecepcion)" [disabled]="guardando()" [attr.aria-label]="'Incluir lote recibido ' + r.idRecepcion" (change)="seleccionar(r.idRecepcion, $any($event.target).checked)" /> }</td> }
+                      <td class="lote-id">
+                        <span class="lote-num">#{{ r.idRecepcion }}</span>
+                        @if (color.tipo) { <span class="badge-oro" [class.badge-rojo]="color.tipo === 'ROJO'" [class.badge-verde]="color.tipo === 'VERDE'">{{ color.nombre }}</span> }
+                        <small>{{ r.fecha | date:'dd/MM/yyyy' }}</small>
+                      </td>
+                      <td>{{ p.onza | numeroClaro:'1.2-4' }}</td>
+                      <td><span class="ley-tag">{{ p.ley | numeroClaro:'1.0-4' }}</span></td>
+                      <td>{{ p.porcentaje | numeroClaro:'1.0-4' }}%</td>
+                      <td>{{ p.tipoCambio | numeroClaro:'1.2-4' }}</td>
+                      <td>{{ p.pesoFundidoG | numeroClaro:'1.3-3' }} g</td>
+                      <td class="numero">${{ p.precioUsd | numeroClaro:'1.2-2' }}</td>
+                      <td class="numero">S/ {{ p.precioPen | numeroClaro:'1.2-2' }}</td>
+                      <td class="importe">S/ {{ p.totalPen | numeroClaro:'1.2-2' }}</td>
+                      <td>@if (primero) { <span class="major-status" [class.ready]="r.estado === 'VALORIZADO'">{{ estado(r) }}</span>@if (seccion() === 'recepciones' && r.estado !== 'EN_LOTE') { <button type="button" class="accion" (click)="abrir(r)">Editar</button> } }</td>
+                    </tr>
+                  } @empty {
+                    @if (r.pesoRojoSinFundirG && r.pesoVerdeSinFundirG) {
+                      <tr>
+                        @if (seccion() === 'exportacion') { <td></td> }
+                        <td class="lote-id">
+                          <span class="lote-num">#{{ r.idRecepcion }}</span>
+                          <span class="badge-oro badge-rojo">🔴 Oro Rojo</span>
+                          <small>{{ r.fecha | date:'dd/MM/yyyy' }}</small>
+                        </td>
+                        <td colspan="4" class="pendiente">Sin ley registrada.</td>
+                        <td>{{ r.pesoRojoSinFundirG | numeroClaro:'1.3-3' }} g sin fundir</td>
+                        <td colspan="3">—</td>
+                        <td rowspan="2"><span class="major-status pending">{{ estado(r) }}</span>@if (seccion() === 'recepciones' && r.estado !== 'EN_LOTE') { <button type="button" class="accion" (click)="abrir(r)">Registrar leyes</button> }</td>
+                      </tr>
+                      <tr>
+                        @if (seccion() === 'exportacion') { <td></td> }
+                        <td class="lote-id">
+                          <span class="lote-num">#{{ r.idRecepcion }}</span>
+                          <span class="badge-oro badge-verde">🟢 Oro Verde</span>
+                          <small>{{ r.fecha | date:'dd/MM/yyyy' }}</small>
+                        </td>
+                        <td colspan="4" class="pendiente">Sin ley registrada.</td>
+                        <td>{{ r.pesoVerdeSinFundirG | numeroClaro:'1.3-3' }} g sin fundir</td>
+                        <td colspan="3">—</td>
+                      </tr>
+                    } @else {
+                      <tr>
+                        @if (seccion() === 'exportacion') { <td></td> }
+                        <td class="lote-id">
+                          <span class="lote-num">#{{ r.idRecepcion }}</span>
+                          @if (r.pesoRojoSinFundirG) { <span class="badge-oro badge-rojo">🔴 Oro Rojo</span> }
+                          @if (r.pesoVerdeSinFundirG) { <span class="badge-oro badge-verde">🟢 Oro Verde</span> }
+                          <small>{{ r.fecha | date:'dd/MM/yyyy' }}</small>
+                        </td>
+                        <td colspan="4" class="pendiente">Sin ley registrada.</td>
+                        <td>{{ (r.pesoRojoSinFundirG || r.pesoVerdeSinFundirG || r.pesoDeclaradoG) | numeroClaro:'1.3-3' }} g sin fundir</td>
+                        <td colspan="3">—</td>
+                        <td><span class="major-status pending">{{ estado(r) }}</span>@if (seccion() === 'recepciones' && r.estado !== 'EN_LOTE') { <button type="button" class="accion" (click)="abrir(r)">Registrar leyes</button> }</td>
+                      </tr>
+                    }
+                  }
+                }
+                }
+              }
+            }
+          </tbody></table>
+        </div>
+      }
+      @if (seccion() === 'exportacion') {
+        <div class="exportar-resumen"><div><strong>{{ seleccionados().length }} lote(s) seleccionado(s)</strong><span>{{ pesoSeleccionado() | numeroClaro:'1.3-3' }} g fundidos</span></div>
+          <a mat-stroked-button class="button-secondary" [routerLink]="vistaPrevia ? '/vista-previa/mayorista/consolidacion' : '/mayorista/consolidacion'">Ver lotes de exportación</a>
+          <button mat-flat-button class="button-primary" [disabled]="!seleccionados().length || guardando()" (click)="confirmacion.set('exportar')">Crear lote de exportación</button>
+        </div>
+      }
+    </section>
+  }
+  @if (confirmacion(); as accion) {
+    <div class="modal-fondo" (keydown.escape)="!guardando() && confirmacion.set(null)">
+      <section class="confirmar" role="dialog" aria-modal="true" aria-labelledby="confirmar-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+        <span class="eyebrow">REVISAR OPERACIÓN</span><h2 id="confirmar-titulo">{{ accion === 'guardar' ? (origenesAcumulados().length ? 'Registrar análisis acumulado' : 'Registrar lote #' + editando()?.idRecepcion) : 'Crear lote de exportación' }}</h2>
+        @if (accion === 'guardar') {
+          <p>{{ editando()?.nombreAcopiador }} · {{ partidas.length }} partida(s) por ley.</p>
+          <dl><dt>Peso fundido</dt><dd>{{ calculo()?.pesoFundidoG | numeroClaro:'1.3-3' }} g</dd><dt>Total material</dt><dd>S/ {{ calculo()?.subtotal | numeroClaro:'1.2-2' }}</dd><dt>Adelanto</dt><dd>S/ {{ calculo()?.adelanto | numeroClaro:'1.2-2' }}</dd><dt>Total a pagar</dt><dd class="importe">S/ {{ calculo()?.total | numeroClaro:'1.2-2' }}</dd></dl>
+        } @else {
+          <p>Se reunirán {{ seleccionados().length }} lotes recibidos con {{ pesoSeleccionado() | numeroClaro:'1.3-3' }} g fundidos. Se conservará la ley de cada partida.</p><p>Los lotes incluidos quedarán bloqueados para edición mientras pertenezcan a exportación.</p>
+        }
+        <div class="modal-acciones"><button mat-stroked-button class="button-secondary" [disabled]="guardando()" (click)="confirmacion.set(null)" cdkFocusInitial>Volver</button><button mat-flat-button class="button-primary" [disabled]="guardando()" (click)="confirmar()">{{ guardando() ? 'Guardando…' : 'Confirmar' }}</button></div>
+      </section>
+    </div>
   }
 </section>
+
+
+
+

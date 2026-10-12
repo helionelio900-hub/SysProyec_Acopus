@@ -14,7 +14,9 @@ public record LoteExportacionResponse(
         List<Partida> partidas,
         List<Recepcion> recepciones
 ) {
-    public record Recepcion(Long idRecepcion, String nombreAcopiador, BigDecimal pesoRojoG, BigDecimal pesoVerdeG) {}
+    public record Recepcion(Long idRecepcion, String nombreAcopiador, BigDecimal pesoRojoG, BigDecimal pesoVerdeG,
+            BigDecimal pesoFundidoG, List<LeyPeso> leyes) {}
+    public record LeyPeso(BigDecimal ley, BigDecimal pesoFundidoG) {}
     public record Partida(
             Long idLiquidacionG1,
             String nombreAcopiadorG2,

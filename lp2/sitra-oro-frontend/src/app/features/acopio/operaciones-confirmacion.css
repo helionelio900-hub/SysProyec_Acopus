@@ -1,0 +1,17 @@
+.delivery-confirmation { width:min(660px,calc(100vw - 2rem)); max-height:85vh; box-sizing:border-box; padding:1.6rem; border:1px solid #d8e2ed; border-radius:1rem; background:#fff; color:#22354e; box-shadow:0 24px 80px #10243a40; }
+.delivery-confirmation::backdrop { background:#10243a88; backdrop-filter:blur(3px); }
+.confirmation-heading { display:flex; justify-content:space-between; align-items:start; gap:1rem; }
+.confirmation-heading h2 { margin:.45rem 0; font-size:1.55rem; }
+.confirmation-close { width:36px; height:36px; flex-shrink:0; border:1px solid #d8e2ed; border-radius:50%; background:#fff; color:#53667f; font-size:1.5rem; cursor:pointer; }
+.delivery-confirmation > p { color:#68798f; line-height:1.6; font-size:.9rem; }
+.confirmation-totals { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; margin:1.2rem 0; }
+.confirmation-totals > div { display:grid; gap:.45rem; padding:1rem; border:1px solid #e2e8ef; border-radius:.7rem; }
+.confirmation-totals span { font-size:.8rem; color:#68798f; }
+.confirmation-totals strong { font-size:1.35rem; }
+.confirmation-red { background:#fff5f3; }.confirmation-green { background:#f0faf5; }.confirmation-total { background:#fff7df; }
+.confirmation-purchases { max-height:260px; overflow:auto; border:1px solid #e2e8ef; border-radius:.7rem; }
+.confirmation-purchase { display:flex; align-items:center; gap:1rem; padding:.85rem 1rem; border-bottom:1px solid #e2e8ef; font-size:.85rem; }
+.confirmation-purchase:last-child { border-bottom:0; }.confirmation-purchase > div { display:grid; gap:.25rem; flex:1; min-width:0; }.confirmation-purchase > div span { color:#68798f; overflow-wrap:anywhere; }
+.confirmation-actions { display:flex; justify-content:flex-end; gap:.75rem; margin-top:1.3rem; padding-top:1rem; border-top:1px solid #e2e8ef; }
+.confirmation-actions button { min-height:44px; }
+@media (max-width:550px) { .delivery-confirmation { padding:1rem; }.confirmation-totals { grid-template-columns:1fr; }.confirmation-totals > div { display:flex; justify-content:space-between; align-items:center; }.confirmation-actions { flex-direction:column; } }

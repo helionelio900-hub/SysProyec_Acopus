@@ -1,16 +1,34 @@
-import { HttpErrorResponse } from '@angular/common/http';
+import { NumeroClaroPipe } from '../../core/numero-claro.pipe';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+
+import { environment } from '../../../environments/environment';
+import { EntregaMinero } from '../../core/api/entregas-minero';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { OperacionesService, SolicitudMinero } from '../../core/api/operaciones.service';
 
 @Component({
   selector: 'app-solicitudes-acopio',
-  imports: [MatButtonModule],
+  imports: [MatButtonModule, NumeroClaroPipe],
   templateUrl: './solicitudes.html',
   styleUrl: './solicitudes.css',
 })
 export class SolicitudesAcopio implements OnInit {
   private readonly service = inject(OperacionesService);
+  private readonly http = inject(HttpClient);
+  protected readonly entregas = signal<EntregaMinero[]>([]);
+  protected readonly aceptando = signal<number | null>(null);
+  protected aceptarEntrega(entrega: EntregaMinero): void {
+    this.aceptando.set(entrega.ID_SOLICITUD);
+    this.http.post(`${environment.apiBaseUrl}/api/v1/acopio/solicitudes-entrega/${entrega.ID_SOLICITUD}/aceptar`, {}).subscribe({
+      next: () => {
+        this.aceptando.set(null);
+        this.mensaje.set('Solicitud aceptada. Ya puedes seleccionar al minero en Compras de oro y confirmar los pesos reales.');
+        this.cargar();
+      },
+      error: () => { this.aceptando.set(null); this.error.set('No se pudo aceptar la entrega. Actualiza e intenta nuevamente.'); },
+    });
+  }
   protected readonly solicitudes = signal<SolicitudMinero[]>([]);
   protected readonly cargando = signal(true);
   protected readonly aprobando = signal<string | null>(null);
@@ -20,6 +38,10 @@ export class SolicitudesAcopio implements OnInit {
     this.cargar();
   }
   protected cargar(): void {
+    this.http.get<EntregaMinero[]>(`${environment.apiBaseUrl}/api/v1/acopio/solicitudes-entrega`).subscribe({
+      next: items => this.entregas.set(items),
+      error: () => this.error.set('No se pudieron cargar las solicitudes de entrega.'),
+    });
     this.cargando.set(true);
     this.error.set('');
     this.service.solicitudes().subscribe({

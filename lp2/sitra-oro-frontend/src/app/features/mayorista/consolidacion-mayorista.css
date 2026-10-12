@@ -232,3 +232,38 @@
     min-width: 740px;
   }
 }
+.ponderacion-resultados { display:grid; grid-template-columns:1fr 1fr; gap:1rem; padding:1.2rem; margin-top:1rem; border:1px solid #e4c36e; border-radius:10px; background:#fff8e6; } .ponderacion-resultados span { display:block; font-size:.8rem; color:#6f5b2d; } .ponderacion-resultados strong { display:block; margin-top:.5rem; font-size:1.5rem; color:#143550; } @media(max-width:600px) { .ponderacion-resultados { grid-template-columns:1fr; } }
+.fundido-final label { display:block; font-size:.8rem; color:#6f5b2d; margin-bottom:.5rem; }
+.fundido-final input { box-sizing:border-box; width:100%; max-width:320px; padding:.7rem; min-height:44px; border:1px solid #cddcf0; border-radius:8px; font:inherit; background:#fff; }
+.fundido-final input[aria-invalid=true] { border-color:#b42318; }
+.fundido-final p { color:#b42318; font-size:.8rem; }
+.merma-final strong { color:#b42318; }
+.fundicion-nota { font-size:.78rem; color:#586b80; }
+.imprimir-promedio { width:100%; min-height:48px; margin-top:1rem; }
+@media print {
+  :host { display:block; position:absolute; top:0; left:0; width:100%; background:white; }
+  .imprimir-promedio { display:none; }
+  .workspace { margin:0; padding:0; box-shadow:none; }
+  .table-wrap { overflow:visible; }
+  .ponderacion-resultados { break-inside:avoid; }
+}
+.acciones-lote button,.editor-exportacion button { border:1px solid #cddcf0; border-radius:6px; padding:.55rem .8rem; margin:.2rem; background:#fff; font:inherit; cursor:pointer; color:#143550; }
+.acciones-lote button:disabled { opacity:.45; cursor:default; }
+.acciones-lote .eliminar-lote { color:#b42318; border-color:#f5b5b0; }
+.acciones-lote small { display:block; color:#68788a; margin-top:.3rem; }
+.editor-exportacion { padding:1rem; margin:1rem 0; border:1px solid #c4d6ec; border-radius:10px; background:#f5f8fc; }
+.opcion-recepcion { display:flex; align-items:center; gap:.6rem; padding:.6rem 0; }
+@media print { .acciones-lote,.editor-exportacion { display:none; } }
+.export-saved > h2 { margin:0 0 18px; font-size:1.2rem; }
+.acciones-lote { white-space:nowrap; }
+.acciones-lote button { min-height:38px; padding:8px 14px; font-size:.8rem; font-weight:650; }
+.ponderacion-resultados { padding:22px; gap:22px; }
+.modal-backdrop { position:fixed; inset:0; z-index:1000; display:grid; place-items:center; padding:20px; background:#07182b99; }
+.delete-modal { width:min(100%,440px); box-sizing:border-box; padding:28px; border-radius:16px; background:white; box-shadow:0 20px 70px #07182b44; }
+.modal-kicker { color:#b42318; font-size:.65rem; font-weight:800; letter-spacing:.1em; }
+.delete-modal h2 { margin:12px 0; font-size:1.25rem; }.delete-modal p { color:#63748a; line-height:1.6; font-size:.85rem; }
+.modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; }
+.modal-actions button { min-height:42px; padding:9px 16px; border:1px solid #d4deea; border-radius:8px; background:white; color:#143550; font:inherit; font-size:.8rem; font-weight:650; cursor:pointer; }
+.modal-actions .danger-button { background:#fff5f5; color:#b42318; border-color:#efc4c0; }
+.modal-actions button:disabled { opacity:.5; }
+@media print { .modal-backdrop { display:none; } }

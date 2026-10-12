@@ -32,6 +32,7 @@ public class LoteExportacionService {
     private final PartidaLoteExportacionRepository partidas;
     private final pe.edu.upeu.sitraoro.acopio.mayorista.repository.RecepcionMayoristaRepository recepciones;
     private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+    private final pe.edu.upeu.sitraoro.acopio.mayorista.repository.DetalleRecepcionLeyRepository detallesLey;
 
     @Transactional
     public LoteExportacionResponse crearDesdeRecepciones(List<Long> ids) {
@@ -44,15 +45,11 @@ public class LoteExportacionService {
             var recepcion = recepciones.bloquearPorId(id).orElseThrow(() -> new ResourceNotFoundException("Recepción no encontrada: " + id));
             if (jdbc.queryForObject("SELECT COUNT(*) FROM LOTE_RECEPCIONES WHERE ID_RECEPCION = ?", Integer.class, id) > 0)
                 throw new ConflictException("La recepción " + id + " ya está en un lote");
-            BigDecimal rojo = recepcion.getRojo().getPesoFundidoG();
-            BigDecimal verde = recepcion.getVerde().getPesoFundidoG();
-            if ((recepcion.getRojo().getPesoSinFundirG() != null && rojo == null)
-                    || (recepcion.getVerde().getPesoSinFundirG() != null && verde == null))
-                throw new IllegalArgumentException("Completa y guarda la fundición del mayorista en la recepción " + id);
-            rojo = rojo == null ? BigDecimal.ZERO : rojo;
-            verde = verde == null ? BigDecimal.ZERO : verde;
-            if (rojo.add(verde).signum() <= 0) throw new IllegalArgumentException("La recepción debe tener peso fundido positivo");
-            jdbc.update("INSERT INTO LOTE_RECEPCIONES (ID_RECEPCION, ID_LOTE, PESO_ROJO_G, PESO_VERDE_G) VALUES (?, ?, ?, ?)", id, lote.getIdLote(), rojo, verde);
+            var filas = detallesLey.findByRecepcion_IdRecepcionOrderByIdDetalle(id);
+            if (filas.isEmpty()) throw new IllegalArgumentException("Registra las leyes y la valorización del lote recibido " + id + " antes de incluirlo en exportación");
+            BigDecimal peso = filas.stream().map(pe.edu.upeu.sitraoro.acopio.mayorista.entity.DetalleRecepcionLey::getPesoFundidoG).reduce(BigDecimal.ZERO, BigDecimal::add);
+            if (peso.signum() <= 0) throw new IllegalArgumentException("El lote debe tener peso fundido positivo");
+            jdbc.update("INSERT INTO LOTE_RECEPCIONES (ID_RECEPCION, ID_LOTE, PESO_ROJO_G, PESO_VERDE_G, PESO_FUNDIDO_G) VALUES (?, ?, 0, 0, ?)", id, lote.getIdLote(), peso);
         }
         return respuesta(lote);
     }
@@ -82,15 +79,38 @@ public class LoteExportacionService {
     @Transactional
     public void eliminar(Long id) {
         LoteExportacion lote = obtenerEditable(id);
+        jdbc.update("DELETE FROM LOTE_RECEPCIONES WHERE ID_LOTE=?",id);
         lotes.delete(lote);
+    }
+    @Transactional
+    public LoteExportacionResponse editarRecepciones(Long id, java.time.LocalDate fecha, List<Long> ids) {
+        var lote=obtenerEditable(id);
+        if(!lote.getPartidas().isEmpty()) throw new ConflictException("Este lote contiene liquidaciones anteriores");
+        if(ids==null || ids.isEmpty() || ids.size()>200 || ids.stream().anyMatch(x->x==null||x<=0) || new HashSet<>(ids).size()!=ids.size())
+            throw new IllegalArgumentException("Selecciona entre 1 y 200 lotes recibidos distintos");
+        jdbc.update("DELETE FROM LOTE_RECEPCIONES WHERE ID_LOTE=?",id);
+        for(Long recepcionId:ids.stream().sorted().toList()) {
+            recepciones.bloquearPorId(recepcionId).orElseThrow(()->new ResourceNotFoundException("Recepción no encontrada"));
+            if(jdbc.queryForObject("SELECT COUNT(*) FROM LOTE_RECEPCIONES WHERE ID_RECEPCION=?",Integer.class,recepcionId)>0)
+                throw new ConflictException("Una recepción ya pertenece a otro lote");
+            var filas=detallesLey.findByRecepcion_IdRecepcionOrderByIdDetalle(recepcionId);
+            if(filas.isEmpty()) throw new IllegalArgumentException("La recepción debe tener leyes registradas");
+            var peso=filas.stream().map(pe.edu.upeu.sitraoro.acopio.mayorista.entity.DetalleRecepcionLey::getPesoFundidoG).reduce(BigDecimal.ZERO,BigDecimal::add);
+            jdbc.update("INSERT INTO LOTE_RECEPCIONES(ID_RECEPCION,ID_LOTE,PESO_ROJO_G,PESO_VERDE_G,PESO_FUNDIDO_G) VALUES(?,?,0,0,?)",recepcionId,id,peso);
+        }
+        lote.setFecha(fecha);
+        return respuesta(lotes.saveAndFlush(lote));
     }
 
     @Transactional
     public LoteExportacionResponse preparar(Long id) {
         LoteExportacion lote = obtenerEditable(id);
-        if (lote.getPartidas().size() < 2) {
+        var recibidas = detalleRecepciones(id);
+        if (recibidas.isEmpty() && lote.getPartidas().size() < 2) {
             throw new ConflictException("El lote requiere al menos dos liquidaciones");
         }
+        if (recibidas.stream().anyMatch(r -> r.pesoFundidoG().signum() <= 0))
+            throw new ConflictException("Todos los lotes recibidos deben tener peso fundido positivo");
         lote.setEstado(EstadoLoteExportacion.PREPARADO);
         lote.setFechaPreparacion(LocalDateTime.now());
         return respuesta(lotes.saveAndFlush(lote));
@@ -160,12 +180,18 @@ public class LoteExportacionService {
         BigDecimal pesoTotal = detalle.stream().map(LoteExportacionResponse.Partida::pesoFundidoG)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return new LoteExportacionResponse(lote.getIdLote(), lote.getFecha(), lote.getEstado().name(),
-                pesoTotal.add(recibidas.stream().map(item -> item.pesoRojoG().add(item.pesoVerdeG())).reduce(BigDecimal.ZERO, BigDecimal::add)),
+                pesoTotal.add(recibidas.stream().map(LoteExportacionResponse.Recepcion::pesoFundidoG).reduce(BigDecimal.ZERO, BigDecimal::add)),
                 lote.getFechaPreparacion(), detalle, recibidas);
     }
 
     private List<LoteExportacionResponse.Recepcion> detalleRecepciones(Long idLote) {
-        return jdbc.query("SELECT lr.ID_RECEPCION, r.NOMBRE_ACOPIADOR, lr.PESO_ROJO_G, lr.PESO_VERDE_G FROM LOTE_RECEPCIONES lr JOIN MAYORISTA_RECEPCIONES r ON r.ID_RECEPCION = lr.ID_RECEPCION WHERE lr.ID_LOTE = ? ORDER BY lr.ID_RECEPCION",
-                (fila, numero) -> new LoteExportacionResponse.Recepcion(fila.getLong(1), fila.getString(2), fila.getBigDecimal(3), fila.getBigDecimal(4)), idLote);
+        try {
+            return jdbc.query("SELECT lr.ID_RECEPCION, r.NOMBRE_ACOPIADOR, lr.PESO_ROJO_G, lr.PESO_VERDE_G, COALESCE(lr.PESO_FUNDIDO_G, lr.PESO_ROJO_G + lr.PESO_VERDE_G) FROM LOTE_RECEPCIONES lr JOIN MAYORISTA_RECEPCIONES r ON r.ID_RECEPCION = lr.ID_RECEPCION WHERE lr.ID_LOTE = ? ORDER BY lr.ID_RECEPCION",
+                    (fila, numero) -> new LoteExportacionResponse.Recepcion(fila.getLong(1), fila.getString(2), fila.getBigDecimal(3), fila.getBigDecimal(4), fila.getBigDecimal(5),
+                            detallesLey.findByRecepcion_IdRecepcionOrderByIdDetalle(fila.getLong(1)).stream()
+                                    .map(d -> new LoteExportacionResponse.LeyPeso(d.getLey().getValor(), d.getPesoFundidoG())).toList()), idLote);
+        } catch (org.springframework.dao.DataAccessException e) {
+            return List.of();
+        }
     }
 }

@@ -13,6 +13,7 @@ export interface ResumenDashboard {
 }
 export interface TransaccionAcopio {
   idTransaccionG2: number;
+  idCompraG2?: number | null;
   minero: { idMinero: number; documentoIdentidad: string; nombresApellidos: string };
   pesoSinFundirG: number;
   pesoFundidoNetoG: number;
@@ -65,6 +66,18 @@ export interface CrearTransaccion {
   pesoFundidoNetoG: number;
   tipoOro: 'ROJO' | 'VERDE';
   precioAplicadoPen?: number | null;
+}
+export interface CrearCompraAcopio {
+  idSolicitud?: number;
+  idMinero: number;
+  detalles: Omit<CrearTransaccion, 'idMinero'>[];
+}
+export interface CompraAcopio {
+  idCompraG2: number;
+  minero: TransaccionAcopio['minero'];
+  fechaCompra: string;
+  totalPagadoPen: number;
+  detalles: TransaccionAcopio[];
 }
 export interface EnviarComprasMayorista {
   idsComprasAcopiador: number[];
@@ -126,6 +139,50 @@ export interface ReporteEntregasAcopiador {
   pesoVerdeFundidoG: number;
   items: RecepcionMayorista[];
 }
+export interface PartidaLey {
+  tipoOro?: 'ROJO' | 'VERDE' | string;
+  onza: number;
+  ley: number;
+  porcentaje: number;
+  tipoCambio: number;
+  pesoSinFundirG: number;
+  pesoFundidoG: number;
+}
+export interface DetalleLey extends PartidaLey {
+  idLey: number;
+  precioUsd: number;
+  precioPen: number;
+  totalPen: number;
+}
+export interface GuardarRecepcionLey {
+  revision: number;
+  adelanto: number;
+  detalles: PartidaLey[];
+}
+export interface CalculoLey {
+  detalles: DetalleLey[];
+  pesoFundidoG: number;
+  subtotal: number;
+  adelanto: number;
+  total: number;
+}
+export interface RecepcionLey {
+  idRecepcion: number;
+  fecha: string;
+  idCentroAcopio: number;
+  nombreAcopiador: string;
+  revision: number;
+  estado: 'PENDIENTE' | 'VALORIZADO' | 'EN_LOTE';
+  idLoteExportacion: number | null;
+  pesoDeclaradoG: number;
+  pesoRojoSinFundirG: number | null;
+  pesoVerdeSinFundirG: number | null;
+  pesoFundidoG: number;
+  subtotal: number | null;
+  adelanto: number;
+  total: number;
+  detalles: DetalleLey[];
+}
 export type CrearRecepcionMayorista = Omit<RecepcionMayorista, 'idRecepcion' | 'nombreAcopiador'>;
 export interface Liquidacion {
   idLiquidacionG1: number;
@@ -152,7 +209,7 @@ export interface PartidaLoteExportacion {
   lecturaDecimal: number;
 }
 export interface LoteExportacion {
-  recepciones?: { idRecepcion: number; nombreAcopiador: string; pesoRojoG: number; pesoVerdeG: number }[];
+  recepciones?: { idRecepcion: number; nombreAcopiador: string; pesoRojoG: number; pesoVerdeG: number; pesoFundidoG: number; leyes: { ley: number; pesoFundidoG: number }[] }[];
   idLote: number;
   fecha: string;
   estado: 'BORRADOR' | 'PREPARADO';
@@ -183,6 +240,12 @@ export interface PrecioReferencial {
 
 @Injectable({ providedIn: 'root' })
 export class OperacionesService {
+  editarRecepcionesExportacion(id: number, fecha: string, ids: number[]): Observable<LoteExportacion> {
+    return this.http.put<LoteExportacion>(this.url(`/api/v1/mayorista/lotes-exportacion/${id}/recepciones`), { fecha, ids });
+  }
+  compraDirectaMayorista(analisis: GuardarRecepcionLey): Observable<RecepcionLey> {
+    return this.http.post<RecepcionLey>(this.url('/api/v1/mayorista/compras-directas'), { analisis });
+  }
   private readonly http = inject(HttpClient);
   private url(path: string): string {
     return `${environment.apiBaseUrl}${path}`;
@@ -196,6 +259,12 @@ export class OperacionesService {
   }
   registrarTransaccion(request: CrearTransaccion): Observable<TransaccionAcopio> {
     return this.http.post<TransaccionAcopio>(this.url('/api/v1/acopio/transacciones'), request);
+  }
+  registrarCompra(request: CrearCompraAcopio): Observable<CompraAcopio> {
+    return this.http.post<CompraAcopio>(this.url('/api/v1/acopio/compras'), request);
+  }
+  compras(): Observable<CompraAcopio[]> {
+    return this.http.get<CompraAcopio[]>(this.url('/api/v1/acopio/compras'));
   }
   acumulados(): Observable<AcumuladosAcopio> {
     return this.http.get<AcumuladosAcopio>(this.url('/api/v1/acopio/acumulados-semanales'));
@@ -231,6 +300,19 @@ export class OperacionesService {
       ? undefined
       : new HttpParams().set('idCentroAcopio', idCentroAcopio);
     return this.http.get<RecepcionMayorista[]>(this.url('/api/v1/mayorista/recepciones'), { params });
+  }
+  recepcionesPorLey(idCentroAcopio?: number | null): Observable<RecepcionLey[]> {
+    const params = idCentroAcopio ? new HttpParams().set('idCentroAcopio', idCentroAcopio) : new HttpParams();
+    return this.http.get<RecepcionLey[]>(this.url('/api/v1/mayorista/recepciones-ley'), { params });
+  }
+  calcularRecepcionLey(request: GuardarRecepcionLey): Observable<CalculoLey> {
+    return this.http.post<CalculoLey>(this.url('/api/v1/mayorista/recepciones-ley/calcular'), request);
+  }
+  guardarRecepcionLey(id: number, request: GuardarRecepcionLey): Observable<RecepcionLey> {
+    return this.http.put<RecepcionLey>(this.url(`/api/v1/mayorista/recepciones/${id}/leyes`), request);
+  }
+  guardarAnalisisAcumulado(entregas: { id: number; revision: number }[], analisis: GuardarRecepcionLey): Observable<RecepcionLey> {
+    return this.http.post<RecepcionLey>(this.url('/api/v1/mayorista/recepciones-ley/acumulado'), { entregas, analisis });
   }
   enviarComprasMayorista(request: EnviarComprasMayorista): Observable<RecepcionMayorista> {
     return this.http.post<RecepcionMayorista>(this.url('/api/v1/acopio/entregas-mayorista'), request);
@@ -278,9 +360,9 @@ export class OperacionesService {
   cotizacionesColor(): Observable<{ color: string; precioGramoPen: number; fechaPublicacion: string }[]> {
     return this.http.get<{ color: string; precioGramoPen: number; fechaPublicacion: string }[]>(this.url('/api/v1/cotizador/colores'));
   }
-  publicarColores(onza: number, dolar: number, exportacionRojo: number, exportacionVerde: number) {
+  publicarColores(onza: number, dolar: number, exportacionRojo: number, exportacionVerde: number, leyRojo = 90, leyVerde = 80) {
     return this.http.post<{ color: string; precioGramoPen: number; fechaPublicacion: string }[]>(this.url('/api/v1/mayorista/cotizaciones-color'), {}, {
-      params: { onza, dolar, exportacionRojo, exportacionVerde },
+      params: { onza, dolar, exportacionRojo, exportacionVerde, leyRojo, leyVerde },
     });
   }
   precioReferencial(cotizacionOnzaUsd: number, tipoCambioUsdPen: number): Observable<PrecioReferencial> {

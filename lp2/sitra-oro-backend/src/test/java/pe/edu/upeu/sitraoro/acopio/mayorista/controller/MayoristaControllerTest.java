@@ -16,6 +16,7 @@ import pe.edu.upeu.sitraoro.acopio.mayorista.service.MayoristaService;
 import pe.edu.upeu.sitraoro.acopio.mayorista.service.RecepcionMayoristaServiceImpl;
 import pe.edu.upeu.sitraoro.acopio.mayorista.service.PrecioReferencialService;
 import pe.edu.upeu.sitraoro.acopio.acopiador.service.AcopiadorService;
+import pe.edu.upeu.sitraoro.acopio.parametros.service.ParametrosSistemaService;
 import pe.edu.upeu.sitraoro.exception.GlobalExceptionHandler;
 import pe.edu.upeu.sitraoro.exception.StockInsuficienteException;
 import pe.edu.upeu.sitraoro.exception.ConflictException;
@@ -52,6 +53,15 @@ class MayoristaControllerTest {
 
     @MockitoBean
     private PrecioReferencialService precioReferencialService;
+
+    @MockitoBean
+    private ParametrosSistemaService parametrosSistemaService;
+
+    @MockitoBean
+    private pe.edu.upeu.sitraoro.acopio.mayorista.service.LoteExportacionService loteExportacionService;
+
+    @MockitoBean
+    private pe.edu.upeu.sitraoro.acopio.parametros.service.CotizacionColorService cotizacionColorService;
 
     @Test
     @DisplayName("POST /api/v1/mayorista/liquidaciones - Pago no definido (409 Conflict)")

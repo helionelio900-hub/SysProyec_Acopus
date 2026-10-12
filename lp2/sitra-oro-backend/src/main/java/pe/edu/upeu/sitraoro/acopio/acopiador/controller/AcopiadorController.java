@@ -17,11 +17,13 @@ import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.AcumuladosG2Response;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.TransaccionG2Request;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.TransaccionG2Response;
+import pe.edu.upeu.sitraoro.acopio.acopiador.dto.CompraG2Request;
+import pe.edu.upeu.sitraoro.acopio.acopiador.dto.CompraG2Response;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.EntregaMayoristaRequest;
 import pe.edu.upeu.sitraoro.acopio.acopiador.service.AcopiadorService;
-import pe.edu.upeu.sitraoro.acopio.mayorista.dto.RecepcionMayoristaResponse;
-import pe.edu.upeu.sitraoro.acopio.mayorista.dto.ReporteEntregasAcopiador;
-import pe.edu.upeu.sitraoro.acopio.mayorista.service.RecepcionMayoristaServiceImpl;
+import pe.edu.upeu.sitraoro.acopio.acopiador.dto.EntregaMayoristaResponse;
+import pe.edu.upeu.sitraoro.acopio.acopiador.dto.ReporteEntregasAcopiadorResponse;
+import pe.edu.upeu.sitraoro.acopio.acopiador.service.EntregaMayoristaPort;
 import pe.edu.upeu.sitraoro.exception.ApiErrorResponse;
 
 import java.util.List;
@@ -35,24 +37,40 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class AcopiadorController {
 
     private final AcopiadorService acopiadorService;
-    private final RecepcionMayoristaServiceImpl recepcionMayoristaService;
+    private final EntregaMayoristaPort entregaMayoristaPort;
+
+    @PostMapping("/compras")
+    @Operation(summary = "Registrar una compra con cabecera y una o varias partidas")
+    public ResponseEntity<CompraG2Response> registrarCompraConDetalles(
+            @Valid @RequestBody CompraG2Request request,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                acopiadorService.registrarCompraConDetalles(request, centroId(jwt)));
+    }
+
+    @GetMapping("/compras")
+    @Operation(summary = "Consultar compras y sus partidas del centro autenticado")
+    public ResponseEntity<List<CompraG2Response>> listarComprasConDetalles(
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(acopiadorService.listarComprasConDetalles(centroId(jwt)));
+    }
 
     @PostMapping("/entregas-mayorista")
     @Operation(summary = "Enviar al mayorista las compras seleccionadas por el acopiador")
-    public ResponseEntity<RecepcionMayoristaResponse> enviarAlMayorista(
+    public ResponseEntity<EntregaMayoristaResponse> enviarAlMayorista(
             @Valid @RequestBody EntregaMayoristaRequest request,
             @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                recepcionMayoristaService.registrarDesdeAcopiador(centroId(jwt), request.idsComprasAcopiador()));
+                entregaMayoristaPort.registrarDesdeAcopiador(centroId(jwt), request.idsComprasAcopiador()));
     }
 
     @GetMapping("/entregas-mayorista/resumen")
     @Operation(summary = "Consultar entregas del centro autenticado con agregados por color y filtro de fechas")
-    public ResponseEntity<ReporteEntregasAcopiador> reporteEntregas(
+    public ResponseEntity<ReporteEntregasAcopiadorResponse> reporteEntregas(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(recepcionMayoristaService.reporteAcopiador(centroId(jwt), desde, hasta));
+        return ResponseEntity.ok(entregaMayoristaPort.reporteAcopiador(centroId(jwt), desde, hasta));
     }
 
     @PostMapping("/transacciones")

@@ -15,8 +15,18 @@ public record TransaccionG2Response(
     LocalDateTime fechaTransaccion,
     Long idRecepcionMayorista,
     Long idLiquidacionG1,
-    boolean anulada
+    boolean anulada,
+    Long idCompraG2
 ) {
+    public TransaccionG2Response(Long idTransaccionG2, MineroResumen minero,
+                                 BigDecimal pesoSinFundirG, BigDecimal pesoFundidoNetoG,
+                                 String tipoOro, BigDecimal precioAplicadoPen,
+                                 BigDecimal totalPagadoPen, LocalDateTime fechaTransaccion,
+                                 Long idRecepcionMayorista, Long idLiquidacionG1, boolean anulada) {
+        this(idTransaccionG2, minero, pesoSinFundirG, pesoFundidoNetoG, tipoOro,
+                precioAplicadoPen, totalPagadoPen, fechaTransaccion,
+                idRecepcionMayorista, idLiquidacionG1, anulada, null);
+    }
     public TransaccionG2Response(Long idTransaccionG2, MineroResumen minero,
                                  BigDecimal pesoSinFundirG, BigDecimal pesoFundidoNetoG,
                                  String tipoOro, BigDecimal precioAplicadoPen,

@@ -10,6 +10,10 @@ import pe.edu.upeu.sitraoro.acopio.acopiador.dto.ResumenPesoRecepcion;
 import pe.edu.upeu.sitraoro.acopio.acopiador.entity.TransaccionG2;
 import pe.edu.upeu.sitraoro.acopio.acopiador.mapper.TransaccionG2Mapper;
 import pe.edu.upeu.sitraoro.acopio.acopiador.repository.TransaccionG2Repository;
+import pe.edu.upeu.sitraoro.acopio.acopiador.repository.CompraG2Repository;
+import pe.edu.upeu.sitraoro.acopio.acopiador.entity.CompraG2;
+import pe.edu.upeu.sitraoro.acopio.acopiador.dto.CompraG2Request;
+import pe.edu.upeu.sitraoro.acopio.acopiador.dto.CompraG2Response;
 import pe.edu.upeu.sitraoro.acopio.parametros.entity.Minero;
 import pe.edu.upeu.sitraoro.acopio.parametros.service.MineroService;
 import pe.edu.upeu.sitraoro.exception.ConflictException;
@@ -31,11 +35,67 @@ public class AcopiadorServiceImpl implements AcopiadorService {
     private final CalculadorPrecioOroService calculadorPrecioOroService;
     private final pe.edu.upeu.sitraoro.acopio.parametros.service.CotizacionColorService cotizacionColorService;
     private final TransaccionG2Mapper transaccionG2Mapper;
+    private final CompraG2Repository compraG2Repository;
+    private final pe.edu.upeu.sitraoro.acopio.parametros.repository.MineroRepository mineros;
+    private final pe.edu.upeu.sitraoro.acopio.minero.service.EntregaMineroService solicitudesEntrega;
+
+    @Override
+    @Transactional
+    public CompraG2Response registrarCompraConDetalles(CompraG2Request request, Long idCentroAcopio) {
+        if (request.idSolicitud() != null) solicitudesEntrega.reservarCompra(request.idSolicitud(), idCentroAcopio, request.idMinero());
+        Minero minero = buscarMineroOFallar(request.idMinero());
+        if (!java.util.Objects.equals(idCentroAcopio, minero.getIdCentroAcopio()) && mineros.entregasAceptadas(minero.getIdMinero(),idCentroAcopio)==0)
+            throw new ConflictException("El minero no pertenece a tu centro de acopio");
+        if (request.detalles() == null || request.detalles().isEmpty() || request.detalles().size() > 200) {
+            throw new IllegalArgumentException("La compra debe tener entre 1 y 200 partidas");
+        }
+        CompraG2 compra = new CompraG2();
+        compra.setMinero(minero);
+        compra.setIdCentroAcopio(idCentroAcopio);
+        compra.setFechaCompra(java.time.LocalDateTime.now());
+        for (var detalle : request.detalles()) {
+            BigDecimal precio = detalle.precioAplicadoPen() != null
+                    ? detalle.precioAplicadoPen() : cotizacionColorService.precio(detalle.tipoOro());
+            if (precio == null || precio.signum() <= 0) {
+                throw new IllegalArgumentException("Cada partida debe tener un precio por gramo mayor que cero");
+            }
+            BigDecimal importe = detalle.pesoFundidoNetoG().multiply(precio).setScale(2, RoundingMode.HALF_UP);
+            if (importe.compareTo(new BigDecimal("10000000000")) >= 0) {
+                throw new IllegalArgumentException("El importe de una partida supera el límite permitido");
+            }
+            TransaccionG2 partida = TransaccionG2.builder()
+                    .minero(minero).idCentroAcopio(idCentroAcopio)
+                    .fechaTransaccion(compra.getFechaCompra()).tipoOro(detalle.tipoOro())
+                    .pesoSinFundirG(detalle.pesoSinFundirG()).pesoFundidoNetoG(detalle.pesoFundidoNetoG())
+                    .precioAplicadoPen(precio).totalPagadoPen(importe).build();
+            compra.agregarPartida(partida);
+        }
+        var guardada = compraG2Repository.saveAndFlush(compra);
+        if (request.idSolicitud() != null) solicitudesEntrega.vincularCompra(request.idSolicitud(), guardada.getIdCompraG2());
+        return respuestaCompra(guardada);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CompraG2Response> listarComprasConDetalles(Long idCentroAcopio) {
+        return compraG2Repository.findByIdCentroAcopioOrderByFechaCompraDescIdCompraG2Desc(idCentroAcopio)
+                .stream().map(this::respuestaCompra).toList();
+    }
+
+    private CompraG2Response respuestaCompra(CompraG2 compra) {
+        var detalles = compra.getDetalles().stream().map(transaccionG2Mapper::toResponse).toList();
+        BigDecimal total = detalles.stream().filter(partida -> !partida.anulada())
+                .map(TransaccionG2Response::totalPagadoPen).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return new CompraG2Response(compra.getIdCompraG2(), transaccionG2Mapper.toResumen(compra.getMinero()),
+                compra.getFechaCompra(), total, detalles);
+    }
 
     @Override
     @Transactional
     public TransaccionG2Response registrarCompraDirecta(TransaccionG2Request request, Long idCentroAcopio) {
         Minero minero = buscarMineroOFallar(request.idMinero());
+        if (!java.util.Objects.equals(idCentroAcopio, minero.getIdCentroAcopio()) && mineros.entregasAceptadas(minero.getIdMinero(),idCentroAcopio)==0)
+            throw new ConflictException("El minero no pertenece a tu centro de acopio");
 
         BigDecimal precioAplicado = request.precioAplicadoPen() != null && request.precioAplicadoPen().signum() > 0
                 ? request.precioAplicadoPen()

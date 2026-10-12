@@ -20,15 +20,23 @@ public class RecepcionMayorista {
     @Column(name = "ID_RECEPCION")
     private Long idRecepcion;
 
+    @Builder.Default
+    @Column(name = "REVISION_LEY", nullable = false)
+    private Long revisionLey = 0L;
+
     @Column(name = "FECHA", nullable = false)
     private LocalDate fecha;
 
     @Column(name = "NOMBRE_ACOPIADOR", nullable = false, length = 223)
     private String nombreAcopiador;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ID_CENTRO_ACOPIO", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_CENTRO_ACOPIO")
     private CentroAcopio centroAcopio;
+    @Column(name = "ID_MINERO_DIRECTO")
+    private Long idMineroDirecto;
+    @Column(name = "COMPRA_DIRECTA", nullable = false)
+    private boolean compraDirecta;
 
     @Embedded
     @AttributeOverrides({

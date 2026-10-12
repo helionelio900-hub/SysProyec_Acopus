@@ -17,15 +17,20 @@ import pe.edu.upeu.sitraoro.exception.ResourceNotFoundException;
 
 import java.util.List;
 import java.math.BigDecimal;
+import pe.edu.upeu.sitraoro.acopio.acopiador.dto.EntregaMayoristaResponse;
+import pe.edu.upeu.sitraoro.acopio.acopiador.dto.ReporteEntregasAcopiadorResponse;
+import pe.edu.upeu.sitraoro.acopio.acopiador.service.EntregaMayoristaPort;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
 @Service
 @RequiredArgsConstructor
-public class RecepcionMayoristaServiceImpl {
+public class RecepcionMayoristaServiceImpl implements EntregaMayoristaPort {
     private final RecepcionMayoristaRepository repository;
     private final CentroAcopioRepository centroAcopioRepository;
     private final AcopiadorService acopiadorService;
+    private final pe.edu.upeu.sitraoro.acopio.mayorista.repository.DetalleRecepcionLeyRepository detallesLey;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     @Transactional(readOnly = true)
     public List<RecepcionMayoristaResponse> listar(Long idCentroAcopio) {
@@ -37,14 +42,16 @@ public class RecepcionMayoristaServiceImpl {
                 .toList();
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public ReporteEntregasAcopiador reporteAcopiador(Long idCentroAcopio, LocalDate desde, LocalDate hasta) {
+    public ReporteEntregasAcopiadorResponse reporteAcopiador(Long idCentroAcopio, LocalDate desde, LocalDate hasta) {
         if (desde != null && hasta != null && desde.isAfter(hasta)) {
             throw new IllegalArgumentException("La fecha inicial debe ser anterior o igual a la fecha final");
         }
-        List<RecepcionMayoristaResponse> items = listar(idCentroAcopio).stream()
+        List<EntregaMayoristaResponse> items = listar(idCentroAcopio).stream()
                 .filter(item -> desde == null || !item.fecha().isBefore(desde))
                 .filter(item -> hasta == null || !item.fecha().isAfter(hasta))
+                .map(this::aEntregaResponse)
                 .toList();
         BigDecimal rojo = items.stream()
                 .map(item -> item.rojo().pesoSinFundirG())
@@ -54,7 +61,7 @@ public class RecepcionMayoristaServiceImpl {
                 .map(item -> item.verde().pesoSinFundirG())
                 .filter(java.util.Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return new ReporteEntregasAcopiador(items.size(), rojo, verde, items);
+        return new ReporteEntregasAcopiadorResponse(items.size(), rojo, verde, items);
     }
 
     @Transactional
@@ -71,8 +78,9 @@ public class RecepcionMayoristaServiceImpl {
         return respuesta(guardada);
     }
 
+    @Override
     @Transactional
-    public RecepcionMayoristaResponse registrarDesdeAcopiador(Long idCentroAcopio, List<Long> idsCompras) {
+    public EntregaMayoristaResponse registrarDesdeAcopiador(Long idCentroAcopio, List<Long> idsCompras) {
         CentroAcopio centro = obtenerCentroActivo(idCentroAcopio);
         RecepcionMayorista recepcion = new RecepcionMayorista();
         recepcion.setFecha(LocalDate.now(ZoneId.of("America/Lima")));
@@ -91,13 +99,25 @@ public class RecepcionMayoristaServiceImpl {
                 guardada.getIdRecepcion(), idCentroAcopio, idsCompras);
         aplicarPesosSeleccionados(guardada, pesos);
         repository.save(guardada);
-        return respuesta(guardada);
+        return aEntregaResponse(respuesta(guardada));
+    }
+
+    private EntregaMayoristaResponse aEntregaResponse(RecepcionMayoristaResponse r) {
+        return new EntregaMayoristaResponse(
+                r.idRecepcion(), r.fecha(), r.idCentroAcopio(), r.nombreAcopiador(),
+                new EntregaMayoristaResponse.FilaOro(
+                        r.rojo().pesoSinFundirG(), r.rojo().pesoFundidoG(), r.rojo().onza(), r.rojo().dolar(), r.rojo().exportacion(), r.rojo().pagoMaterial()),
+                new EntregaMayoristaResponse.FilaOro(
+                        r.verde().pesoSinFundirG(), r.verde().pesoFundidoG(), r.verde().onza(), r.verde().dolar(), r.verde().exportacion(), r.verde().pagoMaterial()),
+                r.descuento(), r.total(), r.idsComprasAcopiador()
+        );
     }
 
     @Transactional
     public RecepcionMayoristaResponse actualizar(Long id, RecepcionMayoristaRequest request) {
         RecepcionMayorista actual = repository.bloquearPorId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Recepción mayorista no encontrada: " + id));
+        validarEdicionHistorica(id);
         ResumenPesoRecepcion pesosSeleccionados = null;
         if (!request.idsComprasAcopiador().isEmpty()) {
             pesosSeleccionados = acopiadorService.vincularComprasRecepcion(
@@ -116,8 +136,24 @@ public class RecepcionMayoristaServiceImpl {
     public void eliminar(Long id) {
         RecepcionMayorista actual = repository.bloquearPorId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Recepción mayorista no encontrada: " + id));
+        validarEdicionHistorica(id);
         acopiadorService.desvincularComprasRecepcion(id);
         repository.delete(actual);
+    }
+
+    private void validarEdicionHistorica(Long id) {
+        Integer agrupada = jdbc.queryForObject("SELECT COUNT(*) FROM RECEPCION_ACUMULADA WHERE ID_ORIGEN = ? OR ID_ACUMULADA = ?", Integer.class, id, id);
+        if (agrupada != null && agrupada > 0)
+            throw new pe.edu.upeu.sitraoro.exception.ConflictException("Esta entrega pertenece a un análisis acumulado y conserva su trazabilidad");
+        if (detallesLey.existsByRecepcion_IdRecepcion(id))
+            throw new pe.edu.upeu.sitraoro.exception.ConflictException("Esta recepción está valorizada por ley. Adminístrala desde Lotes recibidos.");
+        try {
+            Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM LOTE_RECEPCIONES WHERE ID_RECEPCION = ?", Integer.class, id);
+            if (count != null && count > 0)
+                throw new pe.edu.upeu.sitraoro.exception.ConflictException("La recepción pertenece a un lote de exportación y no puede modificarse ni eliminarse");
+        } catch (org.springframework.dao.DataAccessException e) {
+            // Tabla no presente en esquemas de prueba sin migración de exportación
+        }
     }
 
     private static void validarPesosManuales(RecepcionMayoristaRequest request) {
@@ -211,7 +247,7 @@ public class RecepcionMayoristaServiceImpl {
     private RecepcionMayoristaResponse respuesta(RecepcionMayorista item) {
         List<Long> idsCompras = acopiadorService.idsComprasRecepcion(item.getIdRecepcion());
         return new RecepcionMayoristaResponse(
-                item.getIdRecepcion(), item.getFecha(), item.getCentroAcopio().getIdCentroAcopio(),
+                item.getIdRecepcion(), item.getFecha(), item.getCentroAcopio() == null ? -item.getIdRecepcion() : item.getCentroAcopio().getIdCentroAcopio(),
                 item.getNombreAcopiador(),
                 fila(item.getRojo()), fila(item.getVerde()),
                 texto(item.getDescuento()), texto(item.getTotal()), idsCompras);

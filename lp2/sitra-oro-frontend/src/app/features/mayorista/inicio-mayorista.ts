@@ -60,7 +60,7 @@ export class InicioMayorista implements OnInit {
     });
   }
   protected dinero(valor: number | null | undefined): string {
-    return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(
+    return new Intl.NumberFormat('es-PE', { useGrouping: false, style: 'currency', currency: 'PEN' }).format(
       valor ?? 0,
     );
   }

@@ -21,6 +21,10 @@ public class TransaccionG2 {
     private Long idTransaccionG2;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_COMPRA_G2")
+    private CompraG2 compra;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_MINERO", nullable = false)
     private Minero minero;
 

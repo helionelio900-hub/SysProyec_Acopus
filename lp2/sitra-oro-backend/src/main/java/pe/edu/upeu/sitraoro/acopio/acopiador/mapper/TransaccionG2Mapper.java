@@ -12,6 +12,8 @@ import pe.edu.upeu.sitraoro.acopio.parametros.entity.Minero;
 public interface TransaccionG2Mapper {
 
     @Mapping(target = "idTransaccionG2", ignore = true)
+    @Mapping(target = "compra", ignore = true)
+    @Mapping(target = "anulada", ignore = true)
     @Mapping(target = "fechaTransaccion", ignore = true)
     @Mapping(target = "idLiquidacionG1", ignore = true)
     @Mapping(target = "idRecepcionMayorista", ignore = true)
@@ -24,6 +26,7 @@ public interface TransaccionG2Mapper {
     @Mapping(target = "minero", source = "minero")
     TransaccionG2 toEntity(TransaccionG2Request request, Minero minero);
 
+    @Mapping(target = "idCompraG2", source = "compra.idCompraG2")
     TransaccionG2Response toResponse(TransaccionG2 transaccionG2);
 
     default MineroResumen toResumen(Minero minero) {
