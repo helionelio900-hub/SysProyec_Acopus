@@ -31,9 +31,9 @@ public class RecepcionLeyService {
         BigDecimal subtotal = BigDecimal.ZERO;
         for (var p : request.detalles()) {
             long idLey = p.ley().movePointRight(4).longValueExact();
-            if (!vistas.add(idLey)) throw new IllegalArgumentException("La ley " + p.ley().stripTrailingZeros().toPlainString() + " está repetida en este lote. Reúne sus pesos en una sola partida.");
+            if (!vistas.add(idLey)) throw new MayoristaReglaException("LEY_REPETIDA", "La ley " + p.ley().stripTrailingZeros().toPlainString() + " está repetida en este lote. Reúne sus pesos en una sola partida.");
             if (p.pesoFundidoG().compareTo(p.pesoSinFundirG()) > 0)
-                throw new IllegalArgumentException("El peso fundido no puede superar el peso sin fundir");
+                throw new MayoristaReglaException("PESO_FUNDIDO_SUPERA_ENTRADA", "El peso fundido no puede superar el peso sin fundir");
             // Conserva la convención comercial vigente de SITRA; la ley ingresada sustituye al factor fijo por color.
             BigDecimal usdExacto = p.onza().multiply(p.ley().movePointLeft(2))
                     .multiply(BigDecimal.ONE.subtract(p.porcentaje().movePointLeft(2)))
@@ -47,7 +47,7 @@ public class RecepcionLeyService {
             peso = peso.add(p.pesoFundidoG());
             subtotal = subtotal.add(total);
         }
-        if (request.adelanto().compareTo(subtotal) > 0) throw new IllegalArgumentException("El adelanto no puede superar el total de material");
+        if (request.adelanto().compareTo(subtotal) > 0) throw new MayoristaReglaException("ADELANTO_SUPERA_TOTAL", "El adelanto no puede superar el total de material");
         return new RecepcionLeyResponse.Calculo(filas, peso, subtotal, request.adelanto(), subtotal.subtract(request.adelanto()));
     }
 
@@ -57,6 +57,20 @@ public class RecepcionLeyService {
                 : recepciones.findByCentroAcopio_IdCentroAcopioOrderByFechaDescIdRecepcionDesc(idCentro);
         Set<Long> agrupadas = new HashSet<>(jdbc.queryForList("SELECT ID_ORIGEN FROM RECEPCION_ACUMULADA", Long.class));
         return items.stream().filter(r -> !agrupadas.contains(r.getIdRecepcion())).map(this::respuesta).toList();
+    }
+    public record ReporteCompras(java.time.LocalDate desde, java.time.LocalDate hasta, long operaciones,
+      long partidas, BigDecimal pesoFundidoG, BigDecimal subtotal, BigDecimal adelanto, BigDecimal total,
+      List<RecepcionLeyResponse> items) {}
+    @Transactional(readOnly=true)
+    public ReporteCompras reporte(java.time.LocalDate desde, java.time.LocalDate hasta) {
+        if(desde!=null && hasta!=null && desde.isAfter(hasta)) throw new IllegalArgumentException("La fecha inicial no puede superar la fecha final");
+        var items=listar(null).stream().filter(r -> !r.detalles().isEmpty()
+          && (desde==null || !r.fecha().isBefore(desde)) && (hasta==null || !r.fecha().isAfter(hasta))).toList();
+        return new ReporteCompras(desde,hasta,items.size(),items.stream().mapToLong(r->r.detalles().size()).sum(),
+          items.stream().map(RecepcionLeyResponse::pesoFundidoG).reduce(BigDecimal.ZERO,BigDecimal::add),
+          items.stream().map(RecepcionLeyResponse::subtotal).reduce(BigDecimal.ZERO,BigDecimal::add),
+          items.stream().map(RecepcionLeyResponse::adelanto).reduce(BigDecimal.ZERO,BigDecimal::add),
+          items.stream().map(RecepcionLeyResponse::total).reduce(BigDecimal.ZERO,BigDecimal::add),items);
     }
 
     @Transactional

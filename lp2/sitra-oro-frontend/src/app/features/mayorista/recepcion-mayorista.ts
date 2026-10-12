@@ -1,10 +1,11 @@
 import { NumeroClaroPipe } from '../../core/numero-claro.pipe';
+import { ReporteComprasMayorista } from './reporte-compras';
 import { A11yModule } from '@angular/cdk/a11y';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators, ValidationErrors } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, debounceTime, map, of, switchMap, tap } from 'rxjs';
@@ -36,10 +37,10 @@ export interface GrupoLey {
   }[];
 }
 
-type Seccion = 'recepciones' | 'exportacion' | 'historial';
+type Seccion = 'recepciones' | 'exportacion' | 'historial' | 'reporte';
 @Component({
   selector: 'app-recepcion-mayorista',
-  imports: [ReactiveFormsModule, MatButtonModule, NumeroClaroPipe, DatePipe, A11yModule, RouterLink],
+  imports: [ReactiveFormsModule, MatButtonModule, NumeroClaroPipe, DatePipe, A11yModule, RouterLink, ReporteComprasMayorista],
   templateUrl: './recepcion-mayorista.html',
   styleUrl: './recepcion-mayorista.css',
 })
@@ -64,7 +65,7 @@ export class RecepcionMayorista implements OnInit {
       pesoDeclaradoG: 0, pesoRojoSinFundirG: null, pesoVerdeSinFundirG: null, pesoFundidoG: 0,
       subtotal: null, adelanto: 0, total: 0, detalles: [] });
   }
-  protected readonly calculo = signal<CalculoLey | null>(null);
+  private readonly calculoServidor = signal<CalculoLey | null>(null);
   protected readonly cargando = signal(false);
   protected readonly calculando = signal(false);
   protected readonly guardando = signal(false);
@@ -77,7 +78,43 @@ export class RecepcionMayorista implements OnInit {
   private revisionFormulario = 0;
   protected readonly form = this.fb.nonNullable.group({
     adelanto: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
-    detalles: this.fb.array([this.nuevaFila()]),
+    detalles: this.fb.array([this.nuevaFila()], {
+      validators: (control: AbstractControl): ValidationErrors | null => {
+        const filas = control.value as { ley: number | null }[];
+        if (!filas || filas.length < 1 || filas.length > 200) return { cantidadPartidas: true };
+        const leyes = filas.filter(f => f.ley !== null).map(f => Math.round(Number(f.ley) * 10000));
+        return new Set(leyes).size !== leyes.length ? { leyRepetida: true } : null;
+      },
+    }),
+  });
+  private readonly valoresCalculo = signal(this.form.getRawValue());
+  private readonly formularioValido = signal(false);
+  protected readonly calculoValidado = computed(() => {
+    const local = this.calculo(); const servidor = this.calculoServidor();
+    return !!local && !!servidor && local.total === servidor.total && local.subtotal === servidor.subtotal
+      && local.detalles.length === servidor.detalles.length && local.detalles.every((p,i) => p.precioPen === servidor.detalles[i].precioPen && p.totalPen === servidor.detalles[i].totalPen);
+  });
+  protected readonly calculo = computed<CalculoLey | null>(() => {
+    const valores = this.valoresCalculo();
+    if (!this.formularioValido()) return null;
+    const escala = (valor: number, decimales: number): bigint => {
+      const [entero, fraccion = ''] = String(valor).split('.');
+      return BigInt(entero) * 10n ** BigInt(decimales) + BigInt(fraccion.padEnd(decimales, '0'));
+    };
+    const redondear = (n: bigint, d: bigint) => (n + d / 2n) / d;
+    let peso = 0n, subtotal = 0n;
+    const detalles = valores.detalles.map(p => {
+      const onza = escala(p.onza!,4), ley = escala(p.ley!,4), porcentaje = escala(p.porcentaje!,4), dolar = escala(p.tipoCambio!,4);
+      const usd16 = redondear(onza * ley * (1000000n - porcentaje) * 10n ** 16n, 1000000000000n * 310999n);
+      const precioUsd = Number(redondear(usd16,10n ** 14n)) / 100;
+      const precioCentimos = redondear(usd16 * dolar,10n ** 18n);
+      const pesoFila = escala(p.pesoFundidoG!,3);
+      const totalCentimos = redondear(precioCentimos * pesoFila,1000n);
+      subtotal += totalCentimos; peso += pesoFila;
+      return { onza:p.onza!, ley:p.ley!, porcentaje:p.porcentaje!, tipoCambio:p.tipoCambio!, pesoSinFundirG:p.pesoSinFundirG!, pesoFundidoG:p.pesoFundidoG!, idLey:Number(ley), precioUsd, precioPen:Number(precioCentimos)/100, totalPen:Number(totalCentimos)/100 };
+    });
+    const adelanto = escala(valores.adelanto,2);
+    return { detalles, pesoFundidoG:Number(peso)/1000, subtotal:Number(subtotal)/100, adelanto:valores.adelanto, total:Number(subtotal - adelanto)/100 };
   });
   protected get partidas() { return this.form.controls.detalles; }
   protected readonly visibles = computed(() => this.registros().filter(r =>
@@ -177,7 +214,7 @@ export class RecepcionMayorista implements OnInit {
   ngOnInit(): void {
     if (this.route.snapshot.queryParamMap.get('seccion') === 'exportacion') this.seccion.set('exportacion');
     this.form.valueChanges.pipe(
-      tap(() => { this.revisionFormulario++; this.calculo.set(null); this.errorCalculo.set(''); this.calculando.set(false); }),
+      tap(() => { this.valoresCalculo.set(this.form.getRawValue()); this.formularioValido.set(this.form.valid); this.revisionFormulario++; this.calculoServidor.set(null); this.errorCalculo.set(''); this.calculando.set(false); }),
       debounceTime(350),
       switchMap(() => {
         const revision = this.revisionFormulario;
@@ -191,7 +228,8 @@ export class RecepcionMayorista implements OnInit {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(resultado => {
       if (!resultado || resultado.revision !== this.revisionFormulario) return;
-      this.calculando.set(false); this.calculo.set(resultado.calculo); this.errorCalculo.set(resultado.error);
+      this.calculando.set(false); this.calculoServidor.set(resultado.calculo); this.errorCalculo.set(resultado.error);
+      if(resultado.calculo && !this.calculoValidado()) this.errorCalculo.set('El cálculo visual no coincide con el servidor. Revisa los datos antes de guardar.');
     });
     this.cargar();
   }
@@ -260,14 +298,14 @@ export class RecepcionMayorista implements OnInit {
   protected quitar(i: number): void { if (this.partidas.length > 1 && !this.guardando()) this.partidas.removeAt(i); }
   protected cancelar(): void {
     if (this.guardando()) return;
-    this.editando.set(null); this.confirmacion.set(null); this.calculo.set(null); this.errorCalculo.set('');
+    this.editando.set(null); this.confirmacion.set(null); this.calculoServidor.set(null); this.errorCalculo.set('');
     this.origenesAcumulados.set([]);
     this.compraDirecta.set(false);
     this.revisionFormulario++; this.calculando.set(false);
   }
   protected revisar(): void {
     this.form.markAllAsTouched();
-    if (this.form.valid && this.calculo() && !this.calculando() && this.editando()) this.confirmacion.set('guardar');
+    if (this.form.valid && this.calculoValidado() && !this.errorCalculo() && !this.calculando() && this.editando()) this.confirmacion.set('guardar');
   }
   protected seleccionar(id: number, marcada: boolean): void {
     if (this.guardando()) return;
@@ -277,7 +315,7 @@ export class RecepcionMayorista implements OnInit {
     if (this.guardando()) return;
     if (this.confirmacion() === 'guardar') {
       const r = this.editando();
-      if (!r || this.form.invalid || !this.calculo()) return;
+      if (!r || this.form.invalid || !this.calculoValidado() || this.errorCalculo()) return;
       this.guardando.set(true);
       const origenes = this.origenesAcumulados();
       const directa = this.compraDirecta();
@@ -334,6 +372,9 @@ export class RecepcionMayorista implements OnInit {
     });
   }
   private textoError(e: HttpErrorResponse, defecto: string): string {
+    if(e.error?.code === 'PESO_FUNDIDO_SUPERA_ENTRADA') return 'El backend rechazó la partida: el peso fundido supera el peso recibido. Corrige esos pesos.';
+    if(e.error?.code === 'ADELANTO_SUPERA_TOTAL') return 'El backend rechazó el adelanto: supera el total del material. Reduce el adelanto.';
+    if(e.error?.code === 'LEY_REPETIDA') return 'El backend rechazó una ley repetida. Reúne su peso en una sola partida.';
     if (e.status === 401) return 'Tu sesión venció. Vuelve a ingresar.';
     if (e.status === 403) return 'Tu cuenta no tiene permiso para gestionar el Mayorista.';
     return e.error?.message ?? e.error?.detail ?? defecto;

@@ -10,6 +10,12 @@ import java.util.List;
 @RequestMapping("/api/v1/mayorista")
 public class RecepcionLeyController {
     private final RecepcionLeyService service;
+    @GetMapping("/recepciones-ley/resumen")
+    public RecepcionLeyService.ReporteCompras reporte(
+      @RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate desde,
+      @RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate hasta) {
+        return service.reporte(desde,hasta);
+    }
     @PostMapping("/recepciones-ley/acumulado")
     public RecepcionLeyResponse guardarAcumulado(@Valid @RequestBody AnalisisAcumuladoRequest request) {
         return service.guardarAcumulado(request);

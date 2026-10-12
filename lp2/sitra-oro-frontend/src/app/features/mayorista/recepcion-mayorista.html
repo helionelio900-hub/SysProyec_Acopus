@@ -11,6 +11,7 @@
     <button [class.active]="seccion() === 'recepciones'" [attr.aria-current]="seccion() === 'recepciones' ? 'page' : null" [disabled]="!!editando() || guardando()" (click)="cambiarSeccion('recepciones')">1. Lotes recibidos <span>{{ pendientes() }}</span></button>
     <button [class.active]="seccion() === 'exportacion'" [attr.aria-current]="seccion() === 'exportacion' ? 'page' : null" [disabled]="!!editando() || guardando()" (click)="cambiarSeccion('exportacion')">2. Preparar exportación <span>{{ valorizados() }}</span></button>
     <button [class.active]="seccion() === 'historial'" [attr.aria-current]="seccion() === 'historial' ? 'page' : null" [disabled]="!!editando() || guardando()" (click)="cambiarSeccion('historial')">Historial por ley</button>
+    <button [class.active]="seccion() === 'reporte'" [attr.aria-current]="seccion() === 'reporte' ? 'page' : null" [disabled]="!!editando() || guardando()" (click)="cambiarSeccion('reporte')">Reporte de compras</button>
   </nav>
   @if (error()) { <p class="feedback error" role="alert">{{ error() }}</p> }
   @if (mensaje()) { <p class="feedback" role="status">{{ mensaje() }}</p> }
@@ -72,6 +73,8 @@
         <button mat-stroked-button type="button" class="button-secondary" (click)="agregar()" [disabled]="partidas.length >= 200 || guardando()">+ Agregar partida</button>
       </div>
       @if (form.invalid && form.touched) { <p class="feedback error" role="alert">Completa los campos resaltados. Usa hasta 4 decimales para parámetros y 3 para pesos.</p> }
+      @if (partidas.hasError('leyRepetida')) { <p class="feedback error" role="alert">Una ley está repetida. Reúne sus pesos en una sola partida o ingresa una ley distinta.</p> }
+      @if (partidas.hasError('cantidadPartidas')) { <p class="feedback error" role="alert">El registro debe contener entre 1 y 200 partidas.</p> }
       @if (errorCalculo()) { <p class="feedback error" role="alert">{{ errorCalculo() }}</p> }
       <div class="pago-resumen">
         <div><span>Total material</span><strong>{{ calculo() ? 'S/ ' + (calculo()!.subtotal | numeroClaro:'1.2-2') : '—' }}</strong></div>
@@ -80,12 +83,13 @@
       </div>
       <div class="form-actions">@if (calculando()) { <span role="status">Calculando importes…</span> }
         <button mat-stroked-button type="button" class="button-secondary" [disabled]="guardando()" (click)="cancelar()">Cancelar</button>
-        <button mat-flat-button type="submit" class="button-primary" [disabled]="guardando() || calculando() || form.invalid || !calculo()">Revisar y registrar</button>
+        <button mat-flat-button type="submit" class="button-primary" [disabled]="guardando() || calculando() || form.invalid || !calculoValidado() || !!errorCalculo()">Revisar y registrar</button>
       </div>
     </form>
   }
 
-  @if (!editando()) {
+  @if (seccion() === 'reporte') { <app-reporte-compras-mayorista /> }
+  @if (!editando() && seccion() !== 'reporte') {
     <section class="panel lista">
       <div class="lista-head"><div><h2>{{ seccion() === 'historial' ? 'Historial de lotes por ley' : seccion() === 'exportacion' ? 'Lotes valorizados disponibles' : 'Entregas por acopiador' }}</h2>
         <p>{{ seccion() === 'exportacion' ? 'Selecciona los lotes recibidos que reunirás en un lote de exportación.' : seccion() === 'historial' ? 'Consulta los lotes y sus partidas agrupados por acopiador.' : 'Todas las entregas de cada acopiador se suman en dos filas: oro rojo y oro verde.' }}</p></div>
@@ -226,9 +230,14 @@
   @if (confirmacion(); as accion) {
     <div class="modal-fondo" (keydown.escape)="!guardando() && confirmacion.set(null)">
       <section class="confirmar" role="dialog" aria-modal="true" aria-labelledby="confirmar-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-        <span class="eyebrow">REVISAR OPERACIÓN</span><h2 id="confirmar-titulo">{{ accion === 'guardar' ? (origenesAcumulados().length ? 'Registrar análisis acumulado' : 'Registrar lote #' + editando()?.idRecepcion) : 'Crear lote de exportación' }}</h2>
+        <span class="eyebrow">REVISAR OPERACIÓN</span><h2 id="confirmar-titulo">{{ accion === 'guardar' ? (compraDirecta() ? 'Registrar compra directa' : origenesAcumulados().length ? 'Registrar análisis acumulado' : 'Registrar lote #' + editando()?.idRecepcion) : 'Crear lote de exportación' }}</h2>
         @if (accion === 'guardar') {
           <p>{{ editando()?.nombreAcopiador }} · {{ partidas.length }} partida(s) por ley.</p>
+          <ul>
+            @for (partida of calculo()?.detalles ?? []; track $index) {
+              <li>Ley {{ partida.ley | numeroClaro:'1.0-4' }} · {{ partida.pesoSinFundirG | numeroClaro:'1.0-3' }} g recibidos · {{ partida.pesoFundidoG | numeroClaro:'1.0-3' }} g fundidos · S/ {{ partida.totalPen | numeroClaro:'1.2-2' }}</li>
+            }
+          </ul>
           <dl><dt>Peso fundido</dt><dd>{{ calculo()?.pesoFundidoG | numeroClaro:'1.3-3' }} g</dd><dt>Total material</dt><dd>S/ {{ calculo()?.subtotal | numeroClaro:'1.2-2' }}</dd><dt>Adelanto</dt><dd>S/ {{ calculo()?.adelanto | numeroClaro:'1.2-2' }}</dd><dt>Total a pagar</dt><dd class="importe">S/ {{ calculo()?.total | numeroClaro:'1.2-2' }}</dd></dl>
         } @else {
           <p>Se reunirán {{ seleccionados().length }} lotes recibidos con {{ pesoSeleccionado() | numeroClaro:'1.3-3' }} g fundidos. Se conservará la ley de cada partida.</p><p>Los lotes incluidos quedarán bloqueados para edición mientras pertenezcan a exportación.</p>

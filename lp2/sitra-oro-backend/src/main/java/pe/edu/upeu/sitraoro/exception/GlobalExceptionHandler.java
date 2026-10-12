@@ -20,6 +20,10 @@ import org.springframework.security.core.AuthenticationException;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(MayoristaReglaException.class)
+    public ResponseEntity<Map<String,Object>> handleReglaMayorista(MayoristaReglaException ex) {
+        return ResponseEntity.badRequest().body(Map.of("status",400,"code",ex.getCodigo(),"message",ex.getMessage(),"timestamp",Instant.now().toString()));
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex) {
