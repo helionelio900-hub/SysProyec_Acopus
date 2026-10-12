@@ -1,0 +1,21 @@
+EXTRACTOS REALES DEL BACKEND — S09 MAYORISTA
+Origen: logs/s09-mayorista-runtime.log
+
+2026-10-11 21:20:54.996 [8f046909-eb04-4c50-97cb-4f3e64f68a72] INFO  p.e.u.s.filter.CorrelationIdFilter - HTTP GET /api/v1/mayorista/recepciones-ley status=200 duracionMs=136
+
+2026-10-11 21:23:26.733 [e3de1975-852a-4cd8-8c63-0bfa855769e5] INFO  p.e.u.s.filter.CorrelationIdFilter - HTTP POST /api/v1/mayorista/recepciones-ley/calcular status=200 duracionMs=63
+2026-10-11 21:23:27.259 [bab71d4e-54e5-42ed-8344-fcdedf87840e] INFO  p.e.u.s.filter.CorrelationIdFilter - HTTP POST /api/v1/mayorista/recepciones-ley/calcular status=200 duracionMs=4
+
+2026-10-11 21:25:24.853 [2e9abb4d-d985-4554-a669-6d91e482653d] WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [pe.edu.upeu.sitraoro.exception.MayoristaReglaException: La ley 85.5 está repetida en este lote. Reúne sus pesos en una sola partida.]
+2026-10-11 21:25:24.853 [2e9abb4d-d985-4554-a669-6d91e482653d] INFO  p.e.u.s.filter.CorrelationIdFilter - HTTP POST /api/v1/mayorista/recepciones-ley/calcular status=400 duracionMs=17
+
+2026-10-11 21:26:40.375 [0ffaebff-4896-43ee-9cfc-e3e6fa633ed1] INFO  p.e.u.s.filter.CorrelationIdFilter - HTTP POST /api/v1/mayorista/recepciones-ley/calcular status=200 duracionMs=5
+2026-10-11 21:26:40.739 [79c21136-6fa2-4bb8-ab40-fa8060d9f2c9] INFO  p.e.u.s.filter.CorrelationIdFilter - HTTP POST /api/v1/mayorista/recepciones-ley/calcular status=200 duracionMs=2
+
+2026-10-11 21:45:13.061 [ac03a27b-2121-4ba1-ba7f-fcafd0e9517d] WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [pe.edu.upeu.sitraoro.exception.MayoristaReglaException: El peso fundido no puede superar el peso sin fundir]
+2026-10-11 21:45:13.061 [ac03a27b-2121-4ba1-ba7f-fcafd0e9517d] INFO  p.e.u.s.filter.CorrelationIdFilter - HTTP POST /api/v1/mayorista/recepciones-ley/calcular status=400 duracionMs=39
+
+2026-10-11 21:46:29.065 [1e23b45a-adc7-48e4-ae13-6a83fd7c8878] WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [pe.edu.upeu.sitraoro.exception.MayoristaReglaException: El adelanto no puede superar el total de material]
+2026-10-11 21:46:29.065 [1e23b45a-adc7-48e4-ae13-6a83fd7c8878] INFO  p.e.u.s.filter.CorrelationIdFilter - HTTP POST /api/v1/mayorista/recepciones-ley/calcular status=400 duracionMs=2
+
+2026-10-11 21:38:43.599 [66da92bc-cc46-4e46-9af1-b770c4e11d29] INFO  p.e.u.s.filter.CorrelationIdFilter - HTTP GET /api/v1/mayorista/recepciones-ley/resumen status=200 duracionMs=52
