@@ -8,6 +8,12 @@ interface TokenPayload {
   sub?: string;
   roles?: string[];
   exp?: number;
+  realm_access?: {
+    roles?: string[];
+  };
+  documentoIdentidad?: string;
+  preferred_username?: string;
+  name?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -15,8 +21,24 @@ export class SesionService {
   private readonly router = inject(Router);
   private readonly tokenActual = signal(this.tokenGuardado());
   private temporizadorExpiracion: ReturnType<typeof setTimeout> | null = null;
-  readonly rol = computed(() => this.leerPayload()?.roles?.[0] as RolSitra | undefined);
-  readonly documento = computed(() => this.leerPayload()?.sub ?? '');
+  readonly rol = computed<RolSitra | undefined>(() => {
+    const payload = this.leerPayload();
+    if (!payload) return undefined;
+    const lista = [...(payload.roles ?? []), ...(payload.realm_access?.roles ?? [])];
+    if (lista.some((r) => r === 'G1_MAYORISTA' || r === 'Mayorista')) return 'G1_MAYORISTA';
+    if (lista.some((r) => r === 'G2_ACOPIADOR' || r === 'acopiador')) return 'G2_ACOPIADOR';
+    if (lista.some((r) => r === 'MINERO' || r === 'Minero')) return 'MINERO';
+    return undefined;
+  });
+  readonly documento = computed(
+    () => this.leerPayload()?.documentoIdentidad ?? this.leerPayload()?.sub ?? '',
+  );
+  readonly nombreUsuario = computed(
+    () =>
+      this.leerPayload()?.preferred_username ??
+      this.leerPayload()?.name ??
+      this.documento(),
+  );
   readonly autenticado = computed(() => !!this.tokenActual() && !this.tokenVencido());
 
   constructor() {

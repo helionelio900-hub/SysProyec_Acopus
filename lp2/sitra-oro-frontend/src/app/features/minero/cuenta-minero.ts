@@ -83,6 +83,8 @@ export class CuentaMinero implements OnInit {
         if (datos) { this.nombreConsultado = datos.nombresApellidos; this.form.controls.nombresApellidos.setValue(datos.nombresApellidos); this.estadoDni.set('Nombre obtenido por consulta de DNI.'); }
       });
     } else {
+      this.form.controls.documentoIdentidad.setValidators([Validators.required, Validators.maxLength(64)]);
+      this.form.controls.documentoIdentidad.updateValueAndValidity();
       this.form.controls.clave.setValidators([Validators.required, Validators.maxLength(64)]);
       this.form.controls.clave.updateValueAndValidity();
       this.form.controls.nombresApellidos.clearValidators();
@@ -133,6 +135,51 @@ export class CuentaMinero implements OnInit {
     }
 
     const { documentoIdentidad, clave } = this.form.getRawValue();
+
+    if (environment.keycloakUrl) {
+      const docLimpio = documentoIdentidad.trim();
+      const equivalencias: Record<string, string> = {
+        '75848157': 'mayorista.demo1',
+        '42824989': 'acopiador.demo1',
+      };
+      const usuarioAuth = equivalencias[docLimpio] || docLimpio;
+
+      const body = new URLSearchParams();
+      body.set('grant_type', 'password');
+      body.set('client_id', environment.keycloakClientId || 'sitra-oro-prueba');
+      body.set('username', usuarioAuth);
+      body.set('password', clave);
+
+      this.http
+        .post<{ access_token: string; token_type: string; expires_in: number }>(
+          environment.keycloakUrl,
+          body.toString(),
+          { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
+        )
+        .subscribe({
+          next: (token) => {
+            this.sesion.guardar(token.access_token);
+            const destino =
+              this.sesion.rol() === 'G2_ACOPIADOR'
+                ? '/acopio'
+                : this.sesion.rol() === 'G1_MAYORISTA'
+                  ? '/mayorista'
+                  : '/minero/cuenta';
+            void this.router.navigateByUrl(destino);
+          },
+          error: (error) => {
+            const detalle =
+              error.error?.error_description ||
+              error.error?.detail ||
+              error.error?.message ||
+              'Credenciales no válidas en Keycloak. Verifica tu usuario y clave.';
+            this.error.set(detalle);
+            this.enviando.set(false);
+          },
+        });
+      return;
+    }
+
     this.http
       .post<TokenResponse>(`${environment.apiBaseUrl}/api/v1/seguridad/login`, {
         documentoIdentidad,

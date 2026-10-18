@@ -30,6 +30,7 @@ export class Layout {
   protected readonly rolLabel = computed(() =>
     this.sesion.rol() === 'G2_ACOPIADOR' ? 'Acopiador' : 'Mayorista',
   );
+  protected readonly usuario = computed(() => this.sesion.nombreUsuario());
   protected cerrarSesion(): void {
     this.sesion.cerrar();
   }

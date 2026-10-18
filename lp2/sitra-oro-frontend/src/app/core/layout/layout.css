@@ -47,6 +47,14 @@
   border-radius: 999px;
   padding: 0.55rem 1rem;
 }
+.user-badge {
+  color: #c5d3e4;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #1c3553;
+}
 .role {
   color: #ffc84c;
   font-size: 0.85rem;

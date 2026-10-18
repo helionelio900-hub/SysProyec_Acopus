@@ -5,8 +5,11 @@
       <span>SITRA<span>-ORO</span></span></a
     >
     <div class="account">
-      <span class="role">{{ rolLabel() }}</span
-      ><button mat-button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+      @if (usuario()) {
+        <span class="user-badge">{{ usuario() }}</span>
+      }
+      <span class="role">{{ rolLabel() }}</span>
+      <button mat-button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
     </div>
   </header>
   <aside class="sidebar">

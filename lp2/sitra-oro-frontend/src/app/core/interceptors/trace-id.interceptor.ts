@@ -4,6 +4,10 @@ import { catchError, throwError } from 'rxjs';
 import { SesionService } from '../auth/sesion.service';
 
 export const traceIdInterceptor: HttpInterceptorFn = (request, next) => {
+  // Las peticiones OIDC directas a Keycloak no deben llevar cabeceras ajenas como X-Trace-ID
+  if (request.url.includes('/protocol/openid-connect') || request.url.includes(':38081')) {
+    return next(request);
+  }
   const sesion = inject(SesionService);
   const token =
     typeof sessionStorage === 'undefined' ? null : sessionStorage.getItem('sitraoro.accessToken');
