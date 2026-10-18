@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.sitraoro.acopio.minero.dto.*;
 import pe.edu.upeu.sitraoro.acopio.minero.service.MineroPortalService;
+import pe.edu.upeu.sitraoro.seguridad.service.IdentidadSesion;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,12 +23,12 @@ public class MineroPortalController {
 
     @GetMapping("/perfil")
     public PerfilMineroResponse perfil(@AuthenticationPrincipal Jwt jwt) {
-        return mineroPortalService.obtenerPerfil(jwt.getSubject());
+        return mineroPortalService.obtenerPerfil(IdentidadSesion.documento(jwt));
     }
 
     @PatchMapping("/perfil/centro-acopio")
     public PerfilMineroResponse cambiarCentro(@AuthenticationPrincipal Jwt jwt,
                                              @Valid @RequestBody CambiarCentroRequest request) {
-        return mineroPortalService.cambiarCentro(jwt.getSubject(), request);
+        return mineroPortalService.cambiarCentro(IdentidadSesion.documento(jwt), request);
     }
 }

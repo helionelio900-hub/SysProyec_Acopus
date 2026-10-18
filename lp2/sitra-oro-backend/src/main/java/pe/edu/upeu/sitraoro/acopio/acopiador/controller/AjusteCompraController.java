@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.AjusteCompraRequest;
 import pe.edu.upeu.sitraoro.acopio.acopiador.dto.AjusteCompraResponse;
 import pe.edu.upeu.sitraoro.acopio.acopiador.service.AjusteCompraService;
+import pe.edu.upeu.sitraoro.seguridad.service.IdentidadSesion;
 import java.util.List;
 
 @RestController
@@ -20,7 +21,7 @@ public class AjusteCompraController {
     @ResponseStatus(HttpStatus.CREATED)
     public AjusteCompraResponse solicitar(@PathVariable Long id, @Valid @RequestBody AjusteCompraRequest request,
                                            @AuthenticationPrincipal Jwt jwt) {
-        return ajustes.solicitar(id, centro(jwt), jwt.getSubject(), request);
+        return ajustes.solicitar(id, centro(jwt), IdentidadSesion.documento(jwt), request);
     }
 
     @GetMapping("/api/v1/acopio/ajustes")

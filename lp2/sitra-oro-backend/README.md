@@ -3,6 +3,15 @@
 Un proyecto Maven, Java 21, Spring Boot, JPA, Oracle y Spring Modulith.
 Módulos: seguridad, minero, parametros, cotizador, acopiador y mayorista.
 
+## Keycloak (práctica S10b)
+
+La adaptación y la configuración que realizarás en Keycloak están en
+[la guía SITRA-ORO](../../docs/S10b_Keycloak_SITRA_ORO.md).
+Inicia con `./scripts/iniciar_keycloak.ps1` para activar `dev,keycloak`;
+prueba con `./scripts/probar_keycloak.ps1 -Rol G1_MAYORISTA`.
+Ese perfil valida el emisor `http://localhost:38081/realms/Sitra_oro`
+y cierra el login local. El inicio habitual con `dev` conserva el acceso de la SPA actual.
+
 ## Inicio reproducible
 
 1. Configure `JAVA_HOME` hacia su JDK 21. Compruebe `./mvnw.cmd -version`.
