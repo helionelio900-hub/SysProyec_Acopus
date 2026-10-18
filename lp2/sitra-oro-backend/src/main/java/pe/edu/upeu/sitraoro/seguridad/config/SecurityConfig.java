@@ -6,12 +6,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -29,11 +33,13 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Bean
+    @Profile("!keycloak")
     SecretKey jwtSecretKey(@Value("${sitraoro.security.jwt.secret:}") String configuredSecret,
                            Environment environment) {
         byte[] keyBytes;
@@ -53,11 +59,13 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Profile("!keycloak")
     JwtEncoder jwtEncoder(SecretKey jwtSecretKey) {
         return new NimbusJwtEncoder(new ImmutableSecret<>(jwtSecretKey));
     }
 
     @Bean
+    @Profile("!keycloak")
     JwtDecoder jwtDecoder(SecretKey jwtSecretKey) {
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(jwtSecretKey)
                 .macAlgorithm(MacAlgorithm.HS256)
@@ -73,6 +81,7 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Profile("!keycloak")
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter authorities = new JwtGrantedAuthoritiesConverter();
         authorities.setAuthoritiesClaimName("roles");
@@ -84,18 +93,31 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain apiSecurity(HttpSecurity http,
-                                    JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+                                    Converter<org.springframework.security.oauth2.jwt.Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter,
+                                    Environment environment) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize
+                .authorizeHttpRequests(authorize -> {
+                    if (environment.matchesProfiles("keycloak")) {
+                        authorize.requestMatchers(HttpMethod.POST, "/api/v1/seguridad/login").denyAll();
+                    } else {
+                        authorize.requestMatchers(HttpMethod.POST, "/api/v1/seguridad/login").permitAll();
+                    }
+                    authorize
                         .requestMatchers("/actuator/health", "/actuator/health/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/cotizador/**", "/api/v1/publico/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/seguridad/login", "/api/v1/minero/registro").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/minero/registro").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/perfil").authenticated()
+                        // Módulo no transaccional de Mayorista (catálogo de centros de acopio):
+                        .requestMatchers(HttpMethod.GET, "/api/v1/mayorista/centros-acopio").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/mayorista/centros-acopio").hasRole("G1_MAYORISTA")
+                        // Módulos transaccionales por rol:
                         .requestMatchers("/api/v1/acopio/**").hasRole("G2_ACOPIADOR")
                         .requestMatchers("/api/v1/mayorista/**").hasRole("G1_MAYORISTA")
                         .requestMatchers("/api/v1/minero/**").hasRole("MINERO")
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated();
+                })
                 .oauth2ResourceServer(resource -> resource.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
         return http.build();
     }

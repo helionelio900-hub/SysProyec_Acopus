@@ -1,0 +1,8 @@
+# Activar junto al perfil dev: --spring.profiles.active=dev,keycloak
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:38081/realms/Sitra_oro}
+          jws-algorithms: RS256

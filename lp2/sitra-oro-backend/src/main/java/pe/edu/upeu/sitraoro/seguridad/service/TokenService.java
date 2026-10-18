@@ -1,6 +1,7 @@
 package pe.edu.upeu.sitraoro.seguridad.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @Service
+@Profile("!keycloak")
 @RequiredArgsConstructor
 public class TokenService {
 
