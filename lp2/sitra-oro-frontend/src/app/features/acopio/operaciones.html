@@ -137,7 +137,15 @@
                     <td>{{ gramos(compra.pesoFundidoNetoG) }}</td>
                     <td>{{ dinero(compra.precioAplicadoPen) }}</td>
                     <td class="amount-cell">{{ dinero(compra.totalPagadoPen) }}</td>
-                    <td>{{ compra.idRecepcionMayorista !== null ? 'Enviado al mayorista' : compra.idLiquidacionG1 !== null ? 'Vinculada a liquidación' : 'Disponible' }}</td>
+                    <td>
+                      <div>{{ compra.idRecepcionMayorista !== null ? 'Enviado al mayorista' : compra.idLiquidacionG1 !== null ? 'Vinculada a liquidación' : 'Disponible' }}</div>
+                      @if (ajusteDe(compra); as ajuste) {
+                        <button type="button" class="motivo-badge" (click)="verDetalleAjuste(ajuste)" [attr.aria-label]="'Ver motivo del ajuste #' + ajuste.idAjuste">
+                          <span class="motivo-icon">📝</span>
+                          <span class="motivo-texto"><strong>Motivo:</strong> {{ ajuste.motivo }}</span>
+                        </button>
+                      }
+                    </td>
                     <td class="purchase-row-actions">
                       <button type="button" class="edit-purchase-button" [disabled]="guardando() || enviandoMayorista() || enviandoAjuste()" (click)="iniciarAjuste(compra, 'EDICION')">Editar</button>
                       <button type="button" class="delete-purchase-button" [disabled]="guardando() || enviandoMayorista() || enviandoAjuste()" (click)="iniciarAjuste(compra, 'ANULACION')">Anular</button>
@@ -208,9 +216,13 @@
                 <td>{{ gramos(item.pesoFundidoNetoG) }}</td>
                 <td>{{ dinero(item.precioAplicadoPen) }}</td>
                 <td class="amount-cell">{{ dinero(item.totalPagadoPen) }}</td>
-                <td>{{ item.anulada ? 'Anulada' : item.idLiquidacionG1 !== null ? 'Vinculada a liquidación #' + item.idLiquidacionG1 : item.idRecepcionMayorista !== null ? 'Enviado al mayorista' : 'Disponible' }}
+                <td>
+                  <div>{{ item.anulada ? 'Anulada' : item.idLiquidacionG1 !== null ? 'Vinculada a liquidación #' + item.idLiquidacionG1 : item.idRecepcionMayorista !== null ? 'Enviado al mayorista' : 'Disponible' }}</div>
                   @if (ajusteDe(item); as ajuste) {
-                    <small>Ajuste #{{ ajuste.idAjuste }}: {{ ajuste.estado.replaceAll('_', ' ').toLowerCase() }}</small>
+                    <button type="button" class="motivo-badge" (click)="verDetalleAjuste(ajuste)" [attr.aria-label]="'Ver detalle del ajuste #' + ajuste.idAjuste">
+                      <span class="motivo-icon">📝</span>
+                      <span class="motivo-texto"><strong>Ajuste #{{ ajuste.idAjuste }}:</strong> {{ ajuste.motivo }}</span>
+                    </button>
                   }
                 </td>
 
@@ -238,7 +250,15 @@
                   <td>{{ item.minero.nombresApellidos }}</td>
                   <td>{{ item.tipoOro === 'ROJO' ? 'Rojo' : 'Verde' }}</td>
                   <td>{{ gramos(item.pesoFundidoNetoG) }}</td>
-                  <td>Eliminada del registro activo</td>
+                  <td>
+                    <div>Eliminada del registro activo</div>
+                    @if (ajusteDe(item); as ajuste) {
+                      <button type="button" class="motivo-badge" (click)="verDetalleAjuste(ajuste)" [attr.aria-label]="'Ver motivo de anulación'">
+                        <span class="motivo-icon">📝</span>
+                        <span class="motivo-texto"><strong>Motivo:</strong> {{ ajuste.motivo }}</span>
+                      </button>
+                    }
+                  </td>
                 </tr>
               }
             </tbody>
@@ -252,6 +272,13 @@
       <section class="panel adjustment-panel" aria-labelledby="adjustment-title">
         <h3 id="adjustment-title">{{ tipoAjuste() === 'EDICION' ? 'Editar' : 'Anular' }} compra #{{ compra.idTransaccionG2 }}</h3>
         <p>El acopiador registra el motivo y la compra original queda en el historial.</p>
+        @if (ajusteDe(compra); as ajustePrevio) {
+          <div class="aviso-motivo-previo">
+            <strong>Último motivo registrado (Ajuste #{{ ajustePrevio.idAjuste }}):</strong>
+            <p>“{{ ajustePrevio.motivo }}”</p>
+            <small>Registrado el {{ ajustePrevio.fechaSolicitud | date:'short' }}</small>
+          </div>
+        }
         @if (tipoAjuste() === 'ANULACION') {
           <p>Al confirmar la anulación, la compra deja de estar disponible y conserva su historial. Las entregas ya registradas mantienen sus datos originales.</p>
         } @else if (compra.idLiquidacionG1 !== null || compra.idRecepcionMayorista !== null) {
@@ -268,7 +295,7 @@
             <label>Peso fundido (g)<input type="number" step="0.001" min="0.001" formControlName="pesoFundidoNuevo" /></label>
             <label>Precio por gramo (S/)<input type="number" step="0.01" min="0.01" formControlName="precioNuevo" /></label>
           }
-          <label class="adjustment-reason">Motivo de la {{ tipoAjuste() === 'EDICION' ? 'corrección' : 'anulación' }}
+          <label class="adjustment-reason">Motivo de la {{ tipoAjuste() === 'EDICION' ? 'corrección' : 'anulación' }} <small class="delivery-secondary">(Se mostrará en la tabla de compras, historial y auditoría)</small>
             <textarea formControlName="motivo" rows="3" maxlength="500" placeholder="Explica qué dato debe corregirse y por qué"></textarea>
           </label>
           @if (formAjuste.controls.motivo.touched && formAjuste.controls.motivo.invalid) {
@@ -347,4 +374,45 @@
       <button mat-flat-button class="button-primary" type="button" [disabled]="lineasEnvio.invalid || enviandoMayorista() || guardando() || enviandoAjuste() || cargando()" (click)="confirmarEnvioMayorista()">Confirmar y enviar</button>
     </footer>
   </dialog>
+
+  @if (detalleAjuste(); as ajuste) {
+    <div class="modal-ajuste-backdrop" (click)="cerrarDetalleAjuste()" (keydown.escape)="cerrarDetalleAjuste()">
+      <div class="modal-ajuste-card" (click)="$event.stopPropagation()">
+        <header class="modal-ajuste-header">
+          <div>
+            <span class="panel-kicker">AUDITORÍA Y TRAZABILIDAD</span>
+            <h3>Detalle del Ajuste #{{ ajuste.idAjuste }}</h3>
+          </div>
+          <button type="button" class="modal-ajuste-close" (click)="cerrarDetalleAjuste()" aria-label="Cerrar">✕</button>
+        </header>
+        <div class="modal-ajuste-body">
+          <div class="motivo-destacado">
+            <strong>Motivo registrado por el acopiador:</strong>
+            <p>“{{ ajuste.motivo }}”</p>
+          </div>
+          <dl class="ajuste-meta-grid">
+            <div><dt>Compra:</dt><dd>#{{ ajuste.idTransaccionG2 }}</dd></div>
+            <div><dt>Operación:</dt><dd>{{ ajuste.tipo === 'EDICION' ? 'Corrección de datos' : 'Anulación de compra' }}</dd></div>
+            <div><dt>Estado:</dt><dd><span class="badge-ajuste-estado">{{ ajuste.estado }}</span></dd></div>
+            <div><dt>Fecha de registro:</dt><dd>{{ ajuste.fechaSolicitud | date:'medium' }}</dd></div>
+          </dl>
+          @if (ajuste.tipo === 'EDICION') {
+            <table class="tabla-comparativa-ajuste">
+              <thead><tr><th>Dato</th><th>Antes</th><th>Después</th></tr></thead>
+              <tbody>
+                <tr><td>Color</td><td>{{ ajuste.tipoOroAnterior === 'ROJO' ? '🔴 Rojo' : '🟢 Verde' }}</td><td>{{ ajuste.tipoOroNuevo === 'ROJO' ? '🔴 Rojo' : '🟢 Verde' }}</td></tr>
+                <tr><td>Peso sin fundir</td><td>{{ gramos(ajuste.pesoSinFundirAnterior) }}</td><td>{{ gramos(ajuste.pesoSinFundirNuevo ?? 0) }}</td></tr>
+                <tr><td>Peso fundido</td><td>{{ gramos(ajuste.pesoFundidoAnterior) }}</td><td>{{ gramos(ajuste.pesoFundidoNuevo ?? 0) }}</td></tr>
+                <tr><td>Precio por gramo</td><td>{{ dinero(ajuste.precioAnterior) }}</td><td>{{ dinero(ajuste.precioNuevo ?? 0) }}</td></tr>
+                <tr><td>Total pagado</td><td>{{ dinero(ajuste.totalAnterior) }}</td><td>{{ dinero(ajuste.totalNuevo ?? 0) }}</td></tr>
+              </tbody>
+            </table>
+          }
+        </div>
+        <footer class="modal-ajuste-footer">
+          <button mat-flat-button class="button-primary" type="button" (click)="cerrarDetalleAjuste()">Cerrar</button>
+        </footer>
+      </div>
+    </div>
+  }
 </section>

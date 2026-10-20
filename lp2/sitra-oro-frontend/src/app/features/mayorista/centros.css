@@ -24,21 +24,124 @@
 .form-group .field small {
   font-weight: 450;
 }
-.zones-manager {
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
-  padding: 1.1rem;
+.field-zona-container {
+  display: flex;
+  flex-direction: column;
 }
-.zones-manager h3 { margin: 0 0 0.35rem; font-size: 1rem; }
-.zones-manager p { margin: 0 0 0.8rem; color: #58708f; }
-.zone-create { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-.zone-create input { flex: 1 1 15rem; padding: 0.75rem; border: 1px solid #cad8e8; border-radius: 0.55rem; }
-.zone-list { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; }
-.zone-list li { display: flex; align-items: center; gap: 0.55rem; padding: 0.4rem 0.65rem; border: 1px solid #d8e2ee; border-radius: 0.55rem; }
-.zone-list button { border: 0; background: transparent; color: #a42323; cursor: pointer; }
-.zone-list button:disabled { opacity: 0.5; cursor: default; }
+.field-zona-container label {
+  color: #33465f;
+  font-size: 0.83rem;
+  font-weight: 700;
+  margin-bottom: 0.43rem;
+}
+.zona-selector-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.zona-selector-row select {
+  flex: 1;
+}
+.btn-plus-zona {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.6rem;
+  background: #fdf5e2;
+  border: 1.5px solid #d4a73b;
+  color: #936b0f;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.btn-plus-zona:hover {
+  background: #f8e5b8;
+  border-color: #b58925;
+  color: #6d4e04;
+  transform: translateY(-1px);
+}
+.zona-inline-add-row {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+.zona-inline-add-row input {
+  flex: 1;
+  padding: 0.65rem 0.8rem;
+  border: 1.5px solid #d4a73b !important;
+  border-radius: 0.6rem;
+  background: #fff;
+  font-size: 0.88rem;
+  outline: none;
+}
+.zona-inline-add-row input:focus {
+  outline: 3px solid #f6cf78a8 !important;
+}
+.btn-confirm-zona {
+  background: #d4a73b;
+  color: #fff;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 750;
+  padding: 0 1rem;
+  height: 2.75rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+.btn-confirm-zona:hover:not(:disabled) {
+  background: #b88d27;
+}
+.btn-confirm-zona:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.btn-cancel-zona {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.6rem;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.btn-cancel-zona:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
 @media (max-width: 700px) {
   .form-group {
     padding: 0.8rem;
   }
 }
+
+.major-field-hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.cargando-dni {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.exito-dni {
+  color: #059669;
+  font-weight: 600;
+}
+

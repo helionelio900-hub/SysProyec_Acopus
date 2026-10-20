@@ -1,7 +1,10 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { CentroAcopio, OperacionesService, ZonaAcopio } from '../../core/api/operaciones.service';
 import { MAYORISTA_VISTA_PREVIA } from './mayorista-preview';
 
@@ -13,10 +16,13 @@ import { MAYORISTA_VISTA_PREVIA } from './mayorista-preview';
 })
 export class CentrosMayorista implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly http = inject(HttpClient);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly service = inject(OperacionesService);
   protected readonly vistaPrevia = inject(MAYORISTA_VISTA_PREVIA);
   protected readonly centros = signal<CentroAcopio[]>([]);
   protected readonly zonas = signal<ZonaAcopio[]>([]);
+  protected readonly mostrandoNuevaZona = signal(false);
   protected readonly nuevaZona = this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(100)]);
   protected readonly gestionandoZona = signal(false);
   protected readonly cargando = signal(true);
@@ -24,6 +30,12 @@ export class CentrosMayorista implements OnInit {
   protected readonly error = signal('');
   protected readonly mensaje = signal('');
   protected readonly mostrarFormulario = signal(this.vistaPrevia);
+
+  // Consulta de DNI para la cuenta del acopiador
+  protected readonly consultandoDniAcopiador = signal(false);
+  protected readonly estadoDniAcopiador = signal('');
+  protected readonly nombreAcopiadorConsultado = signal('');
+
   protected readonly form = this.fb.nonNullable.group({
     nombre: ['', [Validators.required, Validators.maxLength(120)]],
     zona: ['', [Validators.required, Validators.maxLength(100)]],
@@ -41,6 +53,49 @@ export class CentrosMayorista implements OnInit {
   ngOnInit(): void {
     this.cargar();
     this.cargarZonas();
+
+    // Consulta automática de DNI del acopiador en RENIEC
+    this.form.controls.documentoAcopiador.valueChanges
+      .pipe(
+        tap(() => {
+          this.nombreAcopiadorConsultado.set('');
+          this.estadoDniAcopiador.set('');
+          this.consultandoDniAcopiador.set(false);
+        }),
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap((dni) => {
+          const limpio = (dni || '').trim();
+          if (!/^\d{8}$/.test(limpio)) return of(null);
+          this.consultandoDniAcopiador.set(true);
+          this.estadoDniAcopiador.set('Consultando DNI en RENIEC...');
+          return this.http
+            .get<{ nombresApellidos: string }>(
+              `${environment.apiBaseUrl}/api/v1/publico/identidad/dni/${limpio}`
+            )
+            .pipe(
+              map((datos) =>
+                this.form.controls.documentoAcopiador.value.trim() === limpio ? datos : null
+              ),
+              catchError(() => {
+                if (this.form.controls.documentoAcopiador.value.trim() === limpio) {
+                  this.estadoDniAcopiador.set(
+                    'No se pudo verificar el DNI automáticamente.'
+                  );
+                }
+                return of(null);
+              })
+            );
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((datos) => {
+        this.consultandoDniAcopiador.set(false);
+        if (datos) {
+          this.nombreAcopiadorConsultado.set(datos.nombresApellidos);
+          this.estadoDniAcopiador.set('Nombre obtenido por consulta de DNI.');
+        }
+      });
   }
   protected cargarZonas(): void {
     this.service.zonasAcopio().subscribe({
@@ -50,7 +105,7 @@ export class CentrosMayorista implements OnInit {
   }
   protected agregarZona(): void {
     this.nuevaZona.markAsTouched();
-    if (this.nuevaZona.invalid || this.gestionandoZona()) return;
+    if (this.nuevaZona.invalid || !this.nuevaZona.value.trim() || this.gestionandoZona()) return;
     this.gestionandoZona.set(true);
     this.error.set('');
     this.service.crearZonaAcopio(this.nuevaZona.value.trim()).subscribe({
@@ -59,7 +114,8 @@ export class CentrosMayorista implements OnInit {
         this.form.controls.zona.setValue(zona.nombre);
         this.nuevaZona.reset();
         this.gestionandoZona.set(false);
-        this.mensaje.set(`Zona ${zona.nombre} guardada y lista para seleccionar.`);
+        this.mostrandoNuevaZona.set(false);
+        this.mensaje.set(`Zona "${zona.nombre}" agregada y seleccionada.`);
       },
       error: (response: HttpErrorResponse) => {
         this.error.set(response.error?.detail ?? response.error?.message ?? 'No se pudo guardar la zona.');

@@ -41,7 +41,7 @@
                   class="button-primary"
                   type="button"
                   [disabled]="aprobando() === solicitud.documentoIdentidad"
-                  (click)="aprobar(solicitud)"
+                  (click)="pedirAprobacion(solicitud)"
                 >
                   {{
                     aprobando() === solicitud.documentoIdentidad ? 'Aprobando…' : 'Aprobar cuenta'
@@ -69,9 +69,95 @@
           <p>Partida {{ partida.NUMERO }} · {{ partida.COLOR }} · Peso crudo: {{ partida.PESO_CRUDO | numeroClaro:'1.0-3' }} g · Oro estimado: {{ partida.PESO_ESTIMADO | numeroClaro:'1.0-3' }} g</p>
         }
         @if (entrega.ESTADO === 'PENDIENTE') {
-          <button mat-flat-button class="button-primary" type="button" [disabled]="aceptando() !== null" (click)="aceptarEntrega(entrega)">Aceptar solicitud de entrega</button>
+          <button mat-flat-button class="button-primary" type="button" [disabled]="aceptando() !== null" (click)="pedirAceptarEntrega(entrega)">Aceptar solicitud de entrega</button>
         }
       </div>
     } @empty { <p>No hay solicitudes de entrega.</p> }
   </div>
 </section>
+
+@if (solicitudPorAprobar(); as sol) {
+  <div class="sitra-modal-backdrop" (click)="cancelarAprobacion()">
+    <div class="sitra-modal-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="modal-sol-title">
+      <div class="sitra-modal-header">
+        <div class="sitra-modal-badge gold">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <polyline points="16 11 18 13 22 9"></polyline>
+          </svg>
+        </div>
+        <div class="sitra-modal-titles">
+          <h2 id="modal-sol-title">Aprobar cuenta de minero</h2>
+          <p>Habilitar acceso y operaciones en este centro de acopio</p>
+        </div>
+        <button type="button" class="sitra-modal-close" (click)="cancelarAprobacion()" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="sitra-modal-body">
+        <div class="sitra-info-card">
+          <div class="sitra-info-row">
+            <span class="label">Documento de identidad:</span>
+            <span class="val doc-chip">{{ sol.documentoIdentidad }}</span>
+          </div>
+          <div class="sitra-info-row">
+            <span class="label">Registro de minero:</span>
+            <span class="val">N.º {{ sol.idMinero }}</span>
+          </div>
+          <div class="sitra-info-row">
+            <span class="label">Punto de acopio asignado:</span>
+            <span class="val">Centro N.º {{ sol.idCentroAcopioPreferido }}</span>
+          </div>
+        </div>
+        <p class="sitra-modal-desc">
+          Al confirmar, el minero podrá iniciar sesión en la plataforma y realizar entregas de mineral con liquidación directa.
+        </p>
+      </div>
+
+      <div class="sitra-modal-actions">
+        <button type="button" class="btn-cancel" (click)="cancelarAprobacion()" [disabled]="aprobando() !== null">
+          Cancelar
+        </button>
+        <button type="button" class="btn-confirm" (click)="confirmarAprobacion()" [disabled]="aprobando() !== null">
+          {{ aprobando() !== null ? 'Aprobando…' : 'Confirmar y activar cuenta' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (entregaPorAceptar(); as ent) {
+  <div class="sitra-modal-backdrop" (click)="cancelarAceptarEntrega()">
+    <div class="sitra-modal-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="modal-ent-title">
+      <div class="sitra-modal-header">
+        <div class="sitra-modal-badge gold">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <div class="sitra-modal-titles">
+          <h2 id="modal-ent-title">Aceptar solicitud de entrega #{{ ent.ID_SOLICITUD }}</h2>
+          <p>Minero: {{ ent.NOMBRES_APELLIDOS }}</p>
+        </div>
+        <button type="button" class="sitra-modal-close" (click)="cancelarAceptarEntrega()" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="sitra-modal-body">
+        <p class="sitra-modal-desc">
+          Se aceptará la solicitud con <strong>{{ ent.PARTIDAS.length }} partida(s) de mineral</strong>. Los pesos definitivos se confirmarán en la balanza física del centro.
+        </p>
+      </div>
+
+      <div class="sitra-modal-actions">
+        <button type="button" class="btn-cancel" (click)="cancelarAceptarEntrega()" [disabled]="aceptando() !== null">
+          Cancelar
+        </button>
+        <button type="button" class="btn-confirm" (click)="confirmarAceptarEntrega()" [disabled]="aceptando() !== null">
+          {{ aceptando() !== null ? 'Aceptando…' : 'Aceptar solicitud' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

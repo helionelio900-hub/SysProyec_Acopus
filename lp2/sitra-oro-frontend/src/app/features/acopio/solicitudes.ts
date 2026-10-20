@@ -32,11 +32,15 @@ export class SolicitudesAcopio implements OnInit {
   protected readonly solicitudes = signal<SolicitudMinero[]>([]);
   protected readonly cargando = signal(true);
   protected readonly aprobando = signal<string | null>(null);
+  protected readonly solicitudPorAprobar = signal<SolicitudMinero | null>(null);
+  protected readonly entregaPorAceptar = signal<EntregaMinero | null>(null);
   protected readonly error = signal('');
   protected readonly mensaje = signal('');
+
   ngOnInit(): void {
     this.cargar();
   }
+
   protected cargar(): void {
     this.http.get<EntregaMinero[]>(`${environment.apiBaseUrl}/api/v1/acopio/solicitudes-entrega`).subscribe({
       next: items => this.entregas.set(items),
@@ -61,13 +65,18 @@ export class SolicitudesAcopio implements OnInit {
       },
     });
   }
-  protected aprobar(solicitud: SolicitudMinero): void {
-    if (
-      !window.confirm(
-        `¿Aprobar la cuenta del minero con documento ${solicitud.documentoIdentidad}?`,
-      )
-    )
-      return;
+
+  protected pedirAprobacion(solicitud: SolicitudMinero): void {
+    this.solicitudPorAprobar.set(solicitud);
+  }
+
+  protected cancelarAprobacion(): void {
+    this.solicitudPorAprobar.set(null);
+  }
+
+  protected confirmarAprobacion(): void {
+    const solicitud = this.solicitudPorAprobar();
+    if (!solicitud) return;
     this.aprobando.set(solicitud.documentoIdentidad);
     this.error.set('');
     this.mensaje.set('');
@@ -77,9 +86,10 @@ export class SolicitudesAcopio implements OnInit {
           items.filter((item) => item.documentoIdentidad !== solicitud.documentoIdentidad),
         );
         this.mensaje.set(
-          `La cuenta ${solicitud.documentoIdentidad} quedó aprobada para este centro.`,
+          `La cuenta DNI ${solicitud.documentoIdentidad} quedó aprobada para este centro.`,
         );
         this.aprobando.set(null);
+        this.solicitudPorAprobar.set(null);
         console.info('[Acopio] Solicitud aprobada.');
       },
       error: (response: HttpErrorResponse) => {
@@ -88,7 +98,35 @@ export class SolicitudesAcopio implements OnInit {
             'No se pudo aprobar la solicitud. Actualiza la lista e inténtalo nuevamente.',
         );
         this.aprobando.set(null);
+        this.solicitudPorAprobar.set(null);
         console.error('[Acopio] No se pudo aprobar la solicitud.', response.status);
+      },
+    });
+  }
+
+  protected pedirAceptarEntrega(entrega: EntregaMinero): void {
+    this.entregaPorAceptar.set(entrega);
+  }
+
+  protected cancelarAceptarEntrega(): void {
+    this.entregaPorAceptar.set(null);
+  }
+
+  protected confirmarAceptarEntrega(): void {
+    const entrega = this.entregaPorAceptar();
+    if (!entrega) return;
+    this.aceptando.set(entrega.ID_SOLICITUD);
+    this.http.post(`${environment.apiBaseUrl}/api/v1/acopio/solicitudes-entrega/${entrega.ID_SOLICITUD}/aceptar`, {}).subscribe({
+      next: () => {
+        this.aceptando.set(null);
+        this.entregaPorAceptar.set(null);
+        this.mensaje.set('Solicitud de entrega aceptada. Ya puedes registrar su compra en Compras de oro.');
+        this.cargar();
+      },
+      error: () => {
+        this.aceptando.set(null);
+        this.entregaPorAceptar.set(null);
+        this.error.set('No se pudo aceptar la entrega. Actualiza e intenta nuevamente.');
       },
     });
   }

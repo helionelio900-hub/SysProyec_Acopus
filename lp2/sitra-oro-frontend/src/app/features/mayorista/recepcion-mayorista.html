@@ -14,7 +14,14 @@
     <button [class.active]="seccion() === 'reporte'" [attr.aria-current]="seccion() === 'reporte' ? 'page' : null" [disabled]="!!editando() || guardando()" (click)="cambiarSeccion('reporte')">Reporte de compras</button>
   </nav>
   @if (error()) { <p class="feedback error" role="alert">{{ error() }}</p> }
-  @if (mensaje()) { <p class="feedback" role="status">{{ mensaje() }}</p> }
+  @if (mensaje()) {
+    <div class="feedback feedback-con-ticket" role="status">
+      <span>{{ mensaje() }}</span>
+      @if (ticketActual(); as t) {
+        <button mat-stroked-button class="button-secondary ticket-alerta-btn" type="button" (click)="imprimirTicket(t)">🖨️ Sacar ticket #{{ t.idRecepcion }}</button>
+      }
+    </div>
+  }
 
   @if (editando(); as lote) {
     <form id="editor-lote" class="panel editor" [formGroup]="form" (ngSubmit)="revisar()">
@@ -141,7 +148,7 @@
                     <td class="numero">${{ p.precioUsd | numeroClaro:'1.2-2' }}</td>
                     <td class="numero">S/ {{ p.precioPen | numeroClaro:'1.2-2' }}</td>
                     <td class="importe">S/ {{ p.totalPen | numeroClaro:'1.2-2' }}</td>
-                    <td><span class="major-status ready">Valorizado</span></td>
+                    <td><span class="major-status ready">Valorizado</span> <button type="button" class="accion accion-ticket" (click)="abrirTicketPorId(p.idRecepcion)">🖨️ Ticket</button></td>
                   </tr>
                 }
               } @empty {
@@ -169,7 +176,7 @@
                       <td class="numero">${{ p.precioUsd | numeroClaro:'1.2-2' }}</td>
                       <td class="numero">S/ {{ p.precioPen | numeroClaro:'1.2-2' }}</td>
                       <td class="importe">S/ {{ p.totalPen | numeroClaro:'1.2-2' }}</td>
-                      <td>@if (primero) { <span class="major-status" [class.ready]="r.estado === 'VALORIZADO'">{{ estado(r) }}</span>@if (seccion() === 'recepciones' && r.estado !== 'EN_LOTE') { <button type="button" class="accion" (click)="abrir(r)">Editar</button> } }</td>
+                      <td>@if (primero) { <span class="major-status" [class.ready]="r.estado === 'VALORIZADO'">{{ estado(r) }}</span>@if (seccion() === 'recepciones' && r.estado !== 'EN_LOTE') { <button type="button" class="accion" (click)="abrir(r)">Editar</button> }@if (r.estado === 'VALORIZADO') { <button type="button" class="accion accion-ticket" (click)="abrirTicket(r)">🖨️ Ticket</button> } }</td>
                     </tr>
                   } @empty {
                     @if (r.pesoRojoSinFundirG && r.pesoVerdeSinFundirG) {
@@ -235,14 +242,92 @@
           <p>{{ editando()?.nombreAcopiador }} · {{ partidas.length }} partida(s) por ley.</p>
           <ul>
             @for (partida of calculo()?.detalles ?? []; track $index) {
-              <li>Ley {{ partida.ley | numeroClaro:'1.0-4' }} · {{ partida.pesoSinFundirG | numeroClaro:'1.0-3' }} g recibidos · {{ partida.pesoFundidoG | numeroClaro:'1.0-3' }} g fundidos · S/ {{ partida.totalPen | numeroClaro:'1.2-2' }}</li>
+              <li>Ley {{ partida.ley | numeroClaro:'1.0-4' }} · % {{ partida.porcentaje | numeroClaro:'1.0-4' }}% · {{ partida.pesoSinFundirG | numeroClaro:'1.0-3' }} g recibidos · {{ partida.pesoFundidoG | numeroClaro:'1.0-3' }} g fundidos · S/ {{ partida.totalPen | numeroClaro:'1.2-2' }}</li>
             }
           </ul>
           <dl><dt>Peso fundido</dt><dd>{{ calculo()?.pesoFundidoG | numeroClaro:'1.3-3' }} g</dd><dt>Total material</dt><dd>S/ {{ calculo()?.subtotal | numeroClaro:'1.2-2' }}</dd><dt>Adelanto</dt><dd>S/ {{ calculo()?.adelanto | numeroClaro:'1.2-2' }}</dd><dt>Total a pagar</dt><dd class="importe">S/ {{ calculo()?.total | numeroClaro:'1.2-2' }}</dd></dl>
         } @else {
           <p>Se reunirán {{ seleccionados().length }} lotes recibidos con {{ pesoSeleccionado() | numeroClaro:'1.3-3' }} g fundidos. Se conservará la ley de cada partida.</p><p>Los lotes incluidos quedarán bloqueados para edición mientras pertenezcan a exportación.</p>
         }
-        <div class="modal-acciones"><button mat-stroked-button class="button-secondary" [disabled]="guardando()" (click)="confirmacion.set(null)" cdkFocusInitial>Volver</button><button mat-flat-button class="button-primary" [disabled]="guardando()" (click)="confirmar()">{{ guardando() ? 'Guardando…' : 'Confirmar' }}</button></div>
+        <div class="modal-acciones">
+          <button mat-stroked-button class="button-secondary" [disabled]="guardando()" (click)="confirmacion.set(null)" cdkFocusInitial>Volver</button>
+          @if (accion === 'guardar') {
+            <button mat-stroked-button class="button-secondary" [disabled]="guardando()" (click)="previsualizarTicket()">🖨️ Sacar ticket previo</button>
+          }
+          <button mat-flat-button class="button-primary" [disabled]="guardando()" (click)="confirmar()">{{ guardando() ? 'Guardando…' : 'Confirmar' }}</button>
+        </div>
+      </section>
+    </div>
+  }
+
+  @if (ticketActual(); as t) {
+    <div class="modal-fondo" (keydown.escape)="cerrarTicket()">
+      <section class="confirmar modal-ticket-wrap" role="dialog" aria-modal="true" aria-labelledby="ticket-modal-title" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+        <div class="ticket-header-bar">
+          <div>
+            <span class="eyebrow">COMPROBANTE DE LIQUIDACIÓN</span>
+            <h2 id="ticket-modal-title">Ticket de liquidación #{{ t.idRecepcion }}</h2>
+          </div>
+          <button type="button" class="ticket-close-btn" (click)="cerrarTicket()" aria-label="Cerrar ticket">✕</button>
+        </div>
+
+        <div class="ticket-papel-preview" id="recibo-imprimible">
+          <div class="ticket-brand">
+            <h3>SITRA - ORO</h3>
+            <p>COMPROBANTE DE LIQUIDACIÓN POR LEY</p>
+            <p class="ticket-subtext">MÓDULO MAYORISTA</p>
+          </div>
+          <div class="ticket-meta-box">
+            <div><span>Lote / Comprobante:</span> <strong>#{{ t.idRecepcion }}</strong></div>
+            <div><span>Acopiador / Origen:</span> <strong>{{ t.nombreAcopiador }}</strong></div>
+            <div><span>Fecha:</span> <strong>{{ t.fecha | date:'dd/MM/yyyy' }}</strong></div>
+            <div><span>Estado:</span> <strong>{{ t.estado }}</strong></div>
+          </div>
+
+          <div class="ticket-section-title">DETALLE DE PARTIDAS:</div>
+          <table class="ticket-table">
+            <thead>
+              <tr>
+                <th>Ley</th>
+                <th>%</th>
+                <th>Entrada</th>
+                <th>Fundido</th>
+                <th>Precio S/</th>
+                <th>Total S/</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of t.detalles; track $index) {
+                <tr>
+                  <td><strong>{{ p.ley | numeroClaro:'1.0-4' }}</strong></td>
+                  <td><strong>{{ p.porcentaje | numeroClaro:'1.0-4' }}%</strong></td>
+                  <td>{{ p.pesoSinFundirG | numeroClaro:'1.0-3' }}g</td>
+                  <td>{{ p.pesoFundidoG | numeroClaro:'1.0-3' }}g</td>
+                  <td>S/ {{ p.precioPen | numeroClaro:'1.2-2' }}</td>
+                  <td class="ticket-importe"><strong>S/ {{ p.totalPen | numeroClaro:'1.2-2' }}</strong></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <div class="ticket-totales-box">
+            <div><span>Partidas analizadas:</span> <strong>{{ t.detalles.length }}</strong></div>
+            <div><span>Peso fundido total:</span> <strong>{{ t.pesoFundidoG | numeroClaro:'1.0-3' }} g</strong></div>
+            <div><span>Total material:</span> <strong>S/ {{ (t.subtotal ?? t.total + t.adelanto) | numeroClaro:'1.2-2' }}</strong></div>
+            <div><span>Adelanto descontado:</span> <strong>- S/ {{ t.adelanto | numeroClaro:'1.2-2' }}</strong></div>
+            <div class="ticket-gran-total"><span>TOTAL A PAGAR:</span> <strong>S/ {{ t.total | numeroClaro:'1.2-2' }}</strong></div>
+          </div>
+
+          <div class="ticket-firmas-box">
+            <div><span>Firma Mayorista</span></div>
+            <div><span>Firma Acopiador</span></div>
+          </div>
+        </div>
+
+        <div class="modal-acciones ticket-acciones">
+          <button mat-stroked-button class="button-secondary" (click)="cerrarTicket()">Cerrar</button>
+          <button mat-flat-button class="button-primary" (click)="imprimirTicket(t)">🖨️ Imprimir ticket</button>
+        </div>
       </section>
     </div>
   }

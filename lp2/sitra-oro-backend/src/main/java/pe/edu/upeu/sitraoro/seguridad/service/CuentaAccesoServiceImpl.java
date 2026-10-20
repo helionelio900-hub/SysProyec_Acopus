@@ -18,6 +18,7 @@ public class CuentaAccesoServiceImpl implements CuentaAccesoService {
 
     private final CuentaAccesoRepository repository;
     private final PasswordEncoder passwordEncoder;
+    private final KeycloakProvisioningService keycloakProvisioningService;
 
     @Override
     @Transactional
@@ -38,6 +39,14 @@ public class CuentaAccesoServiceImpl implements CuentaAccesoService {
                 .idCentroAcopioPreferido(idCentroAcopioPreferido)
                 .activo(activo)
                 .build());
+
+        keycloakProvisioningService.provisionarUsuario(
+                documentoNormalizado,
+                clave,
+                rol,
+                rol == RolCuenta.G2_ACOPIADOR ? "Acopiador " + documentoNormalizado : "Usuario " + documentoNormalizado
+        );
+
         return resumen(cuenta);
     }
 

@@ -1,3 +1,202 @@
 td .button-primary {
   min-height: 42px;
 }
+
+/* Modal de confirmación moderno SITRA-ORO */
+.sitra-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 25, 41, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1.25rem;
+  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sitra-modal-dialog {
+  width: min(540px, 100%);
+  background: #ffffff;
+  border-radius: 1.1rem;
+  box-shadow: 0 25px 60px -12px rgba(10, 25, 41, 0.35), 0 0 0 1px rgba(212, 167, 59, 0.2);
+  overflow: hidden;
+  animation: modalScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.sitra-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem 1.6rem 1.1rem;
+  border-bottom: 1px solid #edf2f7;
+  position: relative;
+}
+
+.sitra-modal-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fdf5e2;
+  color: #b58925;
+  border: 1px solid #f6cf78;
+  flex-shrink: 0;
+}
+
+.sitra-modal-titles {
+  flex: 1;
+}
+
+.sitra-modal-titles h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1a2a3a;
+  letter-spacing: -0.015em;
+}
+
+.sitra-modal-titles p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.sitra-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.15rem;
+  color: #94a3b8;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.sitra-modal-close:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.sitra-modal-body {
+  padding: 1.35rem 1.6rem;
+}
+
+.sitra-info-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.8rem;
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.sitra-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.86rem;
+}
+
+.sitra-info-row .label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.sitra-info-row .val {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.doc-chip {
+  background: #0f172a;
+  color: #fbbf24 !important;
+  font-family: ui-monospace, monospace;
+  font-size: 0.95rem !important;
+  font-weight: 750 !important;
+  padding: 0.2rem 0.65rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+}
+
+.sitra-modal-desc {
+  margin: 0;
+  font-size: 0.87rem;
+  line-height: 1.55;
+  color: #475569;
+}
+
+.sitra-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.1rem 1.6rem 1.4rem;
+  background: #fcfdfe;
+  border-top: 1px solid #edf2f7;
+}
+
+.btn-cancel {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.btn-confirm {
+  background: linear-gradient(135deg, #d4a73b 0%, #b88d27 100%);
+  border: 1px solid #997217;
+  color: #ffffff;
+  font-weight: 750;
+  font-size: 0.88rem;
+  padding: 0.65rem 1.4rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(184, 141, 39, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-confirm:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dfb242 0%, #a47b1c 100%);
+  box-shadow: 0 6px 16px rgba(184, 141, 39, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-cancel:disabled,
+.btn-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}

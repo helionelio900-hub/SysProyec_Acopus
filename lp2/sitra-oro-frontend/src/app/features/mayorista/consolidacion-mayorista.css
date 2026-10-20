@@ -251,6 +251,7 @@
 .acciones-lote button:disabled { opacity:.45; cursor:default; }
 .acciones-lote .eliminar-lote { color:#b42318; border-color:#f5b5b0; }
 .acciones-lote small { display:block; color:#68788a; margin-top:.3rem; }
+.badge-cerrado { display:inline-block; padding:5px 12px; border-radius:6px; background:#e8eff8; color:#143550; font-size:.78rem; font-weight:700; border:1px solid #c8d8ec; }
 .editor-exportacion { padding:1rem; margin:1rem 0; border:1px solid #c4d6ec; border-radius:10px; background:#f5f8fc; }
 .opcion-recepcion { display:flex; align-items:center; gap:.6rem; padding:.6rem 0; }
 @media print { .acciones-lote,.editor-exportacion { display:none; } }
@@ -267,3 +268,70 @@
 .modal-actions .danger-button { background:#fff5f5; color:#b42318; border-color:#efc4c0; }
 .modal-actions button:disabled { opacity:.5; }
 @media print { .modal-backdrop { display:none; } }
+
+.panel-cabecera-unificada {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.panel-cabecera-unificada h2 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+.subtitulo-consolidado {
+  margin: 0;
+  font-size: 0.83rem;
+  color: #64748b;
+}
+.tabs-origen {
+  display: flex;
+  gap: 0.4rem;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+.tab-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tab-btn:hover {
+  color: #0f172a;
+}
+.tab-activa {
+  background: #fff !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.badge-origen {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.badge-acopio {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+.badge-indep {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+

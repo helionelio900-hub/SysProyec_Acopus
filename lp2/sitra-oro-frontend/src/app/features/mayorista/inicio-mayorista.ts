@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import {
@@ -8,15 +8,17 @@ import {
   ReporteLiquidaciones,
 } from '../../core/api/operaciones.service';
 import { MAYORISTA_VISTA_PREVIA } from './mayorista-preview';
+import { MarketCotizacionesService } from '../../core/api/market-cotizaciones.service';
 
 @Component({
   selector: 'app-inicio-mayorista',
-  imports: [RouterLink, DatePipe, MatButtonModule],
+  imports: [RouterLink, DatePipe, DecimalPipe, MatButtonModule],
   templateUrl: './inicio-mayorista.html',
   styleUrl: './inicio-mayorista.css',
 })
 export class InicioMayorista implements OnInit {
   private readonly operaciones = inject(OperacionesService);
+  protected readonly market = inject(MarketCotizacionesService);
   protected readonly vistaPrevia = inject(MAYORISTA_VISTA_PREVIA);
   protected readonly reporte = signal<ReporteLiquidaciones | null>(null);
   protected readonly centros = signal<CentroAcopio[] | null>(null);
@@ -27,7 +29,27 @@ export class InicioMayorista implements OnInit {
   protected readonly cargandoCentros = signal(true);
   protected readonly errorReporte = signal('');
   protected readonly errorCentros = signal('');
+  protected readonly horaActual = signal(
+    new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+  );
+  protected readonly fechaActual = new Date().toLocaleDateString('es-PE', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
   ngOnInit(): void {
+    setInterval(() => {
+      this.horaActual.set(
+        new Date().toLocaleTimeString('es-PE', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        }),
+      );
+    }, 1000);
+
     this.operaciones.reporteLiquidaciones().subscribe({
       next: (datos) => {
         this.reporte.set(datos);
@@ -60,7 +82,7 @@ export class InicioMayorista implements OnInit {
     });
   }
   protected dinero(valor: number | null | undefined): string {
-    return new Intl.NumberFormat('es-PE', { useGrouping: false, style: 'currency', currency: 'PEN' }).format(
+    return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(
       valor ?? 0,
     );
   }

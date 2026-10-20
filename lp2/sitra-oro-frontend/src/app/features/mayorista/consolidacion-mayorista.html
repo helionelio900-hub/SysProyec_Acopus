@@ -3,9 +3,28 @@
     <div><span class="eyebrow">MAYORISTA · EXPORTACIÓN</span><h1>Lotes para exportación</h1></div>
   </header>
   @if (error()) { <p class="feedback error" role="alert">{{ error() }}</p> }
-  @if (!vistaPrevia) { <app-registro-ponderacion /> }
+  @if (!vistaPrevia) { <app-registro-ponderacion [mostrarGestion]="false" (guardado)="cargar()" (eliminado)="cargar()" /> }
   <section class="panel export-saved" aria-label="Lotes para exportación">
-    <h2>Lotes registrados</h2>
+    <div class="panel-cabecera-unificada">
+      <div>
+        <h2>Lotes y ponderaciones consolidados</h2>
+        <p class="subtitulo-consolidado">Lotes oficiales de acopio y registros independientes de otros oros para exportación.</p>
+      </div>
+      <div class="bar-acciones-origen">
+        <div class="tabs-origen" role="tablist" aria-label="Filtro de origen">
+          <button type="button" class="tab-btn" [class.tab-activa]="filtroOrigen() === 'TODOS'" (click)="filtroOrigen.set('TODOS')">
+            Todos ({{ filasConsolidadas().length }})
+          </button>
+          <button type="button" class="tab-btn" [class.tab-activa]="filtroOrigen() === 'ACOPIO'" (click)="filtroOrigen.set('ACOPIO')">
+            📦 Lotes de Acopio ({{ lotes().length }})
+          </button>
+          <button type="button" class="tab-btn" [class.tab-activa]="filtroOrigen() === 'INDEPENDIENTE'" (click)="filtroOrigen.set('INDEPENDIENTE')">
+            ⚖️ Ponderaciones Libres ({{ ponderaciones().length }})
+          </button>
+        </div>
+      </div>
+    </div>
+
     @if (loteEditor(); as editor) {
       <section class="editor-exportacion">
         <h3>Editar lote #{{ editor.idLote }}</h3>
@@ -19,21 +38,55 @@
       </section>
     }
     @if (cargando()) { <p role="status">Cargando lotes…</p> }
-    @else if (lotes().length) {
+    @else if (filasFiltradas().length) {
       <div class="table-wrap export-table-wrap">
         <table class="export-table">
-          <thead><tr><th>N.º de lote</th><th>Fecha</th><th>Peso fundido (g)</th><th>Lectura (decimal)</th><th>Acciones</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Origen</th>
+              <th>N.º</th>
+              <th>Fecha</th>
+              <th>Peso fundido (g)</th>
+              <th>Lectura (decimal)</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
           <tbody>
-            @for (lote of lotes(); track lote.idLote) {
-              @for (fila of filasPorLey(lote); track $index) {
-                <tr><td><strong>#{{ lote.idLote }}</strong></td><td>{{ lote.fecha }}</td>
-                  <td>{{ gramos(fila.peso) }}</td><td>@if (fila.ley === null) { Sin ley registrada } @else { {{ fila.ley / 100 | numeroClaro:'1.4-4' }} }</td>
-                  <td class="acciones-lote">
-                    <button type="button" (click)="editarLote(lote)" [disabled]="guardando() || lote.estado !== 'BORRADOR' || !lote.recepciones?.length">Editar</button>
-                    <button type="button" class="eliminar-lote" (click)="loteEliminar.set(lote)" [disabled]="guardando() || lote.estado !== 'BORRADOR'">Eliminar</button>
-                    @if (lote.estado === 'PREPARADO') { <small>Preparado · cerrado</small> }
-                  </td></tr>
-              }
+            @for (item of filasFiltradas(); track item.origen + '-' + item.id + '-' + $index) {
+              <tr>
+                <td>
+                  @if (item.origen === 'ACOPIO') {
+                    <span class="badge-origen badge-acopio">📦 Lote Acopio</span>
+                  } @else {
+                    <span class="badge-origen badge-indep">⚖️ Independiente</span>
+                  }
+                </td>
+                <td><strong>#{{ item.id }}</strong></td>
+                <td>{{ item.fecha }}</td>
+                <td>{{ gramos(item.pesoG) }} g</td>
+                <td>
+                  @if (item.lecturaDecimal === null) {
+                    Sin ley registrada
+                  } @else {
+                    {{ item.lecturaDecimal | numeroClaro:'1.4-4' }}
+                  }
+                </td>
+                <td class="acciones-lote">
+                  @if (item.origen === 'ACOPIO') {
+                    @if (item.estado === 'BORRADOR') {
+                      <button type="button" (click)="editarLote(item.loteOriginal!)" [disabled]="guardando() || !item.loteOriginal?.recepciones?.length">Editar</button>
+                      <button type="button" class="eliminar-lote" (click)="loteEliminar.set(item.loteOriginal!)" [disabled]="guardando()">Eliminar</button>
+                    } @else {
+                      <span class="badge-cerrado">Preparado · cerrado</span>
+                    }
+                  } @else {
+                    @if (!vistaPrevia) {
+                      <button type="button" (click)="editarPonderacion(item.ponderacionOriginal!)">Editar</button>
+                      <button type="button" class="eliminar-lote" (click)="eliminarPonderacion(item.ponderacionOriginal!)">Eliminar</button>
+                    }
+                  }
+                </td>
+              </tr>
             }
           </tbody>
         </table>
@@ -54,7 +107,7 @@
         <p class="feedback">Hay lotes sin ley registrada. Completa sus leyes para obtener el promedio de todos los pesos.</p>
       }
       <button mat-stroked-button class="imprimir-promedio" type="button" [disabled]="fundidoInvalido() || promedioExportacion().lectura === null" (click)="imprimirPromedio()">Imprimir promedio total bruto</button>
-    } @else { <p class="empty-state export-empty">Todavía no hay lotes guardados.</p> }
+    } @else { <p class="empty-state export-empty">Todavía no hay registros en esta categoría.</p> }
   </section>
   @if (loteEliminar(); as lote) {
     <div class="modal-backdrop"><section class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-lot-title" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" (keydown.escape)="!guardando() && loteEliminar.set(null)">

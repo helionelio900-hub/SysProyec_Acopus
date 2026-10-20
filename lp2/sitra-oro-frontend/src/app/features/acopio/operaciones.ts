@@ -151,6 +151,9 @@ export class OperacionesAcopio implements OnInit {
   protected readonly compraAjuste = signal<TransaccionAcopio | null>(null);
   protected readonly tipoAjuste = signal<'EDICION' | 'ANULACION'>('EDICION');
   protected readonly enviandoAjuste = signal(false);
+  protected readonly detalleAjuste = signal<AjusteCompra | null>(null);
+  protected verDetalleAjuste(ajuste: AjusteCompra): void { this.detalleAjuste.set(ajuste); }
+  protected cerrarDetalleAjuste(): void { this.detalleAjuste.set(null); }
   protected readonly formAjuste = this.fb.nonNullable.group({
     motivo: ['', [Validators.required, Validators.minLength(8)]],
     tipoOroNuevo: ['ROJO' as 'ROJO' | 'VERDE', Validators.required],

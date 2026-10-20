@@ -37,6 +37,8 @@ Thumbs.db
 
 # Local scratch / test payloads
 sample_mayorista.json
+tmp/
+output/
 
 # Entregables S04 con capturas personales (reloj + perfil) - repo publico, se entregan aparte
 docs/capturas/

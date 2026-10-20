@@ -75,6 +75,13 @@ export class RecepcionMayorista implements OnInit {
   protected readonly filtro = signal('');
   protected readonly seleccion = signal<number[]>([]);
   protected readonly confirmacion = signal<'guardar' | 'exportar' | null>(null);
+  protected readonly ticketActual = signal<RecepcionLey | null>(null);
+  protected abrirTicket(r: RecepcionLey): void { this.ticketActual.set(r); }
+  protected cerrarTicket(): void { this.ticketActual.set(null); }
+  protected abrirTicketPorId(id: number): void {
+    const lote = this.registros().find(r => r.idRecepcion === id);
+    if (lote) this.abrirTicket(lote);
+  }
   private revisionFormulario = 0;
   protected readonly form = this.fb.nonNullable.group({
     adelanto: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
@@ -332,6 +339,7 @@ export class RecepcionMayorista implements OnInit {
             : items.map(x => x.idRecepcion === guardado.idRecepcion ? guardado : x));
           this.seccion.set('historial'); this.filtro.set(String(guardado.idRecepcion));
           this.mensaje.set(`Lote recibido #${guardado.idRecepcion} registrado con ${guardado.detalles.length} partida(s). Total: S/ ${guardado.total.toFixed(2)}.`);
+          this.ticketActual.set(guardado);
         },
         error: e => { this.guardando.set(false); this.confirmacion.set(null); this.error.set(this.textoError(e, 'No se pudo guardar el lote.')); },
       });
@@ -346,6 +354,187 @@ export class RecepcionMayorista implements OnInit {
       });
     }
   }
+
+  protected previsualizarTicket(): void {
+    const edit = this.editando();
+    const calc = this.calculo();
+    if (!edit || !calc) return;
+    const sim: RecepcionLey = {
+      idRecepcion: edit.idRecepcion || 0,
+      fecha: new Date().toISOString().slice(0, 10),
+      idCentroAcopio: edit.idCentroAcopio,
+      nombreAcopiador: edit.nombreAcopiador,
+      revision: edit.revision,
+      estado: 'VALORIZADO',
+      idLoteExportacion: null,
+      pesoDeclaradoG: calc.detalles.reduce((s, d) => s + d.pesoSinFundirG, 0),
+      pesoRojoSinFundirG: edit.pesoRojoSinFundirG,
+      pesoVerdeSinFundirG: edit.pesoVerdeSinFundirG,
+      pesoFundidoG: calc.pesoFundidoG,
+      subtotal: calc.subtotal,
+      adelanto: calc.adelanto,
+      total: calc.total,
+      detalles: calc.detalles,
+    };
+    this.imprimirTicket(sim);
+  }
+
+  protected imprimirTicket(lote?: RecepcionLey | null): void {
+    const r = lote || this.ticketActual();
+    if (!r) return;
+    const ventana = window.open('', '_blank', 'width=460,height=720');
+    if (!ventana) {
+      window.print();
+      return;
+    }
+    const doc = ventana.document;
+    doc.title = `Ticket_${r.idRecepcion || 'PREVIO'}_${r.nombreAcopiador}`;
+    const estilo = doc.createElement('style');
+    estilo.textContent = `
+      @page { size: 72mm auto; margin: 0; }
+      * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+      html, body {
+        width: 72mm;
+        max-width: 72mm;
+        margin: 0 !important;
+        padding: 2mm 3mm !important;
+        height: auto !important;
+        overflow: hidden !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        font-size: 9px;
+        line-height: 1.15;
+        color: #000;
+        background: #fff;
+      }
+      .ticket {
+        width: 100% !important;
+        max-width: 72mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+      }
+      .encabezado { text-align: center; border-bottom: 1.5px solid #000; padding-bottom: 2px; margin-bottom: 3px; }
+      .logo { font-size: 13px; font-weight: 900; letter-spacing: 1.5px; margin: 0; text-transform: uppercase; }
+      .subtitulo { font-size: 8px; font-weight: 700; letter-spacing: 0.3px; margin: 1px 0 0; text-transform: uppercase; color: #222; }
+      .meta { border-bottom: 1px dashed #333; padding-bottom: 2px; margin-bottom: 3px; font-size: 8.5px; }
+      .meta-fila { display: flex; justify-content: space-between; margin-bottom: 1px; }
+      .tabla-partidas { width: 100%; border-collapse: collapse; margin-bottom: 3px; }
+      .tabla-partidas th { border-bottom: 1px solid #000; font-size: 8px; text-transform: uppercase; padding: 2px 1px; font-weight: 800; color: #111; }
+      .tabla-partidas td { padding: 2px 1px; border-bottom: 1px dotted #bbb; font-size: 8.5px; vertical-align: top; }
+      .partida-main { font-weight: 700; font-size: 9px; }
+      .partida-sub { font-size: 7.5px; color: #444; }
+      .totales { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; padding: 2px 0; margin-top: 2px; }
+      .pesos-bar { display: flex; justify-content: space-between; font-size: 7.8px; background: #eee; padding: 2px 3px; margin-bottom: 2px; border-radius: 2px; font-weight: 600; }
+      .totales-fila { display: flex; justify-content: space-between; font-size: 8.5px; margin-bottom: 1px; }
+      .total-final { font-size: 10.5px; font-weight: 900; border-top: 1px dashed #000; margin-top: 2px; padding-top: 2px; }
+      .firmas { margin-top: 10px; display: flex; justify-content: space-between; text-align: center; font-size: 7.5px; }
+      .firma-col { border-top: 1px solid #000; width: 44%; padding-top: 2px; font-weight: 600; }
+      .pie { text-align: center; font-size: 7px; margin-top: 4px; padding-bottom: 2px; letter-spacing: 0.5px; color: #555; }
+      @media print {
+        html, body { width: 72mm !important; margin: 0 !important; padding: 1mm 2mm !important; }
+        .no-print { display: none !important; }
+      }
+    `;
+    doc.head.append(estilo);
+
+    const fDinero = (n: number | string | null | undefined) =>
+      Number(n ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fPeso = (n: number | string | null | undefined) =>
+      Number(n ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+    const fLey = (n: number | string | null | undefined) =>
+      Number(n ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fTC = (n: number | string | null | undefined) =>
+      Number(n ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    const fOz = (n: number | string | null | undefined) =>
+      Number(n ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+    const totalSinFundir = r.detalles.reduce((s, p) => s + (p.pesoSinFundirG || 0), 0);
+    const mermaTotal = Math.max(0, totalSinFundir - (r.pesoFundidoG || 0));
+
+    let htmlPartidas = '';
+    r.detalles.forEach((p, idx) => {
+      htmlPartidas += `
+        <tr>
+          <td style="text-align:left">
+            <div class="partida-main">#${idx + 1} Ley: ${fLey(p.ley)}%</div>
+            <div class="partida-sub">Oz:$${fOz(p.onza)} · TC:${fTC(p.tipoCambio)}</div>
+          </td>
+          <td style="text-align:center">
+            <div>${fPeso(p.pesoSinFundirG)}g / <b>${fPeso(p.pesoFundidoG)}g</b></div>
+            <div class="partida-sub">P/g S/${fDinero(p.precioPen)}</div>
+          </td>
+          <td style="text-align:right; font-weight:bold; vertical-align:top">
+            S/ ${fDinero(p.totalPen)}
+          </td>
+        </tr>
+      `;
+    });
+
+    doc.body.innerHTML = `
+      <div class="ticket">
+        <div class="encabezado">
+          <div class="logo">SITRA - ORO</div>
+          <div class="subtitulo">Comprobante de Liquidación por Ley</div>
+        </div>
+        <div class="meta">
+          <div class="meta-fila">
+            <span><b>COMPROBANTE:</b> ${r.idRecepcion ? '#' + r.idRecepcion : 'VISTA PREVIA'}</span>
+            <span><b>FECHA:</b> ${r.fecha}</span>
+          </div>
+          <div class="meta-fila">
+            <span><b>ACOPIO:</b> ${r.nombreAcopiador}</span>
+            <span><b>ESTADO:</b> ${r.estado}</span>
+          </div>
+        </div>
+        <table class="tabla-partidas">
+          <thead>
+            <tr>
+              <th style="text-align:left">Partida / Ley</th>
+              <th style="text-align:center">Entr / Fund</th>
+              <th style="text-align:right">Total S/</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${htmlPartidas}
+          </tbody>
+        </table>
+        <div class="totales">
+          <div class="pesos-bar">
+            <span>Ent: <b>${fPeso(totalSinFundir)}g</b></span>
+            <span>Fund: <b>${fPeso(r.pesoFundidoG)}g</b></span>
+            <span>Merma: <b>${fPeso(mermaTotal)}g</b></span>
+          </div>
+          <div class="totales-fila">
+            <span>Partidas: <b>${r.detalles.length}</b> · Subtotal:</span>
+            <span><b>S/ ${fDinero(r.subtotal ?? (r.total + r.adelanto))}</b></span>
+          </div>
+          ${r.adelanto > 0 ? `
+          <div class="totales-fila">
+            <span>Adelanto descontado:</span>
+            <span><b>- S/ ${fDinero(r.adelanto)}</b></span>
+          </div>` : ''}
+          <div class="totales-fila total-final">
+            <span>TOTAL NETO A PAGAR:</span>
+            <span>S/ ${fDinero(r.total)}</span>
+          </div>
+        </div>
+        <div class="firmas">
+          <div class="firma-col">Firma Mayorista</div>
+          <div class="firma-col">Firma Acopiador</div>
+        </div>
+        <div class="pie">
+          *** SITRA-ORO · MÓDULO MAYORISTA ***
+        </div>
+      </div>
+    `;
+
+    setTimeout(() => {
+      ventana.focus();
+      ventana.print();
+    }, 250);
+  }
+
   protected estado(r: RecepcionLey): string {
     return r.estado === 'EN_LOTE' ? `En exportación #${r.idLoteExportacion}` : r.estado === 'VALORIZADO' ? 'Valorizado' : 'Ley pendiente';
   }

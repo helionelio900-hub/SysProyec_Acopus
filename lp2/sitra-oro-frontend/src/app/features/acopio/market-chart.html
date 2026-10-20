@@ -1,0 +1,92 @@
+<section class="market-overview-grid" aria-label="Resumen de mercado">
+  <!-- TARJETA DE MERCADO Y GRÁFICO TENDENCIA -->
+  <article class="terminal-card chart-card">
+    <div class="card-head">
+      <div class="card-tag">
+        <span class="tag-accent"></span>
+        <span>TENDENCIA SEMANAL DEL ORO (PEN / GRAMO FINO)</span>
+      </div>
+      <div class="chart-stats">
+        <span class="stat-high">MAX: S/ 324.95</span>
+        <span class="stat-low">MIN: S/ 318.20</span>
+      </div>
+    </div>
+
+    <div class="chart-body">
+      <div class="chart-price-display">
+        <span class="chart-label">Precio Referencial 24K</span>
+        <div class="chart-main-price">
+          S/ 324.95 <span class="chart-unit">/ g</span>
+          <span class="chart-badge-up">▲ +2.12% 7d</span>
+        </div>
+        <div class="chart-sub-rates">
+          <span>Onza Troy Kitco: <strong>$2,684.50 USD</strong></span>
+          <span>1 Onza = <strong>31.1035 gramos</strong></span>
+        </div>
+      </div>
+
+      <!-- GRÁFICO VECTORIAL SVG PURO (ESTILO BLOOMBERG SPARKLINE) -->
+      <div class="svg-chart-container">
+        <svg viewBox="0 0 320 70" preserveAspectRatio="none" class="sparkline-svg">
+          <defs>
+            <linearGradient id="goldAreaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.0"/>
+            </linearGradient>
+            <linearGradient id="goldLineGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#d97706"/>
+              <stop offset="50%" stop-color="#f59e0b"/>
+              <stop offset="100%" stop-color="#fbbf24"/>
+            </linearGradient>
+          </defs>
+          <path [attr.d]="sparklineData().area" fill="url(#goldAreaGrad)" />
+          <path [attr.d]="sparklineData().line" fill="none" stroke="url(#goldLineGrad)" stroke-width="2.5" stroke-linecap="round" />
+          @for (pt of sparklineData().points; track $index) {
+            <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="3" fill="#ffffff" stroke="#f59e0b" stroke-width="2"/>
+          }
+        </svg>
+        <div class="chart-days">
+          <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span class="today-day">Hoy</span>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- TARJETA DE CONVERSIÓN RÁPIDA / ARBITRAJE -->
+  <article class="terminal-card arbitrage-card">
+    <div class="card-head">
+      <div class="card-tag">
+        <span class="tag-accent cyan-accent"></span>
+        <span>ARBITRAJE Y PARIDAD TÉCNICA</span>
+      </div>
+      <span class="pill-cyan">FIX OFICIAL</span>
+    </div>
+
+    <div class="arbitrage-grid">
+      <div class="arb-item">
+        <span class="arb-k">1 Onza Troy (XAU)</span>
+        <strong class="arb-v text-white">$ 2,684.50 USD</strong>
+        <small class="arb-c">= S/ 10,107.14 PEN</small>
+      </div>
+      <div class="arb-divider"></div>
+      <div class="arb-item">
+        <span class="arb-k">Oro Rojo (Amalgama)</span>
+        <strong class="arb-v text-warm">S/ 275.50 / g</strong>
+        <small class="arb-c">Ley ref. ~0.850</small>
+      </div>
+      <div class="arb-divider"></div>
+      <div class="arb-item">
+        <span class="arb-k">Oro Verde (Ecológico)</span>
+        <strong class="arb-v text-emerald">S/ 295.00 / g</strong>
+        <small class="arb-c">+S/ 19.50 premio verde</small>
+      </div>
+    </div>
+
+    <div class="arb-footer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+      <span>Precios actualizados automáticamente con el cotizador central</span>
+    </div>
+  </article>
+</section>

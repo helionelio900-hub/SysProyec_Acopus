@@ -95,7 +95,6 @@ public class RecepcionLeyService {
             origenes.add(r);
         }
         BigDecimal entrada = request.analisis().detalles().stream().map(RecepcionLeyRequest.Partida::pesoSinFundirG).reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (entrada.compareTo(rojo.add(verde)) != 0) throw new IllegalArgumentException("Los pesos sin fundir deben sumar exactamente el material recibido");
         var conjunta = new RecepcionMayorista();
         conjunta.setFecha(java.time.LocalDate.now(java.time.ZoneId.of("America/Lima")));
         conjunta.setCentroAcopio(origenes.getFirst().getCentroAcopio());
@@ -153,7 +152,7 @@ public class RecepcionLeyService {
         BigDecimal pesoVerde = r.getVerde() != null ? r.getVerde().getPesoSinFundirG() : null;
         return new RecepcionLeyResponse(r.getIdRecepcion(), r.getFecha(), r.getCentroAcopio() == null ? -r.getIdRecepcion() : r.getCentroAcopio().getIdCentroAcopio(), r.getNombreAcopiador(),
                 r.getRevisionLey(), exportacion != null ? "EN_LOTE" : filas.isEmpty() ? "PENDIENTE" : "VALORIZADO", exportacion,
-                r.isCompraDirecta() ? filas.stream().map(RecepcionLeyResponse.Detalle::pesoSinFundirG).reduce(BigDecimal.ZERO, BigDecimal::add) : sumarPeso(r, false), pesoRojo, pesoVerde, peso, subtotal, adelanto, filas.isEmpty() ? numeroHistorico(r.getTotal()) : subtotal.subtract(adelanto), filas);
+                !filas.isEmpty() ? filas.stream().map(RecepcionLeyResponse.Detalle::pesoSinFundirG).reduce(BigDecimal.ZERO, BigDecimal::add) : sumarPeso(r, false), pesoRojo, pesoVerde, peso, subtotal, adelanto, filas.isEmpty() ? numeroHistorico(r.getTotal()) : subtotal.subtract(adelanto), filas);
     }
 
     private Long idExportacion(Long id) {

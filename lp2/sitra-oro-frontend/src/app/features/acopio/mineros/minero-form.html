@@ -3,13 +3,23 @@
 <form [formGroup]="form" (ngSubmit)="guardar()">
   <mat-form-field appearance="outline">
     <mat-label>Documento de identidad</mat-label>
-    <input matInput formControlName="documentoIdentidad" maxlength="15" />
+    <input matInput formControlName="documentoIdentidad" maxlength="15" autocomplete="off" />
+    @if (consultandoDni()) {
+      <mat-hint class="hint-dni cargando">Consultando DNI en RENIEC...</mat-hint>
+    } @else if (estadoDni()) {
+      <mat-hint class="hint-dni" [class.exito]="estadoDni().includes('obtenido')">{{ estadoDni() }}</mat-hint>
+    } @else {
+      <mat-hint>Debe tener entre 8 y 15 caracteres.</mat-hint>
+    }
   </mat-form-field>
   @if (mensaje('documentoIdentidad'); as message) { <p class="error">{{ message }}</p> }
 
   <mat-form-field appearance="outline">
     <mat-label>Nombres y apellidos</mat-label>
     <input matInput formControlName="nombresApellidos" maxlength="150" />
+    @if (estadoDni().includes('obtenido')) {
+      <mat-hint class="hint-dni exito">Nombre completado automáticamente por DNI</mat-hint>
+    }
   </mat-form-field>
   @if (mensaje('nombresApellidos'); as message) { <p class="error">{{ message }}</p> }
 

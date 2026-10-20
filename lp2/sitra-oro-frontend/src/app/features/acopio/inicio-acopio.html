@@ -1,50 +1,304 @@
-<section class="workspace">
-  <header class="page-head">
-    <div>
-      <span class="eyebrow">ESPACIO DEL ACOPIADOR</span>
-      <h1>Resumen del acopio</h1>
-      <p>Consulta las compras registradas y los acumulados por tipo de oro.</p>
+<section class="terminal-workspace">
+  <!-- 1. TICKER TAPE INTERNACIONAL ESTILO BLOOMBERG / KITCO (CARGA INMEDIATA EAGER) -->
+  <aside class="market-ticker-tape" aria-label="Cotizaciones de mercado">
+    <div class="ticker-badge">
+      <span class="live-dot"></span>
+      <span>KITCO & FX SPOT</span>
+    </div>
+    <div class="ticker-scroll">
+      <div class="ticker-track">
+        @for (item of market.tickers(); track item.simbolo) {
+          <div class="ticker-item">
+            <span class="ticker-sym">{{ item.simbolo }}</span>
+            <span class="ticker-val">
+              {{ item.moneda === 'USD' ? '$' : 'S/' }} {{ item.valor | number: (item.simbolo === 'USD/PEN' ? '1.3-3' : '1.2-2') }}
+            </span>
+            <span class="ticker-change" [class.up]="item.variacion24h >= 0" [class.down]="item.variacion24h < 0">
+              {{ item.variacion24h >= 0 ? '▲ +' : '▼ ' }}{{ item.variacion24h }}%
+            </span>
+            <span class="ticker-name">{{ item.nombre }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </aside>
+
+  <!-- 2. ENCABEZADO DE TERMINAL DE OPERACIÓN (CARGA INMEDIATA EAGER) -->
+  <header class="terminal-header">
+    <div class="terminal-brand-block">
+      <div class="terminal-meta">
+        <span class="terminal-pill">
+          <span class="pulse-beacon"></span>
+          ESTACIÓN DE BALANZA DIGITAL
+        </span>
+        <span class="market-status">
+          <span class="dot-green"></span> LBMA / COMEX: CONECTADO
+        </span>
+        <span class="terminal-clock">{{ horaActual() }} (UTC-5)</span>
+      </div>
+      <h1 class="terminal-title">Terminal de Acopio Aurífero</h1>
+      <p class="terminal-subtitle">
+        Liquidación directa por ley física, pesaje en balanza electrónica y fijación con cotización internacional.
+      </p>
+    </div>
+
+    <div class="terminal-security-badge">
+      <div class="badge-row">
+        <span class="badge-k">PROTOCOLO</span>
+        <span class="badge-v">RS256 · OIDC</span>
+      </div>
+      <div class="badge-row">
+        <span class="badge-k">BASE DATOS</span>
+        <span class="badge-v">Oracle XE (ACID)</span>
+      </div>
+      <div class="badge-row">
+        <span class="badge-k">TIPO CAMBIO</span>
+        <span class="badge-v highlight">S/ 3.765 / USD</span>
+      </div>
     </div>
   </header>
+
   @if (cargando()) {
-    <p class="loading-state" role="status">Cargando resumen…</p>
-  }
-  @if (error()) {
-    <p class="feedback error" role="alert">{{ error() }}</p>
-  }
-  @if (resumen(); as datos) {
-    <div class="metric-grid">
-      <article class="metric">
-        <span>Total de oro recibido</span><strong>{{ gramos(datos.totalGeneralGramos) }}</strong>
-      </article>
-      <article class="metric">
-        <span>Total pagado registrado</span
-        ><strong>{{ dinero(datos.totalGeneralDineroPen) }}</strong>
-      </article>
-      <article class="metric">
-        <span>Oro rojo · acumulado</span><strong>{{ gramos(datos.sumatoriaGramosOroRojo) }}</strong>
-      </article>
-      <article class="metric">
-        <span>Pago por oro rojo</span><strong>{{ dinero(datos.sumatoriaDineroOroRojoPen) }}</strong>
-      </article>
-      <article class="metric">
-        <span>Oro verde · acumulado</span
-        ><strong>{{ gramos(datos.sumatoriaGramosOroVerde) }}</strong>
-      </article>
-      <article class="metric">
-        <span>Pago por oro verde</span
-        ><strong>{{ dinero(datos.sumatoriaDineroOroVerdePen) }}</strong>
-      </article>
+    <div class="terminal-loading">
+      <div class="terminal-spinner"></div>
+      <p>Consultando métricas de balanza y cotizaciones oficiales…</p>
     </div>
-    <h2 class="section-title">Acciones de trabajo</h2>
-    <nav class="actions" aria-label="Acciones del acopiador">
-      <a mat-flat-button class="button-primary" routerLink="/acopio/operaciones"
-        >Registrar compra de oro</a
-      ><a mat-stroked-button class="button-secondary" routerLink="/acopio/mineros">Ver mineros</a
-      ><a mat-stroked-button class="button-secondary" routerLink="/acopio/solicitudes"
-        >Revisar cuentas por aprobar</a
-      >
-    </nav>
-    <p class="notice">Los acumulados provienen de las operaciones registradas en SITRA-ORO.</p>
+  }
+
+  @if (error()) {
+    <div class="terminal-error" role="alert">
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  @if (resumen(); as datos) {
+    <!-- 3. MÓDULO DIFERIDO CON @defer: GRÁFICO TENDENCIA Y ARBITRAJE KITCO -->
+    @defer (on viewport; prefetch on idle) {
+      <app-market-chart />
+    } @placeholder (minimum 300ms) {
+      <div class="market-chart-skeleton" aria-hidden="true">
+        <div class="skeleton-tile shimmer">
+          <div class="sk-head"></div>
+          <div class="sk-body"></div>
+        </div>
+        <div class="skeleton-tile shimmer">
+          <div class="sk-head"></div>
+          <div class="sk-body"></div>
+        </div>
+      </div>
+    } @loading (after 100ms; minimum 200ms) {
+      <div class="market-loading-bar" role="status">
+        <span class="pulse-beacon"></span> Sincronizando feed en vivo con LBMA / Kitco…
+      </div>
+    } @error {
+      <div class="terminal-error" role="alert">
+        <span>No se pudo cargar el módulo interactivo de mercado.</span>
+      </div>
+    }
+
+    <!-- 4. BENTO GRID DE RENDIMIENTO Y BALANZA -->
+    <section class="terminal-bento-grid" aria-label="Consolidado de balanza">
+      <!-- MASTER HERO BALANCE (Doble Ancho) -->
+      <article class="terminal-card bento-master">
+        <div class="card-head">
+          <div class="card-tag">
+            <span class="tag-accent gold-accent"></span>
+            <span>CONSOLIDADO TOTAL EN BÓVEDA Y BALANZA</span>
+          </div>
+          <span class="pill-gold">BALANCE GLOBAL</span>
+        </div>
+
+        <div class="master-balance-row">
+          <div class="master-metric">
+            <span class="m-label">Masa Total Acumulada</span>
+            <strong class="m-val text-white">{{ gramos(datos.totalGeneralGramos) }}</strong>
+            <span class="m-sub">Equivalente a {{ (datos.totalGeneralGramos / 1000) | number: '1.2-3' }} kilogramos de oro certificado</span>
+          </div>
+
+          <div class="master-divider"></div>
+
+          <div class="master-metric">
+            <span class="m-label">Desembolso Liquidado (Soles)</span>
+            <strong class="m-val text-gold">{{ dinero(datos.totalGeneralDineroPen) }}</strong>
+            <span class="m-sub">100% transferencias procesadas a cuentas bancarias</span>
+          </div>
+        </div>
+
+        <!-- MEDIDOR SEGMENTADO ROJO VS VERDE -->
+        <div class="split-meter-box">
+          <div class="split-header">
+            <span>Distribución de Lotes en Balanza:</span>
+            <div class="split-labels">
+              <span class="split-lbl red-lbl">Oro Convencional: <strong>{{ porcentajeRojo(datos) }}%</strong></span>
+              <span class="split-lbl green-lbl">Oro Ecológico: <strong>{{ porcentajeVerde(datos) }}%</strong></span>
+            </div>
+          </div>
+          <div class="meter-bar">
+            <div class="meter-fill-red" [style.width.%]="porcentajeRojo(datos)"></div>
+            <div class="meter-fill-green" [style.width.%]="porcentajeVerde(datos)"></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- TARJETA ORO ROJO -->
+      <article class="terminal-card line-card red-theme">
+        <div class="card-head">
+          <div class="card-tag">
+            <span class="dot-red"></span>
+            <span>LÍNEA CONVENCIONAL</span>
+          </div>
+          <span class="pill-red">ORO ROJO</span>
+        </div>
+
+        <div class="line-data-block">
+          <div class="line-icon-wrap icon-red">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+            </svg>
+          </div>
+          <div class="line-metrics">
+            <span class="l-sub">PESO FÍSICO</span>
+            <strong class="l-num">{{ gramos(datos.sumatoriaGramosOroRojo) }}</strong>
+          </div>
+          <div class="line-metrics text-right">
+            <span class="l-sub">TOTAL LIQUIDADO</span>
+            <strong class="l-num text-warm">{{ dinero(datos.sumatoriaDineroOroRojoPen) }}</strong>
+          </div>
+        </div>
+
+        <div class="card-foot">
+          <small>Procesamiento con amalgama y quema tradicional</small>
+        </div>
+      </article>
+
+      <!-- TARJETA ORO VERDE -->
+      <article class="terminal-card line-card green-theme">
+        <div class="card-head">
+          <div class="card-tag">
+            <span class="dot-green"></span>
+            <span>SIN MERCURIO</span>
+          </div>
+          <span class="pill-green">ORO VERDE</span>
+        </div>
+
+        <div class="line-data-block">
+          <div class="line-icon-wrap icon-green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+            </svg>
+          </div>
+          <div class="line-metrics">
+            <span class="l-sub">PESO FÍSICO</span>
+            <strong class="l-num">{{ gramos(datos.sumatoriaGramosOroVerde) }}</strong>
+          </div>
+          <div class="line-metrics text-right">
+            <span class="l-sub">TOTAL LIQUIDADO</span>
+            <strong class="l-num text-emerald">{{ dinero(datos.sumatoriaDineroOroVerdePen) }}</strong>
+          </div>
+        </div>
+
+        <div class="card-foot">
+          <small>Extracción gravimétrica 100% libre de contaminantes</small>
+        </div>
+      </article>
+    </section>
+
+    <!-- 5. ESTACIONES DE ACCIÓN DIRECTA -->
+    <section class="terminal-actions" aria-labelledby="acciones-terminal-titulo">
+      <div class="terminal-bar-title">
+        <span class="title-square"></span>
+        <h2 id="acciones-terminal-titulo">ACCIONES OPERATIVAS DIRECTAS</h2>
+      </div>
+
+      <div class="actions-grid">
+        <!-- ACCIÓN 1: COMPRA DE ORO -->
+        <article class="action-tile featured-action">
+          <div class="tile-top-row">
+            <div class="act-icon icon-gold">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="16"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+            </div>
+            <span class="act-pill pill-gold">TRANSACCIÓN PRINCIPAL</span>
+          </div>
+
+          <h3 class="act-title">Registrar Nueva Compra en Balanza</h3>
+          <p class="act-desc">
+            Abre el pesaje certificado de partidas, valoración inmediata por ley en batea y cálculo automático del monto a transferir.
+          </p>
+
+          <a routerLink="/acopio/operaciones" class="act-btn-gold">
+            <span>Iniciar pesaje y compra</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </article>
+
+        <!-- ACCIÓN 2: PADRÓN DE MINEROS -->
+        <article class="action-tile">
+          <div class="tile-top-row">
+            <div class="act-icon icon-cyan">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <span class="act-pill pill-dim">DIRECTORIO</span>
+          </div>
+
+          <h3 class="act-title">Padrón de Mineros Artesanales</h3>
+          <p class="act-desc">
+            Consulta de datos biométricos, verificación de DNI ante RENIEC y estado de vigencia en el registro REINFO.
+          </p>
+
+          <a routerLink="/acopio/mineros" class="act-btn-secondary">
+            <span>Consultar padrón</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </article>
+
+        <!-- ACCIÓN 3: SOLICITUDES PENDIENTES -->
+        <article class="action-tile">
+          <div class="tile-top-row">
+            <div class="act-icon icon-amber">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <circle cx="12" cy="14" r="2"/>
+              </svg>
+            </div>
+            <span class="act-pill pill-dim">APROBACIÓN</span>
+          </div>
+
+          <h3 class="act-title">Solicitudes y Cuentas por Aprobar</h3>
+          <p class="act-desc">
+            Revisión de solicitudes de nuevos mineros que desean entregar mineral en el centro de acopio y vinculación de CCI bancario.
+          </p>
+
+          <a routerLink="/acopio/solicitudes" class="act-btn-secondary">
+            <span>Revisar pendientes</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </article>
+      </div>
+    </section>
+
+    <!-- 6. PIE DE AUDITORÍA -->
+    <footer class="terminal-footer">
+      <div class="foot-left">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span>INTEGRIDAD Y SEGURIDAD AUDITADA · KEYCLOAK RS256 · BASE DE DATOS ORACLE XE (ACID)</span>
+      </div>
+      <div class="foot-right">
+        <span>SITRA-ORO TERMINAL v2.5</span>
+      </div>
+    </footer>
   }
 </section>

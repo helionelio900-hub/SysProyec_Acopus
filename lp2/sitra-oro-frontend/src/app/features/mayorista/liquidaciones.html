@@ -2,37 +2,145 @@
   <header class="page-head">
     <div>
       <span class="eyebrow">MAYORISTA · PAGO AL ACOPIADOR</span>
-      <h1>Liquidación al acopiador</h1>
-      <p>Calcula y publica la cotización por gramo para el minero y el acopiador.</p>
+      <h1>Liquidación al acopiador & Cotizaciones</h1>
+      <p>Monitoreo en vivo de Oro Spot (Kitco) y Dólar (Bloomberg / SUNAT) para liquidación.</p>
     </div>
-    <span class="major-status ready">Precio referencial disponible</span>
+    <span class="major-status ready">Mercado en vivo activo</span>
   </header>
-  <div class="major-notice">
-    <span aria-hidden="true">ⓘ</span>
-    <p>
-      Publica precios vigentes por color. El minero ve soles por gramo y el acopiador los usa al registrar compras.
-    </p>
-  </div>
 
+  <!-- SECCIÓN DE MONITOREO DE MERCADO EN VIVO -->
+  <section class="panel panel-mercado-vivo" aria-labelledby="mercado-vivo-title">
+    <div class="mercado-cabecera">
+      <div class="mercado-titular">
+        <span class="badge-live"><span class="live-dot"></span> EN VIVO</span>
+        <h2 id="mercado-vivo-title">Cotizaciones Internacionales y Tipo de Cambio</h2>
+        <p>Precios spot en tiempo real para fijar la cotización oficial de compra.</p>
+      </div>
+      <div class="mercado-acciones">
+        <button type="button" class="btn-recargar" (click)="cargarMercado()" [disabled]="cargandoMercado()">
+          {{ cargandoMercado() ? 'Actualizando…' : '🔄 Actualizar datos' }}
+        </button>
+        <button type="button" class="btn-aplicar-ambos" (click)="aplicarAmbos()" [disabled]="!oroMercado() && !dolarMercado()">
+          ⚡ Aplicar valores al formulario
+        </button>
+      </div>
+    </div>
 
+    <!-- TARJETAS CON VALORES DE MERCADO (BID / ASK / DAY RANGE) -->
+    <div class="mercado-tarjetas">
+      <!-- Tarjeta Oro Spot Kitco -->
+      <div class="tarjeta-mercado tarjeta-oro">
+        <div class="tarjeta-top">
+          <div class="activo-info">
+            <span class="activo-icono">🥇</span>
+            <div>
+              <span class="activo-nombre">ORO SPOT (XAU / USD)</span>
+              <span class="activo-sub">Kitco / Bullion Spot</span>
+            </div>
+          </div>
+          @if (oroMercado(); as oro) {
+            <span class="variacion" [class.subida]="oro.cambio24h >= 0" [class.bajada]="oro.cambio24h < 0">
+              {{ oro.cambio24h >= 0 ? '+' : '' }}{{ oro.cambio24h | number:'1.2-2' }}%
+            </span>
+          }
+        </div>
+
+        @if (oroMercado(); as oro) {
+          <div class="precio-cuerpo">
+            <div class="caja-precio principal">
+              <span class="label">BID (Precio Compra)</span>
+              <strong class="monto">$ {{ oro.bid | number:'1.2-2' }}</strong>
+            </div>
+            <div class="caja-precio">
+              <span class="label">ASK</span>
+              <strong class="monto-sec">$ {{ oro.ask | number:'1.2-2' }}</strong>
+            </div>
+          </div>
+          <div class="rango-barra">
+            <span class="rango-texto">Rango 24h: <b>${{ oro.min24h | number:'1.1-1' }}</b> - <b>${{ oro.max24h | number:'1.1-1' }}</b></span>
+            <button type="button" class="btn-copiar-campo" (click)="aplicarOro()">
+              Usar ${{ oro.bid | number:'1.2-2' }} en Onza
+            </button>
+          </div>
+        } @else {
+          <p class="cargando-aviso">Cargando cotización de oro…</p>
+        }
+      </div>
+
+      <!-- Tarjeta Dólar Perú Bloomberg / SUNAT -->
+      <div class="tarjeta-mercado tarjeta-dolar">
+        <div class="tarjeta-top">
+          <div class="activo-info">
+            <span class="activo-icono">💵</span>
+            <div>
+              <span class="activo-nombre">DÓLAR PERÚ (USD / PEN)</span>
+              <span class="activo-sub">Bloomberg Línea & SUNAT</span>
+            </div>
+          </div>
+          <span class="activo-badge-oficial">OFICIAL SUNAT / BCRP</span>
+        </div>
+
+        @if (dolarMercado(); as dolar) {
+          <div class="precio-cuerpo">
+            <div class="caja-precio principal">
+              <span class="label">MERCADO INTERBANCARIO</span>
+              <strong class="monto">S/ {{ dolar.interbancario | number:'1.4-4' }}</strong>
+            </div>
+            @if (dolar.sunatVenta) {
+              <div class="caja-precio">
+                <span class="label">SUNAT VENTA / COMPRA</span>
+                <strong class="monto-sec">S/ {{ dolar.sunatVenta | number:'1.3-3' }} / {{ dolar.sunatCompra | number:'1.3-3' }}</strong>
+              </div>
+            }
+          </div>
+          <div class="rango-barra">
+            <span class="rango-texto">Tipo Venta SUNAT: <b>S/ {{ (dolar.sunatVenta ?? dolar.interbancario) | number:'1.3-4' }}</b></span>
+            <button type="button" class="btn-copiar-campo" (click)="aplicarDolar()">
+              Usar en Tipo de Cambio
+            </button>
+          </div>
+        } @else {
+          <p class="cargando-aviso">Cargando cotización del dólar…</p>
+        }
+      </div>
+    </div>
+
+    <!-- GRÁFICA EN VIVO TRADINGVIEW (KITCO / BLOOMBERG) -->
+    <div class="mercado-grafica-panel">
+      <div class="grafica-pestanas">
+        <button type="button" class="btn-tab-grafica" [class.activa]="tipoGrafica() === 'DUAL'" (click)="cambiarGrafica('DUAL')">
+          📊 Resumen Dual (Kitco & Bloomberg)
+        </button>
+        <button type="button" class="btn-tab-grafica" [class.activa]="tipoGrafica() === 'ORO'" (click)="cambiarGrafica('ORO')">
+          🕯️ Velas Oro Spot (XAU/USD)
+        </button>
+        <button type="button" class="btn-tab-grafica" [class.activa]="tipoGrafica() === 'DOLAR'" (click)="cambiarGrafica('DOLAR')">
+          📈 Dólar Sol (USD/PEN)
+        </button>
+      </div>
+      <div #contenedorGrafica class="contenedor-tradingview"></div>
+    </div>
+  </section>
+
+  <!-- FORMULARIO DE LIQUIDACIÓN Y PUBLICACIÓN DE PRECIOS -->
   <div class="major-grid liquidation-layout">
     <section class="panel major-span" aria-labelledby="mercado-title">
       <div class="major-card-head">
-        <span class="major-number">01</span>
+        <span class="major-number">02</span>
         <div>
-          <h2 id="mercado-title">Cotización de oro rojo y verde</h2>
-          <p>Ingresa los valores del mercado, revisa el precio de cada color y publica la cotización.</p>
+          <h2 id="mercado-title">Fijación de precio para Oro Rojo y Verde</h2>
+          <p>Verifica la cotización de onza y tipo de cambio, revisa el cálculo por gramo y publica la lista oficial.</p>
         </div>
       </div>
       <form [formGroup]="form" (ngSubmit)="calcularPrecio()" class="market-fields">
-        <label class="field"
-          >Cotización de onza Troy <small>USD / oz</small
-          ><input type="number" min="0.01" step="0.01" formControlName="cotizacionOnzaUsd"
-        /></label>
-        <label class="field"
-          >Tipo de cambio <small>PEN por USD</small
-          ><input type="number" min="0.0001" step="0.0001" formControlName="tipoCambioUsdPen"
-        /></label>
+        <label class="field">
+          Cotización de onza Troy <small>USD / oz</small>
+          <input type="number" min="0.01" step="0.01" formControlName="cotizacionOnzaUsd" />
+        </label>
+        <label class="field">
+          Tipo de cambio <small>PEN por USD</small>
+          <input type="number" min="0.0001" step="0.0001" formControlName="tipoCambioUsdPen" />
+        </label>
         <div class="quote-table-wrap">
           <table class="quote-table">
             <caption>Vista previa de la cotización por gramo</caption>
@@ -49,8 +157,11 @@
             </tbody>
           </table>
         </div>
-        <div class="quote-actions"><small>La vista previa cambia al escribir. Los precios vigentes cambian al publicar.</small>
-          <button mat-flat-button class="button-primary" type="submit" [disabled]="calculandoPrecio() || form.invalid">{{ calculandoPrecio() ? 'Publicando…' : 'Publicar cotización' }}</button>
+        <div class="quote-actions">
+          <small>La vista previa cambia al escribir. Los precios vigentes cambian al publicar.</small>
+          <button mat-flat-button class="button-primary" type="submit" [disabled]="calculandoPrecio() || form.invalid">
+            {{ calculandoPrecio() ? 'Publicando…' : 'Publicar cotización' }}
+          </button>
         </div>
       </form>
       @if (errorPrecio()) {
@@ -59,10 +170,13 @@
       <h3>Cotización publicada</h3>
       <div class="published-prices">
       @for (precio of preciosColor(); track precio.color) {
-        <div class="major-result"><span>Oro {{ precio.color === 'ROJO' ? 'rojo' : 'verde' }} · soles por gramo</span><strong>{{ dinero(precio.precioGramoPen) }}</strong><small>Publicado: {{ precio.fechaPublicacion | date:'short' }}</small></div>
+        <div class="major-result">
+          <span>Oro {{ precio.color === 'ROJO' ? 'rojo' : 'verde' }} · soles por gramo</span>
+          <strong>{{ dinero(precio.precioGramoPen) }}</strong>
+          <small>Publicado: {{ precio.fechaPublicacion | date:'short' }}</small>
+        </div>
       } @empty { <p>Todavía no hay cotizaciones publicadas.</p> }
       </div>
     </section>
   </div>
-
 </section>

@@ -1,10 +1,11 @@
 import { NumeroClaroPipe } from '../../core/numero-claro.pipe';
-import { RegistroPonderacion } from './registro-ponderacion';
+import { RegistroPonderacion, RegistroPonderacionItem } from './registro-ponderacion';
 import { A11yModule } from '@angular/cdk/a11y';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
   GuardarLoteExportacion,
@@ -14,6 +15,17 @@ import {
   RecepcionLey,
 } from '../../core/api/operaciones.service';
 import { MAYORISTA_VISTA_PREVIA } from './mayorista-preview';
+
+export interface FilaConsolidada {
+  origen: 'ACOPIO' | 'INDEPENDIENTE';
+  id: number;
+  fecha: string;
+  pesoG: number;
+  lecturaDecimal: number | null;
+  estado: string;
+  loteOriginal?: LoteExportacion;
+  ponderacionOriginal?: RegistroPonderacionItem;
+}
 
 interface SeleccionPartida {
   activa: boolean;
@@ -28,15 +40,19 @@ interface SeleccionPartida {
 })
 export class ConsolidacionMayorista implements OnInit {
   private readonly operaciones = inject(OperacionesService);
+  private readonly http = inject(HttpClient);
   protected readonly vistaPrevia = inject(MAYORISTA_VISTA_PREVIA);
   protected readonly fecha = signal(this.fechaLocal());
   protected readonly liquidaciones = signal<Liquidacion[]>([]);
   protected readonly lotes = signal<LoteExportacion[]>([]);
+  protected readonly ponderaciones = signal<RegistroPonderacionItem[]>([]);
+  protected readonly filtroOrigen = signal<'TODOS' | 'ACOPIO' | 'INDEPENDIENTE'>('TODOS');
   protected readonly loteEditor = signal<LoteExportacion | null>(null);
   protected readonly loteEliminar = signal<LoteExportacion | null>(null);
   protected readonly opcionesEditor = signal<RecepcionLey[]>([]);
   protected readonly idsEditor = signal<number[]>([]);
   protected readonly fechaEditor = signal('');
+
   protected editarLote(lote: LoteExportacion): void {
     if (lote.estado !== 'BORRADOR' || this.guardando()) return;
     this.error.set(''); this.fechaEditor.set(lote.fecha);
@@ -49,9 +65,11 @@ export class ConsolidacionMayorista implements OnInit {
       error: () => this.error.set('No se pudieron cargar los lotes recibidos para editar.'),
     });
   }
+
   protected elegirLoteEditor(id: number, incluir: boolean): void {
     this.idsEditor.update(ids => incluir ? [...new Set([...ids,id])] : ids.filter(x => x !== id));
   }
+
   protected guardarLoteEditor(): void {
     const lote=this.loteEditor();
     if (!lote || !this.fechaEditor() || !this.idsEditor().length || this.guardando()) return;
@@ -61,28 +79,234 @@ export class ConsolidacionMayorista implements OnInit {
       error: () => { this.guardando.set(false); this.error.set('No se pudo actualizar el lote. Revisa si alguna recepción ya pertenece a otro lote.'); },
     });
   }
+
+  @ViewChild(RegistroPonderacion) private ponderadorComponent?: RegistroPonderacion;
+
+  protected editarPonderacion(p: RegistroPonderacionItem): void {
+    this.ponderadorComponent?.editarRegistro(p);
+  }
+
+  protected eliminarPonderacion(p: RegistroPonderacionItem): void {
+    this.ponderadorComponent?.pedirEliminar(p);
+  }
+
   protected readonly pesoFundidoFinal = signal<number | null>(null);
   protected readonly fundidoInvalido = computed(() => {
     const peso = this.pesoFundidoFinal();
     return peso !== null && (!Number.isFinite(peso) || peso < 0 || peso > this.promedioExportacion().peso
       || Math.abs(peso * 1000 - Math.round(peso * 1000)) > 0.00001);
   });
+
   protected readonly mermaFinal = computed(() => {
     const peso = this.pesoFundidoFinal();
     return peso === null || this.fundidoInvalido() ? 0 : Math.round((this.promedioExportacion().peso - peso) * 1000) / 1000;
   });
+
   protected imprimirPromedio(): void {
-    if (!this.fundidoInvalido() && this.promedioExportacion().lectura !== null) window.print();
+    const prom = this.promedioExportacion();
+    if (this.fundidoInvalido() || prom.lectura === null) return;
+
+    const ventana = window.open('', '_blank', 'width=460,height=720');
+    if (!ventana) {
+      window.print();
+      return;
+    }
+    const doc = ventana.document;
+    doc.title = `Ticket_Consolidacion_${this.fechaLocal()}`;
+    const estilo = doc.createElement('style');
+    estilo.textContent = `
+      @page { size: 72mm auto; margin: 0; }
+      * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+      html, body {
+        width: 72mm;
+        max-width: 72mm;
+        margin: 0 !important;
+        padding: 2mm 3mm !important;
+        height: auto !important;
+        overflow: hidden !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        font-size: 9px;
+        line-height: 1.15;
+        color: #000;
+        background: #fff;
+      }
+      .ticket {
+        width: 100% !important;
+        max-width: 72mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+      }
+      .encabezado { text-align: center; border-bottom: 1.5px solid #000; padding-bottom: 2px; margin-bottom: 3px; }
+      .logo { font-size: 13px; font-weight: 900; letter-spacing: 1.5px; margin: 0; text-transform: uppercase; }
+      .subtitulo { font-size: 8px; font-weight: 700; letter-spacing: 0.3px; margin: 1px 0 0; text-transform: uppercase; color: #222; }
+      .meta { border-bottom: 1px dashed #333; padding-bottom: 2px; margin-bottom: 3px; font-size: 8.5px; }
+      .meta-fila { display: flex; justify-content: space-between; margin-bottom: 1px; }
+      .tabla-partidas { width: 100%; border-collapse: collapse; margin-bottom: 3px; }
+      .tabla-partidas th { border-bottom: 1px solid #000; font-size: 8px; text-transform: uppercase; padding: 2px 1px; font-weight: 800; color: #111; }
+      .tabla-partidas td { padding: 2px 1px; border-bottom: 1px dotted #bbb; font-size: 8.5px; vertical-align: top; }
+      .partida-main { font-weight: 700; font-size: 9px; }
+      .partida-sub { font-size: 7.5px; color: #444; }
+      .totales { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; padding: 2px 0; margin-top: 2px; }
+      .totales-fila { display: flex; justify-content: space-between; font-size: 8.5px; margin-bottom: 1px; }
+      .total-final { font-size: 10px; font-weight: 900; border-top: 1px dashed #000; margin-top: 2px; padding-top: 2px; }
+      .firmas { margin-top: 12px; display: flex; justify-content: space-between; text-align: center; font-size: 7.5px; }
+      .firma-col { border-top: 1px solid #000; width: 44%; padding-top: 2px; font-weight: 600; }
+      .pie { text-align: center; font-size: 7px; margin-top: 4px; padding-bottom: 2px; letter-spacing: 0.5px; color: #555; }
+      @media print {
+        html, body { width: 72mm !important; margin: 0 !important; padding: 1mm 2mm !important; }
+        .no-print { display: none !important; }
+      }
+    `;
+    doc.head.append(estilo);
+
+    const fPeso = (n: number | null | undefined) =>
+      Number(n ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+    const fLectura = (n: number | null | undefined, dec = 7) => {
+      if (n === null || n === undefined) return '—';
+      const num = Number(n);
+      if (!Number.isFinite(num)) return '—';
+      return new Intl.NumberFormat('en-US', {
+        useGrouping: false,
+        minimumFractionDigits: dec,
+        maximumFractionDigits: dec,
+      }).format(num);
+    };
+
+    const filas = this.filasFiltradas();
+    let htmlFilas = '';
+    filas.forEach((f, idx) => {
+      const orig = f.origen === 'ACOPIO' ? 'Lote Acopio' : 'Independiente';
+      htmlFilas += `
+        <tr>
+          <td style="text-align:left">
+            <div class="partida-main">#${idx + 1} ${orig} #${f.id}</div>
+            <div class="partida-sub">${f.fecha}</div>
+          </td>
+          <td style="text-align:center; font-weight:bold">${fPeso(f.pesoG)}g</td>
+          <td style="text-align:right; font-weight:bold">${fLectura(f.lecturaDecimal, 4)}</td>
+        </tr>
+      `;
+    });
+
+    const fundidoFinal = this.pesoFundidoFinal() ?? prom.peso;
+    const mermaFinal = this.mermaFinal();
+
+    doc.body.innerHTML = `
+      <div class="ticket">
+        <div class="encabezado">
+          <div class="logo">SITRA - ORO</div>
+          <div class="subtitulo">Consolidación Lotes Exportación</div>
+        </div>
+        <div class="meta">
+          <div class="meta-fila">
+            <span><b>FECHA:</b> ${this.fechaLocal()}</span>
+            <span><b>REGISTROS:</b> ${filas.length}</span>
+          </div>
+          <div class="meta-fila">
+            <span><b>FILTRO:</b> ${this.filtroOrigen()}</span>
+            <span><b>ESTADO:</b> CONSOLIDADO</span>
+          </div>
+        </div>
+        <table class="tabla-partidas">
+          <thead>
+            <tr>
+              <th style="text-align:left">Registro</th>
+              <th style="text-align:center">Peso Bruto</th>
+              <th style="text-align:right">Lectura</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${htmlFilas}
+          </tbody>
+        </table>
+        <div class="totales">
+          <div class="totales-fila">
+            <span>Total Peso Bruto:</span>
+            <span><b>${fPeso(prom.peso)} g</b></span>
+          </div>
+          <div class="totales-fila">
+            <span>Lectura promedio bruto:</span>
+            <span><b>${fLectura(prom.lectura, 7)}</b></span>
+          </div>
+          <div class="totales-fila">
+            <span>Peso Fundido Final:</span>
+            <span><b>${fPeso(fundidoFinal)} g</b></span>
+          </div>
+          <div class="totales-fila">
+            <span>Merma Final:</span>
+            <span><b>${fPeso(mermaFinal)} g</b></span>
+          </div>
+          <div class="totales-fila total-final">
+            <span>PROMEDIO BRUTO:</span>
+            <span><b>${fLectura(prom.lectura, 7)}</b></span>
+          </div>
+        </div>
+        <div class="firmas">
+          <div class="firma-col">Firma Mayorista</div>
+          <div class="firma-col">V°B° Exportador</div>
+        </div>
+        <div class="pie">
+          *** SITRA-ORO · MÓDULO MAYORISTA EXPORTACIÓN ***
+        </div>
+      </div>
+    `;
+
+    setTimeout(() => {
+      ventana.focus();
+      ventana.print();
+    }, 250);
   }
-  protected readonly promedioExportacion = computed(() => {
-    const filas = this.lotes().flatMap(lote => this.filasPorLey(lote));
-    const pesoMiligramos = filas.reduce((total, fila) => total + Math.round(fila.peso * 1000), 0);
-    const incompletos = filas.some(fila => fila.ley === null && fila.peso > 0);
-    const sumaPonderada = filas.reduce((total, fila) => total + Math.round(fila.peso * 1000) * (fila.ley ?? 0) / 100, 0);
-    return { peso: pesoMiligramos / 1000,
-      lectura: pesoMiligramos > 0 && !incompletos ? sumaPonderada / pesoMiligramos : null,
-      incompletos };
+
+  protected readonly filasConsolidadas = computed<FilaConsolidada[]>(() => {
+    const res: FilaConsolidada[] = [];
+    for (const lote of this.lotes()) {
+      for (const fila of this.filasPorLey(lote)) {
+        res.push({
+          origen: 'ACOPIO',
+          id: lote.idLote,
+          fecha: lote.fecha,
+          pesoG: fila.peso,
+          lecturaDecimal: fila.ley === null ? null : fila.ley / 100,
+          estado: lote.estado,
+          loteOriginal: lote,
+        });
+      }
+    }
+    for (const p of this.ponderaciones()) {
+      res.push({
+        origen: 'INDEPENDIENTE',
+        id: p.ID_REGISTRO,
+        fecha: p.FECHA,
+        pesoG: p.PESO_TOTAL,
+        lecturaDecimal: p.LECTURA,
+        estado: 'REGISTRADO',
+        ponderacionOriginal: p,
+      });
+    }
+    return res;
   });
+
+  protected readonly filasFiltradas = computed(() => {
+    const f = this.filtroOrigen();
+    if (f === 'ACOPIO') return this.filasConsolidadas().filter(x => x.origen === 'ACOPIO');
+    if (f === 'INDEPENDIENTE') return this.filasConsolidadas().filter(x => x.origen === 'INDEPENDIENTE');
+    return this.filasConsolidadas();
+  });
+
+  protected readonly promedioExportacion = computed(() => {
+    const filas = this.filasFiltradas();
+    const pesoMiligramos = filas.reduce((total, fila) => total + Math.round(fila.pesoG * 1000), 0);
+    const incompletos = filas.some(fila => fila.lecturaDecimal === null && fila.pesoG > 0);
+    const sumaPonderada = filas.reduce((total, fila) => total + Math.round(fila.pesoG * 1000) * (fila.lecturaDecimal ?? 0), 0);
+    return {
+      peso: pesoMiligramos / 1000,
+      lectura: pesoMiligramos > 0 && !incompletos ? sumaPonderada / pesoMiligramos : null,
+      incompletos,
+    };
+  });
+
   protected filasPorLey(lote: LoteExportacion): { ley: number | null; peso: number }[] {
     const pesos = new Map<number | null, number>();
     const sumar = (ley: number | null, peso: number) => pesos.set(ley, (pesos.get(ley) ?? 0) + Math.round(peso * 1000));
@@ -95,6 +319,7 @@ export class ConsolidacionMayorista implements OnInit {
     if (!pesos.size) sumar(null, lote.pesoTotalFundidoG);
     return Array.from(pesos, ([ley, peso]) => ({ ley, peso: peso / 1000 }));
   }
+
   protected readonly seleccion = signal<Record<number, SeleccionPartida>>({});
   protected readonly editandoId = signal<number | null>(null);
   protected readonly detalleId = signal<number | null>(null);
@@ -155,6 +380,10 @@ export class ConsolidacionMayorista implements OnInit {
         this.cargando.set(false);
         this.error.set(this.mensajeError(response, 'No se pudieron consultar los lotes de exportación.'));
       },
+    });
+    this.http.get<RegistroPonderacionItem[]>(`${environment.apiBaseUrl}/api/v1/mayorista/ponderaciones`).subscribe({
+      next: (pond) => this.ponderaciones.set(pond || []),
+      error: () => {},
     });
   }
 

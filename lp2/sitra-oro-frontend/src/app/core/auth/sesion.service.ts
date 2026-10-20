@@ -33,12 +33,15 @@ export class SesionService {
   readonly documento = computed(
     () => this.leerPayload()?.documentoIdentidad ?? this.leerPayload()?.sub ?? '',
   );
-  readonly nombreUsuario = computed(
-    () =>
-      this.leerPayload()?.preferred_username ??
-      this.leerPayload()?.name ??
-      this.documento(),
-  );
+  readonly nombreUsuario = computed(() => {
+    const p = this.leerPayload();
+    if (!p) return '';
+    if (p.name && p.name.trim().length > 0) return p.name;
+    if (p.documentoIdentidad) return `DNI ${p.documentoIdentidad}`;
+    const pref = p.preferred_username;
+    if (pref && !pref.includes('demo')) return pref;
+    return this.documento() ? `DNI ${this.documento()}` : (pref ?? '');
+  });
   readonly autenticado = computed(() => !!this.tokenActual() && !this.tokenVencido());
 
   constructor() {

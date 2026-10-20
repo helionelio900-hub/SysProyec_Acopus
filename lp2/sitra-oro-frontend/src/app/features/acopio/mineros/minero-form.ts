@@ -1,12 +1,13 @@
 import { Component, DestroyRef, OnInit, inject, isDevMode, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap, tap } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { environment } from '../../../../environments/environment';
 import { MineroRequest } from './minero';
 import { MineroService } from './minero.service';
 
@@ -22,9 +23,16 @@ export class MineroForm implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly service = inject(MineroService);
+  private readonly http = inject(HttpClient);
+
   readonly id = signal<number | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+
+  protected readonly consultandoDni = signal(false);
+  protected readonly estadoDni = signal('');
+  private nombreConsultado = '';
+
   protected readonly form = this.fb.nonNullable.group({
     documentoIdentidad: [
       '',
@@ -41,10 +49,62 @@ export class MineroForm implements OnInit {
     .subscribe(() => {
       if (isDevMode()) console.info('[MineroForm] Se detectó un cambio en el campo de nombre.');
     });
+
   get editando(): boolean {
     return this.id() !== null;
   }
+
   ngOnInit(): void {
+    // Consulta automática de DNI en RENIEC al ingresar 8 dígitos
+    this.form.controls.documentoIdentidad.valueChanges
+      .pipe(
+        tap(() => {
+          if (
+            this.nombreConsultado &&
+            this.form.controls.nombresApellidos.value === this.nombreConsultado
+          ) {
+            this.form.controls.nombresApellidos.setValue('');
+          }
+          this.nombreConsultado = '';
+          this.estadoDni.set('');
+          this.consultandoDni.set(false);
+        }),
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap((dni) => {
+          const limpio = (dni || '').trim();
+          if (!/^\d{8}$/.test(limpio)) return of(null);
+          this.consultandoDni.set(true);
+          this.estadoDni.set('Consultando DNI en RENIEC...');
+          return this.http
+            .get<{ nombresApellidos: string }>(
+              `${environment.apiBaseUrl}/api/v1/publico/identidad/dni/${limpio}`
+            )
+            .pipe(
+              map((datos) =>
+                this.form.controls.documentoIdentidad.value.trim() === limpio ? datos : null
+              ),
+              catchError(() => {
+                if (this.form.controls.documentoIdentidad.value.trim() === limpio) {
+                  this.estadoDni.set(
+                    'No se pudo consultar el DNI. Puedes escribir los nombres manualmente.'
+                  );
+                }
+                return of(null);
+              })
+            );
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((datos) => {
+        this.consultandoDni.set(false);
+        if (datos) {
+          this.nombreConsultado = datos.nombresApellidos;
+          this.form.controls.nombresApellidos.setValue(datos.nombresApellidos);
+          this.estadoDni.set('Nombre obtenido por consulta de DNI.');
+        }
+      });
+
     const value = this.route.snapshot.paramMap.get('id');
     if (!value) return;
     const id = Number(value);
@@ -69,6 +129,7 @@ export class MineroForm implements OnInit {
       },
     });
   }
+
   guardar(): void {
     if (this.loading()) return;
     this.form.controls.documentoIdentidad.setValue(
@@ -96,9 +157,11 @@ export class MineroForm implements OnInit {
       },
     });
   }
+
   cancelar(): void {
     this.router.navigateByUrl('/acopio/mineros');
   }
+
   mensaje(
     control: 'documentoIdentidad' | 'nombresApellidos' | 'telefono' | 'zonaProcedencia',
   ): string {

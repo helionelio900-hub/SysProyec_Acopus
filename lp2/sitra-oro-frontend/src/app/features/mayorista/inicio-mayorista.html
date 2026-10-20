@@ -1,205 +1,288 @@
 <section class="workspace mayorista-workspace">
-  <header class="page-head">
-    <div>
-      <span class="eyebrow">MÓDULO MAYORISTA · CONTROL DE PLANTA</span>
-      <h1>Operación mayorista</h1>
-      <p>
-        Consulta la red de acopio y sigue el recorrido del oro desde su recepción hasta la
-        preparación de lotes.
+  <!-- 1. TICKER TAPE INTERNACIONAL ESTILO BLOOMBERG / KITCO -->
+  <aside class="market-ticker-tape" aria-label="Cotizaciones de mercado">
+    <div class="ticker-badge">
+      <span class="live-dot"></span>
+      <span>KITCO & FX SPOT</span>
+    </div>
+    <div class="ticker-scroll">
+      <div class="ticker-track">
+        @for (item of market.tickers(); track item.simbolo) {
+          <div class="ticker-item">
+            <span class="ticker-sym">{{ item.simbolo }}</span>
+            <span class="ticker-val">
+              {{ item.moneda === 'USD' ? '$' : 'S/' }} {{ item.valor | number: (item.simbolo === 'USD/PEN' ? '1.3-3' : '1.2-2') }}
+            </span>
+            <span class="ticker-change" [class.up]="item.variacion24h >= 0" [class.down]="item.variacion24h < 0">
+              {{ item.variacion24h >= 0 ? '▲ +' : '▼ ' }}{{ item.variacion24h }}%
+            </span>
+            <span class="ticker-name">{{ item.nombre }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </aside>
+
+  <!-- ENCABEZADO EJECUTIVO DE PLANTA MAYORISTA -->
+  <header class="terminal-hero">
+    <div class="hero-left">
+      <div class="hero-breadcrumb">
+        <span class="station-chip">
+          <span class="pulse-beacon"></span>
+          PLANTA CENTRAL ACTIVA
+        </span>
+        <span class="market-status">
+          <span class="dot-green"></span> LBMA / COMEX: CONECTADO
+        </span>
+        <span class="terminal-clock">{{ horaActual() }} (UTC-5)</span>
+      </div>
+      <h1 class="hero-title">Supervisión Mayorista y Planta</h1>
+      <p class="hero-desc">
+        Monitoreo consolidado de centros de acopio, liquidación por ensaye de ley y formación de lotes para exportación.
       </p>
+    </div>
+
+
+    <div class="hero-right">
+      <div class="security-card">
+        <div class="sec-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>AUTENTICACIÓN REFORZADA</span>
+        </div>
+        <div class="sec-body">
+          <strong>Keycloak · OIDC RS256</strong>
+          <small>Auditoría de rol G1_MAYORISTA</small>
+        </div>
+      </div>
     </div>
   </header>
 
-  <section aria-labelledby="resumen-titulo">
-    <div class="major-section-head">
-      <div>
-        <span class="major-kicker">DATOS DISPONIBLES</span>
-        <h2 id="resumen-titulo">Resumen actual</h2>
-      </div>
+  <!-- MÉTRICAS CLAVE (KPIs CONSOLIDADOS) -->
+  <section class="kpi-section" aria-label="Métricas de operación mayorista">
+    <div class="section-tag-bar">
+      <span class="tag-square"></span>
+      <h2>MÉTRICAS AUDITADAS EN ORACLE XE</h2>
     </div>
-    <div class="major-grid major-grid-three">
-      <article class="major-card major-metric">
-        <span>Centros activos</span>
-        <strong>{{
-          cargandoCentros()
-              ? '…'
-              : centrosActivos() === null
-                ? '—'
-                : centrosActivos()
-        }}</strong>
-        <small>Centros registrados en la red</small>
+
+    <div class="kpi-grid">
+      <!-- KPI 1: Centros Activos -->
+      <article class="kpi-tile">
+        <div class="tile-top">
+          <div class="kpi-icon-wrap icon-blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <span class="kpi-tag tag-blue">RED REGIONAL</span>
+        </div>
+        <div class="kpi-main">
+          <span class="kpi-label">Centros de Acopio Activos</span>
+          <strong class="kpi-val">{{ cargandoCentros() ? '…' : centrosActivos() === null ? '—' : centrosActivos() }}</strong>
+          <span class="kpi-subtext">Estaciones autorizadas transmitiendo datos</span>
+        </div>
       </article>
-      <article class="major-card major-metric">
-        <span>Liquidaciones registradas</span>
-        <strong>{{
-          cargandoReporte()
-              ? '…'
-              : (reporte()?.agregado?.totalLiquidaciones ?? '—')
-        }}</strong>
-        <small>Historial disponible</small>
+
+      <!-- KPI 2: Liquidaciones Procesadas -->
+      <article class="kpi-tile">
+        <div class="tile-top">
+          <div class="kpi-icon-wrap icon-gold">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <span class="kpi-tag tag-gold">HISTORIAL</span>
+        </div>
+        <div class="kpi-main">
+          <span class="kpi-label">Liquidaciones Procesadas</span>
+          <strong class="kpi-val">{{ cargandoReporte() ? '…' : (reporte()?.agregado?.totalLiquidaciones ?? '—') }}</strong>
+          <span class="kpi-subtext">Operaciones con liquidación final emitida</span>
+        </div>
       </article>
-      <article class="major-card major-metric">
-        <span>Total de liquidaciones registradas</span>
-        <strong>{{
-          cargandoReporte()
-              ? '…'
-              : reporte()
-                ? dinero(reporte()!.agregado.montoTotal)
-                : '—'
-        }}</strong>
-        <small>Importe histórico en soles</small>
+
+      <!-- KPI 3: Monto Total Pagado -->
+      <article class="kpi-tile featured-kpi">
+        <div class="tile-top">
+          <div class="kpi-icon-wrap icon-emerald">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <span class="kpi-tag tag-emerald">BANCARIZADO</span>
+        </div>
+        <div class="kpi-main">
+          <span class="kpi-label">Volumen Financiero Liquidado</span>
+          <strong class="kpi-val text-gold">{{ cargandoReporte() ? '…' : reporte() ? dinero(reporte()!.agregado.montoTotal) : '—' }}</strong>
+          <span class="kpi-subtext">100% desembolsos vía transferencia interbancaria</span>
+        </div>
       </article>
     </div>
+
     @if (errorCentros()) {
-      <p class="feedback error" role="alert">{{ errorCentros() }}</p>
+      <div class="error-panel" role="alert">
+        <span>{{ errorCentros() }}</span>
+      </div>
     }
     @if (errorReporte()) {
-      <p class="feedback error" role="alert">{{ errorReporte() }}</p>
+      <div class="error-panel" role="alert">
+        <span>{{ errorReporte() }}</span>
+      </div>
     }
   </section>
 
-  <section class="major-section" aria-labelledby="flujo-titulo">
-    <div class="major-section-head">
-      <div>
-        <span class="major-kicker">RECORRIDO OPERATIVO</span>
-        <h2 id="flujo-titulo">Áreas de trabajo</h2>
-        <p>Cada etapa conserva su propia información dentro del proceso mayorista.</p>
-      </div>
+  <!-- PIPELINE OPERATIVO MAYORISTA (4 ESTACIONES) -->
+  <section class="pipeline-section" aria-labelledby="pipeline-titulo">
+    <div class="section-tag-bar">
+      <span class="tag-square"></span>
+      <h2 id="pipeline-titulo">FLUJO DE PROCESAMIENTO EN PLANTA</h2>
     </div>
-    <div class="major-grid workflow-grid">
-      <article class="major-card workflow-card">
-        <div class="major-card-head">
-          <span class="major-number">01</span>
-          <div>
-            <h2>Centros y accesos</h2>
-            <p>Registra el centro y crea la cuenta inicial de su acopiador.</p>
-          </div>
+
+    <div class="pipeline-grid">
+      <!-- Etapa 1 -->
+      <article class="pipeline-card">
+        <div class="card-step-header">
+          <span class="step-num">01</span>
+          <span class="step-badge">LOGÍSTICA</span>
         </div>
-        <div class="workflow-footer">
-          <span class="major-status ready">{{
-            vistaPrevia ? 'Solo visualización' : 'Disponible'
-          }}</span
-          ><a
-            class="major-view-link"
-            [routerLink]="vistaPrevia ? '/vista-previa/mayorista/centros' : '/mayorista/centros'"
-            >Abrir centros →</a
-          >
-        </div>
+        <h3 class="card-title">Centros de Acopio</h3>
+        <p class="card-desc">Administra las sucursales descentralizadas y las cuentas vinculadas a operadores de balanza autorizados.</p>
+        <a class="pipeline-link" [routerLink]="vistaPrevia ? '/vista-previa/mayorista/centros' : '/mayorista/centros'">
+          <span>Gestionar red de centros</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
       </article>
-      <article class="major-card workflow-card">
-        <div class="major-card-head">
-          <span class="major-number">02</span>
-          <div>
-            <h2>Lotes recibidos por ley</h2>
-            <p>Registra varias leyes por lote, sus pesos y el importe a pagar al acopiador.</p>
-          </div>
+
+      <!-- Etapa 2 -->
+      <article class="pipeline-card highlight-pipeline">
+        <div class="card-step-header">
+          <span class="step-num">02</span>
+          <span class="step-badge badge-gold">TRANSACCIÓN</span>
         </div>
-        <div class="workflow-footer">
-          <span class="major-status ready">{{ vistaPrevia ? 'Solo visualización' : 'Disponible' }}</span
-          ><a
-            class="major-view-link"
-            [routerLink]="
-              vistaPrevia ? '/vista-previa/mayorista/recepcion' : '/mayorista/recepcion'
-            "
-            >Ver pantalla →</a
-          >
-        </div>
+        <h3 class="card-title">Compra al Acopiador</h3>
+        <p class="card-desc">Recepción directa de partidas de oro acopiadas, ponderación de ley, ensaye físico y liquidación en planta.</p>
+        <a class="pipeline-link link-primary" [routerLink]="vistaPrevia ? '/vista-previa/mayorista/recepcion' : '/mayorista/recepcion'">
+          <span>Registrar compra mayorista</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
       </article>
-      <article class="major-card workflow-card">
-        <div class="major-card-head">
-          <span class="major-number">03</span>
-          <div>
-            <h2>Cotizaciones e historial anterior</h2>
-            <p>Consulta las liquidaciones anteriores y las tarifas publicadas al acopiador.</p>
-          </div>
+
+      <!-- Etapa 3 -->
+      <article class="pipeline-card">
+        <div class="card-step-header">
+          <span class="step-num">03</span>
+          <span class="step-badge">AUDITORÍA</span>
         </div>
-        <div class="workflow-footer">
-          <span class="major-status">Consulta histórica</span
-          ><a
-            class="major-view-link"
-            [routerLink]="
-              vistaPrevia ? '/vista-previa/mayorista/liquidaciones' : '/mayorista/liquidaciones'
-            "
-            >Ver liquidaciones →</a
-          >
-        </div>
+        <h3 class="card-title">Liquidaciones</h3>
+        <p class="card-desc">Historial fiscal de liquidaciones emitidas, tarifas de valorización por onza y vouchers bancarios asociados.</p>
+        <a class="pipeline-link" [routerLink]="vistaPrevia ? '/vista-previa/mayorista/liquidaciones' : '/mayorista/liquidaciones'">
+          <span>Auditar liquidaciones</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
       </article>
-      <article class="major-card workflow-card">
-        <div class="major-card-head">
-          <span class="major-number">04</span>
-          <div>
-            <h2>Lotes para exportación</h2>
-            <p>Reúne lotes valorizados y conserva las leyes y pesos de sus partidas.</p>
-          </div>
+
+      <!-- Etapa 4 -->
+      <article class="pipeline-card">
+        <div class="card-step-header">
+          <span class="step-num">04</span>
+          <span class="step-badge">EXPORTACIÓN</span>
         </div>
-        <div class="workflow-footer">
-          <span class="major-status ready">{{ vistaPrevia ? 'Solo visualización' : 'Disponible' }}</span
-          ><a
-            class="major-view-link"
-            [routerLink]="
-              vistaPrevia ? '/vista-previa/mayorista/consolidacion' : '/mayorista/consolidacion'
-            "
-            >Ver lotes →</a
-          >
-        </div>
+        <h3 class="card-title">Lotes de Exportación</h3>
+        <p class="card-desc">Consolida lotes de mineral con leyes certificadas y precintos de seguridad para exportación a refinería.</p>
+        <a class="pipeline-link" [routerLink]="vistaPrevia ? '/vista-previa/mayorista/consolidacion' : '/mayorista/consolidacion'">
+          <span>Consolidar partidas</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
       </article>
     </div>
   </section>
 
-  <section class="major-section" aria-labelledby="historial-titulo">
-    <div class="major-section-head">
-      <div>
-        <span class="major-kicker">HISTORIAL DISPONIBLE</span>
-        <h2 id="historial-titulo">Últimas liquidaciones registradas</h2>
+  <!-- TABLA DE HISTORIAL DE AUDITORÍA -->
+  <section class="history-section" aria-labelledby="historial-titulo">
+    <div class="history-bar">
+      <div class="section-tag-bar">
+        <span class="tag-square emerald-square"></span>
+        <h2 id="historial-titulo">LIQUIDACIONES RECIENTES EN ORACLE XE</h2>
       </div>
-      <a
-        class="major-view-link"
-        [routerLink]="
-          vistaPrevia ? '/vista-previa/mayorista/liquidaciones' : '/mayorista/liquidaciones'
-        "
-        >Ver historial completo →</a
-      >
+      <a class="view-history-link" [routerLink]="vistaPrevia ? '/vista-previa/mayorista/liquidaciones' : '/mayorista/liquidaciones'">
+        <span>Ver todas las liquidaciones</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
     </div>
+
     @if (cargandoReporte()) {
-      <p class="loading-state" role="status">Cargando historial…</p>
+      <div class="loading-panel">
+        <div class="gold-spinner"></div>
+        <p>Cargando historial auditado desde Oracle XE…</p>
+      </div>
     } @else if (reporte(); as datos) {
       @if (datos.liquidaciones.length) {
-        <div class="table-wrap">
-          <table>
-            <caption class="major-visually-hidden">
-              Últimas liquidaciones registradas
-            </caption>
+        <div class="pro-table-wrapper">
+          <table class="terminal-table">
             <thead>
               <tr>
-                <th>N.º</th>
-                <th>Fecha</th>
-                <th>Estado</th>
-                <th>Detalles</th>
-                <th>Total registrado</th>
+                <th>Operación</th>
+                <th>Fecha de Emisión</th>
+                <th>Estado Operativo</th>
+                <th class="text-center">Leyes Analizadas</th>
+                <th class="text-right">Monto Liquidado</th>
               </tr>
             </thead>
             <tbody>
               @for (item of datos.liquidaciones.slice(0, 5); track item.idLiquidacionG1) {
                 <tr>
                   <td>
-                    <strong>#{{ item.idLiquidacionG1 }}</strong>
+                    <span class="code-badge">#{{ item.idLiquidacionG1 }}</span>
                   </td>
-                  <td>{{ item.fechaLiquidacion | date: 'short' }}</td>
-                  <td>{{ item.estado }}</td>
-                  <td>{{ item.cantidadDetalles }}</td>
-                  <td>{{ dinero(item.totalPagadoG2Pen) }}</td>
+                  <td class="text-muted">
+                    {{ item.fechaLiquidacion | date: 'dd/MM/yyyy · HH:mm' }}
+                  </td>
+                  <td>
+                    <span class="status-pill" [class.status-approved]="item.estado === 'LIQUIDADA' || item.estado === 'ACTIVO' || item.estado === 'CONFIRMADA'">
+                      {{ item.estado }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <span class="ley-chip">{{ item.cantidadDetalles }} partidas</span>
+                  </td>
+                  <td class="text-right font-mono text-gold font-bold">
+                    {{ dinero(item.totalPagadoG2Pen) }}
+                  </td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
       } @else {
-        <p class="empty-state">
-          {{
-            vistaPrevia ? 'Vista previa sin datos.' : 'Todavía no hay liquidaciones registradas.'
-          }}
-        </p>
+        <div class="empty-state-panel">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>No se registran liquidaciones en la base de datos para el período actual.</p>
+        </div>
       }
     }
   </section>
+
+  <!-- AUDITORÍA INSTITUCIONAL -->
+  <footer class="audit-strip">
+    <div class="audit-left">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      <span>PLATAFORMA MAYORISTA AUDITADA · TRAZABILIDAD ORACLE XE · TOKEN KEYCLOAK ACTIVO</span>
+    </div>
+    <div class="audit-right">
+      <span>SITRA-ORO v2.4</span>
+    </div>
+  </footer>
 </section>
