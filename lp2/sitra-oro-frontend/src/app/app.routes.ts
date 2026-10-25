@@ -21,6 +21,11 @@ export const routes: Routes = [
     data: { modo: 'registro' },
   },
   {
+    path: 'auth/callback',
+    title: 'Autenticación | SITRA-ORO',
+    loadComponent: () => import('./core/auth/auth-callback').then((m) => m.AuthCallback),
+  },
+  {
     path: 'ingresar',
     title: 'Iniciar sesión | SITRA-ORO',
     loadComponent: () => import('./features/minero/cuenta-minero').then((m) => m.CuentaMinero),

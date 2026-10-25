@@ -6,6 +6,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { SesionService } from '../../core/auth/sesion.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface CentroAcopio {
   idCentroAcopio: number;
@@ -36,6 +37,7 @@ export class CuentaMinero implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly sesion = inject(SesionService);
+  private readonly auth = inject(AuthService);
   private readonly host = inject(ElementRef<HTMLElement>);
   protected readonly modo = this.route.snapshot.data['modo'] as 'registro' | 'ingreso';
   protected readonly centros = signal<CentroAcopio[]>([]);
@@ -62,6 +64,10 @@ export class CuentaMinero implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.modo === 'ingreso') {
+      void this.auth.iniciarLogin();
+      return;
+    }
     if (this.modo === 'registro') {
       this.cargarCentros();
       this.form.controls.documentoIdentidad.valueChanges.pipe(
@@ -134,51 +140,13 @@ export class CuentaMinero implements OnInit {
       return;
     }
 
-    const { documentoIdentidad, clave } = this.form.getRawValue();
-
-    if (environment.keycloakUrl) {
-      const docLimpio = documentoIdentidad.trim();
-      const equivalencias: Record<string, string> = {
-        '75848157': 'mayorista.demo1',
-        '42824989': 'acopiador.demo1',
-      };
-      const usuarioAuth = equivalencias[docLimpio] || docLimpio;
-
-      const body = new URLSearchParams();
-      body.set('grant_type', 'password');
-      body.set('client_id', environment.keycloakClientId || 'sitra-oro-prueba');
-      body.set('username', usuarioAuth);
-      body.set('password', clave);
-
-      this.http
-        .post<{ access_token: string; token_type: string; expires_in: number }>(
-          environment.keycloakUrl,
-          body.toString(),
-          { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
-        )
-        .subscribe({
-          next: (token) => {
-            this.sesion.guardar(token.access_token);
-            const destino =
-              this.sesion.rol() === 'G2_ACOPIADOR'
-                ? '/acopio'
-                : this.sesion.rol() === 'G1_MAYORISTA'
-                  ? '/mayorista'
-                  : '/minero/cuenta';
-            void this.router.navigateByUrl(destino);
-          },
-          error: (error) => {
-            const detalle =
-              error.error?.error_description ||
-              error.error?.detail ||
-              error.error?.message ||
-              'Credenciales no válidas en Keycloak. Verifica tu usuario y clave.';
-            this.error.set(detalle);
-            this.enviando.set(false);
-          },
-        });
+    if (this.modo === 'ingreso') {
+      this.enviando.set(true);
+      void this.auth.iniciarLogin();
       return;
     }
+
+    const { documentoIdentidad, clave } = this.form.getRawValue();
 
     this.http
       .post<TokenResponse>(`${environment.apiBaseUrl}/api/v1/seguridad/login`, {
