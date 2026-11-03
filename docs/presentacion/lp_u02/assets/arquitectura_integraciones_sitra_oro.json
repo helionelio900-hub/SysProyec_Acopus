@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SITRA-ORO · Integraciones y trazabilidad de compra",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/helionelio900-hub/SysProyec_Acopus.git",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "3829bd39bb2edce6a60c9fe8ecdf89d5d38edac9"
+    },
+    "views": [
+      { "id": "dni", "label": "Consulta de DNI", "focus": ["frontend", "api", "reniec", "minero"], "note": "El DNI se consulta por el endpoint público antes de persistir el minero." },
+      { "id": "precio", "label": "Precio y ajuste", "focus": ["parametros", "transaccion", "ajuste"], "note": "Los parámetros vigentes cotizan la compra; el ajuste conserva la trazabilidad de la transacción." },
+      { "id": "ticket", "label": "Comprobante", "focus": ["frontend", "liquidacion", "ticket"], "note": "La pantalla genera el comprobante imprimible a partir de la liquidación registrada." }
+    ]
+  },
+  "components": [
+    { "id": "frontend", "type": "frontend", "label": "Angular · Acopio y Mayorista", "sublabel": "Formularios, ajuste e impresión", "pos": [45, 250], "size": [190, 72], "sources": [{ "path": "lp2/sitra-oro-frontend/src/app/features/mayorista/recepcion-mayorista.ts", "line": 506, "label": "ticket" }] },
+    { "id": "api", "type": "backend", "label": "Spring Boot API", "sublabel": "REST · reglas de negocio", "pos": [320, 250], "size": [175, 72] },
+    { "id": "reniec", "type": "external", "label": "Servicio RENIEC", "sublabel": "Consulta de DNI de 8 dígitos", "pos": [320, 75], "size": [175, 68], "sources": [{ "path": "lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/minero/controller/ConsultaDniController.java", "line": 39, "label": "consulta DNI" }] },
+    { "id": "minero", "type": "database", "label": "MINEROS", "sublabel": "Identidad validada", "pos": [570, 75], "size": [165, 68] },
+    { "id": "parametros", "type": "database", "label": "PARAMETROS_SISTEMA", "sublabel": "Cotización y merma vigentes", "pos": [570, 235], "size": [175, 72], "sources": [{ "path": "lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/parametros/service/ParametrosSistemaServiceImpl.java", "line": 23, "label": "vigentes" }] },
+    { "id": "transaccion", "type": "database", "label": "TRANSACCIONES_G2", "sublabel": "Compra directa valorizada", "pos": [825, 235], "size": [175, 72], "sources": [{ "path": "lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/acopiador/entity/TransaccionG2.java", "line": 15, "label": "entidad" }] },
+    { "id": "ajuste", "type": "database", "label": "AJUSTES_COMPRA_G2", "sublabel": "Auditoría de cambio o anulación", "pos": [825, 405], "size": [175, 72], "sources": [{ "path": "lp2/sitra-oro-backend/src/main/java/pe/edu/upeu/sitraoro/acopio/acopiador/entity/AjusteCompraG2.java", "line": 13, "label": "entidad" }] },
+    { "id": "liquidacion", "type": "database", "label": "LIQUIDACIONES_G1", "sublabel": "Monto final a pagar", "pos": [570, 405], "size": [175, 72] },
+    { "id": "ticket", "type": "external", "label": "Ticketera / navegador", "sublabel": "Comprobante imprimible", "pos": [320, 440], "size": [175, 68], "sources": [{ "path": "lp2/sitra-oro-frontend/src/app/features/mayorista/recepcion-mayorista.ts", "line": 506, "label": "window.print" }] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "SITRA-ORO", "wraps": ["frontend", "api", "minero", "parametros", "transaccion", "ajuste", "liquidacion", "ticket"] }
+  ],
+  "connections": [
+    { "id": "dni-request", "from": "frontend", "to": "api", "label": "GET /api/v1/publico/identidad/dni/{dni}", "variant": "emphasis", "labelAt": [278, 220] },
+    { "id": "reniec-request", "from": "api", "to": "reniec", "label": "consulta autenticada", "variant": "security" },
+    { "id": "reniec-result", "from": "reniec", "to": "minero", "label": "nombres validados", "variant": "dashed", "labelAt": [533, 157] },
+    { "id": "price-query", "from": "api", "to": "parametros", "label": "obtiene cotización vigente", "labelAt": [533, 336] },
+    { "id": "purchase-price", "from": "parametros", "to": "transaccion", "label": "precio aplicado al registrar", "variant": "dashed", "labelAt": [785, 190] },
+    { "id": "transaction-adjustment", "from": "ajuste", "to": "transaccion", "label": "FK idTransaccionG2 · 1 ajuste por solicitud", "variant": "emphasis" },
+    { "id": "liquidation", "from": "transaccion", "to": "liquidacion", "label": "referencia de liquidación", "variant": "dashed" },
+    { "id": "print-request", "from": "frontend", "to": "ticket", "label": "window.open() · imprimir ticket", "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "DNI", "items": ["RENIEC es una integración externa; no es tabla Oracle.", "El backend valida 8 dígitos y limita consultas por IP."] },
+    { "dot": "amber", "title": "Parámetros", "items": ["No existe FK entre PARAMETROS_SISTEMA y AJUSTES_COMPRA_G2.", "La cotización se consulta para valorizar TRANSACCIONES_G2."] },
+    { "dot": "emerald", "title": "Ticket", "items": ["La ticketera es salida de interfaz, no entidad del dominio.", "El comprobante usa la liquidación y se abre para impresión."] }
+  ]
+}

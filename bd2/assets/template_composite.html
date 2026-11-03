@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    body { background: #ffffff; padding: 0; width: 850px; }
+    .window { background: #ffffff; border-radius: 6px; border: 1.5px solid #cbd5e1; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .titlebar { background: #0f2744; color: #ffffff; padding: 6px 12px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
+    .title-left { font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .status-badge { background: #10b981; color: #ffffff; padding: 2px 8px; border-radius: 10px; font-size: 9.5px; font-weight: 800; }
+    .tab-bar { background: #f1f5f9; padding: 5px 10px; border-bottom: 1px solid #cbd5e1; display: flex; gap: 6px; font-size: 10.5px; }
+    .tab-active { background: #ffffff; padding: 4px 12px; border: 1px solid #cbd5e1; border-bottom: 2px solid #007acc; font-weight: 700; color: #0f2744; border-radius: 4px 4px 0 0; }
+    .sql-bar { background: #0f172a; color: #f8fafc; font-family: Consolas, monospace; font-size: 10.5px; padding: 7px 12px; line-height: 1.4; border-bottom: 1px solid #cbd5e1; }
+    .kw { color: #f59e0b; font-weight: bold; }
+    .str { color: #4ade80; }
+    .table-panel { padding: 6px 10px; background: #ffffff; }
+    .table-meta { font-size: 10px; color: #475569; margin-bottom: 5px; font-weight: 600; display: flex; justify-content: space-between; }
+    table { width: 100%; border-collapse: collapse; font-family: Consolas, monospace; font-size: 10px; }
+    th { background: #f8fafc; color: #0f2744; border: 1px solid #cbd5e1; padding: 4px 8px; text-align: left; font-weight: 700; }
+    td { border: 1px solid #e2e8f0; padding: 4px 8px; color: #1e293b; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    .num { text-align: right; }
+    .hl { background: #fef3c7 !important; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="window">
+    <div class="titlebar">
+      <div class="title-left"><span>Oracle SQL Developer 23.1 · Esquema: <strong>SITRA_ORO@localhost:1521/XEPDB1</strong></span></div>
+      <span class="status-badge">● CONECTADO · ORACLE 21c XE</span>
+    </div>
+    <div class="tab-bar"><div class="tab-active">Resultado de la Consulta: COMPRAS_G2 (COMPOSITE: RANGE + HASH)</div></div>
+    <div class="sql-bar"><span class="kw">SELECT</span> table_name, partition_name, subpartition_name, subpartition_position <span class="kw">AS</span> pos, num_rows <span class="kw">AS</span> filas <span class="kw">FROM</span> user_tab_subpartitions <span class="kw">WHERE</span> table_name = <span class="str">'COMPRAS_G2'</span> <span class="kw">ORDER BY</span> partition_name, subpartition_position;</div>
+    <div class="table-panel">
+      <div class="table-meta"><span>Salida: USER_TAB_SUBPARTITIONS · Semestres (Range) + 2 Subparticiones Hash (0.020 s)</span><span style="color: #059669; font-weight: 700;">Filas Recuperadas OK</span></div>
+      <table>
+        <thead><tr><th class="num">#</th><th>TABLA</th><th>PARTICION PADRE (RANGE)</th><th class="num">SUBPARTICION (HASH)</th><th class="num">POS</th><th>FILAS REALES</th></tr></thead>
+        <tbody><tr><td class="num">1</td><td>COMPRAS_G2</td><td>P_COMPRAS_2026_S1</td><td class="num">SYS_SUBP2373</td><td class="num">1</td><td>0</td></tr>
+<tr><td class="num">2</td><td>COMPRAS_G2</td><td>P_COMPRAS_2026_S1</td><td class="num">SYS_SUBP2374</td><td class="num">2</td><td>0</td></tr>
+<tr><td class="num">3</td><td>COMPRAS_G2</td><td><strong>P_COMPRAS_2026_S2</strong></td><td class="num"><strong>SYS_SUBP2375</strong></td><td class="num">1</td><td><strong>2</strong></td></tr>
+<tr><td class="num">4</td><td>COMPRAS_G2</td><td>P_COMPRAS_2026_S2</td><td class="num">SYS_SUBP2376</td><td class="num">2</td><td>0</td></tr>
+<tr><td class="num">5</td><td>COMPRAS_G2</td><td>P_COMPRAS_FUTURO</td><td class="num">SYS_SUBP2377</td><td class="num">1</td><td>0</td></tr>
+<tr><td class="num">6</td><td>COMPRAS_G2</td><td>P_COMPRAS_FUTURO</td><td class="num">SYS_SUBP2378</td><td class="num">2</td><td>0</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "visual-check",
+  "evidenceKind": "automated-browser",
+  "status": "fail",
+  "visualReview": "pending",
+  "artifact": {
+    "path": "E:\\Cursos_Ciclo_4\\Lenguaje de Programación II\\Sitra_oro\\docs\\presentacion\\lp_u02\\assets\\arquitectura_integraciones_sitra_oro.html",
+    "sha256": "c6207642d254e18992e8d6d877394c0415585290721eae52fb492274a1b8e99a",
+    "bytes": 812498
+  },
+  "state": {
+    "detail": "read",
+    "motion": "still"
+  },
+  "chrome": {
+    "status": "available",
+    "executable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+  },
+  "diagnostics": [
+    {
+      "code": "viewer/visual-check-runtime",
+      "severity": "error",
+      "message": "visual-check could not complete its Chrome inspection.",
+      "subject": {
+        "artifact": "E:\\Cursos_Ciclo_4\\Lenguaje de Programación II\\Sitra_oro\\docs\\presentacion\\lp_u02\\assets\\arquitectura_integraciones_sitra_oro.html"
+      },
+      "evidence": {
+        "reason": "Chrome DevTools process exit failed: Chrome closed with exit code 4294930433\nChrome process: exit code 4294930433.\nChrome stderr:\n[1027/155320.087:ERROR:third_party\\crashpad\\crashpad\\util\\win\\registration_protocol_win.cc:136] TransactNamedPipe: Ha terminado la canalización. (0x6D)\r\n[1027/155320.239:ERROR:third_party\\crashpad\\crashpad\\client\\crashpad_client_win.cc:145] crash server failed to launch, self-terminating"
+      },
+      "supportedFixes": [
+        "resolve the reported Chrome inspection error, then rerun visual-check"
+      ]
+    }
+  ],
+  "containment": {
+    "status": "fail",
+    "viewports": []
+  },
+  "readability": {
+    "status": "fail",
+    "minimumProjectedNodeTextPx": 6,
+    "viewports": []
+  },
+  "viewerChrome": {
+    "status": "fail",
+    "viewports": []
+  },
+  "captures": {
+    "status": "fail",
+    "screenshots": [],
+    "contactSheet": null
+  },
+  "sidecars": {
+    "receipt": "arquitectura_integraciones_sitra_oro.visual-check.json",
+    "contactSheet": "arquitectura_integraciones_sitra_oro.visual-check.html"
+  },
+  "error": "Chrome DevTools process exit failed: Chrome closed with exit code 4294930433\nChrome process: exit code 4294930433.\nChrome stderr:\n[1027/155320.087:ERROR:third_party\\crashpad\\crashpad\\util\\win\\registration_protocol_win.cc:136] TransactNamedPipe: Ha terminado la canalización. (0x6D)\r\n[1027/155320.239:ERROR:third_party\\crashpad\\crashpad\\client\\crashpad_client_win.cc:145] crash server failed to launch, self-terminating"
+}

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Figura 4. Diagrama de secuencia: registrar compra directa mayorista</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #ffffff;
+      padding: 25px 30px;
+      width: 1450px;
+      margin: 0 auto;
+      color: #1e293b;
+    }
+
+    .canvas {
+      position: relative;
+      width: 1390px;
+      background: #ffffff;
+    }
+
+    .title {
+      font-size: 21px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.4px;
+      margin-bottom: 25px;
+    }
+
+    svg {
+      width: 1390px;
+      height: 1040px;
+      display: block;
+    }
+
+    .box-label {
+      font-size: 12px;
+      font-weight: 600;
+      fill: #1e293b;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .actor-name {
+      font-size: 12px;
+      font-weight: 600;
+      fill: #1e293b;
+      text-anchor: middle;
+    }
+
+    .msg-label {
+      font-size: 11px;
+      font-weight: 500;
+      fill: #1e293b;
+    }
+
+    .frame-badge {
+      font-size: 11px;
+      font-weight: 700;
+      fill: #0d9488;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .frame-guard {
+      font-size: 10.5px;
+      font-weight: 600;
+      fill: #334155;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="canvas">
+    <div class="title">Figura 4. Diagrama de secuencia: registrar compra directa mayorista</div>
+
+    <svg viewBox="0 0 1390 1040">
+      <defs>
+        <!-- Flecha Sólida (Llamadas sincrónicas) -->
+        <marker id="arrow-solid" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#334155" />
+        </marker>
+        <!-- Flecha Dashed (Retorno de datos / respuestas) -->
+        <marker id="arrow-dashed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polyline points="1 1.5, 8 5, 1 8.5" fill="none" stroke="#475569" stroke-width="1.6" />
+        </marker>
+      </defs>
+
+      <!-- ============================================================== -->
+      <!-- 1. LÍNEAS DE VIDA VERTICALES (VIOLETA SEGÚN PPTX)               -->
+      <!-- ============================================================== -->
+      <!-- X: Mayorista=80, Controller=310, Service=560, LeyOroRepo=800, Mapper=1040, MayoristaRepo=1270 -->
+      <line x1="80" y1="80" x2="80" y2="950" stroke="#a78bfa" stroke-width="1.2" />
+      <line x1="310" y1="65" x2="310" y2="960" stroke="#a78bfa" stroke-width="1.2" />
+      <line x1="560" y1="65" x2="560" y2="960" stroke="#a78bfa" stroke-width="1.2" />
+      <line x1="800" y1="65" x2="800" y2="960" stroke="#a78bfa" stroke-width="1.2" />
+      <line x1="1040" y1="65" x2="1040" y2="960" stroke="#a78bfa" stroke-width="1.2" />
+      <line x1="1270" y1="65" x2="1270" y2="960" stroke="#a78bfa" stroke-width="1.2" />
+
+      <!-- ============================================================== -->
+      <!-- 2. BARRAS DE ACTIVACIÓN (RECTÁNGULOS GRISES/BLANCOS)           -->
+      <!-- ============================================================== -->
+      <!-- Controller (activo durante toda la petición) -->
+      <rect x="304" y="105" width="12" height="800" fill="#ffffff" stroke="#94a3b8" stroke-width="1.2" />
+
+      <!-- Service (activo durante la ejecución del caso de uso) -->
+      <rect x="554" y="145" width="12" height="715" fill="#ffffff" stroke="#94a3b8" stroke-width="1.2" />
+
+      <!-- LeyOroRepository (activo en búsqueda por ley) -->
+      <rect x="794" y="215" width="12" height="135" fill="#ffffff" stroke="#94a3b8" stroke-width="1.2" />
+
+      <!-- CompraDirectaMapper (activo al armar detalle y response) -->
+      <rect x="1034" y="565" width="12" height="40" fill="#ffffff" stroke="#94a3b8" stroke-width="1.2" />
+      <rect x="1034" y="780" width="12" height="40" fill="#ffffff" stroke="#94a3b8" stroke-width="1.2" />
+
+      <!-- RecepcionMayoristaRepository (activo al persistir) -->
+      <rect x="1264" y="700" width="12" height="40" fill="#ffffff" stroke="#94a3b8" stroke-width="1.2" />
+
+      <!-- ============================================================== -->
+      <!-- 3. MENSAJES INICIALES                                          -->
+      <!-- ============================================================== -->
+      <!-- 1. Mayorista -> Controller -->
+      <text x="100" y="98" class="msg-label">POST /api/v1/mayorista/compras-directas (CompraRequest)</text>
+      <line x1="80" y1="105" x2="304" y2="105" stroke="#334155" stroke-width="1.3" marker-end="url(#arrow-solid)" />
+
+      <!-- 2. Controller -> Service -->
+      <text x="360" y="138" class="msg-label">crear(request)</text>
+      <line x1="316" y1="145" x2="554" y2="145" stroke="#334155" stroke-width="1.3" marker-end="url(#arrow-solid)" />
+
+      <!-- ============================================================== -->
+      <!-- 4. FRAGMENTO COMBINADO: LOOP [por cada PartidaCompraRequest]   -->
+      <!-- ============================================================== -->
+      <rect x="530" y="175" width="550" height="485" fill="none" stroke="#00c49f" stroke-width="1.2" stroke-dasharray="3,3" />
+      <!-- Badge loop -->
+      <rect x="530" y="175" width="38" height="20" rx="3" fill="#e6fffa" stroke="#00c49f" stroke-width="1" />
+      <text x="549" y="186" class="frame-badge">loop</text>
+      <text x="890" y="190" class="frame-guard">[por cada PartidaCompraRequest]</text>
+
+      <!-- Mensaje dentro del loop: Service -> LeyOroRepository -->
+      <text x="610" y="210" class="msg-label">findByPorcentajeLey(partida.ley)</text>
+      <line x1="566" y1="215" x2="794" y2="215" stroke="#334155" stroke-width="1.3" marker-end="url(#arrow-solid)" />
+
+      <!-- ============================================================== -->
+      <!-- 4.1 FRAGMENTO ALT EXTERNO: [ley no existe / ley existe]        -->
+      <!-- ============================================================== -->
+      <rect x="540" y="235" width="530" height="415" fill="none" stroke="#00c49f" stroke-width="1.2" stroke-dasharray="3,3" />
+      <!-- Badge alt externo -->
+      <rect x="540" y="235" width="34" height="20" rx="3" fill="#e6fffa" stroke="#00c49f" stroke-width="1" />
+      <text x="557" y="246" class="frame-badge">alt</text>
+      <text x="880" y="250" class="frame-guard">[ley no existe en catálogo]</text>
+
+      <!-- Retorno 404 Exception -->
+      <text x="600" y="275" class="msg-label">ResourceNotFoundException (404)</text>
+      <line x1="794" y1="280" x2="566" y2="280" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)" />
+
+      <!-- Línea divisoria Alt Externo -->
+      <line x1="540" y1="305" x2="1070" y2="305" stroke="#00c49f" stroke-width="1.2" stroke-dasharray="3,3" />
+      <text x="965" y="320" class="frame-guard">[ley existe]</text>
+
+      <!-- Retorno LeyOroResponse -->
+      <text x="635" y="343" class="msg-label">LeyOroResponse (pureza, factor)</text>
+      <line x1="794" y1="350" x2="566" y2="350" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)" />
+
+      <!-- Auto-llamada 1: validarReglas -->
+      <text x="590" y="375" class="msg-label">validarReglas(pesoFundido, adelanto)</text>
+      <path d="M 566 380 L 610 380 L 610 398 L 566 398" fill="none" stroke="#334155" stroke-width="1.3" marker-end="url(#arrow-solid)" />
+
+      <!-- ============================================================== -->
+      <!-- 4.2 FRAGMENTO ALT INTERNO: REGLAS DE NEGOCIO MAYORISTA         -->
+      <!-- ============================================================== -->
+      <rect x="550" y="415" width="510" height="225" fill="none" stroke="#00c49f" stroke-width="1.2" stroke-dasharray="3,3" />
+      <!-- Badge alt interno -->
+      <rect x="550" y="415" width="34" height="20" rx="3" fill="#e6fffa" stroke="#00c49f" stroke-width="1" />
+      <text x="567" y="426" class="frame-badge">alt</text>
+      <text x="730" y="430" class="frame-guard">[pesoFundido > pesoSinFundir o adelanto > total]</text>
+
+      <!-- Retorno 422 Exception -->
+      <text x="605" y="455" class="msg-label">MayoristaReglaException (422)</text>
+      <line x1="790" y1="460" x2="566" y2="460" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)" />
+
+      <!-- Línea divisoria Alt Interno -->
+      <line x1="550" y1="485" x2="1060" y2="485" stroke="#00c49f" stroke-width="1.2" stroke-dasharray="3,3" />
+      <text x="940" y="500" class="frame-guard">[reglas válidas]</text>
+
+      <!-- Auto-llamada 2: cálculo matemático comercial -->
+      <text x="590" y="522" class="msg-label">cálculo: precioGramo e importePartida</text>
+      <path d="M 566 528 L 610 528 L 610 545 L 566 545" fill="none" stroke="#334155" stroke-width="1.3" marker-end="url(#arrow-solid)" />
+
+      <!-- Service -> Mapper (toDetalle) -->
+      <text x="710" y="560" class="msg-label">toDetalle(partidaRequest, leyOro)</text>
+      <line x1="566" y1="565" x2="1034" y2="565" stroke="#334155" stroke-width="1.3" marker-end="url(#arrow-solid)" />
+
+      <!-- Mapper -> Service (DetalleRecepcionLey) -->
+      <text x="770" y="600" class="msg-label">DetalleRecepcionLey</text>
+      <line x1="1034" y1="605" x2="566" y2="605" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)" />
+
+      <!-- ============================================================== -->
+      <!-- 5. PERSISTENCIA Y RESPUESTA FINAL                              -->
+      <!-- ============================================================== -->
+      <!-- Service -> MayoristaRepo (save) -->
+      <text x="860" y="693" class="msg-label">save(recepcionMayorista)</text>
+      <line x1="566" y1="700" x2="1264" y2="700" stroke="#334155" stroke-width="1.3" marker-end="url(#arrow-solid)" />
+
+      <!-- MayoristaRepo -> Service (Recepcion guardada) -->
+      <text x="875" y="733" class="msg-label">Recepcion guardada</text>
+      <line x1="1264" y1="740" x2="566" y2="740" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)" />
+
+      <!-- Service -> Mapper (toResponse) -->
+      <text x="740" y="773" class="msg-label">toResponse(recepcionMayorista)</text>
+      <line x1="566" y1="780" x2="1034" y2="780" stroke="#334155" stroke-width="1.3" marker-end="url(#arrow-solid)" />
+
+      <!-- Mapper -> Service (RecepcionLeyResponse) -->
+      <text x="760" y="813" class="msg-label">RecepcionLeyResponse</text>
+      <line x1="1034" y1="820" x2="566" y2="820" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)" />
+
+      <!-- Service -> Controller (RecepcionLeyResponse) -->
+      <text x="375" y="853" class="msg-label">RecepcionLeyResponse</text>
+      <line x1="554" y1="860" x2="316" y2="860" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)" />
+
+      <!-- Controller -> Mayorista (201 Created) -->
+      <text x="160" y="898" class="msg-label">201 Created</text>
+      <line x1="304" y1="905" x2="80" y2="905" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)" />
+
+      <!-- ============================================================== -->
+      <!-- 6. PARTICIPANTES SUPERIORES (CABECERAS)                        -->
+      <!-- ============================================================== -->
+
+      <!-- 1. Mayorista (Stick figure) -->
+      <g transform="translate(80, 26)">
+        <circle cx="0" cy="0" r="10" stroke="#00bba6" stroke-width="1.8" fill="#ffffff" />
+        <line x1="0" y1="10" x2="0" y2="28" stroke="#00bba6" stroke-width="1.8" />
+        <line x1="-12" y1="16" x2="12" y2="16" stroke="#00bba6" stroke-width="1.8" />
+        <polyline points="-10,44 0,28 10,44" stroke="#00bba6" stroke-width="1.8" fill="none" />
+        <text x="0" y="54" class="actor-name">Mayorista</text>
+      </g>
+
+      <!-- 2. CompraDirectaMayoristaController -->
+      <g transform="translate(310, 38)">
+        <rect x="-115" y="-18" width="230" height="42" rx="5" fill="#ffffff" stroke="#00bba6" stroke-width="1.5" />
+        <text x="0" y="4" class="box-label">CompraDirectaMayoristaController</text>
+      </g>
+
+      <!-- 3. RecepcionLeyService -->
+      <g transform="translate(560, 38)">
+        <rect x="-80" y="-18" width="160" height="42" rx="5" fill="#ffffff" stroke="#00bba6" stroke-width="1.5" />
+        <text x="0" y="4" class="box-label">RecepcionLeyService</text>
+      </g>
+
+      <!-- 4. LeyOroRepository -->
+      <g transform="translate(800, 38)">
+        <rect x="-75" y="-18" width="150" height="42" rx="5" fill="#ffffff" stroke="#00bba6" stroke-width="1.5" />
+        <text x="0" y="4" class="box-label">LeyOroRepository</text>
+      </g>
+
+      <!-- 5. CompraDirectaMapper -->
+      <g transform="translate(1040, 38)">
+        <rect x="-80" y="-18" width="160" height="42" rx="5" fill="#ffffff" stroke="#00bba6" stroke-width="1.5" />
+        <text x="0" y="4" class="box-label">CompraDirectaMapper</text>
+      </g>
+
+      <!-- 6. RecepcionMayoristaRepository -->
+      <g transform="translate(1270, 38)">
+        <rect x="-105" y="-18" width="210" height="42" rx="5" fill="#ffffff" stroke="#00bba6" stroke-width="1.5" />
+        <text x="0" y="4" class="box-label">RecepcionMayoristaRepository</text>
+      </g>
+
+      <!-- ============================================================== -->
+      <!-- 7. PARTICIPANTES INFERIORES REPETIDOS (ESTILO EXACTO DOCENTE)  -->
+      <!-- ============================================================== -->
+
+      <!-- 1. Mayorista (Stick figure inferior) -->
+      <g transform="translate(80, 960)">
+        <circle cx="0" cy="0" r="10" stroke="#00bba6" stroke-width="1.8" fill="#ffffff" />
+        <line x1="0" y1="10" x2="0" y2="28" stroke="#00bba6" stroke-width="1.8" />
+        <line x1="-12" y1="16" x2="12" y2="16" stroke="#00bba6" stroke-width="1.8" />
+        <polyline points="-10,44 0,28 10,44" stroke="#00bba6" stroke-width="1.8" fill="none" />
+        <text x="0" y="54" class="actor-name">Mayorista</text>
+      </g>
+
+      <!-- 2. CompraDirectaMayoristaController (inferior) -->
+      <g transform="translate(310, 985)">
+        <rect x="-115" y="-18" width="230" height="42" rx="5" fill="#ffffff" stroke="#00bba6" stroke-width="1.5" />
+        <text x="0" y="4" class="box-label">CompraDirectaMayoristaController</text>
+      </g>
+
+      <!-- 3. RecepcionLeyService (inferior) -->
+      <g transform="translate(560, 985)">
+        <rect x="-80" y="-18" width="160" height="42" rx="5" fill="#ffffff" stroke="#00bba6" stroke-width="1.5" />
+        <text x="0" y="4" class="box-label">RecepcionLeyService</text>
+      </g>
+
+      <!-- 4. LeyOroRepository (inferior) -->
+      <g transform="translate(800, 985)">
+        <rect x="-75" y="-18" width="150" height="42" rx="5" fill="#ffffff" stroke="#00bba6" stroke-width="1.5" />
+        <text x="0" y="4" class="box-label">LeyOroRepository</text>
+      </g>
+
+      <!-- 5. CompraDirectaMapper (inferior) -->
+      <g transform="translate(1040, 985)">
+        <rect x="-80" y="-18" width="160" height="42" rx="5" fill="#ffffff" stroke="#00bba6" stroke-width="1.5" />
+        <text x="0" y="4" class="box-label">CompraDirectaMapper</text>
+      </g>
+
+      <!-- 6. RecepcionMayoristaRepository (inferior) -->
+      <g transform="translate(1270, 985)">
+        <rect x="-105" y="-18" width="210" height="42" rx="5" fill="#ffffff" stroke="#00bba6" stroke-width="1.5" />
+        <text x="0" y="4" class="box-label">RecepcionMayoristaRepository</text>
+      </g>
+
+    </svg>
+  </div>
+
+</body>
+</html>

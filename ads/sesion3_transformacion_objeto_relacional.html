@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SESIÓN 3 - Diseño de Clases Avanzado y Transformación Objeto Relacional</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f8fafc;
+      background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+      color: #1e293b;
+      padding: 40px;
+      width: 1780px;
+      margin: 0 auto;
+    }
+
+    /* HEADER SESIÓN 3 */
+    .header-board {
+      text-align: center;
+      margin-bottom: 40px;
+      background: #ffffff;
+      padding: 26px 36px;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+      border: 1.5px solid #cbd5e1;
+    }
+
+    .sesion-tag {
+      color: #dc2626;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .main-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      font-weight: 500;
+      color: #1d4ed8;
+      max-width: 1300px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* FILA POR ENTIDAD (3 COLUMNAS) */
+    .entity-row {
+      display: grid;
+      grid-template-columns: 590px 610px 500px;
+      gap: 24px;
+      margin-bottom: 40px;
+      background: #ffffff;
+      padding: 26px;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+      border: 1.5px solid #cbd5e1;
+      align-items: start;
+    }
+
+    .col-header {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f2b5c;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* COLUMNA 1: TABLA DE DECISIONES */
+    .decisions-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 12.5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      border: 1.5px solid #cbd5e1;
+    }
+
+    .decisions-table th {
+      background-color: #ffd43b;
+      color: #111827;
+      padding: 10px 10px;
+      font-weight: 800;
+      text-align: center;
+      border: 1px solid #cbd5e1;
+      font-size: 13px;
+    }
+
+    .decisions-table td {
+      padding: 8.5px 10px;
+      border: 1px solid #e2e8f0;
+      vertical-align: middle;
+      line-height: 1.35;
+    }
+
+    .decisions-table tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    .td-decision {
+      font-weight: 700;
+      color: #1e293b;
+      width: 25%;
+      text-align: center;
+    }
+
+    .td-pregunta {
+      color: #334155;
+      font-style: italic;
+      font-size: 11.5px;
+      width: 37%;
+    }
+
+    .td-valor {
+      color: #0f172a;
+      font-weight: 600;
+      width: 38%;
+      font-size: 12px;
+    }
+
+    .badge-java {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      margin: 1px 0;
+    }
+
+    .badge-sql {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      margin: 1px 0;
+    }
+
+    /* COLUMNA 2: IMPLEMENTACIÓN JAVA */
+    .code-container {
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+      border: 1px solid #334155;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .code-header {
+      background-color: #2d2d2d;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #3f3f46;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .window-circle {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .circle-red { background: #ef4444; }
+    .circle-yellow { background: #f59e0b; }
+    .circle-green { background: #10b981; }
+
+    .file-name {
+      color: #94a3b8;
+      font-size: 11.5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .code-body {
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #d4d4d4;
+      overflow: hidden;
+    }
+
+    .code-line {
+      display: flex;
+      white-space: pre;
+    }
+
+    .line-number {
+      color: #64748b;
+      width: 26px;
+      text-align: right;
+      padding-right: 12px;
+      user-select: none;
+      font-size: 11px;
+    }
+
+    .code-text {
+      flex: 1;
+    }
+
+    /* Resaltado de sintaxis Java */
+    .kw { color: #569cd6; font-weight: 600; }
+    .type { color: #4ec9b0; }
+    .field { color: #9cdcfe; }
+    .method { color: #dcdcaa; }
+    .str { color: #ce9178; }
+    .num { color: #b5cea8; }
+
+    /* COLUMNA 3: IMPLEMENTACIÓN BASE DE DATOS */
+    .sql-card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 18px 20px;
+      border: 1.5px solid #cbd5e1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sql-badge {
+      display: inline-block;
+      align-self: flex-start;
+      background: #e0e7ff;
+      color: #3730a3;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .sql-body {
+      background: #f8fafc;
+      padding: 14px 16px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      color: #1e293b;
+      white-space: pre-wrap;
+    }
+
+    /* Resaltado de sintaxis SQL */
+    .sql-kw { color: #7c3aed; font-weight: 700; }
+    .sql-table { color: #0284c7; font-weight: 700; }
+    .sql-col { color: #0f172a; font-weight: 600; }
+    .sql-type { color: #d97706; font-weight: 600; }
+    .sql-fk { color: #059669; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- ENCABEZADO OFICIAL SESIÓN 3 -->
+  <div class="header-board">
+    <div class="sesion-tag">SESIÓN 3</div>
+    <h1 class="main-title">Diseño de Clases Avanzado y Transformación Objeto Relacional</h1>
+    <p class="subtitle">
+      Esta sesión se realiza con el objetivo de tomar decisiones respecto al diagrama de clases; en este caso se analiza por clases con el objetivo de analizar cada detalle de implementación de las clases en código backend (Java) y base de datos (Oracle XE).
+    </p>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- ENTIDAD 1: MINERO                          -->
+  <!-- ========================================== -->
+  <div class="entity-row" id="entidad-minero">
+    <!-- Columna 1 -->
+    <div>
+      <div class="col-header">📌 Diagrama de decisiones de la entidad minero</div>
+      <table class="decisions-table">
+        <thead>
+          <tr>
+            <th>Decisión</th>
+            <th>Preguntas que resuelve</th>
+            <th>SITRA-ORO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-decision">Tipo concreto</td>
+            <td class="td-pregunta">¿Con qué tipo de lenguaje se representa cada atributo?</td>
+            <td class="td-valor">
+              <span class="badge-java">Java: id:Long, doc:String, nombres:String</span><br>
+              <span class="badge-sql">SQL: id:NUMBER, doc:VARCHAR2(15)</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-decision">Identidad</td>
+            <td class="td-pregunta">¿Cómo se identifica cada objeto y por qué método se generará?</td>
+            <td class="td-valor">Clave subrogada autogenerada por Oracle mediante <span class="badge-sql">IDENTITY PRIMARY KEY</span></td>
+          </tr>
+          <tr>
+            <td class="td-decision">Navegabilidad</td>
+            <td class="td-pregunta">¿Desde qué clase se puede llegar a la otra?</td>
+            <td class="td-valor">No navega en memoria hacia compras. Navegación entrante desde <strong>CompraAcopio</strong> (1 &lt;-- 0..*).</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Enumeraciones</td>
+            <td class="td-pregunta">¿Qué valores admite un atributo de estado o restricciones?</td>
+            <td class="td-valor">Sin enumeración; <span class="badge-sql">UNIQUE(documento)</span> y validación de 8 dígitos DNI / RUC.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Referencia entre módulos</td>
+            <td class="td-pregunta">¿A qué clase de otra entidad se referencia por objeto o por id?</td>
+            <td class="td-valor">Referenciado por objeto desde <strong>CompraAcopio</strong> y por ID escalar <span class="badge-java">idMinero</span> desde <strong>CuentaAcceso</strong>.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Atributo derivado</td>
+            <td class="td-pregunta">¿Se calcula en caliente o es un atributo con un algoritmo de cálculo?</td>
+            <td class="td-valor">No tiene atributos calculados; entidad maestra de personas.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Ubicación de la operación</td>
+            <td class="td-pregunta">¿Dónde reside el método o la operación?</td>
+            <td class="td-valor">Validación en <span class="badge-java">MineroServiceImpl</span>; estado y getters/setters en la entidad.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Columna 2 -->
+    <div>
+      <div class="col-header">💻 Implementación en Java</div>
+      <div class="code-container">
+        <div class="code-header">
+          <div class="window-controls">
+            <div class="window-circle circle-red"></div>
+            <div class="window-circle circle-yellow"></div>
+            <div class="window-circle circle-green"></div>
+          </div>
+          <span class="file-name">Minero.java</span>
+        </div>
+        <div class="code-body">
+<div class="code-line"><span class="line-number">1</span><span class="code-text"><span class="kw">public class</span> <span class="type">Minero</span> {</span></div>
+<div class="code-line"><span class="line-number">2</span><span class="code-text">    <span class="kw">private</span> <span class="type">Long</span> <span class="field">idMinero</span>;</span></div>
+<div class="code-line"><span class="line-number">3</span><span class="code-text">    <span class="kw">private</span> <span class="type">String</span> <span class="field">documentoIdentidad</span>;</span></div>
+<div class="code-line"><span class="line-number">4</span><span class="code-text">    <span class="kw">private</span> <span class="type">String</span> <span class="field">nombresApellidos</span>;</span></div>
+<div class="code-line"><span class="line-number">5</span><span class="code-text">    <span class="kw">private</span> <span class="type">String</span> <span class="field">telefono</span>;</span></div>
+<div class="code-line"><span class="line-number">6</span><span class="code-text">    <span class="kw">private</span> <span class="type">String</span> <span class="field">zonaProcedencia</span>;</span></div>
+<div class="code-line"><span class="line-number">7</span><span class="code-text"></span></div>
+<div class="code-line"><span class="line-number">8</span><span class="code-text">    <span class="kw">public</span> <span class="method">Minero</span>(<span class="type">Long</span> <span class="field">idMinero</span>, <span class="type">String</span> <span class="field">doc</span>, <span class="type">String</span> <span class="field">nom</span>) {</span></div>
+<div class="code-line"><span class="line-number">9</span><span class="code-text">        <span class="kw">this</span>.<span class="field">idMinero</span> = <span class="field">idMinero</span>;</span></div>
+<div class="code-line"><span class="line-number">10</span><span class="code-text">        <span class="kw">this</span>.<span class="field">documentoIdentidad</span> = <span class="field">doc</span>;</span></div>
+<div class="code-line"><span class="line-number">11</span><span class="code-text">        <span class="kw">this</span>.<span class="field">nombresApellidos</span> = <span class="field">nom</span>;</span></div>
+<div class="code-line"><span class="line-number">12</span><span class="code-text">    }</span></div>
+<div class="code-line"><span class="line-number">13</span><span class="code-text"></span></div>
+<div class="code-line"><span class="line-number">14</span><span class="code-text">    <span class="kw">public</span> <span class="type">Long</span> <span class="method">getIdMinero</span>() { <span class="kw">return</span> <span class="field">idMinero</span>; }</span></div>
+<div class="code-line"><span class="line-number">15</span><span class="code-text">    <span class="kw">public void</span> <span class="method">setIdMinero</span>(<span class="type">Long</span> <span class="field">id</span>) { <span class="kw">this</span>.<span class="field">idMinero</span> = <span class="field">id</span>; }</span></div>
+<div class="code-line"><span class="line-number">16</span><span class="code-text">    <span class="kw">public</span> <span class="type">String</span> <span class="method">getDocumentoIdentidad</span>() { <span class="kw">return</span> <span class="field">documentoIdentidad</span>; }</span></div>
+<div class="code-line"><span class="line-number">17</span><span class="code-text">    <span class="kw">public</span> <span class="type">String</span> <span class="method">getNombresApellidos</span>() { <span class="kw">return</span> <span class="field">nombresApellidos</span>; }</span></div>
+<div class="code-line"><span class="line-number">18</span><span class="code-text">}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna 3 -->
+    <div>
+      <div class="col-header">🗄️ Implementación en Base de datos</div>
+      <div class="sql-card">
+        <span class="sql-badge">ORACLE XE DDL</span>
+        <div class="sql-body">
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-table">MINEROS</span> (
+    <span class="sql-col">ID_MINERO</span>           <span class="sql-type">NUMBER</span> <span class="sql-kw">GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY</span>,
+    <span class="sql-col">DOCUMENTO_IDENTIDAD</span> <span class="sql-type">VARCHAR2(15)</span> <span class="sql-kw">NOT NULL UNIQUE</span>,
+    <span class="sql-col">NOMBRES_APELLIDOS</span>   <span class="sql-type">VARCHAR2(150)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">TELEFONO</span>            <span class="sql-type">VARCHAR2(20)</span>,
+    <span class="sql-col">ZONA_PROCEDENCIA</span>    <span class="sql-type">VARCHAR2(100)</span>,
+    <span class="sql-col">FECHA_REGISTRO</span>      <span class="sql-type">TIMESTAMP</span> <span class="sql-kw">DEFAULT CURRENT_TIMESTAMP NOT NULL</span>
+);</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- ENTIDAD 2: COMPRA ACOPIO (TRANSACCION G2)  -->
+  <!-- ========================================== -->
+  <div class="entity-row" id="entidad-compra">
+    <!-- Columna 1 -->
+    <div>
+      <div class="col-header">📌 Diagrama de decisiones de compra acopio</div>
+      <table class="decisions-table">
+        <thead>
+          <tr>
+            <th>Decisión</th>
+            <th>Preguntas que resuelve</th>
+            <th>SITRA-ORO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-decision">Tipo concreto</td>
+            <td class="td-pregunta">¿Con qué tipo de lenguaje se representa cada atributo?</td>
+            <td class="td-valor">
+              <span class="badge-java">Java: pesos/precios: BigDecimal, tipo: TipoOro</span><br>
+              <span class="badge-sql">SQL: pesos: NUMBER(10,3), montos: NUMBER(12,2)</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-decision">Identidad</td>
+            <td class="td-pregunta">¿Cómo se identifica cada objeto y por qué método se generará?</td>
+            <td class="td-valor"><span class="badge-java">idTransaccionG2: Long</span> autogenerado por secuencia de Oracle XE.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Navegabilidad</td>
+            <td class="td-pregunta">¿Desde qué clase se puede llegar a la otra?</td>
+            <td class="td-valor">Navega a <strong>Minero</strong> (<span class="badge-java">@ManyToOne</span>). No navega por objeto a la liquidación.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Enumeraciones</td>
+            <td class="td-pregunta">¿Qué valores admite un atributo de estado o restricciones?</td>
+            <td class="td-valor"><span class="badge-java">TipoOro</span> ('ROJO', 'VERDE') con restricción <span class="badge-sql">CHECK(TIPO_ORO IN ('ROJO','VERDE'))</span>.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Referencia entre módulos</td>
+            <td class="td-pregunta">¿A qué clase de otra entidad se referencia por objeto o por id?</td>
+            <td class="td-valor">Guarda <span class="badge-java">idLiquidacionG1: Long</span> escalar para desacoplar el agregado con Mayorista.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Atributo derivado</td>
+            <td class="td-pregunta">¿Se calcula en caliente o es un atributo con un algoritmo de cálculo?</td>
+            <td class="td-valor"><span class="badge-java">totalPagadoPen</span> se calcula (pesoFundido * precioGramo) y se persiste inmutable.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Ubicación de la operación</td>
+            <td class="td-pregunta">¿Dónde reside el método o la operación?</td>
+            <td class="td-valor">En el método <span class="badge-java">calcularTotalPagado()</span> de la entidad; coordinado por el servicio de acopio.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Columna 2 -->
+    <div>
+      <div class="col-header">💻 Implementación en Java</div>
+      <div class="code-container">
+        <div class="code-header">
+          <div class="window-controls">
+            <div class="window-circle circle-red"></div>
+            <div class="window-circle circle-yellow"></div>
+            <div class="window-circle circle-green"></div>
+          </div>
+          <span class="file-name">CompraAcopio.java</span>
+        </div>
+        <div class="code-body">
+<div class="code-line"><span class="line-number">1</span><span class="code-text"><span class="kw">public class</span> <span class="type">CompraAcopio</span> {</span></div>
+<div class="code-line"><span class="line-number">2</span><span class="code-text">    <span class="kw">private</span> <span class="type">Long</span> <span class="field">idCompra</span>;</span></div>
+<div class="code-line"><span class="line-number">3</span><span class="code-text">    <span class="kw">private</span> <span class="type">Minero</span> <span class="field">minero</span>;</span></div>
+<div class="code-line"><span class="line-number">4</span><span class="code-text">    <span class="kw">private</span> <span class="type">BigDecimal</span> <span class="field">pesoSinFundirG</span>;</span></div>
+<div class="code-line"><span class="line-number">5</span><span class="code-text">    <span class="kw">private</span> <span class="type">BigDecimal</span> <span class="field">pesoFundidoNetoG</span>;</span></div>
+<div class="code-line"><span class="line-number">6</span><span class="code-text">    <span class="kw">private</span> <span class="type">TipoOro</span> <span class="field">tipoOro</span>;</span></div>
+<div class="code-line"><span class="line-number">7</span><span class="code-text">    <span class="kw">private</span> <span class="type">BigDecimal</span> <span class="field">precioAplicadoPen</span>;</span></div>
+<div class="code-line"><span class="line-number">8</span><span class="code-text">    <span class="kw">private</span> <span class="type">Long</span> <span class="field">idLiquidacion</span>;</span></div>
+<div class="code-line"><span class="line-number">9</span><span class="code-text"></span></div>
+<div class="code-line"><span class="line-number">10</span><span class="code-text">    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="method">calcularTotalPagado</span>() {</span></div>
+<div class="code-line"><span class="line-number">11</span><span class="code-text">        <span class="kw">return this</span>.<span class="field">pesoFundidoNetoG</span></span></div>
+<div class="code-line"><span class="line-number">12</span><span class="code-text">            .<span class="method">multiply</span>(<span class="kw">this</span>.<span class="field">precioAplicadoPen</span>)</span></div>
+<div class="code-line"><span class="line-number">13</span><span class="code-text">            .<span class="method">setScale</span>(<span class="num">2</span>, <span class="type">RoundingMode</span>.<span class="field">HALF_UP</span>);</span></div>
+<div class="code-line"><span class="line-number">14</span><span class="code-text">    }</span></div>
+<div class="code-line"><span class="line-number">15</span><span class="code-text"></span></div>
+<div class="code-line"><span class="line-number">16</span><span class="code-text">    <span class="kw">public</span> <span class="type">Long</span> <span class="method">getIdCompra</span>() { <span class="kw">return</span> <span class="field">idCompra</span>; }</span></div>
+<div class="code-line"><span class="line-number">17</span><span class="code-text">    <span class="kw">public</span> <span class="type">Minero</span> <span class="method">getMinero</span>() { <span class="kw">return</span> <span class="field">minero</span>; }</span></div>
+<div class="code-line"><span class="line-number">18</span><span class="code-text">    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="method">getPesoFundidoNetoG</span>() { <span class="kw">return</span> <span class="field">pesoFundidoNetoG</span>; }</span></div>
+<div class="code-line"><span class="line-number">19</span><span class="code-text">    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="method">getTotalPagadoPen</span>() { <span class="kw">return</span> <span class="method">calcularTotalPagado</span>(); }</span></div>
+<div class="code-line"><span class="line-number">20</span><span class="code-text">}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna 3 -->
+    <div>
+      <div class="col-header">🗄️ Implementación en Base de datos</div>
+      <div class="sql-card">
+        <span class="sql-badge">ORACLE XE DDL</span>
+        <div class="sql-body">
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-table">TRANSACCIONES_G2</span> (
+    <span class="sql-col">ID_TRANSACCION_G2</span>   <span class="sql-type">NUMBER</span> <span class="sql-kw">GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY</span>,
+    <span class="sql-col">ID_MINERO</span>           <span class="sql-type">NUMBER</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">PESO_SIN_FUNDIR_G</span>   <span class="sql-type">NUMBER(10, 3)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">PESO_FUNDIDO_NETO_G</span> <span class="sql-type">NUMBER(10, 3)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">TIPO_ORO</span>            <span class="sql-type">VARCHAR2(10)</span> <span class="sql-kw">NOT NULL CHECK</span> (TIPO_ORO <span class="sql-kw">IN</span> (<span class="str">'ROJO'</span>, <span class="str">'VERDE'</span>)),
+    <span class="sql-col">PRECIO_APLICADO_PEN</span> <span class="sql-type">NUMBER(10, 2)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">TOTAL_PAGADO_PEN</span>    <span class="sql-type">NUMBER(12, 2)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">FECHA_TRANSACCION</span>   <span class="sql-type">TIMESTAMP</span> <span class="sql-kw">DEFAULT CURRENT_TIMESTAMP NOT NULL</span>,
+    <span class="sql-col">ID_LIQUIDACION_G1</span>   <span class="sql-type">NUMBER</span> <span class="sql-kw">NULL</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-fk">FK_G2_MINERO</span> <span class="sql-kw">FOREIGN KEY</span> (ID_MINERO)
+        <span class="sql-kw">REFERENCES</span> <span class="sql-table">MINEROS</span>(ID_MINERO)
+);</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- ENTIDAD 3: LIQUIDACION MAYORISTA           -->
+  <!-- ========================================== -->
+  <div class="entity-row" id="entidad-liquidacion">
+    <!-- Columna 1 -->
+    <div>
+      <div class="col-header">📌 Diagrama de decisiones de liquidación mayorista</div>
+      <table class="decisions-table">
+        <thead>
+          <tr>
+            <th>Decisión</th>
+            <th>Preguntas que resuelve</th>
+            <th>SITRA-ORO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-decision">Tipo concreto</td>
+            <td class="td-pregunta">¿Con qué tipo de lenguaje se representa cada atributo?</td>
+            <td class="td-valor">
+              <span class="badge-java">Java: cotización/totales: BigDecimal, estado: Enum</span><br>
+              <span class="badge-sql">SQL: cotización: NUMBER(10,2), total: NUMBER(12,2)</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-decision">Identidad</td>
+            <td class="td-pregunta">¿Cómo se identifica cada objeto y por qué método se generará?</td>
+            <td class="td-valor"><span class="badge-java">idLiquidacionG1: Long</span> autogenerado por secuencia de Oracle XE.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Navegabilidad</td>
+            <td class="td-pregunta">¿Desde qué clase se puede llegar a la otra?</td>
+            <td class="td-valor">Aggregate Root: contiene su colección <span class="badge-java">List&lt;DetalleLiquidacion&gt;</span> (1 *-- 1..2).</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Enumeraciones</td>
+            <td class="td-pregunta">¿Qué valores admite un atributo de estado o restricciones?</td>
+            <td class="td-valor"><span class="badge-java">EstadoLiquidacion</span> ('REGISTRADA', 'ANULADA') reflejado con <span class="badge-sql">CHECK(ESTADO IN (...))</span>.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Referencia entre módulos</td>
+            <td class="td-pregunta">¿A qué clase de otra entidad se referencia por objeto o por id?</td>
+            <td class="td-valor">Agrupa compras asociando su <span class="badge-sql">ID_LIQUIDACION_G1</span> en la tabla de transacciones.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Atributo derivado</td>
+            <td class="td-pregunta">¿Se calcula en caliente o es un atributo con un algoritmo de cálculo?</td>
+            <td class="td-valor"><span class="badge-java">totalPagado</span> y <span class="badge-java">pesoTotal</span> consolidan la suma de los detalles y se guardan.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Ubicación de la operación</td>
+            <td class="td-pregunta">¿Dónde reside el método o la operación?</td>
+            <td class="td-valor"><span class="badge-java">calcularTotalPagado()</span> y validación de máximo 2 tipos de oro en la entidad.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Columna 2 -->
+    <div>
+      <div class="col-header">💻 Implementación en Java</div>
+      <div class="code-container">
+        <div class="code-header">
+          <div class="window-controls">
+            <div class="window-circle circle-red"></div>
+            <div class="window-circle circle-yellow"></div>
+            <div class="window-circle circle-green"></div>
+          </div>
+          <span class="file-name">LiquidacionMayorista.java</span>
+        </div>
+        <div class="code-body">
+<div class="code-line"><span class="line-number">1</span><span class="code-text"><span class="kw">public class</span> <span class="type">LiquidacionMayorista</span> {</span></div>
+<div class="code-line"><span class="line-number">2</span><span class="code-text">    <span class="kw">private</span> <span class="type">Long</span> <span class="field">idLiquidacion</span>;</span></div>
+<div class="code-line"><span class="line-number">3</span><span class="code-text">    <span class="kw">private</span> <span class="type">String</span> <span class="field">nombreAcopiador</span>;</span></div>
+<div class="code-line"><span class="line-number">4</span><span class="code-text">    <span class="kw">private</span> <span class="type">BigDecimal</span> <span class="field">cotizacionOnzaUsd</span>;</span></div>
+<div class="code-line"><span class="line-number">5</span><span class="code-text">    <span class="kw">private</span> <span class="type">BigDecimal</span> <span class="field">tipoCambioUsdPen</span>;</span></div>
+<div class="code-line"><span class="line-number">6</span><span class="code-text">    <span class="kw">private</span> <span class="type">EstadoLiquidacion</span> <span class="field">estado</span> = <span class="type">EstadoLiquidacion</span>.<span class="field">REGISTRADA</span>;</span></div>
+<div class="code-line"><span class="line-number">7</span><span class="code-text">    <span class="kw">private</span> <span class="type">List</span>&lt;<span class="type">DetalleLiquidacion</span>&gt; <span class="field">detalles</span> = <span class="kw">new</span> <span class="type">ArrayList</span>&lt;&gt;();</span></div>
+<div class="code-line"><span class="line-number">8</span><span class="code-text"></span></div>
+<div class="code-line"><span class="line-number">9</span><span class="code-text">    <span class="kw">public void</span> <span class="method">agregarDetalle</span>(<span class="type">DetalleLiquidacion</span> <span class="field">det</span>) {</span></div>
+<div class="code-line"><span class="line-number">10</span><span class="code-text">        <span class="kw">if</span> (<span class="field">detalles</span>.<span class="method">size</span>() &gt;= <span class="num">2</span>) <span class="kw">throw new</span> <span class="type">IllegalStateException</span>(<span class="str">"Máx 2 tipos de oro"</span>);</span></div>
+<div class="code-line"><span class="line-number">11</span><span class="code-text">        <span class="field">detalles</span>.<span class="method">add</span>(<span class="field">det</span>);</span></div>
+<div class="code-line"><span class="line-number">12</span><span class="code-text">    }</span></div>
+<div class="code-line"><span class="line-number">13</span><span class="code-text"></span></div>
+<div class="code-line"><span class="line-number">14</span><span class="code-text">    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="method">calcularTotalPagado</span>() {</span></div>
+<div class="code-line"><span class="line-number">15</span><span class="code-text">        <span class="kw">return</span> <span class="field">detalles</span>.<span class="method">stream</span>()</span></div>
+<div class="code-line"><span class="line-number">16</span><span class="code-text">            .<span class="method">map</span>(<span class="type">DetalleLiquidacion</span>::<span class="method">calcularSubtotal</span>)</span></div>
+<div class="code-line"><span class="line-number">17</span><span class="code-text">            .<span class="method">reduce</span>(<span class="type">BigDecimal</span>.<span class="field">ZERO</span>, <span class="type">BigDecimal</span>::<span class="method">add</span>);</span></div>
+<div class="code-line"><span class="line-number">18</span><span class="code-text">    }</span></div>
+<div class="code-line"><span class="line-number">19</span><span class="code-text">}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna 3 -->
+    <div>
+      <div class="col-header">🗄️ Implementación en Base de datos</div>
+      <div class="sql-card">
+        <span class="sql-badge">ORACLE XE DDL</span>
+        <div class="sql-body">
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-table">LIQUIDACIONES_G1</span> (
+    <span class="sql-col">ID_LIQUIDACION_G1</span>       <span class="sql-type">NUMBER</span> <span class="sql-kw">GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY</span>,
+    <span class="sql-col">NOMBRE_ACOPIADOR_G2</span>     <span class="sql-type">VARCHAR2(150)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">ESTADO</span>                  <span class="sql-type">VARCHAR2(20)</span> <span class="sql-kw">DEFAULT</span> <span class="str">'REGISTRADA'</span> <span class="sql-kw">NOT NULL</span>
+                            <span class="sql-kw">CONSTRAINT</span> <span class="sql-fk">CK_LIQ_ESTADO</span> <span class="sql-kw">CHECK</span> (ESTADO <span class="sql-kw">IN</span> (<span class="str">'REGISTRADA'</span>, <span class="str">'ANULADA'</span>)),
+    <span class="sql-col">PESO_TOTAL_FUNDIDO_G</span>    <span class="sql-type">NUMBER(10, 3)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">COTIZACION_ONZA_USD</span>     <span class="sql-type">NUMBER(10, 2)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">TIPO_CAMBIO_USD_PEN</span>     <span class="sql-type">NUMBER(6, 4)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">TOTAL_PAGADO_G2_PEN</span>     <span class="sql-type">NUMBER(12, 2)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">FECHA_LIQUIDACION</span>       <span class="sql-type">TIMESTAMP</span> <span class="sql-kw">DEFAULT CURRENT_TIMESTAMP NOT NULL</span>
+);</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- ENTIDAD 4: DETALLE LIQUIDACION             -->
+  <!-- ========================================== -->
+  <div class="entity-row" id="entidad-detalle">
+    <!-- Columna 1 -->
+    <div>
+      <div class="col-header">📌 Diagrama de decisiones de detalle liquidación</div>
+      <table class="decisions-table">
+        <thead>
+          <tr>
+            <th>Decisión</th>
+            <th>Preguntas que resuelve</th>
+            <th>SITRA-ORO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-decision">Tipo concreto</td>
+            <td class="td-pregunta">¿Con qué tipo de lenguaje se representa cada atributo?</td>
+            <td class="td-valor">
+              <span class="badge-java">Java: peso/precio/subtotal: BigDecimal, tipo: TipoOro</span><br>
+              <span class="badge-sql">SQL: peso: NUMBER(10,3), montos: NUMBER(12,2)</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-decision">Identidad</td>
+            <td class="td-pregunta">¿Cómo se identifica cada objeto y por qué método se generará?</td>
+            <td class="td-valor"><span class="badge-java">idDetalle: Long</span> autogenerado por secuencia de base de datos.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Navegabilidad</td>
+            <td class="td-pregunta">¿Desde qué clase se puede llegar a la otra?</td>
+            <td class="td-valor">Componente dependiente de <strong>LiquidacionMayorista</strong>; no navega al exterior.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Enumeraciones</td>
+            <td class="td-pregunta">¿Qué valores admite un atributo de estado o restricciones?</td>
+            <td class="td-valor"><span class="badge-java">TipoOro</span> ('ROJO', 'VERDE') controlado por <span class="badge-sql">CHECK(TIPO_ORO IN (...))</span>.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Referencia entre módulos</td>
+            <td class="td-pregunta">¿A qué clase de otra entidad se referencia por objeto o por id?</td>
+            <td class="td-valor">Pertenece estrictamente al módulo de liquidación mayorista.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Atributo derivado</td>
+            <td class="td-pregunta">¿Se calcula en caliente o es un atributo con un algoritmo de cálculo?</td>
+            <td class="td-valor"><span class="badge-java">subtotalPen</span> se calcula (pesoFundido * precioGramo) y se persiste.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Ubicación de la operación</td>
+            <td class="td-pregunta">¿Dónde reside el método o la operación?</td>
+            <td class="td-valor"><span class="badge-java">calcularSubtotal()</span> vive como método de la entidad detalle.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Columna 2 -->
+    <div>
+      <div class="col-header">💻 Implementación en Java</div>
+      <div class="code-container">
+        <div class="code-header">
+          <div class="window-controls">
+            <div class="window-circle circle-red"></div>
+            <div class="window-circle circle-yellow"></div>
+            <div class="window-circle circle-green"></div>
+          </div>
+          <span class="file-name">DetalleLiquidacion.java</span>
+        </div>
+        <div class="code-body">
+<div class="code-line"><span class="line-number">1</span><span class="code-text"><span class="kw">public class</span> <span class="type">DetalleLiquidacion</span> {</span></div>
+<div class="code-line"><span class="line-number">2</span><span class="code-text">    <span class="kw">private</span> <span class="type">Long</span> <span class="field">idDetalle</span>;</span></div>
+<div class="code-line"><span class="line-number">3</span><span class="code-text">    <span class="kw">private</span> <span class="type">TipoOro</span> <span class="field">tipoOro</span>;</span></div>
+<div class="code-line"><span class="line-number">4</span><span class="code-text">    <span class="kw">private</span> <span class="type">BigDecimal</span> <span class="field">pesoFundidoG</span>;</span></div>
+<div class="code-line"><span class="line-number">5</span><span class="code-text">    <span class="kw">private</span> <span class="type">BigDecimal</span> <span class="field">precioGramoPen</span>;</span></div>
+<div class="code-line"><span class="line-number">6</span><span class="code-text"></span></div>
+<div class="code-line"><span class="line-number">7</span><span class="code-text">    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="method">calcularSubtotal</span>() {</span></div>
+<div class="code-line"><span class="line-number">8</span><span class="code-text">        <span class="kw">return this</span>.<span class="field">pesoFundidoG</span></span></div>
+<div class="code-line"><span class="line-number">9</span><span class="code-text">            .<span class="method">multiply</span>(<span class="kw">this</span>.<span class="field">precioGramoPen</span>)</span></div>
+<div class="code-line"><span class="line-number">10</span><span class="code-text">            .<span class="method">setScale</span>(<span class="num">2</span>, <span class="type">RoundingMode</span>.<span class="field">HALF_UP</span>);</span></div>
+<div class="code-line"><span class="line-number">11</span><span class="code-text">    }</span></div>
+<div class="code-line"><span class="line-number">12</span><span class="code-text"></span></div>
+<div class="code-line"><span class="line-number">13</span><span class="code-text">    <span class="kw">public</span> <span class="type">TipoOro</span> <span class="method">getTipoOro</span>() { <span class="kw">return</span> <span class="field">tipoOro</span>; }</span></div>
+<div class="code-line"><span class="line-number">14</span><span class="code-text">    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="method">getPesoFundidoG</span>() { <span class="kw">return</span> <span class="field">pesoFundidoG</span>; }</span></div>
+<div class="code-line"><span class="line-number">15</span><span class="code-text">    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="method">getSubtotalPen</span>() { <span class="kw">return</span> <span class="method">calcularSubtotal</span>(); }</span></div>
+<div class="code-line"><span class="line-number">16</span><span class="code-text">}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna 3 -->
+    <div>
+      <div class="col-header">🗄️ Implementación en Base de datos</div>
+      <div class="sql-card">
+        <span class="sql-badge">ORACLE XE DDL</span>
+        <div class="sql-body">
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-table">DETALLE_LIQUIDACIONES_G1</span> (
+    <span class="sql-col">ID_DETALLE_LIQUIDACION</span>  <span class="sql-type">NUMBER</span> <span class="sql-kw">GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY</span>,
+    <span class="sql-col">ID_LIQUIDACION_G1</span>       <span class="sql-type">NUMBER</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">TIPO_ORO</span>                <span class="sql-type">VARCHAR2(10)</span> <span class="sql-kw">NOT NULL CHECK</span> (TIPO_ORO <span class="sql-kw">IN</span> (<span class="str">'ROJO'</span>, <span class="str">'VERDE'</span>)),
+    <span class="sql-col">PESO_FUNDIDO_G</span>          <span class="sql-type">NUMBER(10, 3)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">PRECIO_GRAMO_PEN</span>        <span class="sql-type">NUMBER(10, 2)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">SUBTOTAL_PEN</span>            <span class="sql-type">NUMBER(12, 2)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-fk">FK_DETALLE_LIQ</span> <span class="sql-kw">FOREIGN KEY</span> (ID_LIQUIDACION_G1) 
+        <span class="sql-kw">REFERENCES</span> <span class="sql-table">LIQUIDACIONES_G1</span>(ID_LIQUIDACION_G1) <span class="sql-kw">ON DELETE CASCADE</span>
+);</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- ENTIDAD 5: CENTRO DE ACOPIO                -->
+  <!-- ========================================== -->
+  <div class="entity-row" id="entidad-centro">
+    <!-- Columna 1 -->
+    <div>
+      <div class="col-header">📌 Diagrama de decisiones de centro de acopio</div>
+      <table class="decisions-table">
+        <thead>
+          <tr>
+            <th>Decisión</th>
+            <th>Preguntas que resuelve</th>
+            <th>SITRA-ORO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-decision">Tipo concreto</td>
+            <td class="td-pregunta">¿Con qué tipo de lenguaje se representa cada atributo?</td>
+            <td class="td-valor">
+              <span class="badge-java">Java: id: Long, strings: String, activo: boolean</span><br>
+              <span class="badge-sql">SQL: id: NUMBER, strings: VARCHAR2, activo: NUMBER(1)</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="td-decision">Identidad</td>
+            <td class="td-pregunta">¿Cómo se identifica cada objeto y por qué método se generará?</td>
+            <td class="td-valor"><span class="badge-java">idCentroAcopio: Long</span> autogenerado por secuencia de Oracle XE.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Navegabilidad</td>
+            <td class="td-pregunta">¿Desde qué clase se puede llegar a la otra?</td>
+            <td class="td-valor">Recibe referencias desde transacciones y cuentas; no mantiene listas en memoria.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Enumeraciones</td>
+            <td class="td-pregunta">¿Qué valores admite un atributo de estado o restricciones?</td>
+            <td class="td-valor">Flag de estado <span class="badge-sql">ACTIVO NUMBER(1) CHECK (ACTIVO IN (0,1))</span>.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Referencia entre módulos</td>
+            <td class="td-pregunta">¿A qué clase de otra entidad se referencia por objeto o por id?</td>
+            <td class="td-valor">Vincula con el usuario acopiador por <span class="badge-sql">ID_CUENTA_ACOPIADOR</span> con <span class="badge-sql">UNIQUE</span>.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Atributo derivado</td>
+            <td class="td-pregunta">¿Se calcula en caliente o es un atributo con un algoritmo de cálculo?</td>
+            <td class="td-valor">No maneja atributos derivados; es catálogo físico operativo.</td>
+          </tr>
+          <tr>
+            <td class="td-decision">Ubicación de la operación</td>
+            <td class="td-pregunta">¿Dónde reside el método o la operación?</td>
+            <td class="td-valor">Validación de unicidad sede/zona en <span class="badge-java">CentroAcopioServiceImpl</span>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Columna 2 -->
+    <div>
+      <div class="col-header">💻 Implementación en Java</div>
+      <div class="code-container">
+        <div class="code-header">
+          <div class="window-controls">
+            <div class="window-circle circle-red"></div>
+            <div class="window-circle circle-yellow"></div>
+            <div class="window-circle circle-green"></div>
+          </div>
+          <span class="file-name">CentroAcopio.java</span>
+        </div>
+        <div class="code-body">
+<div class="code-line"><span class="line-number">1</span><span class="code-text"><span class="kw">public class</span> <span class="type">CentroAcopio</span> {</span></div>
+<div class="code-line"><span class="line-number">2</span><span class="code-text">    <span class="kw">private</span> <span class="type">Long</span> <span class="field">idCentroAcopio</span>;</span></div>
+<div class="code-line"><span class="line-number">3</span><span class="code-text">    <span class="kw">private</span> <span class="type">String</span> <span class="field">nombre</span>;</span></div>
+<div class="code-line"><span class="line-number">4</span><span class="code-text">    <span class="kw">private</span> <span class="type">String</span> <span class="field">zona</span>;</span></div>
+<div class="code-line"><span class="line-number">5</span><span class="code-text">    <span class="kw">private</span> <span class="type">String</span> <span class="field">direccion</span>;</span></div>
+<div class="code-line"><span class="line-number">6</span><span class="code-text">    <span class="kw">private</span> <span class="type">String</span> <span class="field">telefono</span>;</span></div>
+<div class="code-line"><span class="line-number">7</span><span class="code-text">    <span class="kw">private boolean</span> <span class="field">activo</span> = <span class="kw">true</span>;</span></div>
+<div class="code-line"><span class="line-number">8</span><span class="code-text"></span></div>
+<div class="code-line"><span class="line-number">9</span><span class="code-text">    <span class="kw">public</span> <span class="type">Long</span> <span class="method">getIdCentroAcopio</span>() { <span class="kw">return</span> <span class="field">idCentroAcopio</span>; }</span></div>
+<div class="code-line"><span class="line-number">10</span><span class="code-text">    <span class="kw">public</span> <span class="type">String</span> <span class="method">getNombre</span>() { <span class="kw">return</span> <span class="field">nombre</span>; }</span></div>
+<div class="code-line"><span class="line-number">11</span><span class="code-text">    <span class="kw">public void</span> <span class="method">setNombre</span>(<span class="type">String</span> <span class="field">n</span>) { <span class="kw">this</span>.<span class="field">nombre</span> = <span class="field">n</span>; }</span></div>
+<div class="code-line"><span class="line-number">12</span><span class="code-text">    <span class="kw">public</span> <span class="type">String</span> <span class="method">getZona</span>() { <span class="kw">return</span> <span class="field">zona</span>; }</span></div>
+<div class="code-line"><span class="line-number">13</span><span class="code-text">    <span class="kw">public boolean</span> <span class="method">isActivo</span>() { <span class="kw">return</span> <span class="field">activo</span>; }</span></div>
+<div class="code-line"><span class="line-number">14</span><span class="code-text">}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna 3 -->
+    <div>
+      <div class="col-header">🗄️ Implementación en Base de datos</div>
+      <div class="sql-card">
+        <span class="sql-badge">ORACLE XE DDL</span>
+        <div class="sql-body">
+<span class="sql-kw">CREATE TABLE</span> <span class="sql-table">CENTROS_ACOPIO</span> (
+    <span class="sql-col">ID_CENTRO_ACOPIO</span>    <span class="sql-type">NUMBER</span> <span class="sql-kw">GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY</span>,
+    <span class="sql-col">NOMBRE</span>              <span class="sql-type">VARCHAR2(120)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">ZONA</span>                <span class="sql-type">VARCHAR2(100)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">DIRECCION</span>           <span class="sql-type">VARCHAR2(200)</span> <span class="sql-kw">NOT NULL</span>,
+    <span class="sql-col">TELEFONO</span>            <span class="sql-type">VARCHAR2(20)</span>,
+    <span class="sql-col">ID_CUENTA_ACOPIADOR</span> <span class="sql-type">NUMBER</span> <span class="sql-kw">NOT NULL UNIQUE</span>,
+    <span class="sql-col">ACTIVO</span>              <span class="sql-type">NUMBER(1)</span> <span class="sql-kw">DEFAULT 1 NOT NULL CHECK</span> (ACTIVO <span class="sql-kw">IN</span> (0, 1)),
+    <span class="sql-kw">CONSTRAINT</span> <span class="sql-fk">UK_CENTRO_NOMBRE_ZONA</span> <span class="sql-kw">UNIQUE</span> (NOMBRE, ZONA)
+);</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

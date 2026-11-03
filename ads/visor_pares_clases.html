@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SITRA-ORO · Análisis de Relaciones y Cardinalidades (Formato Docente)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background-color: #f8fafc;
+      background-image: 
+        linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+        linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+      background-size: 24px 24px;
+      margin: 0;
+      padding: 30px 20px 40px 20px;
+      color: #1e293b;
+      overflow-x: hidden;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .header h1 {
+      margin: 0 0 8px 0;
+      color: #1e293b;
+      font-size: 26px;
+    }
+    .header p {
+      margin: 0;
+      color: #64748b;
+      font-size: 15px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+    .pair-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .diagram-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .uml-box {
+      border: 1.5px solid #1e293b;
+      border-radius: 6px;
+      background: #ffffff;
+      width: 280px;
+      font-size: 13px;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.06);
+    }
+    .uml-header {
+      font-weight: bold;
+      text-align: center;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-bottom: 1.5px solid #1e293b;
+      font-size: 15px;
+    }
+    .uml-section {
+      padding: 8px 12px;
+      line-height: 1.5;
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 12.5px;
+    }
+    .uml-section + .uml-section {
+      border-top: 1px solid #cbd5e1;
+    }
+    .relation-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 140px;
+      position: relative;
+    }
+    .rel-line-wrap {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      position: relative;
+      height: 24px;
+    }
+    .rel-line {
+      flex: 1;
+      height: 2px;
+      background: #1e293b;
+    }
+    .rel-mult-left {
+      position: absolute;
+      left: 0;
+      top: -18px;
+      font-weight: bold;
+      font-size: 13px;
+      color: #0f172a;
+    }
+    .rel-mult-right {
+      position: absolute;
+      right: 0;
+      top: -18px;
+      font-weight: bold;
+      font-size: 13px;
+      color: #0f172a;
+    }
+    .rel-verb {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0284c7;
+      text-transform: lowercase;
+      margin-bottom: 4px;
+    }
+    .rel-diamond {
+      width: 12px;
+      height: 12px;
+      background: #1e293b;
+      transform: rotate(45deg);
+      margin-right: -2px;
+    }
+    .arrow-right {
+      width: 0; 
+      height: 0; 
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 8px solid #1e293b;
+    }
+    .reading-box {
+      background: #f8fafc;
+      border-left: 4px solid #0284c7;
+      padding: 12px 18px;
+      border-radius: 4px;
+      font-size: 14.5px;
+      line-height: 1.6;
+    }
+    .reading-box p {
+      margin: 4px 0;
+    }
+    .reading-box strong {
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>SITRA-ORO · Pares de Clases y Cardinalidades</h1>
+    <p>Análisis y Diseño de Sistemas (ADS) · Formato de análisis visual bidireccional</p>
+  </div>
+
+  <div class="container">
+
+    <!-- PAR 1 -->
+    <div class="pair-card">
+      <div class="diagram-row">
+        <!-- Box 1 -->
+        <div class="uml-box">
+          <div class="uml-header">CuentaAcceso</div>
+          <div class="uml-section">
+            - idCuenta: Long<br>
+            - documentoIdentidad: String<br>
+            - claveHash: String<br>
+            - activo: boolean
+          </div>
+          <div class="uml-section">
+            + autenticar(): boolean<br>
+            + cambiarClave(): void
+          </div>
+        </div>
+        <!-- Relation -->
+        <div class="relation-link">
+          <span class="rel-verb">tiene</span>
+          <div class="rel-line-wrap">
+            <span class="rel-mult-left">0..*</span>
+            <div class="rel-line"></div>
+            <div class="arrow-right"></div>
+            <span class="rel-mult-right">1</span>
+          </div>
+        </div>
+        <!-- Box 2 -->
+        <div class="uml-box">
+          <div class="uml-header">Rol</div>
+          <div class="uml-section">
+            - idRol: String<br>
+            - nombre: String<br>
+            - descripcion: String
+          </div>
+          <div class="uml-section">
+            + asignarPermiso(): void
+          </div>
+        </div>
+      </div>
+      <div class="reading-box">
+        <p><strong>cuenta a rol:</strong> Una cuenta de usuario debe pertenecer obligatoriamente a un solo rol.</p>
+        <p><strong>rol a cuenta:</strong> 1 rol puede estar asignado a varios usuarios registrados.</p>
+      </div>
+    </div>
+
+    <!-- PAR 2 -->
+    <div class="pair-card">
+      <div class="diagram-row">
+        <!-- Box 1 -->
+        <div class="uml-box">
+          <div class="uml-header">Minero</div>
+          <div class="uml-section">
+            - idMinero: Long<br>
+            - documentoIdentidad: String<br>
+            - nombresApellidos: String<br>
+            - zonaProcedencia: String
+          </div>
+          <div class="uml-section">
+            + registrarMinero(): void<br>
+            + actualizarDatos(): void
+          </div>
+        </div>
+        <!-- Relation -->
+        <div class="relation-link">
+          <span class="rel-verb">realiza</span>
+          <div class="rel-line-wrap">
+            <span class="rel-mult-left">1</span>
+            <div class="rel-line"></div>
+            <div class="arrow-right"></div>
+            <span class="rel-mult-right">0..*</span>
+          </div>
+        </div>
+        <!-- Box 2 -->
+        <div class="uml-box">
+          <div class="uml-header">TransaccionG2</div>
+          <div class="uml-section">
+            - idTransaccionG2: Long<br>
+            - pesoSinFundirG: BigDecimal<br>
+            - pesoFundidoNetoG: BigDecimal<br>
+            - totalPagadoPen: BigDecimal
+          </div>
+          <div class="uml-section">
+            + registrarPesaje(): void<br>
+            + calcularPago(): void
+          </div>
+        </div>
+      </div>
+      <div class="reading-box">
+        <p><strong>minero a transaccion:</strong> Un minero puede realizar de cero a muchas compras de oro en el centro de acopio.</p>
+        <p><strong>transaccion a minero:</strong> Una transacción de compra debe pertenecer obligatoriamente a un solo minero.</p>
+      </div>
+    </div>
+
+    <!-- PAR 3 -->
+    <div class="pair-card">
+      <div class="diagram-row">
+        <!-- Box 1 -->
+        <div class="uml-box">
+          <div class="uml-header">LiquidacionG1</div>
+          <div class="uml-section">
+            - idLiquidacionG1: Long<br>
+            - fechaLiquidacion: Date<br>
+            - estado: EstadoLiquidacion<br>
+            - totalPagadoG2Pen: Money
+          </div>
+          <div class="uml-section">
+            + procesarCierre(): void<br>
+            + anular(): void
+          </div>
+        </div>
+        <!-- Relation with composition diamond -->
+        <div class="relation-link">
+          <span class="rel-verb">compone</span>
+          <div class="rel-line-wrap">
+            <div class="rel-diamond"></div>
+            <span class="rel-mult-left" style="left:16px;">1</span>
+            <div class="rel-line"></div>
+            <span class="rel-mult-right">1..2</span>
+          </div>
+        </div>
+        <!-- Box 2 -->
+        <div class="uml-box">
+          <div class="uml-header">DetalleLiquidacionG1</div>
+          <div class="uml-section">
+            - idDetalle: Long<br>
+            - tipoOro: TipoOro<br>
+            - pesoFundidoG: BigDecimal<br>
+            - subtotalPen: Money
+          </div>
+          <div class="uml-section">
+            + calcularSubtotal(): void
+          </div>
+        </div>
+      </div>
+      <div class="reading-box">
+        <p><strong>liquidacion a detalle:</strong> Una liquidación mayorista contiene de 1 a 2 detalles obligatorios (por color de oro).</p>
+        <p><strong>detalle a liquidacion:</strong> Un detalle pertenece estrictamente a una sola liquidación y no existe sin ella.</p>
+      </div>
+    </div>
+
+    <!-- PAR 4 -->
+    <div class="pair-card">
+      <div class="diagram-row">
+        <!-- Box 1 -->
+        <div class="uml-box">
+          <div class="uml-header">CentroAcopio</div>
+          <div class="uml-section">
+            - idCentroAcopio: Long<br>
+            - nombre: String<br>
+            - direccion: String<br>
+            - activo: boolean
+          </div>
+          <div class="uml-section">
+            + crearCentro(): void<br>
+            + actualizarEstado(): void
+          </div>
+        </div>
+        <!-- Relation -->
+        <div class="relation-link">
+          <span class="rel-verb">pertenece a</span>
+          <div class="rel-line-wrap">
+            <span class="rel-mult-left">1..*</span>
+            <div class="rel-line"></div>
+            <div class="arrow-right"></div>
+            <span class="rel-mult-right">1</span>
+          </div>
+        </div>
+        <!-- Box 2 -->
+        <div class="uml-box">
+          <div class="uml-header">ZonaAcopio</div>
+          <div class="uml-section">
+            - idZona: Long<br>
+            - nombre: String
+          </div>
+          <div class="uml-section">
+            + agregarZona(): void<br>
+            + listarZonas(): void
+          </div>
+        </div>
+      </div>
+      <div class="reading-box">
+        <p><strong>centro de acopio a zona:</strong> Un centro de acopio se ubica en una sola zona geográfica (La Rinconada, Ananea, etc.).</p>
+        <p><strong>zona a centro de acopio:</strong> Una zona geográfica puede albergar a 1 o varios centros de acopio autorizados.</p>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

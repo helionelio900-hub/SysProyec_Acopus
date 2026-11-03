@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SITRA-ORO · Diagrama de Clases del Dominio (Miro Edition)</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f8fafc;
+      background-image: 
+        linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+        linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+      background-size: 24px 24px;
+      color: #0f172a;
+      overflow: hidden;
+      width: 1550px;
+    }
+
+    .canvas-title {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .canvas-title h1 {
+      margin: 0 0 6px 0;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #0f172a;
+    }
+    .canvas-title p {
+      margin: 0;
+      font-size: 15px;
+      color: #64748b;
+    }
+
+    /* Diagram Stage */
+    .stage {
+      position: relative;
+      width: 1470px;
+      height: 890px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      margin: 0 auto;
+    }
+
+    /* SVG Overlay for Connections */
+    .connections-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* UML Class Boxes */
+    .uml-class {
+      position: absolute;
+      background: #ffffff;
+      border: 1.5px solid #1e293b;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .uml-header {
+      background: #f1f5f9;
+      border-bottom: 1.5px solid #1e293b;
+      padding: 10px 14px;
+      text-align: center;
+    }
+    .uml-header .stereotype {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .uml-header .class-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .uml-attributes, .uml-methods {
+      padding: 10px 14px;
+      font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #334155;
+    }
+
+    .uml-methods {
+      border-top: 1px solid #cbd5e1;
+      background: #fafafa;
+    }
+
+    /* Enum Boxes */
+    .uml-enum {
+      position: absolute;
+      background: #fffdf5;
+      border: 1.5px dashed #d97706;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      z-index: 2;
+      overflow: hidden;
+    }
+    .uml-enum .enum-header {
+      background: #fef3c7;
+      border-bottom: 1px dashed #d97706;
+      padding: 6px 12px;
+      text-align: center;
+    }
+    .uml-enum .enum-header .stereotype {
+      font-size: 11px;
+      color: #b45309;
+      font-weight: 700;
+    }
+    .uml-enum .enum-header .class-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #78350f;
+    }
+    .uml-enum .enum-values {
+      padding: 8px 14px;
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #92400e;
+    }
+
+    /* Rules Note Box */
+    .rules-card {
+      position: absolute;
+      left: 50px;
+      top: 760px;
+      width: 1370px;
+      background: #f8fafc;
+      border: 1.5px solid #0284c7;
+      border-radius: 10px;
+      padding: 14px 20px;
+      z-index: 2;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .rules-card h4 {
+      margin: 0 0 8px 0;
+      color: #0369a1;
+      font-size: 13.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .rule-item {
+      font-size: 11.5px;
+      line-height: 1.45;
+      color: #334155;
+      background: #ffffff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+    }
+
+    /* Connection Line labels */
+    .rel-badge {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      fill: #0284c7;
+    }
+    .mult-badge {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      fill: #0f172a;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="canvas-title">
+    <h1>SITRA-ORO · Modelo de Clases del Dominio</h1>
+    <p>Análisis y Diseño de Sistemas (ADS) · Arquitectura de Clases, Multiplicidades y Reglas de Negocio</p>
+  </div>
+
+  <div class="stage">
+
+    <svg class="connections-svg" viewBox="0 0 1470 860">
+      <defs>
+        <!-- Marker Arrow -->
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b" />
+        </marker>
+        <!-- Marker Open Arrow -->
+        <marker id="open-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M 1 2 L 8 5 L 1 8" fill="none" stroke="#0284c7" stroke-width="1.8" />
+        </marker>
+        <!-- Marker Composition Diamond -->
+        <marker id="diamond" viewBox="0 0 14 14" refX="7" refY="7" markerWidth="11" markerHeight="11" orient="auto">
+          <path d="M 7 1 L 13 7 L 7 13 L 1 7 z" fill="#1e293b" />
+        </marker>
+      </defs>
+
+      <!-- 1. Minero -> TransaccionG2 (Realiza: 1 a 0..*) -->
+      <path d="M 330 180 L 460 180" stroke="#1e293b" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+      <text x="342" y="168" class="mult-badge">1</text>
+      <text x="375" y="172" class="rel-badge">realiza</text>
+      <text x="430" y="168" class="mult-badge">0..*</text>
+
+      <!-- 2. TransaccionG2 -> LiquidacionG1 (Se liquida en: 0..* a 0..1) -->
+      <path d="M 780 180 L 920 180" stroke="#1e293b" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+      <text x="792" y="168" class="mult-badge">0..*</text>
+      <text x="815" y="172" class="rel-badge">se liquida en</text>
+      <text x="892" y="168" class="mult-badge">0..1</text>
+
+      <!-- 3. LiquidacionG1 -> DetalleLiquidacionG1 (Composición: 1 a 1..2) -->
+      <path d="M 1080 375 L 1080 470" stroke="#1e293b" stroke-width="2" fill="none" marker-start="url(#diamond)" />
+      <text x="1095" y="405" class="mult-badge">1</text>
+      <text x="1095" y="428" class="rel-badge">compone</text>
+      <text x="1095" y="458" class="mult-badge">1..2</text>
+
+      <!-- 4. TransaccionG2 -> ParametrosSistema (Uso para cotizar) -->
+      <path d="M 620 330 L 620 480" stroke="#64748b" stroke-width="1.8" stroke-dasharray="6,4" fill="none" marker-end="url(#open-arrow)" />
+      <text x="630" y="415" class="rel-badge" style="fill:#64748b;">usa cotizaciones</text>
+
+      <!-- 5. TransaccionG2 -> TipoOro (Dependencia) -->
+      <path d="M 460 250 C 390 260, 290 320, 240 370" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5,4" fill="none" marker-end="url(#open-arrow)" />
+
+      <!-- 6. DetalleLiquidacionG1 -> TipoOro (Dependencia) -->
+      <path d="M 940 550 C 720 570, 420 520, 240 430" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5,4" fill="none" marker-end="url(#open-arrow)" />
+
+      <!-- 7. LiquidacionG1 -> EstadoLiquidacion (Dependencia) -->
+      <path d="M 1240 250 C 1320 260, 1370 300, 1370 370" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5,4" fill="none" marker-end="url(#open-arrow)" />
+    </svg>
+
+    <!-- CLASS 1: Minero -->
+    <div class="uml-class" style="left: 50px; top: 60px; width: 280px;">
+      <div class="uml-header">
+        <span class="class-name">Minero</span>
+      </div>
+      <div class="uml-attributes">
+        - idMinero: Long<br>
+        - documentoIdentidad: String<br>
+        - nombresApellidos: String<br>
+        - telefono: String<br>
+        - zonaProcedencia: String<br>
+        - fechaRegistro: LocalDateTime
+      </div>
+      <div class="uml-methods">
+        + registrar(): void<br>
+        + actualizarDatos(): void
+      </div>
+    </div>
+
+    <!-- CLASS 2: TransaccionG2 -->
+    <div class="uml-class" style="left: 460px; top: 40px; width: 320px;">
+      <div class="uml-header">
+        <span class="class-name">TransaccionG2</span>
+      </div>
+      <div class="uml-attributes">
+        - idTransaccionG2: Long<br>
+        - pesoSinFundirG: BigDecimal<br>
+        - pesoFundidoNetoG: BigDecimal<br>
+        - tipoOro: TipoOro<br>
+        - precioAplicadoPen: BigDecimal<br>
+        - totalPagadoPen: BigDecimal<br>
+        - fechaTransaccion: LocalDateTime<br>
+        - idLiquidacionG1: Long<br>
+        - idCentroAcopio: Long
+      </div>
+      <div class="uml-methods">
+        + calcularPago(): BigDecimal<br>
+        + marcarLiquidada(): void
+      </div>
+    </div>
+
+    <!-- CLASS 3: LiquidacionG1 -->
+    <div class="uml-class" style="left: 920px; top: 40px; width: 320px;">
+      <div class="uml-header">
+        <span class="stereotype">«raíz de agregado»</span>
+        <span class="class-name">LiquidacionG1</span>
+      </div>
+      <div class="uml-attributes">
+        - idLiquidacionG1: Long<br>
+        - nombreAcopiadorG2: String<br>
+        - estado: EstadoLiquidacion<br>
+        - pesoTotalFundidoG: BigDecimal<br>
+        - cotizacionOnzaUsd: BigDecimal<br>
+        - tipoCambioUsdPen: BigDecimal<br>
+        - precioResultanteGramo: BigDecimal<br>
+        - totalPagadoG2Pen: BigDecimal<br>
+        - fechaLiquidacion: LocalDateTime
+      </div>
+      <div class="uml-methods">
+        + procesarCierre(): void<br>
+        + anular(): void
+      </div>
+    </div>
+
+    <!-- CLASS 4: DetalleLiquidacionG1 -->
+    <div class="uml-class" style="left: 940px; top: 470px; width: 280px;">
+      <div class="uml-header">
+        <span class="class-name">DetalleLiquidacionG1</span>
+      </div>
+      <div class="uml-attributes">
+        - idDetalle: Long<br>
+        - tipoOro: TipoOro<br>
+        - pesoFundidoG: BigDecimal<br>
+        - precioGramoPen: BigDecimal<br>
+        - subtotalPen: BigDecimal
+      </div>
+      <div class="uml-methods">
+        + calcularSubtotal(): BigDecimal
+      </div>
+    </div>
+
+    <!-- CLASS 5: ParametrosSistema -->
+    <div class="uml-class" style="left: 470px; top: 480px; width: 300px;">
+      <div class="uml-header">
+        <span class="class-name">ParametrosSistema</span>
+      </div>
+      <div class="uml-attributes">
+        - idParametro: Long<br>
+        - fecha: LocalDate<br>
+        - precioDiarioGramoPen: BigDecimal<br>
+        - porcentajeMermaEst: BigDecimal<br>
+        - cotizacionOnzaUsd: BigDecimal<br>
+        - tipoCambioUsdPen: BigDecimal
+      </div>
+      <div class="uml-methods">
+        + estimarCotizacion(): BigDecimal<br>
+        + obtenerPrecioG2(): BigDecimal
+      </div>
+    </div>
+
+    <!-- ENUM 1: TipoOro -->
+    <div class="uml-enum" style="left: 100px; top: 370px; width: 150px;">
+      <div class="enum-header">
+        <span class="stereotype">«enumeration»</span>
+        <span class="class-name">TipoOro</span>
+      </div>
+      <div class="enum-values">
+        ROJO<br>
+        VERDE
+      </div>
+    </div>
+
+    <!-- ENUM 2: EstadoLiquidacion -->
+    <div class="uml-enum" style="left: 1290px; top: 370px; width: 150px;">
+      <div class="enum-header">
+        <span class="stereotype">«enumeration»</span>
+        <span class="class-name">EstadoLiquidacion</span>
+      </div>
+      <div class="enum-values">
+        REGISTRADA<br>
+        ANULADA
+      </div>
+    </div>
+
+    <!-- RULES NOTE -->
+    <div class="rules-card">
+      <h4>📌 Invariantes y Reglas del Modelo de Dominio</h4>
+      <div class="rules-grid">
+        <div class="rule-item"><strong>1. Merma de Fundición:</strong><br><code>pesoFundidoNetoG &le; pesoSinFundirG</code> (el oro pierde impurezas).</div>
+        <div class="rule-item"><strong>2. Regla de Pago:</strong><br><code>totalPagadoPen = pesoNeto &times; precioGramo</code>.</div>
+        <div class="rule-item"><strong>3. Cierre Mayorista:</strong><br>Máximo 1 detalle por <code>TipoOro</code> (Rojo / Verde) en cada liquidación.</div>
+        <div class="rule-item"><strong>4. Agrupación:</strong><br>Transacciones pasan de <code>idLiquidacion=null</code> a asociadas en el lote.</div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

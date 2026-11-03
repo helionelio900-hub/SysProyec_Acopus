@@ -48,3 +48,12 @@ docs/S04_LP2_Equipo05_*.docx
 # Guias personales de sustentacion - solo locales
 docs/proyecto-integrador/u1/guion-sustentacion.md
 docs/proyecto-integrador/u1/sustentacion-helio.md
+
+# Scratch and debug previews
+/crop_grid_*.png
+/debug_*.png
+/test_*.png
+/test_cap*.png
+/test_er_*.png
+/test_preview_*.png
+/timezlrg_45.dat

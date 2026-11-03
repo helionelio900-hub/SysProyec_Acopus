@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SITRA-ORO · Multiplicidades y Criterios de Clases (Miro Card)</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 30px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background-color: #f8fafc;
+      background-image: 
+        linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+        linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+      background-size: 24px 24px;
+      color: #1e293b;
+      overflow: hidden;
+      width: 1400px;
+    }
+
+    .cards-row {
+      display: flex;
+      gap: 30px;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .miro-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 24px 28px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    }
+
+    .card-left {
+      width: 780px;
+    }
+
+    .card-right {
+      width: 520px;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      text-align: center;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+
+    .mult-item {
+      margin-bottom: 18px;
+      line-height: 1.55;
+    }
+    .mult-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .mult-header {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mult-tag {
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+      font-size: 14px;
+    }
+
+    .mult-example {
+      margin: 4px 0 0 20px;
+      font-size: 13.5px;
+      color: #475569;
+    }
+    .mult-example strong {
+      color: #0f172a;
+    }
+
+    /* Right Card items */
+    .criteria-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .criteria-list li {
+      position: relative;
+      padding-left: 24px;
+      margin-bottom: 14px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: #334155;
+    }
+    .criteria-list li::before {
+      content: "✔";
+      position: absolute;
+      left: 0;
+      color: #0284c7;
+      font-weight: bold;
+      font-size: 13px;
+    }
+    .criteria-list strong {
+      color: #0f172a;
+    }
+    .criteria-desc {
+      display: block;
+      color: #64748b;
+      font-size: 12.5px;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cards-row">
+
+    <!-- TARJETA IZQUIERDA: MULTIPLICIDADES EN SITRA-ORO -->
+    <div class="miro-card card-left">
+      <div class="card-title">Multiplicidades aplicadas al negocio SITRA-ORO</div>
+
+      <div class="mult-item">
+        <div class="mult-header">
+          <span class="mult-tag">1</span> (Exactamente uno): Obligatorio y único.
+        </div>
+        <div class="mult-example">
+          &bull; <strong>Ejemplo en SITRA-ORO:</strong> Una <strong>Transacción de compra</strong> pertenece a exactamente <strong>1 Minero</strong>. Un <strong>DetalleLiquidación</strong> pertenece obligatoriamente a <strong>1 Liquidación Mayorista</strong>.
+        </div>
+      </div>
+
+      <div class="mult-item">
+        <div class="mult-header">
+          <span class="mult-tag">0..1</span> (Cero o uno): Opcional, con límite de uno.
+        </div>
+        <div class="mult-example">
+          &bull; <strong>Ejemplo en SITRA-ORO:</strong> Una <strong>TransacciónG2</strong> puede estar agrupada en <strong>0 o 1 LiquidaciónG1</strong> (nace libre con valor nulo y luego se consolida en una sola liquidación).
+        </div>
+      </div>
+
+      <div class="mult-item">
+        <div class="mult-header">
+          <span class="mult-tag">0..*</span> (Cero o muchos): Libre y sin límite máximo.
+        </div>
+        <div class="mult-example">
+          &bull; <strong>Ejemplo en SITRA-ORO:</strong> Un <strong>Minero</strong> registrado puede tener <strong>0 o muchas Compras</strong> en su historial. Una <strong>Liquidación Mayorista</strong> agrupa <strong>0 o muchas Transacciones</strong> de oro.
+        </div>
+      </div>
+
+      <div class="mult-item">
+        <div class="mult-header">
+          <span class="mult-tag">1..*</span> (Uno o muchos): Obligatorio al menos uno.
+        </div>
+        <div class="mult-example">
+          &bull; <strong>Ejemplo en SITRA-ORO:</strong> Una <strong>Zona de Acopio</strong> debe albergar al menos <strong>1 o varios Centros de Acopio</strong>. Una <strong>Liquidación Mayorista</strong> contiene obligatoriamente de <strong>1 a 2 Detalles</strong> (Rojo o Verde) para ser emitida.
+        </div>
+      </div>
+    </div>
+
+    <!-- TARJETA DERECHA: CRITERIOS DE IDENTIFICACIÓN DE CLASES -->
+    <div class="miro-card card-right">
+      <div class="card-title">Cómo identificamos las clases en SITRA-ORO:</div>
+      <ul class="criteria-list">
+        <li>
+          <strong>Importante en el giro del negocio:</strong>
+          <span class="criteria-desc"><code>Minero</code>, <code>TransaccionG2</code> y <code>LiquidacionG1</code> representan el corazón del acopio y fundición de oro en Puno.</span>
+        </li>
+        <li>
+          <strong>Agrupa características comunes:</strong>
+          <span class="criteria-desc"><code>Minero</code> agrupa productores artesanales; <code>CentroAcopio</code> agrupa puntos de pesaje y balanzas.</span>
+        </li>
+        <li>
+          <strong>Tiene identidad propia:</strong>
+          <span class="criteria-desc">Cada clase tiene identificador único (<code>idMinero</code>, <code>idTransaccionG2</code>, <code>idLiquidacionG1</code>).</span>
+        </li>
+        <li>
+          <strong>Tiene responsabilidades o acciones:</strong>
+          <span class="criteria-desc"><code>TransaccionG2</code> calcula pago tras merma (<code>calcularPago()</code>); <code>LiquidacionG1</code> emite el cierre (<code>procesarCierre()</code>).</span>
+        </li>
+        <li>
+          <strong>Tiene información propia:</strong>
+          <span class="criteria-desc">Atributos específicos como pesos con 3 decimales, precio spot diario, DNI y cotización internacional.</span>
+        </li>
+        <li>
+          <strong>Se relaciona con otras entidades:</strong>
+          <span class="criteria-desc">Trazabilidad completa: el minero entrega mineral &rarr; acopiador pesa y funde &rarr; mayorista liquida lote.</span>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+</body>
+</html>

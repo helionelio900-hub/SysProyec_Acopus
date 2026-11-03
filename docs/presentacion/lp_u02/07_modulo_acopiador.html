@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SITRA-ORO · Módulo Acopiador (Evidencia Interactiva)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #020b19;
+      --navy2: #071426;
+      --navy-card: rgba(8, 22, 43, 0.94);
+      --gold: #f2b736;
+      --gold-soft: #f8cf76;
+      --text: #f7f9fc;
+      --dim: #a8b8cf;
+      --line: rgba(139, 178, 225, .20);
+      --line-active: rgba(242, 183, 54, .60);
+      --green: #10b981;
+      --green-bg: rgba(16, 185, 129, 0.16);
+      --blue: #38bdf8;
+      --blue-bg: rgba(56, 189, 248, 0.16);
+      --font-mono: 'JetBrains Mono', Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--navy);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+    }
+
+    .slide {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      min-width: 1200px;
+      overflow: hidden;
+      background: radial-gradient(48rem 30rem at 92% 45%, rgba(23, 63, 94, .25), transparent 66%),
+                  radial-gradient(34rem 28rem at 5% 92%, rgba(242, 183, 54, .08), transparent 65%),
+                  var(--navy);
+    }
+
+    .grid-bg {
+      position: absolute;
+      inset: 74px 0 50px;
+      opacity: .4;
+      background-image: linear-gradient(rgba(115, 161, 216, .05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(115, 161, 216, .05) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(90deg, #000, rgba(0, 0, 0, .35) 60%, transparent);
+      pointer-events: none;
+    }
+
+    /* Header */
+    header {
+      position: absolute;
+      z-index: 3;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 74px;
+      padding: 0 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(2, 11, 25, .82);
+      border-bottom: 1px solid rgba(139, 178, 225, .14);
+      backdrop-filter: blur(10px);
+    }
+    .upeu { height: 42px; filter: brightness(0) invert(1); }
+    .career { display: flex; align-items: center; gap: 12px; }
+    .career img { width: 40px; height: 40px; object-fit: contain; }
+    .career small {
+      display: block;
+      color: #bdcbe0;
+      font: 600 10px/1 'Plus Jakarta Sans', sans-serif;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .career b {
+      display: block;
+      margin-top: 4px;
+      font-size: 13.5px;
+      letter-spacing: -.02em;
+    }
+
+    /* Main Layout */
+    main {
+      position: absolute;
+      z-index: 2;
+      inset: 74px 0 50px;
+      padding: 22px 3.5vw 18px;
+      display: grid;
+      grid-template-columns: 410px 1fr;
+      gap: 24px;
+    }
+
+    /* Columna Izquierda: Panel Interactivo de Criterios */
+    .criteria-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+      padding-right: 6px;
+    }
+
+    .panel-header {
+      margin-bottom: 8px;
+    }
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--gold);
+      font: 700 11px/1 var(--font-mono);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 2px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+    h1 {
+      margin: 8px 0 6px;
+      font-size: 26px;
+      line-height: 1.15;
+      letter-spacing: -.03em;
+      font-weight: 800;
+    }
+    .gold { color: var(--gold); }
+    .lead {
+      margin: 0;
+      color: var(--dim);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+
+    /* Lista de Botones de Criterio */
+    .criteria-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .criterion-btn {
+      width: 100%;
+      background: var(--navy-card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-align: left;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      transition: all .2s cubic-bezier(.2, .8, .2, 1);
+      position: relative;
+      color: var(--text);
+    }
+    .criterion-btn:hover {
+      border-color: rgba(242, 183, 54, .5);
+      background: rgba(14, 32, 60, .95);
+      transform: translateX(4px);
+    }
+    .criterion-btn.active {
+      border-color: var(--gold);
+      background: linear-gradient(90deg, rgba(242, 183, 54, .12), rgba(8, 22, 43, .98));
+      box-shadow: 0 0 20px rgba(242, 183, 54, .25);
+    }
+    .criterion-btn.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 10%;
+      bottom: 10%;
+      width: 4px;
+      background: var(--gold);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .c-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(242, 183, 54, .15);
+      border: 1px solid rgba(242, 183, 54, .4);
+      color: var(--gold);
+      font: 800 12px/1 var(--font-mono);
+      letter-spacing: .05em;
+    }
+    .criterion-btn.active .c-badge {
+      background: var(--gold);
+      color: #020b19;
+      border-color: var(--gold);
+    }
+
+    .c-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .c-info strong {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .c-info span {
+      font-size: 11px;
+      color: var(--dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .criterion-btn.active .c-info span {
+      color: var(--gold-soft);
+    }
+
+    .c-file {
+      font: 600 10.5px/1 var(--font-mono);
+      color: #739ac5;
+      background: rgba(115, 154, 197, .12);
+      padding: 4px 7px;
+      border-radius: 4px;
+    }
+
+    /* Barra de Seguridad C4 & C5 */
+    .security-bar {
+      margin-top: 4px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .sec-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #a7f3d0;
+      font-family: var(--font-mono);
+    }
+    .sec-pill {
+      background: var(--green);
+      color: #02140d;
+      font-weight: 800;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Columna Derecha: Visor de Evidencia en Alta Resolución */
+    .viewer-panel {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: var(--navy-card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 16px 40px -10px rgba(0, 0, 0, .7);
+    }
+
+    .viewer-top {
+      height: 40px;
+      background: rgba(3, 15, 33, 0.95);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .viewer-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .traffic-lights {
+      display: flex;
+      gap: 6px;
+    }
+    .traffic-lights i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .tl-red { background: #ef4444; }
+    .tl-yellow { background: #eab308; }
+    .tl-green { background: #10b981; }
+
+    .viewer-title {
+      font: 700 11px/1 var(--font-mono);
+      color: var(--gold);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .viewer-path {
+      font: 500 10.5px/1 var(--font-mono);
+      color: var(--dim);
+    }
+    .viewer-status {
+      font: 700 10px/1 var(--font-mono);
+      color: #10b981;
+      background: var(--green-bg);
+      border: 1px solid rgba(16, 185, 129, .3);
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: .08em;
+    }
+
+    .viewer-screen {
+      flex: 1;
+      position: relative;
+      background: #040e1d;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Tarjeta explicativa dentro del visor (fuera del canvas de la imagen) */
+    .evidence-callout {
+      margin: 12px 16px 6px;
+      padding: 10px 14px;
+      background: rgba(7, 20, 38, 0.96);
+      border: 1px solid rgba(139, 178, 225, 0.25);
+      border-left: 3px solid var(--gold);
+      border-radius: 6px;
+      transition: all .25s ease;
+      flex-shrink: 0;
+    }
+    .evidence-callout h4 {
+      margin: 0 0 3px 0;
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .evidence-callout p {
+      margin: 0;
+      color: #e1e9f4;
+      font-size: 11.5px;
+      line-height: 1.4;
+    }
+    .evidence-callout code {
+      color: var(--gold-soft);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .img-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 14px 12px;
+      overflow: hidden;
+    }
+
+    .viewer-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .8);
+      border: 1px solid rgba(139, 178, 225, .25);
+      cursor: zoom-in;
+      transition: transform .2s ease, opacity .2s ease;
+      image-rendering: auto;
+    }
+    .viewer-img:hover {
+      transform: scale(1.008);
+      border-color: var(--gold);
+    }
+
+    .viewer-caption {
+      padding: 8px 16px;
+      background: rgba(3, 15, 33, 0.95);
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: #d0ddec;
+    }
+    .viewer-caption strong {
+      color: var(--gold);
+      font-family: var(--font-mono);
+    }
+    .click-hint {
+      color: var(--dim);
+      font-size: 10.5px;
+      font-family: var(--font-mono);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Modal de pantalla completa para la captura */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(2, 11, 25, .94);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      cursor: zoom-out;
+    }
+    .modal.open {
+      display: flex;
+    }
+    .modal-box {
+      max-width: 95vw;
+      max-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .modal-box .evidence-callout {
+      max-width: 880px;
+      cursor: default;
+    }
+    .modal img {
+      max-width: 95vw;
+      max-height: calc(90vh - 65px);
+      border-radius: 10px;
+      box-shadow: 0 0 60px rgba(0, 0, 0, .8);
+      border: 1px solid rgba(242, 183, 54, .3);
+      image-rendering: auto;
+    }
+
+    /* Footer */
+    footer {
+      position: absolute;
+      z-index: 3;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 50px;
+      padding: 0 48px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      border-top: 1px solid rgba(139, 178, 225, .14);
+      background: rgba(2, 11, 25, .82);
+    }
+    .count {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #dce7f5;
+      font: 600 11px/1 var(--font-mono);
+      letter-spacing: .14em;
+    }
+    .count::before {
+      content: "";
+      width: 36px;
+      height: 3px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--gold), rgba(242, 183, 54, .08));
+    }
+    .dots { display: flex; gap: 8px; }
+    .dots i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid rgba(139, 178, 225, .45);
+    }
+    .dots i.on {
+      width: 24px;
+      border-radius: 8px;
+      border-color: var(--gold);
+      background: var(--gold);
+    }
+    .brand {
+      justify-self: end;
+      color: #b8c6dc;
+      font: 600 11px/1 var(--font-mono);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+<section class="slide">
+  <div class="grid-bg" aria-hidden="true"></div>
+
+  <header>
+    <img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión">
+    <div class="career">
+      <img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas">
+      <div>
+        <small>Escuela Profesional de</small>
+        <b>Ingeniería de Sistemas</b>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Columna Izquierda: Panel Interactivo de Criterios Rúbrica -->
+    <section class="criteria-panel">
+      <div class="panel-header">
+        <div class="eyebrow">MÓDULO ACOPIADOR · JHYMEL NELIO FIGUEROA CHAMBI</div>
+        <h1>Evidencias y <span class="gold">criterios en vivo</span></h1>
+        <p class="lead">Haz clic en cada criterio para desplegar su evidencia visual en alta resolución:</p>
+      </div>
+
+      <div class="criteria-list" role="tablist">
+        <!-- C1: CRUD Independiente -->
+        <button class="criterion-btn active" data-target="c1" role="tab" aria-selected="true">
+          <span class="c-badge">C1</span>
+          <div class="c-info">
+            <strong>CRUD Independiente</strong>
+            <span>Gestión y listado de Mineros (Figueroa Nelio)</span>
+          </div>
+          <span class="c-file">minero-list.ts</span>
+        </button>
+
+        <!-- C2: CRUD Dependiente -->
+        <button class="criterion-btn" data-target="c2" role="tab" aria-selected="false">
+          <span class="c-badge">C2</span>
+          <div class="c-info">
+            <strong>CRUD Dependiente</strong>
+            <span>Dependencia Minero ↔ Zona (Cerro Lunar) y DNI</span>
+          </div>
+          <span class="c-file">minero-form.ts</span>
+        </button>
+
+        <!-- C3: Cabecera-Detalle Transaccional -->
+        <button class="criterion-btn" data-target="c3_trans" role="tab" aria-selected="false">
+          <span class="c-badge">C3</span>
+          <div class="c-info">
+            <strong>Cabecera–Detalle Transaccional</strong>
+            <span>Acopio G2 por lotes (Oro ROJO/VERDE) y atomicidad</span>
+          </div>
+          <span class="c-file">operaciones.ts</span>
+        </button>
+
+        <!-- C3: Reportes Integrados -->
+        <button class="criterion-btn" data-target="c3_rep" role="tab" aria-selected="false">
+          <span class="c-badge">C3</span>
+          <div class="c-info">
+            <strong>Reportes Consolidados</strong>
+            <span>Liquidaciones (S/ 81,313.80) y 29 tests en Oracle</span>
+          </div>
+          <span class="c-file">entregas-recibidas.ts</span>
+        </button>
+
+        <!-- C4 / C5: Seguridad Backend & Frontend -->
+        <button class="criterion-btn" data-target="c4_c5" role="tab" aria-selected="false">
+          <span class="c-badge" style="color:var(--green); border-color:rgba(16,185,129,.4);">C4</span>
+          <div class="c-info">
+            <strong>Seguridad Backend & Frontend</strong>
+            <span>Spring Boot :8081 (Role: ACOPIADOR) + Keycloak OIDC</span>
+          </div>
+          <span class="c-file" style="color:var(--green);">SecurityConfig.java</span>
+        </button>
+      </div>
+
+      <!-- Barra de Seguridad C4 & C5 -->
+      <div class="security-bar">
+        <div class="sec-tag">
+          <span class="sec-pill">C4/C5 VERIFICADO</span>
+          <span>Keycloak 26 · PKCE (S256)</span>
+        </div>
+        <div class="sec-tag">
+          <span>Storage: <b style="color:#38bdf8;">sessionStorage</b></span>
+        </div>
+        <div class="sec-tag">
+          <span>Role: <b style="color:var(--gold);">ACOPIADOR</b></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Columna Derecha: Visor de Evidencia en Pantalla Completa -->
+    <section class="viewer-panel">
+      <div class="viewer-top">
+        <div class="viewer-meta">
+          <div class="traffic-lights">
+            <i class="tl-red"></i>
+            <i class="tl-yellow"></i>
+            <i class="tl-green"></i>
+          </div>
+          <span class="viewer-title" id="viewerTitle">GESTIÓN MAESTRA DE MINEROS</span>
+          <span class="viewer-path" id="viewerPath">src/app/features/acopio/mineros/minero-list.ts</span>
+        </div>
+      </div>
+
+      <div class="viewer-screen">
+        <div class="evidence-callout" id="evidenceCallout">
+          <h4 id="calloutTitle">C1 · CRUD Independiente (Entidad Maestra)</h4>
+          <p id="calloutText">Alta, edición y persistencia de mineros en <code>minero-list.ts</code>. Registro verificado de <b>Figueroa Nelio</b> (DNI <code>77232635</code>) con estado <b>Activo</b>.</p>
+        </div>
+        <div class="img-wrapper">
+          <img id="viewerImage" class="viewer-img" src="assets/evidencia_acopiador_c1_mineros.png" alt="Evidencia del sistema">
+        </div>
+      </div>
+
+      <div class="viewer-caption">
+        <span id="viewerCaption"><strong>C1 (CRUD Independiente):</strong> Listado y control de la entidad maestra Minero. Registro activo de <code>Figueroa Nelio</code> en Cerro Lunar - La Rinconada.</span>
+        <span class="click-hint">🔍 Haz clic en la captura para pantalla completa</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Fullscreen -->
+  <div class="modal" id="imageModal" aria-hidden="true">
+    <div class="modal-box">
+      <div class="evidence-callout" id="modalCallout">
+        <h4 id="modalCalloutTitle">C1 · CRUD Independiente (Entidad Maestra)</h4>
+        <p id="modalCalloutText">Alta, edición y persistencia de mineros en <code>minero-list.ts</code>. Registro verificado de <b>Figueroa Nelio</b> (DNI <code>77232635</code>) con estado <b>Activo</b>.</p>
+      </div>
+      <img id="modalImg" src="" alt="Captura ampliada">
+    </div>
+  </div>
+
+  <footer>
+    <div class="count">DIAPOSITIVA 03</div>
+    <div class="dots" aria-label="Navegación">
+      <i></i><i></i><i class="on"></i><i></i><i></i>
+    </div>
+    <span class="brand">SITRA-ORO · MÓDULO ACOPIADOR</span>
+  </footer>
+</section>
+
+<script>
+  (() => {
+    "use strict";
+
+    const evidenceData = {
+      c1: {
+        title: "C1 · CRUD INDEPENDIENTE (GESTIÓN MAESTRA DE MINEROS)",
+        path: "src/app/features/acopio/mineros/minero-list.ts",
+        img: "assets/evidencia_acopiador_c1_mineros.png",
+        status: "C1 · 20/20 INDEPENDIENTE",
+        calloutTitle: "C1 · CRUD Independiente (Entidad Maestra)",
+        calloutText: "Alta, edición y persistencia de mineros en <code>minero-list.ts</code>. Registro verificado de <b>Figueroa Nelio</b> (DNI <code>77232635</code>) con estado <b>Activo</b>.",
+        calloutBorder: "var(--gold)",
+        caption: "<strong>C1 (CRUD Independiente):</strong> Listado y control de la entidad maestra Minero. Registro activo de <code>Figueroa Nelio</code> en Cerro Lunar - La Rinconada."
+      },
+      c2: {
+        title: "C2 · CRUD DEPENDIENTE (ZONA TERRITORIAL Y VALIDACIÓN DNI)",
+        path: "src/app/features/acopio/mineros/minero-form.ts",
+        img: "assets/evidencia_acopiador_c2_dependiente.png",
+        status: "C2 · 20/20 DEPENDIENTE",
+        calloutTitle: "C2 · Integridad Referencial FK y Validación RENIEC",
+        calloutText: "Dependencia foránea: cada Minero se asocia obligatoriamente a una <b>Zona territorial</b> (Cerro Lunar). Validación reactiva de DNI (8-15 dígitos) con autocompletado RENIEC.",
+        calloutBorder: "var(--blue)",
+        caption: "<strong>C2 (CRUD Dependiente):</strong> Clave foránea: asociación a <b>Zona</b> (<code>Cerro Lunar - La Rinconada</code>) y validación estricta de documento de identidad."
+      },
+      c3_trans: {
+        title: "C3 · ACOPIO G2: CABECERA–DETALLE Y TRAZABILIDAD POR COLOR",
+        path: "src/app/features/acopio/operaciones.ts · AcopiadorServiceImpl.java",
+        img: "assets/evidencia_acopiador_c3_transaccional.png",
+        status: "C3 · 20/20 TRANSACCIONAL",
+        calloutTitle: "C3 · Transaccional: Cabecera – Detalle (Acopio G2)",
+        calloutText: "Cabecera con Minero (1) y partidas clasificadas en <b>Oro ROJO / Oro VERDE</b> (N). Control de peso bruto vs neto fundido y atomicidad <b>@Transactional</b>.",
+        calloutBorder: "var(--gold)",
+        caption: "<strong>C3 (Cabecera–Detalle):</strong> Flujo transaccional 1 a N. Desglose de partidas por color de oro, cálculo neto y acumulación sin mezclar lotes."
+      },
+      c3_rep: {
+        title: "C3 · REPORTES CONSOLIDADOS Y VALIDACIÓN ATÓMICA DE STOCK",
+        path: "src/app/features/acopio/entregas-recibidas.ts",
+        img: "assets/evidencia_acopiador_c3_reportes.png",
+        status: "C3 · 20/20 REPORTES",
+        calloutTitle: "C3 · Reporte Agregado y Cierre de Liquidaciones",
+        calloutText: "Consolidación de <b>4 liquidaciones</b> con desembolso total de <b>S/ 81,313.80</b> (ticket promedio S/ 20,328.45). Verificación con <b>29 tests unitarios</b> sobre Oracle XE 21.",
+        calloutBorder: "var(--blue)",
+        caption: "<strong>C3 (Reportes):</strong> Métricas consolidadas en libro mayor, filtros combinados por estado/fecha y 29 comprobaciones superadas en base de datos."
+      },
+      c4_c5: {
+        title: "C4 / C5 · SEGURIDAD KEYCLOAK & SPRING BOOT (ROL ACOPIADOR)",
+        path: "src/app/core/auth/interceptors/auth.interceptor.ts · SecurityConfig.java",
+        img: "assets/evidencia_acopiador_c4_c5_seguridad.png",
+        status: "C4/C5 · 20/20 SEGURIDAD",
+        calloutTitle: "C4 & C5 · Seguridad: Interceptor JWT + Rol ACOPIADOR",
+        calloutText: "Petición a <code>/api/v1/acopio/mineros</code> autorizada con <b>200 OK</b> en <code>:8081</code>. Token Bearer emitido por Keycloak (<code>:38081</code>) y trazabilidad con <code>X-Trace-ID</code>.",
+        calloutBorder: "var(--green)",
+        caption: "<strong>C4 & C5 (Seguridad):</strong> Endpoint protegido bajo rol <code>ACOPIADOR</code>, cabecera Bearer JWT validada en Spring Boot y correlación de logs distribuida."
+      }
+    };
+
+    const buttons = document.querySelectorAll(".criterion-btn");
+    const vTitle = document.getElementById("viewerTitle");
+    const vPath = document.getElementById("viewerPath");
+    const vImg = document.getElementById("viewerImage");
+    const vStatus = document.getElementById("viewerStatus");
+    const vCaption = document.getElementById("viewerCaption");
+    const vCallout = document.getElementById("evidenceCallout");
+    const vCalloutTitle = document.getElementById("calloutTitle");
+    const vCalloutText = document.getElementById("calloutText");
+
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImg");
+    const mCallout = document.getElementById("modalCallout");
+    const mCalloutTitle = document.getElementById("modalCalloutTitle");
+    const mCalloutText = document.getElementById("modalCalloutText");
+
+    function selectCriterion(targetKey) {
+      const data = evidenceData[targetKey];
+      if (!data) return;
+
+      buttons.forEach(btn => {
+        const isMatch = btn.dataset.target === targetKey;
+        btn.classList.toggle("active", isMatch);
+        btn.setAttribute("aria-selected", isMatch ? "true" : "false");
+      });
+
+      // Transición suave de imagen y callout
+      vImg.style.opacity = "0";
+      vImg.style.transform = "scale(0.98)";
+      vCallout.style.opacity = "0.7";
+
+      setTimeout(() => {
+        vTitle.textContent = data.title;
+        vPath.textContent = data.path;
+        vImg.src = data.img;
+        if (vStatus) vStatus.textContent = data.status;
+        vCaption.innerHTML = data.caption;
+
+        // Actualizar Callout con la explicación corta
+        vCalloutTitle.textContent = data.calloutTitle;
+        vCalloutText.innerHTML = data.calloutText;
+        vCallout.style.borderLeftColor = data.calloutBorder;
+        vCalloutTitle.style.color = data.calloutBorder;
+
+        // Sincronizar en el modal
+        mCalloutTitle.textContent = data.calloutTitle;
+        mCalloutText.innerHTML = data.calloutText;
+        mCallout.style.borderLeftColor = data.calloutBorder;
+        mCalloutTitle.style.color = data.calloutBorder;
+
+        vImg.style.opacity = "1";
+        vImg.style.transform = "scale(1)";
+        vCallout.style.opacity = "1";
+      }, 150);
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        selectCriterion(btn.dataset.target);
+      });
+    });
+
+    // Zoom modal al hacer clic en la imagen
+    vImg.addEventListener("click", () => {
+      modalImg.src = vImg.src;
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    });
+
+    modal.addEventListener("click", () => {
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+    });
+
+  })();
+</script>
+</body>
+</html>

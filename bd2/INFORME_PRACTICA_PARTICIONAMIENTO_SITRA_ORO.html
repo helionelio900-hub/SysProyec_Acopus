@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>SITRA-ORO — Informe de Particionamiento de Tablas en Oracle Database 21c</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 10mm 12mm 10mm 12mm;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 8.5pt;
+      line-height: 1.4;
+      color: #1e293b;
+      background: #ffffff;
+      text-align: justify;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    /* ==========================================================================
+       PÁGINA 1: PORTADA OFICIAL UPEU
+       ========================================================================== */
+    .cover-page {
+      height: 100%;
+      min-height: 265mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+      padding: 2mm 0;
+    }
+
+    .cover-top-logos {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2.5px solid #0f2744;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+
+    .cover-top-logos img.logo-left,
+    .cover-top-logos img.logo-right {
+      height: 56px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .cover-inst-text {
+      flex: 1;
+      padding: 0 10px;
+    }
+
+    .inst-name {
+      font-size: 13.5pt;
+      font-weight: 800;
+      color: #0f2744;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .fac-name {
+      font-size: 9.8pt;
+      font-weight: 700;
+      color: #854d0e;
+      text-transform: uppercase;
+      margin-bottom: 1px;
+    }
+
+    .esc-name {
+      font-size: 9pt;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+    }
+
+    .cover-emblem-wrap {
+      margin: 10px auto;
+      width: 130px;
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cover-emblem-wrap img {
+      width: 120px;
+      height: auto;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.18));
+    }
+
+    .cover-title-group {
+      margin: 8px 0;
+    }
+
+    .project-name {
+      font-size: 22pt;
+      font-weight: 900;
+      color: #0f2744;
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+    }
+
+    .project-desc {
+      font-size: 9.8pt;
+      font-weight: 600;
+      color: #b45309;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+
+    .doc-main-type {
+      font-size: 12.5pt;
+      font-weight: 800;
+      color: #0f2744;
+      line-height: 1.35;
+      text-transform: uppercase;
+      max-width: 600px;
+      margin: 0 auto 6px;
+    }
+
+    .doc-version-status {
+      font-size: 8.8pt;
+      font-weight: 700;
+      color: #047857;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .cover-meta-card {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      background: #f8fafc;
+      padding: 12px 18px;
+      margin: 12px 0 6px;
+      font-size: 8.8pt;
+      text-align: left;
+    }
+
+    .meta-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 20px;
+    }
+
+    .meta-card-grid div strong {
+      color: #0f2744;
+      font-weight: 700;
+    }
+
+    .cover-city-date {
+      margin-top: 8px;
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ==========================================================================
+       ENCABEZADO DE PÁGINAS INTERNAS
+       ========================================================================== */
+    .header-running {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1.5px solid #cbd5e1;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+      font-size: 7.8pt;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .header-running strong {
+      color: #0f2744;
+    }
+
+    h2 {
+      font-size: 10.5pt;
+      font-weight: 800;
+      color: #0f2744;
+      text-transform: uppercase;
+      border-bottom: 1.5px solid #0f2744;
+      padding-bottom: 3px;
+      margin-bottom: 6px;
+    }
+
+    /* Resumen Ejecutivo */
+    table.summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8pt;
+      margin: 8px 0 12px;
+    }
+
+    table.summary-table th {
+      background: #0f2744;
+      color: #ffffff;
+      padding: 6px 8px;
+      text-align: left;
+      font-weight: 700;
+      border: 1px solid #0f2744;
+    }
+
+    table.summary-table td {
+      border: 1px solid #cbd5e1;
+      padding: 5px 8px;
+      vertical-align: middle;
+    }
+
+    table.summary-table tr:nth-child(even) td {
+      background-color: #f8fafc;
+    }
+
+    .benefit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .benefit-card {
+      border: 1.2px solid #cbd5e1;
+      border-radius: 5px;
+      background: #f8fafc;
+      padding: 10px;
+    }
+
+    .benefit-card h4 {
+      font-size: 8.8pt;
+      font-weight: 800;
+      color: #0f2744;
+      margin-bottom: 4px;
+      border-bottom: 1px solid #cbd5e1;
+      padding-bottom: 3px;
+    }
+
+    .benefit-card p {
+      font-size: 7.8pt;
+      color: #475569;
+      line-height: 1.35;
+    }
+
+    /* ==========================================================================
+       PÁGINAS INDIVIDUALES DE EVIDENCIA CON CAPTURA MAXIMIZADA
+       ========================================================================== */
+    .evidence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .evidence-subtitle {
+      font-size: 8.2pt;
+      color: #475569;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2.5px 8px;
+      border-radius: 4px;
+      font-size: 7.6pt;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .badge-range { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+    .badge-list { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-hash { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+    .badge-interval { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+    .badge-composite { background: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; }
+    .badge-cbo { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+
+    /* Contenedor de Captura Gigante en Alta Definición */
+    .result-img-wrap {
+      width: 100%;
+      text-align: center;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 5px;
+      margin: 4px 0 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .result-img-large {
+      width: 100%;
+      height: auto;
+      max-height: 168mm;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: 4px;
+    }
+
+    /* Caja Explicativa Estructurada Debajo de la Imagen */
+    .exp-box {
+      background: #f8fafc;
+      border: 1.2px solid #cbd5e1;
+      border-left: 4px solid #007acc;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 8.1pt;
+      line-height: 1.38;
+      color: #334155;
+    }
+
+    .exp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px 18px;
+    }
+
+    .exp-item strong {
+      color: #0f2744;
+      font-weight: 700;
+    }
+
+    .exp-full {
+      grid-column: span 2;
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px dashed #cbd5e1;
+      font-size: 8.1pt;
+    }
+
+    .exp-full strong {
+      color: #b45309;
+      font-weight: 800;
+    }
+
+    .footer-doc {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 8pt;
+      color: #64748b;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==========================================================================
+     PÁGINA 1: PORTADA OFICIAL UPEU
+     ========================================================================== -->
+<div class="cover-page">
+  <div class="cover-top-logos">
+    <img class="logo-left" src="assets/upeu.png" alt="Universidad Peruana Unión">
+    <div class="cover-inst-text">
+      <div class="inst-name">Universidad Peruana Unión</div>
+      <div class="fac-name">Facultad de Ingeniería y Arquitectura</div>
+      <div class="esc-name">Escuela Profesional de Ingeniería de Sistemas</div>
+    </div>
+    <img class="logo-right" src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas">
+  </div>
+
+  <div class="cover-emblem-wrap">
+    <img src="assets/quilate-bullion-emblema-v2.png" alt="Emblema Oficial SITRA-ORO">
+  </div>
+
+  <div class="cover-title-group">
+    <div class="project-name">SITRA-ORO</div>
+    <div class="project-desc">Sistema de Trazabilidad y Liquidación en Acopio de Oro</div>
+    <div class="doc-main-type">
+      EVIDENCIA TÉCNICA: IMPLEMENTACIÓN DE LOS 5 TIPOS DE PARTICIONAMIENTO EN ORACLE DATABASE 21c XE
+    </div>
+    <div class="doc-version-status">
+      Unidad II: Administración, Almacenamiento y Optimización · Reporte Completo de Capturas en SQL Developer
+    </div>
+  </div>
+
+  <div class="cover-meta-card">
+    <div class="meta-card-grid">
+      <div><strong>Asignatura:</strong> Administración de Base de Datos II</div>
+      <div><strong>Docente:</strong> Ing. Eder Gutierrez Quispe</div>
+      <div><strong>Ciclo / Semestre:</strong> Ciclo IV · Semestre Académico 2026-II</div>
+      <div><strong>Fecha de Entrega:</strong> Martes 27 de Octubre de 2026</div>
+      <div>
+        <strong>Integrantes (Equipo 05):</strong><br>
+        • Faijo Calisaya Helio Paul (Módulo Mayorista &amp; Parámetros)<br>
+        • Figueroa Chambi Jhymel Nelio (Módulo Acopiador &amp; Cotizador)
+      </div>
+      <div>
+        <strong>Entorno Operativo:</strong><br>
+        • Motor: Oracle Database 21c Express Edition (XEPDB1)<br>
+        • Herramienta: Oracle SQL Developer 23.1<br>
+        • Esquema: <code>SITRA_ORO</code> (22 tablas activas)
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-city-date">
+    Juliaca, Puno, Perú — Octubre de 2026<br>
+    <span style="font-weight: 500; font-size: 8.5pt; text-transform: none; color: #64748b;">“Sé Íntegro, Sé Misionero, Sé Innovador”</span>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PÁGINA 2: RESUMEN EJECUTIVO Y ARQUITECTURA
+     ========================================================================== -->
+<div class="page-break"></div>
+<div class="header-running">
+  <span>SITRA-ORO · Administración de Base de Datos II</span>
+  <strong>Reporte de Particionamiento · 5 Tipos Oracle</strong>
+</div>
+
+<h2>1. Resumen Ejecutivo: Mapeo de los 5 Tipos en SITRA-ORO</h2>
+<p style="margin-bottom: 6px; font-size: 8.3pt; color: #475569;">
+  En conformidad con los temas desarrollados en clase por el docente, se diseñó e implementó en vivo la totalidad de las 5 estrategias de particionamiento nativo sobre las entidades clave de <strong>SITRA-ORO</strong>:
+</p>
+
+<table class="summary-table">
+  <thead>
+    <tr>
+      <th style="width: 14%;">Tipo Cátedra</th>
+      <th style="width: 22%;">Tabla en SITRA-ORO</th>
+      <th style="width: 22%;">Columna Clave</th>
+      <th style="width: 16%;">Particiones Creadas</th>
+      <th style="width: 26%;">Impacto y Justificación</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="badge badge-range">1. RANGE</span></td>
+      <td><code>TRANSACCIONES_G2</code></td>
+      <td><code>FECHA_TRANSACCION</code></td>
+      <td>6 trimestres</td>
+      <td>Liquidaciones rápidas aislando periodos contables pasados.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-list">2. LIST</span></td>
+      <td><code>CENTROS_ACOPIO</code></td>
+      <td><code>ZONA</code></td>
+      <td>4 distritos</td>
+      <td>Consultas territoriales por sede de acopio (La Rinconada, Ananea).</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-hash">3. HASH</span></td>
+      <td><code>MINEROS</code></td>
+      <td><code>ID_MINERO</code></td>
+      <td>4 buckets</td>
+      <td>Elimina cuellos de botella en empadronamiento masivo de mineros.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-interval">4. INTERVAL</span></td>
+      <td><code>LIQUIDACIONES_G1</code></td>
+      <td><code>FECHA_LIQUIDACION</code></td>
+      <td>Auto mensual</td>
+      <td>Oracle crea particiones mensuales automáticas al insertar registros.</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-composite">5. COMPOSITE</span></td>
+      <td><code>COMPRAS_G2</code></td>
+      <td><code>FECHA_COMPRA</code> + ID</td>
+      <td>3 R / 6 Sub-H</td>
+      <td>Granularidad semestral con balanceo hash por minero concurrente.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Estrategia de Optimización y Rendimiento en SITRA-ORO</h2>
+<p style="margin-bottom: 8px; font-size: 8.3pt; color: #475569;">
+  La implementación del particionamiento físico resuelve de manera definitiva los tres problemas críticos en el acopio de oro:
+</p>
+
+<div class="benefit-grid">
+  <div class="benefit-card">
+    <h4>1. Poda de Particiones (Pruning)</h4>
+    <p>
+      El optimizador basado en costos (CBO) descarta físicamente los segmentos que no cumplen los filtros de fecha o zona, reduciendo drásticamente las lecturas en disco (I/O).
+    </p>
+  </div>
+  <div class="benefit-card">
+    <h4>2. Disponibilidad 24/7 (ONLINE)</h4>
+    <p>
+      La conversión de las tablas existentes se ejecutó mediante la cláusula <code>ONLINE</code>, asegurando que las operaciones de pesaje y compraventa no se interrumpan en producción.
+    </p>
+  </div>
+  <div class="benefit-card">
+    <h4>3. Mantenimiento Independiente</h4>
+    <p>
+      Cada partición o subpartición actúa como un objeto de almacenamiento autónomo; el DBA puede archivar o reconstruir índices sobre un trimestre sin tocar el resto de la tabla.
+    </p>
+  </div>
+</div>
+
+<div class="exp-box" style="margin-top: 18px;">
+  <strong>Metodología de Presentación de Resultados:</strong> A continuación se dedica una página completa e independiente a cada evidencia ejecutada en Oracle SQL Developer. Las capturas se presentan a tamaño completo sin recortes, permitiendo al docente inspeccionar directamente la conexión <code>SITRA_ORO</code>, el código SQL resaltado en el editor y la respuesta del motor en la consola inferior con sus tiempos en segundos.
+</div>
+
+<!-- ==========================================================================
+     PÁGINA 3: RECÁLCULO DE ESTADÍSTICAS CBO
+     ========================================================================== -->
+<div class="page-break"></div>
+<div class="header-running">
+  <span>SITRA-ORO · Administración de Base de Datos II</span>
+  <strong>Reporte de Particionamiento · 5 Tipos Oracle</strong>
+</div>
+
+<div class="evidence-header">
+  <h2>2. Recálculo Obligatorio de Estadísticas del Optimizador CBO</h2>
+  <span class="badge badge-cbo">DBMS_STATS EN 2.339 s</span>
+</div>
+<div class="evidence-subtitle">
+  Ejecución en Oracle SQL Developer · Actualización del Catálogo para Habilitar Poda de Particiones
+</div>
+
+<div class="result-img-wrap">
+  <img class="result-img-large" src="assets/captura_sql_dev_cbo_stats.png" alt="Captura Recálculo CBO en SQL Developer">
+</div>
+
+<div class="exp-box">
+  <div class="exp-grid">
+    <div class="exp-item"><strong>Instrucción Ejecutada:</strong> <code>DBMS_STATS.GATHER_SCHEMA_STATS(USER, estimate_percent => 100, cascade => TRUE);</code></div>
+    <div class="exp-item"><strong>Resultado en Consola:</strong> <code>Procedimiento PL/SQL terminado correctamente. (Tarea en 2.339 s)</code></div>
+    <div class="exp-full">
+      <strong>¿Por qué es indispensable para el Docente?:</strong> En Oracle Database 21c, tras particionar tablas y redistribuir filas físicamente, el Optimizador Basado en Costos (CBO) necesita estadísticas frescas de bloques y cardinalidad. Sin este paso, el CBO no aplicaría la poda de particiones (*Partition Pruning*), ejecutando escaneos completos lentos. Con el 100% de estadísticas calculadas, las consultas eligen el plan óptimo en milisegundos.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PÁGINA 4: TIPO 1 (RANGE)
+     ========================================================================== -->
+<div class="page-break"></div>
+<div class="header-running">
+  <span>SITRA-ORO · Administración de Base de Datos II</span>
+  <strong>Reporte de Particionamiento · 5 Tipos Oracle</strong>
+</div>
+
+<div class="evidence-header">
+  <h2>3. Resultado 1: Particionamiento por Rango (RANGE)</h2>
+  <span class="badge badge-range">TIPO 1: RANGE NATIVO</span>
+</div>
+<div class="evidence-subtitle">
+  Tabla TRANSACCIONES_G2 · Segmentación por Trimestres Fiscales (Q1 a Q4 del 2026 + Histórico y Futuro)
+</div>
+
+<div class="result-img-wrap">
+  <img class="result-img-large" src="assets/captura_sql_dev_range.png" alt="Captura Real Oracle SQL Developer - RANGE">
+</div>
+
+<div class="exp-box">
+  <div class="exp-grid">
+    <div class="exp-item"><strong>Tabla y Esquema:</strong> <code>SITRA_ORO.TRANSACCIONES_G2</code></div>
+    <div class="exp-item"><strong>Columna Clave:</strong> <code>FECHA_TRANSACCION</code> (TIMESTAMP)</div>
+    <div class="exp-item"><strong>Resultado en Consola:</strong> <code>Table TRANSACCIONES_G2 alterado (Tarea en 1.187 s)</code></div>
+    <div class="exp-item"><strong>Cláusula ONLINE:</strong> Ejecución en caliente sin bloqueo de compras de acopio</div>
+    <div class="exp-full">
+      <strong>Explicación para el Docente:</strong> Las transacciones de compraventa aurífera crecen continuamente. Al segmentar por trimestres (Q1 a Q4 del 2026), las liquidaciones y reportes diarios solo leen la partición del trimestre en curso (Q4), evitando escanear millones de registros históricos pasados y acelerando drásticamente las auditorías de SUNAT.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PÁGINA 5: TIPO 2 (LIST)
+     ========================================================================== -->
+<div class="page-break"></div>
+<div class="header-running">
+  <span>SITRA-ORO · Administración de Base de Datos II</span>
+  <strong>Reporte de Particionamiento · 5 Tipos Oracle</strong>
+</div>
+
+<div class="evidence-header">
+  <h2>4. Resultado 2: Particionamiento por Lista (LIST)</h2>
+  <span class="badge badge-list">TIPO 2: LIST NATIVO</span>
+</div>
+<div class="evidence-subtitle">
+  Tabla CENTROS_ACOPIO · Segmentación Territorial por Distrito (La Rinconada, Ananea, Lunar de Oro)
+</div>
+
+<div class="result-img-wrap">
+  <img class="result-img-large" src="assets/captura_sql_dev_list.png" alt="Captura Real Oracle SQL Developer - LIST">
+</div>
+
+<div class="exp-box">
+  <div class="exp-grid">
+    <div class="exp-item"><strong>Tabla y Esquema:</strong> <code>SITRA_ORO.CENTROS_ACOPIO</code></div>
+    <div class="exp-item"><strong>Columna Clave:</strong> <code>ZONA</code> (VARCHAR2 con distritos discretos)</div>
+    <div class="exp-item"><strong>Resultado en Consola:</strong> <code>Table CENTROS_ACOPIO alterado (Tarea en 0.276 s)</code></div>
+    <div class="exp-item"><strong>Partición por Defecto:</strong> <code>P_ZONA_OTROS</code> almacena cualquier nueva zona no clasificada</div>
+    <div class="exp-full">
+      <strong>Explicación para el Docente:</strong> Los centros de pesaje y fiscalización operan en localidades mineras separadas geográficamente (La Rinconada, Ananea y Lunar de Oro). La partición LIST almacena los registros de cada zona en segmentos físicos independientes, permitiendo auditar o realizar mantenimiento a una sede sin afectar la disponibilidad de las demás sedes de Puno.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PÁGINA 6: TIPO 3 (HASH)
+     ========================================================================== -->
+<div class="page-break"></div>
+<div class="header-running">
+  <span>SITRA-ORO · Administración de Base de Datos II</span>
+  <strong>Reporte de Particionamiento · 5 Tipos Oracle</strong>
+</div>
+
+<div class="evidence-header">
+  <h2>5. Resultado 3: Particionamiento por Dispersión (HASH)</h2>
+  <span class="badge badge-hash">TIPO 3: HASH NATIVO</span>
+</div>
+<div class="evidence-subtitle">
+  Tabla MINEROS · Balanceo de Carga en 4 Particiones Físicas mediante Algoritmo Hash de Oracle
+</div>
+
+<div class="result-img-wrap">
+  <img class="result-img-large" src="assets/captura_sql_dev_hash.png" alt="Captura Real Oracle SQL Developer - HASH">
+</div>
+
+<div class="exp-box">
+  <div class="exp-grid">
+    <div class="exp-item"><strong>Tabla y Esquema:</strong> <code>SITRA_ORO.MINEROS</code></div>
+    <div class="exp-item"><strong>Columna Clave:</strong> <code>ID_MINERO</code> (Clave Primaria Numérica)</div>
+    <div class="exp-item"><strong>Resultado en Consola:</strong> <code>Table MINEROS alterado (Tarea en 0.292 s)</code></div>
+    <div class="exp-item"><strong>Estructura Interna:</strong> 4 particiones físicas generadas por el algoritmo hash de Oracle</div>
+    <div class="exp-full">
+      <strong>Explicación para el Docente:</strong> El padrón de mineros artesanales no cuenta con una dimensión de fecha adecuada para rangos. Mediante el algoritmo de dispersión HASH con 4 particiones, Oracle distribuye uniformemente los registros entre bloques de disco independientes, eliminando la contención de entrada/salida (I/O hotspots) durante el empadronamiento masivo de mineros.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PÁGINA 7: TIPO 4 (INTERVAL)
+     ========================================================================== -->
+<div class="page-break"></div>
+<div class="header-running">
+  <span>SITRA-ORO · Administración de Base de Datos II</span>
+  <strong>Reporte de Particionamiento · 5 Tipos Oracle</strong>
+</div>
+
+<div class="evidence-header">
+  <h2>6. Resultado 4: Particionamiento por Intervalos Automáticos (INTERVAL)</h2>
+  <span class="badge badge-interval">TIPO 4: INTERVAL MENSUAL</span>
+</div>
+<div class="evidence-subtitle">
+  Tabla LIQUIDACIONES_G1 · Creación Dinámica de Particiones Mensuales sin Intervención Manual
+</div>
+
+<div class="result-img-wrap">
+  <img class="result-img-large" src="assets/captura_sql_dev_interval.png" alt="Captura Real Oracle SQL Developer - INTERVAL">
+</div>
+
+<div class="exp-box">
+  <div class="exp-grid">
+    <div class="exp-item"><strong>Tabla y Esquema:</strong> <code>SITRA_ORO.LIQUIDACIONES_G1</code></div>
+    <div class="exp-item"><strong>Función de Intervalo:</strong> <code>NUMTOYMINTERVAL(1, 'MONTH')</code></div>
+    <div class="exp-item"><strong>Resultado en Consola:</strong> <code>Table LIQUIDACIONES_G1 alterado (Tarea en 0.271 s)</code></div>
+    <div class="exp-item"><strong>Autonomía Operativa:</strong> Creación desatendida de particiones del sistema (<code>SYS_P...</code>)</div>
+    <div class="exp-full">
+      <strong>Explicación para el Docente:</strong> Representa la evolución moderna del particionamiento por rango. El administrador de base de datos no necesita crear particiones manuales cada fin de mes; cuando ingresa una liquidación de noviembre o diciembre, el motor Oracle crea de forma automática el segmento físico mensual correspondiente, garantizando disponibilidad continua sin errores de inserción.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PÁGINA 8: TIPO 5 (COMPOSITE: RANGE + HASH)
+     ========================================================================== -->
+<div class="page-break"></div>
+<div class="header-running">
+  <span>SITRA-ORO · Administración de Base de Datos II</span>
+  <strong>Reporte de Particionamiento · 5 Tipos Oracle</strong>
+</div>
+
+<div class="evidence-header">
+  <h2>7. Resultado 5: Particionamiento Compuesto (COMPOSITE: RANGE + HASH)</h2>
+  <span class="badge badge-composite">TIPO 5: COMPOSITE (RANGE + HASH)</span>
+</div>
+<div class="evidence-subtitle">
+  Tabla COMPRAS_G2 · Granularidad Semestral (Range) combinada con Dispersión Hash por Minero
+</div>
+
+<div class="result-img-wrap">
+  <img class="result-img-large" src="assets/captura_sql_dev_composite.png" alt="Captura Real Oracle SQL Developer - COMPOSITE">
+</div>
+
+<div class="exp-box">
+  <div class="exp-grid">
+    <div class="exp-item"><strong>Tabla y Esquema:</strong> <code>SITRA_ORO.COMPRAS_G2</code></div>
+    <div class="exp-item"><strong>Nivel 1 (Range):</strong> Semestres (S1, S2 y Futuro por <code>FECHA_COMPRA</code>)</div>
+    <div class="exp-item"><strong>Resultado en Consola:</strong> <code>Table COMPRAS_G2 alterado (Tarea en 0.264 s)</code></div>
+    <div class="exp-item"><strong>Nivel 2 (Hash):</strong> 2 subparticiones hash por semestre (Total: 6 subparticiones)</div>
+    <div class="exp-full">
+      <strong>Explicación para el Docente:</strong> Cumple con el requisito avanzado de combinar dos métodos: segmenta las compras de oro en el tiempo por semestres (Nivel Range) y, al mismo tiempo, divide las transacciones de los mineros entre múltiples bloques físicos (Nivel Hash). Esto proporciona la máxima granularidad y rendimiento tanto para reportes semestrales como para consultas por minero.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PÁGINA 9: EVIDENCIA 1: CATÁLOGO USER_PART_TABLES
+     ========================================================================== -->
+<div class="page-break"></div>
+<div class="header-running">
+  <span>SITRA-ORO · Administración de Base de Datos II</span>
+  <strong>Reporte de Particionamiento · 5 Tipos Oracle</strong>
+</div>
+
+<div class="evidence-header">
+  <h2>8. Evidencia 1: Catálogo Consolidado de los 5 Tipos (USER_PART_TABLES)</h2>
+  <span class="badge badge-cbo">DICCIONARIO ORACLE (0.075 s)</span>
+</div>
+<div class="evidence-subtitle">
+  Consulta al Catálogo de Metadatos de Oracle 21c confirmando la Activación de los 5 Métodos
+</div>
+
+<div class="result-img-wrap">
+  <img class="result-img-large" src="assets/captura_sql_dev_master_5_tipos.png" alt="Catálogo USER_PART_TABLES en SQL Developer">
+</div>
+
+<div class="exp-box">
+  <div class="exp-grid">
+    <div class="exp-item"><strong>Filas Recuperadas:</strong> 5 entidades particionadas del esquema <code>SITRA_ORO</code></div>
+    <div class="exp-item"><strong>Tiempo de Respuesta:</strong> <code>0.075 segundos en Oracle SQL Developer</code></div>
+    <div class="exp-full">
+      <strong>Confirmación al Docente:</strong> La consulta a <code>USER_PART_TABLES</code> ratifica los 5 tipos en la BD: <code>CENTROS_ACOPIO</code> (LIST, 4 part.), <code>COMPRAS_G2</code> (RANGE con subpartición HASH, 3 part. padre), <code>LIQUIDACIONES_G1</code> (RANGE con INTERVAL mensual de 1 mes), <code>MINEROS</code> (HASH, 4 part.) y <code>TRANSACCIONES_G2</code> (RANGE, 6 part.). Se demuestra el cumplimiento integral del sílabo.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PÁGINA 10: EVIDENCIA 2: SUBPARTICIONES COMPUESTAS
+     ========================================================================== -->
+<div class="page-break"></div>
+<div class="header-running">
+  <span>SITRA-ORO · Administración de Base de Datos II</span>
+  <strong>Reporte de Particionamiento · 5 Tipos Oracle</strong>
+</div>
+
+<div class="evidence-header">
+  <h2>9. Evidencia 2: Detalle de Subparticiones Compuestas (USER_TAB_SUBPARTITIONS)</h2>
+  <span class="badge badge-composite">6 SUBPARTICIONES EN 0.055 s</span>
+</div>
+<div class="evidence-subtitle">
+  Inspección de Segmentos HASH Físicos de COMPRAS_G2 en Oracle SQL Developer
+</div>
+
+<div class="result-img-wrap">
+  <img class="result-img-large" src="assets/captura_sql_dev_composite_subpart.png" alt="Subparticiones Composite en SQL Developer">
+</div>
+
+<div class="exp-box">
+  <div class="exp-grid">
+    <div class="exp-item"><strong>Tabla Padre:</strong> <code>COMPRAS_G2</code> (Particiones semestrales por fecha)</div>
+    <div class="exp-item"><strong>Segmentos Hash Hijos:</strong> <code>SYS_SUBP2457</code> a <code>SYS_SUBP2462</code></div>
+    <div class="exp-full">
+      <strong>Confirmación al Docente:</strong> Demuestra que cada partición semestral (S1, S2, Futuro) se subdivide físicamente en 2 subparticiones HASH (Posición 1 y 2). Las compras de mineral quedan dispersas entre 6 segmentos de almacenamiento físico independientes, garantizando balanceo y concurrencia máxima en compras.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PÁGINA 11: EVIDENCIA 3: PODA DE PARTICIONES (EXPLAIN PLAN)
+     ========================================================================== -->
+<div class="page-break"></div>
+<div class="header-running">
+  <span>SITRA-ORO · Administración de Base de Datos II</span>
+  <strong>Reporte de Particionamiento · 5 Tipos Oracle</strong>
+</div>
+
+<div class="evidence-header">
+  <h2>10. Evidencia 3: Poda de Particiones y Optimización I/O (EXPLAIN PLAN)</h2>
+  <span class="badge badge-cbo">PSTART=5 | PSTOP=5 (0.075 s)</span>
+</div>
+<div class="evidence-subtitle">
+  Demostración de Partition Pruning en TRANSACCIONES_G2 con DBMS_XPLAN en SQL Developer
+</div>
+
+<div class="result-img-wrap">
+  <img class="result-img-large" src="assets/captura_sql_dev_explain_plan.png" alt="Explain Plan Partition Pruning en SQL Developer">
+</div>
+
+<div class="exp-box">
+  <div class="exp-grid">
+    <div class="exp-item"><strong>Operación CBO:</strong> <code>PARTITION RANGE SINGLE</code></div>
+    <div class="exp-item"><strong>Poda Lograda:</strong> Pstart = 5 &nbsp;|&nbsp; Pstop = 5 (Solo lee la partición 2026_Q4)</div>
+    <div class="exp-item"><strong>Costo Estimado CBO:</strong> Cost = 6 (Consumo mínimo de I/O)</div>
+    <div class="exp-item"><strong>Filas Leídas:</strong> 26 registros (Aislamiento físico total)</div>
+    <div class="exp-full">
+      <strong>Demostración de Eficiencia al Docente:</strong> Al ejecutar una consulta de compras de octubre de 2026, el optimizador CBO aplicó <em>Partition Pruning</em>: descartó físicamente las particiones 1, 2, 3, 4 y 6, leyendo exclusivamente el segmento físico de la partición 5. Esto redujo el consumo de I/O a una fracción mínima del costo total.
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     PÁGINA 12: CONCLUSIONES TÉCNICAS Y CONFORMIDAD INSTITUCIONAL
+     ========================================================================== -->
+<div class="page-break"></div>
+<div class="header-running">
+  <span>SITRA-ORO · Administración de Base de Datos II</span>
+  <strong>Reporte de Particionamiento · 5 Tipos Oracle</strong>
+</div>
+
+<h2>11. Conclusiones Técnicas de Ingeniería</h2>
+<div class="exp-box" style="border-left-color: #047857; margin-top: 10px; padding: 12px 16px;">
+  <ul style="margin-left: 18px; font-size: 8.6pt; line-height: 1.55;">
+    <li style="margin-bottom: 8px;">
+      <strong>Cumplimiento Integral de la Cátedra (5 de 5 Tipos):</strong> Se aplicaron con éxito las cinco variantes expuestas en clase (RANGE, LIST, HASH, INTERVAL y COMPOSITE) sobre entidades reales del sistema SITRA-ORO en Oracle Database 21c XE, verificadas en vivo mediante Oracle SQL Developer.
+    </li>
+    <li style="margin-bottom: 8px;">
+      <strong>Eficiencia Operacional (Partition Pruning):</strong> Los planes de ejecución con <code>DBMS_XPLAN</code> demostraron que las consultas filtradas acceden únicamente a los segmentos físicos involucrados (Pstart=5, Pstop=5), eliminando escaneos innecesarios en disco y acelerando los reportes a SUNAT.
+    </li>
+    <li style="margin-bottom: 8px;">
+      <strong>Cero Caídas en Producción (ONLINE):</strong> La conversión mediante la cláusula <code>ONLINE</code> demostró que las operaciones de pesaje y compra de mineral aurífero pueden continuar ejecutándose mientras el DBA reorganiza el almacenamiento.
+    </li>
+    <li style="margin-bottom: 4px;">
+      <strong>Transparencia Arquitectónica (JPA / Spring Boot):</strong> La segmentación física es completamente transparente para la lógica de software en Java; los repositorios JPA operan con consultas relacionales estándar sin requerir adaptaciones complejas ni código propietario.
+    </li>
+  </ul>
+</div>
+
+<h2 style="margin-top: 25px;">12. Declaración de Conformidad y Trabajo de Equipo</h2>
+<table class="summary-table" style="margin-top: 8px; font-size: 8.5pt;">
+  <thead>
+    <tr>
+      <th style="width: 35%;">Estudiante Integrante</th>
+      <th style="width: 25%;">Rol en el Proyecto</th>
+      <th style="width: 40%;">Aporte en la Práctica de Particionamiento</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Faijo Calisaya Helio Paul</strong></td>
+      <td>Módulo Mayorista &amp; Parámetros</td>
+      <td>Diseño e implementación de particionamiento RANGE, HASH y recálculo de estadísticas CBO con DBMS_STATS.</td>
+    </tr>
+    <tr>
+      <td><strong>Figueroa Chambi Jhymel Nelio</strong></td>
+      <td>Módulo Acopiador &amp; Cotizador</td>
+      <td>Diseño de particiones LIST, INTERVAL automático y COMPOSITE (Range+Hash) en compras auríferas.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="footer-doc" style="margin-top: 50px;">
+  Universidad Peruana Unión — Campus Juliaca · Facultad de Ingeniería y Arquitectura · Escuela Profesional de Ingeniería de Sistemas<br>
+  <em>Proyecto SITRA-ORO · Equipo 05 · Ciclo IV · Semestre Académico 2026-II</em><br>
+  <strong>“Sé Íntegro, Sé Misionero, Sé Innovador”</strong>
+</div>
+
+</body>
+</html>

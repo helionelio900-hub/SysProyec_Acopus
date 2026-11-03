@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SITRA-ORO — Estados de la Compra Directa Mayorista</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: #fbfcfd;
+      background-image: 
+        linear-gradient(to right, #eef2f6 1px, transparent 1px),
+        linear-gradient(to bottom, #eef2f6 1px, transparent 1px);
+      background-size: 20px 20px;
+      padding: 40px;
+      width: 1250px;
+      margin: 0 auto;
+      color: #1e293b;
+    }
+
+    .canvas {
+      position: relative;
+      width: 1170px;
+      height: 860px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+      padding: 30px;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 25px;
+    }
+
+    /* SVG para líneas y conectores */
+    .connections-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Nodo Inicial */
+    .start-node {
+      position: absolute;
+      left: 200px;
+      top: 130px;
+      width: 32px;
+      height: 32px;
+      background: #0f172a;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 2;
+    }
+
+    /* Tarjeta de Nota: Si el registro falla */
+    .note-fail {
+      position: absolute;
+      left: 480px;
+      top: 110px;
+      width: 440px;
+      background: #fee2e2;
+      border: 1.5px solid #f87171;
+      border-radius: 8px;
+      padding: 14px 18px;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.08);
+      z-index: 2;
+      text-align: center;
+    }
+    .note-fail h4 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #991b1b;
+      margin-bottom: 5px;
+    }
+    .note-fail p {
+      font-size: 12px;
+      color: #7f1d1d;
+      line-height: 1.4;
+    }
+
+    /* Estado: VALORIZADO */
+    .state-valorizado {
+      position: absolute;
+      left: 90px;
+      top: 310px;
+      width: 320px;
+      background: #ecfdf5;
+      border: 2px solid #10b981;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.12);
+      z-index: 2;
+      overflow: hidden;
+    }
+    .state-header-green {
+      background: #d1fae5;
+      padding: 12px 14px;
+      text-align: center;
+      border-bottom: 1.5px solid #10b981;
+    }
+    .state-header-green h3 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #065f46;
+      letter-spacing: 0.5px;
+    }
+    .state-header-green span {
+      font-size: 11.5px;
+      color: #047857;
+      font-weight: 500;
+      display: block;
+      margin-top: 2px;
+    }
+    .state-body {
+      padding: 14px 16px;
+      font-size: 11.5px;
+      line-height: 1.5;
+      color: #1e293b;
+    }
+    .state-body div {
+      margin-bottom: 8px;
+    }
+    .state-body div:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Estado: EN LOTE */
+    .state-enlote {
+      position: absolute;
+      left: 760px;
+      top: 310px;
+      width: 320px;
+      background: #f5f3ff;
+      border: 2px solid #8b5cf6;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(139, 92, 246, 0.12);
+      z-index: 2;
+      overflow: hidden;
+    }
+    .state-header-purple {
+      background: #ede9fe;
+      padding: 12px 14px;
+      text-align: center;
+      border-bottom: 1.5px solid #8b5cf6;
+    }
+    .state-header-purple h3 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #5b21b6;
+      letter-spacing: 0.5px;
+    }
+    .state-header-purple span {
+      font-size: 11.5px;
+      color: #6d28d9;
+      font-weight: 500;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* Etiquetas de Transiciones */
+    .transition-label-top {
+      position: absolute;
+      left: 425px;
+      top: 340px;
+      width: 320px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6d28d9;
+      z-index: 3;
+      background: #ffffff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #ddd6fe;
+    }
+
+    .transition-label-bottom {
+      position: absolute;
+      left: 425px;
+      top: 415px;
+      width: 320px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #047857;
+      z-index: 3;
+      background: #ffffff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #a7f3d0;
+    }
+
+    .label-init {
+      position: absolute;
+      left: 55px;
+      top: 215px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #047857;
+      background: #ffffff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      z-index: 3;
+    }
+
+    /* Notas Inferiores Amarillas */
+    .note-bottom-left {
+      position: absolute;
+      left: 90px;
+      top: 590px;
+      width: 380px;
+      background: #fefce8;
+      border: 1.5px solid #facc15;
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: 0 4px 12px rgba(250, 204, 21, 0.1);
+      z-index: 2;
+    }
+    .note-bottom-left h4 {
+      font-size: 13px;
+      font-weight: 800;
+      color: #854d0e;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .note-bottom-left p {
+      font-size: 11.5px;
+      color: #713f12;
+      line-height: 1.45;
+    }
+
+    .note-bottom-right {
+      position: absolute;
+      left: 700px;
+      top: 590px;
+      width: 380px;
+      background: #fefce8;
+      border: 1.5px solid #facc15;
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: 0 4px 12px rgba(250, 204, 21, 0.1);
+      z-index: 2;
+    }
+    .note-bottom-right h4 {
+      font-size: 13px;
+      font-weight: 800;
+      color: #854d0e;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .note-bottom-right p {
+      font-size: 11.5px;
+      color: #713f12;
+      line-height: 1.45;
+    }
+
+    /* Pie de página con leyenda */
+    .legend {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    .legend strong {
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="canvas">
+    <div class="title">SITRA-ORO — Estados de la Compra Directa Mayorista</div>
+
+    <!-- NODO INICIAL -->
+    <div class="start-node"></div>
+    <div class="label-init">registrar [válido] / COMMIT</div>
+
+    <!-- NOTA DE FALLO SUPERIOR -->
+    <div class="note-fail">
+      <h4>Si el registro falla</h4>
+      <p>La compra no llega a existir. Se revierte la transacción y la UI permite corregir.<br><strong>ROLLBACK es un efecto, no un estado.</strong></p>
+    </div>
+
+    <!-- ESTADO 1: VALORIZADO -->
+    <div class="state-valorizado">
+      <div class="state-header-green">
+        <h3>VALORIZADO</h3>
+        <span>Con partidas · sin vínculo de exportación</span>
+      </div>
+      <div class="state-body">
+        <div><strong>guardar</strong> [reglas y revisión válidas] / recalcular e incrementar revisión</div>
+        <div><strong>error</strong> / conservar versión anterior</div>
+      </div>
+    </div>
+
+    <!-- TRANSICIONES ENTRE ESTADOS -->
+    <div class="transition-label-top">incorporar [libre] / vincular a BORRADOR &rarr;</div>
+    <div class="transition-label-bottom">&larr; retirar [BORRADOR] / eliminar vínculo</div>
+
+    <!-- ESTADO 2: EN LOTE -->
+    <div class="state-enlote">
+      <div class="state-header-purple">
+        <h3>EN LOTE</h3>
+        <span>Vinculada a un lote de exportación</span>
+      </div>
+      <div class="state-body">
+        <div><strong>editar análisis</strong> / HTTP 409</div>
+        <div><strong>preparar lote</strong> / conservar EN_LOTE</div>
+        <div style="margin-top: 6px; color: #6d28d9; font-weight: 600;">Lote: BORRADOR o PREPARADO</div>
+      </div>
+    </div>
+
+    <!-- NOTAS INFERIORES -->
+    <div class="note-bottom-left">
+      <h4>Estado derivado</h4>
+      <p>
+        Detalles presentes y sin vínculo &rarr; <strong>VALORIZADO</strong>.<br>
+        La compra directa nace así tras el COMMIT.<br>
+        <strong>PENDIENTE</strong> corresponde a recepciones sin detalles; no es una etapa estable de la compra directa.
+      </p>
+    </div>
+
+    <div class="note-bottom-right">
+      <h4>Condiciones del vínculo</h4>
+      <p>
+        <strong>Incorporar:</strong> recepción libre y peso fundido positivo.<br>
+        <strong>Retirar o eliminar lote:</strong> solo si es BORRADOR.<br>
+        Si es PREPARADO, edición y eliminación se rechazan.<br>
+        La compra conserva sus partidas.
+      </p>
+    </div>
+
+    <!-- CAPA VECTORIAL DE FLECHAS Y LÍNEAS DISCONTINUAS -->
+    <svg class="connections-layer">
+      <defs>
+        <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981" />
+        </marker>
+        <marker id="arrow-purple" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#8b5cf6" />
+        </marker>
+        <marker id="arrow-emerald" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#059669" />
+        </marker>
+      </defs>
+
+      <!-- Flecha desde nodo inicial a VALORIZADO -->
+      <line x1="216" y1="162" x2="216" y2="308" stroke="#10b981" stroke-width="2.2" marker-end="url(#arrow-green)" />
+
+      <!-- Línea discontinua a nota de fallo -->
+      <line x1="232" y1="146" x2="480" y2="146" stroke="#f87171" stroke-width="1.8" stroke-dasharray="5 5" />
+
+      <!-- Flecha VALORIZADO -> EN LOTE (arriba) -->
+      <line x1="410" y1="365" x2="758" y2="365" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrow-purple)" />
+
+      <!-- Flecha EN LOTE -> VALORIZADO (abajo) -->
+      <line x1="760" y1="440" x2="412" y2="440" stroke="#059669" stroke-width="2" marker-end="url(#arrow-emerald)" />
+
+      <!-- Línea discontinua VALORIZADO -> Nota estado derivado -->
+      <line x1="250" y1="480" x2="250" y2="590" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="5 5" />
+
+      <!-- Línea discontinua EN LOTE -> Nota condiciones vinculo -->
+      <line x1="920" y1="480" x2="920" y2="590" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="5 5" />
+    </svg>
+
+    <div class="legend">
+      <strong>evento [guarda] / efecto</strong> · Flecha sólida: transición · Línea discontinua: nota<br>
+      Operaciones dentro de la tarjeta: transiciones internas que conservan el estado.
+    </div>
+  </div>
+
+</body>
+</html>

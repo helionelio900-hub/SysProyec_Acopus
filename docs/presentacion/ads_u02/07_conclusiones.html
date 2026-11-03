@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SITRA-ORO · Síntesis Final: Trazabilidad y Conclusiones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#020b19;--navy-card:#071426;--gold:#f2b736;--gold-soft:#f8cf76;--text:#f8fafc;--dim:#afbed2;--line:rgba(157,188,226,.23)}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--navy);font-family:'Plus Jakarta Sans','Segoe UI',sans-serif;color:var(--text)}
+  .slide{position:relative;width:100vw;height:100vh;min-width:1200px;overflow:hidden;background:radial-gradient(circle at 85% 15%,rgba(242,183,54,.08),transparent 45%),var(--navy)}
+  header{position:absolute;z-index:3;top:0;left:0;right:0;height:82px;padding:0 54px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,11,25,.75);border-bottom:1px solid rgba(157,188,226,.14);backdrop-filter:blur(8px)}
+  .upeu{height:46px;filter:brightness(0) invert(1)}.career{display:flex;align-items:center;gap:12px}.career img{width:46px;height:46px;object-fit:contain}.career small{display:block;color:#bdcbe0;font:600 10px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.13em;text-transform:uppercase}.career b{display:block;margin-top:4px;font-size:14px;letter-spacing:-.02em}
+  
+  .layout{position:relative;z-index:2;height:calc(100% - 138px);margin-top:82px;padding:20px 54px;display:grid;grid-template-columns:1fr 1.25fr;gap:36px;align-items:center}
+  
+  /* Columna Izquierda */
+  .left-col{display:flex;flex-direction:column;justify-content:center}
+  .eyebrow{display:flex;align-items:center;gap:12px;color:var(--gold);font:700 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.25em;text-transform:uppercase}.eyebrow:before{content:"";width:34px;height:3px;border-radius:4px;background:var(--gold)}
+  h1{margin:10px 0 6px;font-size:clamp(28px,2.4vw,38px);line-height:1.1;letter-spacing:-.03em}.gold{color:var(--gold)}
+  .lead{margin:0 0 14px;color:#cbd5e1;font-size:14px;line-height:1.4}
+  
+  .points{display:flex;flex-direction:column;gap:9px}
+  .point{padding:9px 13px;background:rgba(7,20,38,.65);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;border-top:1px solid rgba(157,188,226,.12);border-right:1px solid rgba(157,188,226,.12);border-bottom:1px solid rgba(157,188,226,.12)}
+  .point strong{display:block;color:var(--gold-soft);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+  .point p{margin:0;color:#f1f5fb;font-size:12.5px;line-height:1.35}
+  .point p code{background:rgba(2,11,25,.8);color:#38bdf8;padding:1px 4px;border-radius:4px;font-size:11px}
+
+  /* Columna Derecha: Imagen Miro HD */
+  .right-col{display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .image-wrapper{position:relative;width:100%;max-height:510px;background:#ffffff;border-radius:12px;padding:8px;box-shadow:0 16px 40px rgba(0,0,0,.6), 0 0 0 1px rgba(242,183,54,.35);overflow:hidden;display:flex;flex-direction:column}
+  .image-wrapper img{width:100%;height:auto;max-height:450px;object-fit:contain;border-radius:6px;display:block}
+  .image-badge{margin-top:8px;padding:6px 12px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center}
+  .image-badge span{font-size:11px;font-weight:600;color:#0f172a}
+  .image-badge small{font-size:10.5px;color:#0d9488;font-weight:700;text-transform:uppercase}
+
+  footer{position:absolute;z-index:3;left:0;right:0;bottom:0;height:56px;padding:0 54px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-top:1px solid rgba(157,188,226,.14);background:rgba(2,11,25,.75)}.count{display:flex;align-items:center;gap:18px;color:#dce7f5;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.16em}.count:before{content:"";width:54px;height:3px;border-radius:4px;background:linear-gradient(90deg,var(--gold),rgba(242,183,54,.08))}.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(157,188,226,.46)}.dots i.on{width:26px;border-radius:9px;border-color:var(--gold);background:var(--gold)}.brand{justify-self:end;color:#b8c6dc;font:600 11px/1 'Plus Jakarta Sans', 'Segoe UI', sans-serif;letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<section class="slide">
+  <header>
+    <img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión">
+    <div class="career">
+      <img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas">
+      <div><small>Escuela Profesional de</small><b>Ingeniería de Sistemas</b></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Explicación Técnica -->
+    <div class="left-col">
+      <div class="eyebrow">Síntesis Final · Análisis y Diseño de Sistemas</div>
+      <h1>Trazabilidad Técnica y <span class="gold">Conclusiones</span></h1>
+      <p class="lead">Articulación rigurosa de las 4 sesiones en una solución de software escalable y confiable.</p>
+
+      <div class="points">
+        <div class="point">
+          <strong>1. Trazabilidad de Extremo a Extremo</strong>
+          <p>Cada regla de negocio identificada en el dominio (S01) se plasmó en el diagrama de clases (S02), se refinó con principios SOLID (S03) y se orquestó dinámicamente (S04).</p>
+        </div>
+        <div class="point">
+          <strong>2. Arquitectura Pragmática y Segura</strong>
+          <p>La adopción del Monolito Modular con Spring Boot y Oracle XE asegura integridad transaccional ACID para acopio y liquidación sin la sobrecarga de microservicios.</p>
+        </div>
+        <div class="point">
+          <strong>3. Ciclo de Vida Auditado</strong>
+          <p>Las máquinas de estados (Figura 6) garantizan que compras y liquidaciones sigan transiciones legales (<code>REGISTRADA</code> ➔ <code>EN_BÓVEDA</code> ➔ <code>LIQUIDADA</code>) previniendo inconsistencias contables.</p>
+        </div>
+        <div class="point">
+          <strong>4. Calidad y Extensibilidad del Código</strong>
+          <p>Inyección de dependencias (DIP), contratos desacoplados (ISP) y validaciones Jakarta aseguran que el backend sea fácilmente testeable y consumible por Angular.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Imagen Miro HD: Diagrama de Estados -->
+    <div class="right-col">
+      <div class="image-wrapper">
+        <img src="assets/09_sitra_oro_estados_compra_directa_HD.png" alt="Diagrama de Estados SITRA-ORO en Miro">
+        <div class="image-badge">
+          <span>Figura 6 · Diagrama de Estados de Ciclo de Vida</span>
+          <small>Evidencia Oficial Miro</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="count">07 / 08</span>
+    <span class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i></span>
+    <span class="brand">SITRA-ORO · ADS UNIDAD II</span>
+  </footer>
+</section>
+</body>
+</html>

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SITRA-ORO — Diagrama de Secuencia: Registrar Compra Directa Mayorista</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f8fafc;
+      background-image: 
+        linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+        linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+      background-size: 20px 20px;
+      padding: 30px;
+      width: 2260px;
+      margin: 0 auto;
+      color: #0f172a;
+    }
+
+    .canvas {
+      position: relative;
+      width: 2200px;
+      height: 2240px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 14px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.06);
+      padding: 24px;
+    }
+
+    .header-title {
+      text-align: center;
+      font-size: 23px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 24px;
+    }
+
+    svg {
+      width: 100%;
+      height: 2140px;
+      display: block;
+    }
+
+    .lifeline-header {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .lifeline-sub {
+      font-size: 10px;
+      font-weight: 500;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .msg-text {
+      font-size: 11px;
+      font-weight: 600;
+      fill: #1e293b;
+    }
+    .msg-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .note-text {
+      font-size: 10.5px;
+      font-weight: 600;
+      fill: #0369a1;
+      line-height: 1.4;
+    }
+    .frame-title {
+      font-size: 11px;
+      font-weight: 800;
+      fill: #0284c7;
+    }
+    .frame-cond {
+      font-size: 10.5px;
+      font-weight: 700;
+      fill: #475569;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="canvas">
+    <div class="header-title">SITRA-ORO — Diagrama de Secuencia: Registrar Compra Directa Mayorista (Cabecera-Detalle)</div>
+
+    <svg viewBox="0 0 2160 2140">
+      <defs>
+        <!-- Marcadores de Flechas -->
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7" />
+        </marker>
+        <marker id="arrow-solid-dark" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0f172a" />
+        </marker>
+        <marker id="arrow-return" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polyline points="0 1.5, 8 5, 0 8.5" fill="none" stroke="#0284c7" stroke-width="1.6" />
+        </marker>
+        <marker id="arrow-return-dark" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polyline points="0 1.5, 8 5, 0 8.5" fill="none" stroke="#475569" stroke-width="1.6" />
+        </marker>
+        <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#dc2626" />
+        </marker>
+        <marker id="arrow-return-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polyline points="0 1.5, 8 5, 0 8.5" fill="none" stroke="#dc2626" stroke-width="1.6" />
+        </marker>
+        <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#16a34a" />
+        </marker>
+        <marker id="arrow-return-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polyline points="0 1.5, 8 5, 0 8.5" fill="none" stroke="#16a34a" stroke-width="1.6" />
+        </marker>
+
+        <!-- Filtro Sombra para Notas y Cajas -->
+        <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.06" />
+        </filter>
+      </defs>
+
+      <!-- ============================================================== -->
+      <!-- 1. LÍNEAS DE VIDA VERTICALES (DASHED)                           -->
+      <!-- ============================================================== -->
+      <!-- X: Mayorista=110, Angular=320, Controller=550, Service=780, RepMayorista=1000, RepLey=1200, RepDetalle=1420, Oracle=1640, TxMgr=1860, ExceptionH=2070 -->
+      <line x1="110" y1="90" x2="110" y2="2040" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5" />
+      <line x1="320" y1="90" x2="320" y2="2040" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5" />
+      <line x1="550" y1="90" x2="550" y2="2040" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5" />
+      <line x1="780" y1="90" x2="780" y2="2040" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5" />
+      <line x1="1000" y1="90" x2="1000" y2="2040" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5" />
+      <line x1="1200" y1="90" x2="1200" y2="2040" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5" />
+      <line x1="1420" y1="90" x2="1420" y2="2040" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5" />
+      <line x1="1640" y1="90" x2="1640" y2="2040" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5" />
+      <line x1="1860" y1="90" x2="1860" y2="2040" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5" />
+      <line x1="2070" y1="90" x2="2070" y2="2040" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 5" />
+
+      <!-- ============================================================== -->
+      <!-- 2. BARRAS DE ACTIVACIÓN (EXECUTION SPECIFICATIONS)             -->
+      <!-- ============================================================== -->
+      <!-- Angular local loop activation -->
+      <rect x="312" y="195" width="16" height="260" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5" rx="2" />
+
+      <!-- Controller activation (main request) -->
+      <rect x="542" y="475" width="16" height="1425" fill="#fed7aa" stroke="#f97316" stroke-width="1.5" rx="2" />
+
+      <!-- Service activation (domain process) -->
+      <rect x="772" y="575" width="16" height="1290" fill="#bbf7d0" stroke="#22c55e" stroke-width="1.5" rx="2" />
+
+      <!-- TxManager activation (Init) -->
+      <rect x="1852" y="510" width="16" height="40" fill="#a7f3d0" stroke="#10b981" stroke-width="1.5" rx="2" />
+
+      <!-- LeyOroRepository activation -->
+      <rect x="1192" y="730" width="16" height="40" fill="#e9d5ff" stroke="#a855f7" stroke-width="1.5" rx="2" />
+
+      <!-- GlobalExceptionHandler activation (in Alt Error) -->
+      <rect x="2062" y="1145" width="16" height="135" fill="#ffe4e6" stroke="#f43f5e" stroke-width="1.5" rx="2" />
+
+      <!-- TxManager activation (Rollback) -->
+      <rect x="1852" y="1180" width="16" height="45" fill="#a7f3d0" stroke="#10b981" stroke-width="1.5" rx="2" />
+
+      <!-- RecepcionMayoristaRepository activation (Save) -->
+      <rect x="992" y="1520" width="16" height="85" fill="#ddd6fe" stroke="#8b5cf6" stroke-width="1.5" rx="2" />
+
+      <!-- Oracle DB activation (Insert Cabecera) -->
+      <rect x="1632" y="1545" width="16" height="45" fill="#fecdd3" stroke="#e11d48" stroke-width="1.5" rx="2" />
+
+      <!-- DetalleRecepcionLeyRepository activation (SaveAll) -->
+      <rect x="1412" y="1635" width="16" height="85" fill="#f5d0fe" stroke="#d946ef" stroke-width="1.5" rx="2" />
+
+      <!-- Oracle DB activation (Insert Detalles) -->
+      <rect x="1632" y="1660" width="16" height="45" fill="#fecdd3" stroke="#e11d48" stroke-width="1.5" rx="2" />
+
+      <!-- TxManager activation (Commit) -->
+      <rect x="1852" y="1750" width="16" height="90" fill="#a7f3d0" stroke="#10b981" stroke-width="1.5" rx="2" />
+
+      <!-- Oracle DB activation (Commit Work) -->
+      <rect x="1632" y="1775" width="16" height="40" fill="#fecdd3" stroke="#e11d48" stroke-width="1.5" rx="2" />
+
+      <!-- Angular final confirmation activation -->
+      <rect x="312" y="1890" width="16" height="75" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5" rx="2" />
+
+      <!-- ============================================================== -->
+      <!-- 3. FRAMES DE INTERACCIÓN (GROUP, LOOP, ALT)                    -->
+      <!-- ============================================================== -->
+
+      <!-- FRAME 1: Group Frontend Local -->
+      <rect x="60" y="155" width="375" height="295" fill="none" stroke="#0284c7" stroke-width="1.5" rx="4" />
+      <path d="M 60 155 L 115 155 L 125 173 L 60 173 Z" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5" />
+      <text x="70" y="167" class="frame-title">Group</text>
+      <text x="135" y="168" class="frame-cond">[loop: Revisión previa sin persistencia]</text>
+
+      <!-- FRAME 2: Loop Service Partidas -->
+      <rect x="740" y="660" width="510" height="260" fill="none" stroke="#0284c7" stroke-width="1.5" rx="4" />
+      <path d="M 740 660 L 785 660 L 795 678 L 740 678 Z" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5" />
+      <text x="748" y="673" class="frame-title">Loop</text>
+      <text x="805" y="674" class="frame-cond">[para cada partida 1..N]</text>
+
+      <!-- FRAME 3: Alternativa (Alt) -->
+      <rect x="40" y="1100" width="2080" height="910" fill="none" stroke="#0284c7" stroke-width="1.8" rx="6" />
+      <path d="M 40 1100 L 110 1100 L 122 1120 L 40 1120 Z" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.8" />
+      <text x="50" y="1114" class="frame-title">Alternativa</text>
+      <text x="130" y="1115" class="frame-cond">[Infracción de regla de negocio o error de validación]</text>
+
+      <!-- Línea Divisoria Dashed de la Alternativa -->
+      <line x1="40" y1="1435" x2="2120" y2="1435" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="6 4" />
+      <text x="55" y="1455" class="frame-cond" style="fill:#16a34a; font-weight:800;">[else: Datos válidos - Persistencia atómica en Oracle XE]</text>
+
+      <!-- ============================================================== -->
+      <!-- 4. MENSAJES Y TRANSICIONES                                     -->
+      <!-- ============================================================== -->
+
+      <!-- --- SECCIÓN 1: FRONTEND (ANGULAR) --- -->
+      <!-- Msg 1: Ingresar partidas -->
+      <line x1="110" y1="195" x2="310" y2="195" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="120" y="188" class="msg-text">1: ingresar partidas y adelanto</text>
+
+      <!-- Msg 2: Efecto reactivo -->
+      <path d="M 328 220 L 370 220 L 370 240 L 330 240" fill="none" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="378" y="234" class="msg-text">2: efecto reactivo: actualiza vista previa local (Signals)</text>
+
+      <!-- NOTA 1: Interacción resumida -->
+      <g filter="url(#shadow)">
+        <polygon points="120,265 410,265 425,280 425,325 120,325" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.4" />
+        <polygon points="410,265 410,280 425,280" fill="#bae6fd" stroke="#38bdf8" stroke-width="1.4" />
+        <text x="135" y="285" class="note-text" style="font-weight:700;">Interacción resumida: cálculo previo sin API.</text>
+        <text x="135" y="303" class="note-text">Sin persistencia ni resultado al cliente (cálculo instantáneo en memoria).</text>
+      </g>
+
+      <!-- Msg 3: Comprobación local -->
+      <path d="M 328 345 L 370 345 L 370 365 L 330 365" fill="none" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="378" y="358" class="msg-text">3: calculaValidado(): comprobación local vs servidor</text>
+
+      <!-- Msg 4: Revisar y registrar -->
+      <line x1="110" y1="385" x2="310" y2="385" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="120" y="378" class="msg-text">4: Revisar y registrar</text>
+
+      <!-- Msg 5: Habilita confirmación -->
+      <path d="M 328 400 L 370 400 L 370 420 L 330 420" fill="none" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="378" y="414" class="msg-text">5: habilita confirmación y solicita confirmación</text>
+
+      <!-- Msg 6: Confirmar registro -->
+      <line x1="110" y1="435" x2="310" y2="435" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="120" y="428" class="msg-text">6: Confirmar registro</text>
+
+      <!-- --- SECCIÓN 2: HTTP POST & INICIO TRANSACCIÓN --- -->
+      <!-- Msg 7: POST Compra Directa -->
+      <line x1="328" y1="480" x2="540" y2="480" stroke="#0284c7" stroke-width="1.8" marker-end="url(#arrow)" />
+      <text x="338" y="473" class="msg-text">7: POST /api/v1/mayorista/compras-directas <tspan fill="#64748b">(RecepciónLeyRequest con DetalleLeyDTO[])</tspan></text>
+
+      <!-- Msg 8: Inicia transacción -->
+      <line x1="558" y1="515" x2="1850" y2="515" stroke="#0284c7" stroke-width="1.8" marker-end="url(#arrow)" />
+      <text x="570" y="508" class="msg-text">8: Inicia transacción en el gestor (@Transactional)</text>
+
+      <!-- Msg 9: OK Transacción iniciada -->
+      <line x1="1850" y1="545" x2="558" y2="545" stroke="#0284c7" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrow-return)" />
+      <text x="1560" y="538" class="msg-text">9: ok / transacción iniciada</text>
+
+      <!-- Msg 10: registrarCompraDirecta -->
+      <line x1="558" y1="580" x2="770" y2="580" stroke="#0284c7" stroke-width="1.8" marker-end="url(#arrow)" />
+      <text x="570" y="573" class="msg-text">10: registrarCompraDirecta(dto)</text>
+
+      <!-- --- SECCIÓN 3: VALIDACIONES EN SERVICE --- -->
+      <!-- Msg 11: Validar DTO Jakarta -->
+      <path d="M 788 615 L 830 615 L 830 635 L 790 635" fill="none" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="838" y="628" class="msg-text">11: Validar DTO: @Valid jakarta (@NotNull, @DecimalMin)</text>
+
+      <!-- Msg 12: Valida ley y porcentaje -->
+      <path d="M 788 695 L 830 695 L 830 715 L 790 715" fill="none" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="838" y="708" class="msg-text">12: Valida: ley != null &amp;&amp; porcentajeLey != null</text>
+
+      <!-- Msg 13: Query LeyOroRepository -->
+      <line x1="788" y1="735" x2="1190" y2="735" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="800" y="728" class="msg-text">13: findByPorcentajeLey(partida.ley)</text>
+
+      <!-- Msg 14: Return LeyOro -->
+      <line x1="1190" y1="765" x2="788" y2="765" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-return)" />
+      <text x="890" y="758" class="msg-text">14: LeyOro entidad (pureza certificada)</text>
+
+      <!-- Msg 15: Valida ley no repetida -->
+      <path d="M 788 795 L 830 795 L 830 815 L 790 815" fill="none" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="838" y="808" class="msg-text">15: Valida: no presente partida.ley repetida en lote</text>
+
+      <!-- Msg 16: Valida pesoFundido -->
+      <path d="M 788 840 L 830 840 L 830 860 L 790 860" fill="none" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="838" y="853" class="msg-text">16: Valida: pesoFundido &le; pesoSinFundir (merma no negativa)</text>
+
+      <!-- Msg 17: Calcula precio e importe -->
+      <path d="M 788 885 L 830 885 L 830 905 L 790 905" fill="none" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="838" y="898" class="msg-text">17: calcula precio e importe del lingote / ley</text>
+
+      <!-- NOTA 2: Fórmulas de Cálculo -->
+      <g filter="url(#shadow)">
+        <polygon points="780,940 1340,940 1355,955 1355,1035 780,1035" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5" />
+        <polygon points="1340,940 1340,955 1355,955" fill="#bae6fd" stroke="#38bdf8" stroke-width="1.5" />
+        <text x="795" y="960" class="note-text" style="font-weight:700;">usdExacto = onza * (ley/100) * (1 - porcentaje/100) / 31.1035</text>
+        <text x="795" y="978" class="note-text">División: escala 10, HALF_UP.</text>
+        <text x="795" y="996" class="note-text">precioTotal = usdExacto redondeado a 2 decimales | precioPen = usdExacto * tipoCambio, escala 2</text>
+        <text x="795" y="1014" class="note-text">importe = precioPen * pesoFundido, retIva/2, escala 2</text>
+      </g>
+
+      <!-- Msg 18: Sumar subtotales y validar adelanto -->
+      <path d="M 788 1055 L 830 1055 L 830 1075 L 790 1075" fill="none" stroke="#0284c7" stroke-width="1.6" marker-end="url(#arrow)" />
+      <text x="838" y="1068" class="msg-text">18: Sumar subtotales y validar regla: adelanto &le; totalCalculado</text>
+
+      <!-- --- SECCIÓN 4: ALTERNATIVA - BRANCH ERROR / ROLLBACK --- -->
+      <!-- Msg 19: Lanza excepción -->
+      <line x1="788" y1="1150" x2="2060" y2="1150" stroke="#dc2626" stroke-width="1.8" marker-end="url(#arrow-red)" />
+      <text x="800" y="1143" class="msg-text" style="fill:#dc2626;">19: throw MayoristaReglaException(código, mensaje)</text>
+
+      <!-- Msg 20: Rollback al TxManager -->
+      <line x1="2060" y1="1185" x2="1870" y2="1185" stroke="#dc2626" stroke-width="1.6" marker-end="url(#arrow-red)" />
+      <text x="1880" y="1178" class="msg-text" style="fill:#dc2626;">20: solicita rollback de la transacción</text>
+
+      <!-- Msg 21: Transacción revertida -->
+      <line x1="1850" y1="1220" x2="2060" y2="1220" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrow-return-red)" />
+      <text x="1875" y="1213" class="msg-text" style="fill:#dc2626;">21: Transacción revertida (ROLLBACK completado)</text>
+
+      <!-- Msg 22: HTTP 422 a Controller -->
+      <line x1="2060" y1="1260" x2="558" y2="1260" stroke="#dc2626" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#arrow-return-red)" />
+      <text x="575" y="1253" class="msg-text" style="fill:#dc2626;">22: HTTP 422 Unprocessable Entity (error JSON: timestamp, código, detalle)</text>
+
+      <!-- Msg 23: HTTP 422 a Angular -->
+      <line x1="542" y1="1295" x2="328" y2="1295" stroke="#dc2626" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#arrow-return-red)" />
+      <text x="340" y="1288" class="msg-text" style="fill:#dc2626;">23: HTTP 422 Error respuesta con código de infracción</text>
+
+      <!-- Msg 24: Alerta en UI -->
+      <line x1="312" y1="1330" x2="110" y2="1330" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrow-return-red)" />
+      <text x="120" y="1323" class="msg-text" style="fill:#dc2626;">24: muestra alerta roja en fila y permite corregir sin recargar</text>
+
+      <!-- NOTA 3: Códigos de Excepción -->
+      <g filter="url(#shadow)">
+        <polygon points="780,1350 1930,1350 1945,1365 1945,1415 780,1415" fill="#fee2e2" stroke="#f87171" stroke-width="1.5" />
+        <polygon points="1930,1350 1930,1365 1945,1365" fill="#fecdd3" stroke="#f87171" stroke-width="1.5" />
+        <text x="795" y="1373" class="note-text" style="fill:#991b1b; font-weight:700;">Códigos: LEY_REPETIDA, PESO_FUNDIDO_SUPERA_ENTRADA, ADELANTO_SUPERA_TOTAL.</text>
+        <text x="795" y="1395" class="note-text" style="fill:#991b1b;">La transacción termina sin registrar en base de datos. HTTP 422 / HTTP 400.</text>
+      </g>
+
+      <!-- --- SECCIÓN 5: CAMINO FELIZ / PERSISTENCIA ATÓMICA --- -->
+      <!-- Msg 25: Build entidad -->
+      <path d="M 788 1475 L 830 1475 L 830 1495 L 790 1495" fill="none" stroke="#16a34a" stroke-width="1.6" marker-end="url(#arrow-green)" />
+      <text x="838" y="1488" class="msg-text" style="fill:#16a34a;">25: buildRecepcionMayorista(dto, calculos): instancia entidad y colección de detalles</text>
+
+      <!-- Msg 26: Save Cabecera -->
+      <line x1="788" y1="1525" x2="990" y2="1525" stroke="#16a34a" stroke-width="1.8" marker-end="url(#arrow-green)" />
+      <text x="800" y="1518" class="msg-text">26: save(recepcionMayorista)</text>
+
+      <!-- Msg 27: SQL INSERT Cabecera -->
+      <line x1="1008" y1="1550" x2="1630" y2="1550" stroke="#16a34a" stroke-width="1.8" marker-end="url(#arrow-green)" />
+      <text x="1020" y="1543" class="msg-text">27: SQL INSERT INTO RECEPCION_MAYORISTA (...)</text>
+
+      <!-- Msg 28: ID generado -->
+      <line x1="1630" y1="1585" x2="1008" y2="1585" stroke="#16a34a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrow-return-green)" />
+      <text x="1180" y="1578" class="msg-text">28: ID generado (SEQ_RECEPCION_MAYORISTA.NEXTVAL)</text>
+
+      <!-- Msg 29: Cabecera guardada -->
+      <line x1="992" y1="1610" x2="788" y2="1610" stroke="#16a34a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrow-return-green)" />
+      <text x="815" y="1603" class="msg-text">29: entidad cabecera guardada con ID</text>
+
+      <!-- Msg 30: SaveAll Detalles -->
+      <line x1="788" y1="1640" x2="1410" y2="1640" stroke="#16a34a" stroke-width="1.8" marker-end="url(#arrow-green)" />
+      <text x="800" y="1633" class="msg-text">30: saveAll(detallesRecepcion)</text>
+
+      <!-- Msg 31: SQL INSERT Detalles -->
+      <line x1="1428" y1="1665" x2="1630" y2="1665" stroke="#16a34a" stroke-width="1.8" marker-end="url(#arrow-green)" />
+      <text x="1440" y="1658" class="msg-text">31: SQL INSERT INTO DETALLE_RECEPCION_LEY (batch 1..N)</text>
+
+      <!-- Msg 32: OK filas insertadas -->
+      <line x1="1630" y1="1700" x2="1428" y2="1700" stroke="#16a34a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrow-return-green)" />
+      <text x="1465" y="1693" class="msg-text">32: OK (filas insertadas)</text>
+
+      <!-- Msg 33: Detalles persistidos -->
+      <line x1="1412" y1="1725" x2="788" y2="1725" stroke="#16a34a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrow-return-green)" />
+      <text x="960" y="1718" class="msg-text">33: colección de detalles persistida</text>
+
+      <!-- Msg 34: Commit al TxManager -->
+      <line x1="788" y1="1755" x2="1850" y2="1755" stroke="#16a34a" stroke-width="1.8" marker-end="url(#arrow-green)" />
+      <text x="800" y="1748" class="msg-text" style="fill:#16a34a; font-weight:700;">34: commit(): confirma transacción atómica</text>
+
+      <!-- Msg 35: COMMIT WORK en Oracle -->
+      <line x1="1850" y1="1780" x2="1648" y2="1780" stroke="#16a34a" stroke-width="1.8" marker-end="url(#arrow-green)" />
+      <text x="1660" y="1773" class="msg-text" style="fill:#16a34a;">35: COMMIT WORK</text>
+
+      <!-- Msg 36: COMMIT exitoso -->
+      <line x1="1648" y1="1810" x2="1850" y2="1810" stroke="#16a34a" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrow-return-green)" />
+      <text x="1680" y="1803" class="msg-text" style="fill:#16a34a;">36: COMMIT exitoso</text>
+
+      <!-- Msg 37: Transacción confirmada -->
+      <line x1="1850" y1="1835" x2="788" y2="1835" stroke="#16a34a" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#arrow-return-green)" />
+      <text x="1220" y="1828" class="msg-text" style="fill:#16a34a; font-weight:700;">37: Transacción confirmada exitosamente</text>
+
+      <!-- Msg 38: Response DTO -->
+      <line x1="772" y1="1865" x2="558" y2="1865" stroke="#16a34a" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#arrow-return-green)" />
+      <text x="575" y="1858" class="msg-text">38: RecepcionLeyResponse (operacionId, totalPEN, estado: VALORIZADO)</text>
+
+      <!-- Msg 39: HTTP 201 Created -->
+      <line x1="542" y1="1895" x2="328" y2="1895" stroke="#16a34a" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-return-green)" />
+      <text x="340" y="1888" class="msg-text" style="fill:#16a34a; font-weight:700;">39: HTTP 201 Created (payload completo con nroOperacion y totales)</text>
+
+      <!-- Msg 40: Modal confirmación -->
+      <path d="M 328 1920 L 370 1920 L 370 1940 L 330 1940" fill="none" stroke="#16a34a" stroke-width="1.6" marker-end="url(#arrow-green)" />
+      <text x="378" y="1933" class="msg-text">40: muestra modal de confirmación con Nro. de Operación generado</text>
+
+      <!-- Msg 41: Comprobante visible -->
+      <line x1="312" y1="1965" x2="110" y2="1965" stroke="#16a34a" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#arrow-return-green)" />
+      <text x="120" y="1958" class="msg-text" style="fill:#16a34a; font-weight:700;">41: Comprobante y confirmación visibles para impresión / descarga</text>
+
+      <!-- ============================================================== -->
+      <!-- 5. CABECERAS DE LÍNEAS DE VIDA (SUPERIOR)                      -->
+      <!-- ============================================================== -->
+
+      <!-- 1. Actor Mayorista -->
+      <g transform="translate(110, 35)">
+        <circle cx="0" cy="0" r="10" stroke="#0284c7" stroke-width="2" fill="#ffffff" />
+        <line x1="0" y1="10" x2="0" y2="32" stroke="#0284c7" stroke-width="2" />
+        <line x1="-15" y1="18" x2="15" y2="18" stroke="#0284c7" stroke-width="2" />
+        <polyline points="-12,50 0,32 12,50" stroke="#0284c7" stroke-width="2" fill="none" />
+        <text x="0" y="65" class="lifeline-header" style="fill:#0f172a;">Mayorista</text>
+        <text x="0" y="78" class="lifeline-sub" style="fill:#64748b;">Actor de Negocio</text>
+      </g>
+
+      <!-- 2. RecepcionMayorista (Angular 21) -->
+      <g transform="translate(320, 50)">
+        <rect x="-95" y="-30" width="190" height="60" rx="8" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.8" filter="url(#shadow)" />
+        <text x="0" y="-12" class="lifeline-sub" style="fill:#0369a1;">&laquo;boundary&raquo;</text>
+        <text x="0" y="4" class="lifeline-header" style="fill:#0369a1;">RecepcionMayorista</text>
+        <text x="0" y="18" class="lifeline-sub" style="fill:#0284c7;">Angular 21 · Signals</text>
+      </g>
+
+      <!-- 3. CompraDirectaMayoristaController -->
+      <g transform="translate(550, 50)">
+        <rect x="-95" y="-30" width="190" height="60" rx="8" fill="#ffedd5" stroke="#fb923c" stroke-width="1.8" filter="url(#shadow)" />
+        <text x="0" y="-12" class="lifeline-sub" style="fill:#c2410c;">&laquo;control&raquo;</text>
+        <text x="0" y="4" class="lifeline-header" style="fill:#c2410c;">CompraDirectaController</text>
+        <text x="0" y="18" class="lifeline-sub" style="fill:#ea580c;">Spring Boot 4</text>
+      </g>
+
+      <!-- 4. RecepcionLeyService -->
+      <g transform="translate(780, 50)">
+        <rect x="-95" y="-30" width="190" height="60" rx="8" fill="#dcfce7" stroke="#4ade80" stroke-width="1.8" filter="url(#shadow)" />
+        <text x="0" y="-12" class="lifeline-sub" style="fill:#15803d;">&laquo;service&raquo;</text>
+        <text x="0" y="4" class="lifeline-header" style="fill:#15803d;">RecepcionLeyService</text>
+        <text x="0" y="18" class="lifeline-sub" style="fill:#16a34a;">Lógica de Dominio</text>
+      </g>
+
+      <!-- 5. RecepcionMayoristaRepository -->
+      <g transform="translate(1000, 50)">
+        <rect x="-90" y="-30" width="180" height="60" rx="8" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.8" filter="url(#shadow)" />
+        <text x="0" y="-12" class="lifeline-sub" style="fill:#6d28d9;">&laquo;repository&raquo;</text>
+        <text x="0" y="4" class="lifeline-header" style="fill:#6d28d9; font-size:11px;">RecepcionMayoristaRepo</text>
+        <text x="0" y="18" class="lifeline-sub" style="fill:#7c3aed;">Spring Data JPA</text>
+      </g>
+
+      <!-- 6. LeyOroRepository -->
+      <g transform="translate(1200, 50)">
+        <rect x="-85" y="-30" width="170" height="60" rx="8" fill="#f3e8ff" stroke="#c084fc" stroke-width="1.8" filter="url(#shadow)" />
+        <text x="0" y="-12" class="lifeline-sub" style="fill:#7e22ce;">&laquo;repository&raquo;</text>
+        <text x="0" y="4" class="lifeline-header" style="fill:#7e22ce;">LeyOroRepository</text>
+        <text x="0" y="18" class="lifeline-sub" style="fill:#9333ea;">Catálogo JPA</text>
+      </g>
+
+      <!-- 7. DetalleRecepcionLeyRepository -->
+      <g transform="translate(1420, 50)">
+        <rect x="-95" y="-30" width="190" height="60" rx="8" fill="#fae8ff" stroke="#e879f9" stroke-width="1.8" filter="url(#shadow)" />
+        <text x="0" y="-12" class="lifeline-sub" style="fill:#a21caf;">&laquo;repository&raquo;</text>
+        <text x="0" y="4" class="lifeline-header" style="fill:#a21caf; font-size:11px;">DetalleRecepcionRepo</text>
+        <text x="0" y="18" class="lifeline-sub" style="fill:#c026d3;">Batch JPA</text>
+      </g>
+
+      <!-- 8. Oracle Database (Cylinder) -->
+      <g transform="translate(1640, 50)">
+        <path d="M -60 -12 C -60 -24 60 -24 60 -12 L 60 20 C 60 32 -60 32 -60 20 Z" fill="#ffe4e6" stroke="#fb7185" stroke-width="1.8" filter="url(#shadow)" />
+        <ellipse cx="0" cy="-12" rx="60" ry="10" fill="#fecdd3" stroke="#fb7185" stroke-width="1.8" />
+        <text x="0" y="3" class="lifeline-header" style="fill:#9f1239; font-size:11px;">Oracle Database</text>
+        <text x="0" y="16" class="lifeline-sub" style="fill:#be123c;">PDB XEPDB1</text>
+      </g>
+
+      <!-- 9. Spring TransactionManager -->
+      <g transform="translate(1860, 50)">
+        <rect x="-90" y="-30" width="180" height="60" rx="8" fill="#d1fae5" stroke="#34d399" stroke-width="1.8" filter="url(#shadow)" />
+        <text x="0" y="-12" class="lifeline-sub" style="fill:#047857;">Spring</text>
+        <text x="0" y="4" class="lifeline-header" style="fill:#047857; font-size:11px;">TransactionManager</text>
+        <text x="0" y="18" class="lifeline-sub" style="fill:#059669;">@Transactional</text>
+      </g>
+
+      <!-- 10. GlobalExceptionHandler -->
+      <g transform="translate(2070, 50)">
+        <rect x="-85" y="-30" width="170" height="60" rx="8" fill="#fff1f2" stroke="#f43f5e" stroke-width="1.8" filter="url(#shadow)" />
+        <text x="0" y="-12" class="lifeline-sub" style="fill:#be123c;">&laquo;exception handler&raquo;</text>
+        <text x="0" y="4" class="lifeline-header" style="fill:#be123c; font-size:10.5px;">GlobalExceptionHandler</text>
+        <text x="0" y="18" class="lifeline-sub" style="fill:#e11d48;">@RestControllerAdvice</text>
+      </g>
+
+      <!-- ============================================================== -->
+      <!-- 6. CABECERAS DE LÍNEAS DE VIDA (INFERIOR REPETIDA)             -->
+      <!-- ============================================================== -->
+
+      <!-- 1. Actor Mayorista (Inferior) -->
+      <g transform="translate(110, 2050)">
+        <circle cx="0" cy="0" r="10" stroke="#0284c7" stroke-width="2" fill="#ffffff" />
+        <line x1="0" y1="10" x2="0" y2="32" stroke="#0284c7" stroke-width="2" />
+        <line x1="-15" y1="18" x2="15" y2="18" stroke="#0284c7" stroke-width="2" />
+        <polyline points="-12,50 0,32 12,50" stroke="#0284c7" stroke-width="2" fill="none" />
+        <text x="0" y="65" class="lifeline-header" style="fill:#0f172a;">Mayorista</text>
+      </g>
+
+      <!-- 2. RecepcionMayorista (Angular 21) -->
+      <g transform="translate(320, 2065)">
+        <rect x="-95" y="-25" width="190" height="50" rx="6" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5" />
+        <text x="0" y="-3" class="lifeline-header" style="fill:#0369a1;">RecepcionMayorista</text>
+        <text x="0" y="11" class="lifeline-sub" style="fill:#0284c7;">Angular 21</text>
+      </g>
+
+      <!-- 3. CompraDirectaMayoristaController -->
+      <g transform="translate(550, 2065)">
+        <rect x="-95" y="-25" width="190" height="50" rx="6" fill="#ffedd5" stroke="#fb923c" stroke-width="1.5" />
+        <text x="0" y="-3" class="lifeline-header" style="fill:#c2410c;">CompraDirectaController</text>
+        <text x="0" y="11" class="lifeline-sub" style="fill:#ea580c;">Spring Boot 4</text>
+      </g>
+
+      <!-- 4. RecepcionLeyService -->
+      <g transform="translate(780, 2065)">
+        <rect x="-95" y="-25" width="190" height="50" rx="6" fill="#dcfce7" stroke="#4ade80" stroke-width="1.5" />
+        <text x="0" y="-3" class="lifeline-header" style="fill:#15803d;">RecepcionLeyService</text>
+        <text x="0" y="11" class="lifeline-sub" style="fill:#16a34a;">Service</text>
+      </g>
+
+      <!-- 5. RecepcionMayoristaRepository -->
+      <g transform="translate(1000, 2065)">
+        <rect x="-90" y="-25" width="180" height="50" rx="6" fill="#ede9fe" stroke="#a78bfa" stroke-width="1.5" />
+        <text x="0" y="-3" class="lifeline-header" style="fill:#6d28d9; font-size:11px;">RecepcionMayoristaRepo</text>
+        <text x="0" y="11" class="lifeline-sub" style="fill:#7c3aed;">Repository</text>
+      </g>
+
+      <!-- 6. LeyOroRepository -->
+      <g transform="translate(1200, 2065)">
+        <rect x="-85" y="-25" width="170" height="50" rx="6" fill="#f3e8ff" stroke="#c084fc" stroke-width="1.5" />
+        <text x="0" y="-3" class="lifeline-header" style="fill:#7e22ce;">LeyOroRepository</text>
+        <text x="0" y="11" class="lifeline-sub" style="fill:#9333ea;">Repository</text>
+      </g>
+
+      <!-- 7. DetalleRecepcionLeyRepository -->
+      <g transform="translate(1420, 2065)">
+        <rect x="-95" y="-25" width="190" height="50" rx="6" fill="#fae8ff" stroke="#e879f9" stroke-width="1.5" />
+        <text x="0" y="-3" class="lifeline-header" style="fill:#a21caf; font-size:11px;">DetalleRecepcionRepo</text>
+        <text x="0" y="11" class="lifeline-sub" style="fill:#c026d3;">Repository</text>
+      </g>
+
+      <!-- 8. Oracle Database -->
+      <g transform="translate(1640, 2065)">
+        <path d="M -55 -10 C -55 -20 55 -20 55 -10 L 55 15 C 55 25 -55 25 -55 15 Z" fill="#ffe4e6" stroke="#fb7185" stroke-width="1.5" />
+        <ellipse cx="0" cy="-10" rx="55" ry="8" fill="#fecdd3" stroke="#fb7185" stroke-width="1.5" />
+        <text x="0" y="3" class="lifeline-header" style="fill:#9f1239; font-size:11px;">Oracle Database</text>
+      </g>
+
+      <!-- 9. Spring TransactionManager -->
+      <g transform="translate(1860, 2065)">
+        <rect x="-90" y="-25" width="180" height="50" rx="6" fill="#d1fae5" stroke="#34d399" stroke-width="1.5" />
+        <text x="0" y="-3" class="lifeline-header" style="fill:#047857; font-size:11px;">TransactionManager</text>
+        <text x="0" y="11" class="lifeline-sub" style="fill:#059669;">@Transactional</text>
+      </g>
+
+      <!-- 10. GlobalExceptionHandler -->
+      <g transform="translate(2070, 2065)">
+        <rect x="-85" y="-25" width="170" height="50" rx="6" fill="#fff1f2" stroke="#f43f5e" stroke-width="1.5" />
+        <text x="0" y="-3" class="lifeline-header" style="fill:#be123c; font-size:10.5px;">GlobalExceptionHandler</text>
+        <text x="0" y="11" class="lifeline-sub" style="fill:#e11d48;">@RestControllerAdvice</text>
+      </g>
+
+    </svg>
+  </div>
+
+</body>
+</html>

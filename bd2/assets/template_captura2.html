@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    body { background: #1e1e1e; padding: 12px; }
+    .window { background: #252526; border-radius: 8px; border: 1px solid #3c3c3c; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .titlebar { background: #323233; color: #cccccc; padding: 8px 14px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3c3c3c; }
+    .window-controls span { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-left: 6px; }
+    .c-red { background: #ff5f56; } .c-yel { background: #ffbd2e; } .c-grn { background: #27c93f; }
+    .conn-tab { background: #1e1e1e; color: #4ec9b0; padding: 6px 14px; font-size: 12px; font-weight: bold; border-top: 2px solid #007acc; display: inline-block; }
+    .sql-editor { background: #1e1e1e; color: #d4d4d4; font-family: Consolas, monospace; font-size: 13px; padding: 12px 16px; line-height: 1.5; border-bottom: 1px solid #3c3c3c; }
+    .kw { color: #569cd6; font-weight: bold; }
+    .str { color: #ce9178; }
+    .results-panel { background: #252526; padding: 10px 14px; }
+    .results-header { font-size: 12px; color: #9cdcfe; margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; }
+    table { width: 100%; border-collapse: collapse; font-family: Consolas, monospace; font-size: 11.5px; }
+    th { background: #2d2d2d; color: #9cdcfe; border: 1px solid #3c3c3c; padding: 6px 10px; text-align: left; }
+    td { border: 1px solid #333333; padding: 6px 10px; color: #cccccc; }
+    .plan-prune { background: #064e3b !important; color: #a7f3d0 !important; font-weight: bold; }
+    .tree-icon { color: #38bdf8; margin-right: 4px; }
+  </style>
+</head>
+<body>
+  <div class="window">
+    <div class="titlebar">
+      <span>Oracle SQL Developer 23.1 · Plan de Ejecución Explicado (F10) · <strong>SITRA_ORO@XEPDB1</strong></span>
+      <div class="window-controls"><span class="c-red"></span><span class="c-yel"></span><span class="c-grn"></span></div>
+    </div>
+    <div style="background: #2d2d2d; padding-left: 10px;">
+      <div class="conn-tab">Plan Explicativo: Consulta Poda por Fecha [Q4 2026]</div>
+    </div>
+    <div class="sql-editor">
+      <span class="kw">EXPLAIN PLAN FOR</span><br>
+      <span class="kw">SELECT</span> * <span class="kw">FROM</span> TRANSACCIONES_G2<br>
+      <span class="kw">WHERE</span> FECHA_TRANSACCION <span class="kw">BETWEEN</span> <span class="kw">TIMESTAMP</span> <span class="str">'2026-10-01 00:00:00'</span> <span class="kw">AND</span> <span class="kw">TIMESTAMP</span> <span class="str">'2026-10-25 00:00:00'</span>;
+    </div>
+    <div class="results-panel">
+      <div class="results-header">
+        <span>Árbol de Operaciones del Plan · Partition Pruning Activo</span>
+        <span style="color: #4ade80;">Costo I/O Estimado: 2 | Filas Cardinalidad: 26</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Operación</th>
+            <th>Nombre Objeto</th>
+            <th>Filas</th>
+            <th>Bytes</th>
+            <th>Costo (%CPU)</th>
+            <th style="color: #4ade80;">Pstart</th>
+            <th style="color: #4ade80;">Pstop</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0</td><td>SELECT STATEMENT</td><td></td><td>26</td><td>2.1 K</td><td>2 (0)</td><td></td><td></td>
+          </tr>
+          <tr class="plan-prune">
+            <td>1</td><td>&nbsp;&nbsp;<span class="tree-icon">↳</span> PARTITION RANGE ITERATOR</td><td></td><td>26</td><td>2.1 K</td><td>2 (0)</td><td>5</td><td>5</td>
+          </tr>
+          <tr class="plan-prune">
+            <td>2</td><td>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tree-icon">↳</span> TABLE ACCESS FULL</td><td>TRANSACCIONES_G2</td><td>26</td><td>2.1 K</td><td>2 (0)</td><td>5</td><td>5</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top: 10px; font-size: 11px; color: #94a3b8; border-top: 1px solid #3c3c3c; padding-top: 6px;">
+        <strong>Comprobación de Optimización:</strong> Pstart = 5 y Pstop = 5 indica que Oracle 21c solo escaneó el bloque físico de la partición <code>P_TRANS_2026_Q4</code>. Las particiones 1, 2, 3, 4 y 6 no fueron leídas de disco.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

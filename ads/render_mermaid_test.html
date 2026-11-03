@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Diagrama de Clases del Dominio SITRA-ORO</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .titulo {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .titulo h1 {
+      margin: 0 0 6px 0;
+      font-size: 26px;
+      color: #0f172a;
+    }
+    .titulo p {
+      margin: 0;
+      font-size: 14px;
+      color: #64748b;
+    }
+    .card-wrap {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 30px;
+      background: #ffffff;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="titulo">
+    <h1>SITRA-ORO · Modelo de Clases del Dominio</h1>
+    <p>Análisis y Diseño de Sistemas (ADS) · Arquitectura y Reglas del Dominio Core</p>
+  </div>
+  <div class="card-wrap">
+    <pre class="mermaid">
+classDiagram
+    class Minero {
+        -Long idMinero
+        -String documentoIdentidad
+        -String nombresApellidos
+        -String telefono
+        -String zonaProcedencia
+        -LocalDateTime fechaRegistro
+        +registrar()
+    }
+
+    class TransaccionG2 {
+        -Long idTransaccionG2
+        -BigDecimal pesoSinFundirG
+        -BigDecimal pesoFundidoNetoG
+        -TipoOro tipoOro
+        -BigDecimal precioAplicadoPen
+        -BigDecimal totalPagadoPen
+        -LocalDateTime fechaTransaccion
+        -Long idLiquidacionG1
+        -Long idCentroAcopio
+        +calcularPago()
+        +marcarLiquidada()
+    }
+
+    class LiquidacionG1 {
+        -Long idLiquidacionG1
+        -String nombreAcopiadorG2
+        -EstadoLiquidacion estado
+        -BigDecimal pesoTotalFundidoG
+        -BigDecimal cotizacionOnzaUsd
+        -BigDecimal tipoCambioUsdPen
+        -BigDecimal precioResultanteGramo
+        -BigDecimal totalPagadoG2Pen
+        -LocalDateTime fechaLiquidacion
+        +procesarCierre()
+        +anular()
+    }
+
+    class DetalleLiquidacionG1 {
+        -Long idDetalle
+        -TipoOro tipoOro
+        -BigDecimal pesoFundidoG
+        -BigDecimal precioGramoPen
+        -BigDecimal subtotalPen
+        +calcularSubtotal()
+    }
+
+    class ParametrosSistema {
+        -Long idParametro
+        -LocalDate fecha
+        -BigDecimal precioDiarioGramoPen
+        -BigDecimal porcentajeMermaEst
+        -BigDecimal cotizacionOnzaUsd
+        -BigDecimal tipoCambioUsdPen
+        +estimarCotizacion()
+        +obtenerPrecioG2()
+    }
+
+    class TipoOro {
+        <<enumeration>>
+        ROJO
+        VERDE
+    }
+
+    class EstadoLiquidacion {
+        <<enumeration>>
+        REGISTRADA
+        ANULADA
+    }
+
+    Minero "1" --> "0..*" TransaccionG2 : realiza
+    LiquidacionG1 "1" *-- "1..2" DetalleLiquidacionG1 : compone
+    TransaccionG2 "0..*" --> "0..1" LiquidacionG1 : se liquida en
+    TransaccionG2 ..> TipoOro : tipoOro
+    DetalleLiquidacionG1 ..> TipoOro : tipoOro
+    LiquidacionG1 ..> EstadoLiquidacion : estado
+    TransaccionG2 ..> ParametrosSistema : usa para cotizar
+    </pre>
+  </div>
+
+  <script>
+    mermaid.parseError = function(err, hash) {
+      const el = document.createElement('pre');
+      el.style.background = '#fee2e2';
+      el.style.color = '#b91c1c';
+      el.style.padding = '15px';
+      el.style.fontSize = '14px';
+      el.innerText = 'PARSE ERROR:\n' + err + '\nHASH:\n' + JSON.stringify(hash);
+      document.body.prepend(el);
+    };
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'neutral'
+    });
+  </script>
+</body>
+</html>

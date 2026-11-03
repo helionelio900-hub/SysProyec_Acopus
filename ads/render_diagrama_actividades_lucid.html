@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SITRA-ORO — Diagrama de Actividades: Registrar Compra Directa Mayorista</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: #fbfcfd;
+      background-image: 
+        linear-gradient(to right, #eef2f6 1px, transparent 1px),
+        linear-gradient(to bottom, #eef2f6 1px, transparent 1px);
+      background-size: 20px 20px;
+      padding: 30px;
+      width: 1680px;
+      margin: 0 auto;
+      color: #1e293b;
+    }
+
+    .canvas {
+      position: relative;
+      width: 1620px;
+      height: 1250px;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+      padding: 24px;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+    }
+
+    /* CONTENEDOR DE CARRILES (SWIMLANES) */
+    .swimlanes-container {
+      position: relative;
+      display: grid;
+      grid-template-columns: 380px 410px 450px 330px;
+      height: 1140px;
+      border: 2px solid #94a3b8;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .swimlane {
+      position: relative;
+      border-right: 1.5px solid #cbd5e1;
+      height: 100%;
+    }
+    .swimlane:last-child {
+      border-right: none;
+    }
+
+    .lane-header {
+      padding: 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 13.5px;
+      letter-spacing: 0.3px;
+      border-bottom: 2px solid #94a3b8;
+    }
+
+    .header-mayorista { background: #e2e8f0; color: #1e293b; }
+    .header-angular { background: #bae6fd; color: #0369a1; }
+    .header-spring { background: #bbf7d0; color: #15803d; }
+    .header-oracle { background: #fecdd3; color: #9f1239; }
+
+    /* NODOS Y ELEMENTOS DENTRO DEL DIAGRAMA */
+    .connections-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .node-start {
+      position: absolute;
+      left: 175px;
+      top: 65px;
+      width: 30px;
+      height: 30px;
+      background: #0f172a;
+      border-radius: 50%;
+      z-index: 2;
+    }
+
+    .node-end {
+      position: absolute;
+      left: 175px;
+      top: 1055px;
+      width: 30px;
+      height: 30px;
+      background: #ffffff;
+      border: 3px solid #0f172a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    .node-end::after {
+      content: '';
+      width: 16px;
+      height: 16px;
+      background: #0f172a;
+      border-radius: 50%;
+    }
+
+    /* CAJAS DE ACTIVIDADES */
+    .activity-box {
+      position: absolute;
+      background: #f8fafc;
+      border: 1.5px solid #475569;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 11.5px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.35;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      z-index: 2;
+    }
+
+    .box-gray { background: #f1f5f9; border-color: #64748b; color: #0f172a; }
+    .box-blue { background: #f0f9ff; border-color: #0284c7; color: #0369a1; }
+    .box-green { background: #f0fdf4; border-color: #16a34a; color: #15803d; }
+    .box-red { background: #fef2f2; border-color: #dc2626; color: #991b1b; }
+    .box-pink { background: #fff1f2; border-color: #e11d48; color: #9f1239; }
+  </style>
+</head>
+<body>
+
+  <div class="canvas">
+    <div class="title">SITRA-ORO — Diagrama de Actividades: Registrar Compra Directa Mayorista (Cabecera-Detalle)</div>
+
+    <div class="swimlanes-container">
+      
+      <!-- CARRIL 1: MAYORISTA -->
+      <div class="swimlane">
+        <div class="lane-header header-mayorista">Mayorista (Operador)</div>
+      </div>
+
+      <!-- CARRIL 2: INTERFAZ ANGULAR -->
+      <div class="swimlane">
+        <div class="lane-header header-angular">Interfaz Angular 21 (Frontend)</div>
+      </div>
+
+      <!-- CARRIL 3: BACKEND - SPRING -->
+      <div class="swimlane">
+        <div class="lane-header header-spring">Backend - Spring Boot 4 (Servicio)</div>
+      </div>
+
+      <!-- CARRIL 4: PERSISTENCIA - ORACLE -->
+      <div class="swimlane">
+        <div class="lane-header header-oracle">Persistencia - Oracle XE (XEPDB1)</div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- ELEMENTOS ABSOLUTOS DISTRIBUIDOS A LO LARGO DE LOS 4 CARRILES -->
+      <!-- ============================================================== -->
+
+      <!-- 1. Nodo Inicial (Carril 1) -->
+      <div class="node-start"></div>
+
+      <!-- 2. Box: Ingresar partidas y adelanto (Carril 1) -->
+      <div class="activity-box box-gray" style="left: 65px; top: 125px; width: 250px; min-height: 70px; display: flex; align-items: center; justify-content: center;">
+        <div>Ingresar partidas (onza, ley, pesos)<br>y monto de adelanto en efectivo</div>
+      </div>
+
+      <!-- 3. Box: Calcular vista previa reactiva (Carril 2) -->
+      <div class="activity-box box-blue" style="left: 445px; top: 130px; width: 280px;">
+        Calcular vista previa reactiva<br><span style="font-size:10.5px; font-weight:500;">(Signals + FormArray en memoria)</span>
+      </div>
+
+      <!-- 4. Box: Pulsar botón y enviar POST (Carril 2) -->
+      <div class="activity-box box-blue" style="left: 445px; top: 345px; width: 280px;">
+        Pulsar botón <strong>'Revisar y Registrar'</strong><br>
+        POST <code>/api/v1/mayorista/compras-directas</code>
+      </div>
+
+      <!-- 5. Box: Validar DTO con Jakarta (Carril 3) -->
+      <div class="activity-box box-green" style="left: 855px; top: 345px; width: 320px;">
+        Controlador recibe DTO<br>Validación <strong>@Valid Jakarta</strong> (@NotNull, @DecimalMin)
+      </div>
+
+      <!-- Alerta Error DTO (Carril 2) -->
+      <div class="activity-box box-red" style="left: 470px; top: 445px; width: 240px;">
+        HTTP 400 Bad Request<br><span style="font-size:10px;">Campos obligatorios inválidos</span>
+      </div>
+
+      <!-- 6. Box: Iterar colección de partidas (Carril 3) -->
+      <div class="activity-box box-green" style="left: 855px; top: 555px; width: 320px;">
+        <code>RecepcionLeyService.registrar()</code><br>
+        Iterar colección de partidas [1..N]
+      </div>
+
+      <!-- Alerta Excepción Merma Negativa (Carril 2) -->
+      <div class="activity-box box-red" style="left: 450px; top: 655px; width: 270px;">
+        throw MayoristaReglaException<br>
+        <strong>HTTP 422: PESO_FUNDIDO_SUPERA_ENTRADA</strong>
+      </div>
+
+      <!-- 7. Box: Consultar LeyOro y calcular importes (Carril 3) -->
+      <div class="activity-box box-green" style="left: 855px; top: 765px; width: 320px;">
+        Consultar <code>LeyOroRepository</code> por % ley<br>
+        Calcular precio por gramo e importe por partida
+      </div>
+
+      <!-- Alerta Adelanto Supera Total (Carril 2) -->
+      <div class="activity-box box-red" style="left: 450px; top: 860px; width: 270px;">
+        throw MayoristaReglaException<br>
+        <strong>HTTP 422: ADELANTO_SUPERA_TOTAL</strong>
+      </div>
+
+      <!-- 8. Box: Construir entidad transaccional (Carril 3) -->
+      <div class="activity-box box-green" style="left: 855px; top: 970px; width: 320px;">
+        Construir entidad <code>RecepcionMayorista</code><br>
+        Asociar colección de <code>DetalleRecepcionLey</code>
+      </div>
+
+      <!-- 9. Persistencia en Oracle: INSERT cabecera y detalle (Carril 4) -->
+      <div class="activity-box box-pink" style="left: 1285px; top: 945px; width: 290px;">
+        INSERT INTO RECEPCION_MAYORISTA<br>
+        INSERT INTO DETALLE_RECEPCION_LEY
+      </div>
+
+      <div class="activity-box box-pink" style="left: 1310px; top: 1025px; width: 240px;">
+        <strong>COMMIT ATÓMICO</strong><br>
+        <span style="font-size:10px;">ID generado en secuencia Oracle</span>
+      </div>
+
+      <!-- 10. Box: Confirmación exitosa en Carril Mayorista -->
+      <div class="activity-box box-gray" style="left: 70px; top: 960px; width: 240px;">
+        HTTP 201 Created<br>
+        <strong>Confirmación con Nro. de Operación</strong><br>
+        Comprobante de compra directa listo
+      </div>
+
+      <!-- 11. Nodo Fin (Carril 1) -->
+      <div class="node-end"></div>
+
+      <!-- ============================================================== -->
+      <!-- CAPA VECTORIAL DE FLECHAS, ROMBOS Y TRANSICIONES               -->
+      <!-- ============================================================== -->
+      <svg class="connections-layer" viewBox="0 0 1620 1140">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#0f172a" />
+          </marker>
+          <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#16a34a" />
+          </marker>
+          <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#dc2626" />
+          </marker>
+
+          <filter id="drop-shadow" x="-15%" y="-15%" width="130%" height="135%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.08" />
+          </filter>
+        </defs>
+
+        <!-- Start -> Box Ingresar -->
+        <line x1="190" y1="95" x2="190" y2="123" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- Box Ingresar -> Box Calcular Vista Previa (Horizontal Carril 1 -> 2) -->
+        <line x1="315" y1="150" x2="443" y2="150" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- Box Calcular -> Rombo Cálculo Válido -->
+        <line x1="585" y1="175" x2="585" y2="225" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- ================= ROMBO 1: ¿Cálculo Válido? ================= -->
+        <g>
+          <polygon points="585,226 665,260 585,294 505,260" fill="#ffffff" stroke="#0f172a" stroke-width="1.8" filter="url(#drop-shadow)" />
+          <text x="585" y="254" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11.5" font-weight="700" fill="#0f172a">¿Cálculo válido?</text>
+          <text x="585" y="271" text-anchor="middle" font-family="'Inter', sans-serif" font-size="9.5" font-weight="500" fill="#64748b">Local == Servidor</text>
+        </g>
+
+        <!-- Rombo 1 Sí -> Box Pulsar botón -->
+        <line x1="585" y1="294" x2="585" y2="343" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+        <rect x="592" y="306" width="22" height="17" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="603" y="319" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#16a34a">Sí</text>
+
+        <!-- Rombo 1 No -> Vuelve a Box Ingresar -->
+        <polyline points="505,260 390,260 390,145 317,145" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#arrow-red)" />
+        <rect x="410" y="251" width="85" height="18" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="452" y="264" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#dc2626">No (corregir)</text>
+
+        <!-- Box Pulsar botón -> Box DTO Jakarta (Carril 2 -> 3) -->
+        <line x1="725" y1="375" x2="853" y2="375" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- Box DTO -> Rombo DTO OK -->
+        <line x1="1015" y1="390" x2="1015" y2="436" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- ================= ROMBO 2: ¿@Valid DTO OK? ================= -->
+        <g>
+          <polygon points="1015,437 1095,470 1015,503 935,470" fill="#ffffff" stroke="#0f172a" stroke-width="1.8" filter="url(#drop-shadow)" />
+          <text x="1015" y="474" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11.5" font-weight="700" fill="#0f172a">¿@Valid DTO OK?</text>
+        </g>
+
+        <!-- Rombo 2 Sí -> Box Iterar Partidas -->
+        <line x1="1015" y1="503" x2="1015" y2="553" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+        <rect x="1023" y="515" width="22" height="17" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="1034" y="528" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#16a34a">Sí</text>
+
+        <!-- Rombo 2 No -> Error HTTP 400 (Carril 3 -> 2) -->
+        <line x1="935" y1="470" x2="712" y2="470" stroke="#dc2626" stroke-width="1.8" marker-end="url(#arrow-red)" />
+        <rect x="880" y="461" width="26" height="18" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="893" y="474" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#dc2626">No</text>
+        <polyline points="470,470 360,470 360,160 317,160" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow-red)" />
+
+        <!-- Box Iterar -> Rombo PesoFundido -->
+        <line x1="1015" y1="600" x2="1015" y2="644" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- ================= ROMBO 3: ¿pesoFundido <= pesoSinFundir? ================= -->
+        <g>
+          <polygon points="1015,645 1110,680 1015,715 920,680" fill="#ffffff" stroke="#0f172a" stroke-width="1.8" filter="url(#drop-shadow)" />
+          <text x="1015" y="674" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0f172a">¿pesoFundido &le;</text>
+          <text x="1015" y="691" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0f172a">pesoSinFundir?</text>
+        </g>
+
+        <!-- Rombo 3 Sí -> Box Consultar Ley -->
+        <line x1="1015" y1="715" x2="1015" y2="763" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+        <rect x="1023" y="727" width="22" height="17" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="1034" y="740" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#16a34a">Sí</text>
+
+        <!-- Rombo 3 No -> Error Merma Negativa -->
+        <line x1="920" y1="680" x2="722" y2="680" stroke="#dc2626" stroke-width="1.8" marker-end="url(#arrow-red)" />
+        <rect x="865" y="671" width="26" height="18" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="878" y="684" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#dc2626">No</text>
+        <polyline points="450,680 340,680 340,175 317,175" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow-red)" />
+
+        <!-- Box Consultar Ley -> Rombo Adelanto -->
+        <line x1="1015" y1="810" x2="1015" y2="851" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- ================= ROMBO 4: ¿adelanto <= total? ================= -->
+        <g>
+          <polygon points="1015,852 1095,885 1015,918 935,885" fill="#ffffff" stroke="#0f172a" stroke-width="1.8" filter="url(#drop-shadow)" />
+          <text x="1015" y="889" text-anchor="middle" font-family="'Inter', sans-serif" font-size="11.5" font-weight="700" fill="#0f172a">¿adelanto &le; total?</text>
+        </g>
+
+        <!-- Rombo 4 Sí -> Box Construir Entidad -->
+        <line x1="1015" y1="918" x2="1015" y2="968" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+        <rect x="1023" y="930" width="22" height="17" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="1034" y="943" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#16a34a">Sí</text>
+
+        <!-- Rombo 4 No -> Error Adelanto -->
+        <line x1="935" y1="885" x2="722" y2="885" stroke="#dc2626" stroke-width="1.8" marker-end="url(#arrow-red)" />
+        <rect x="880" y="876" width="26" height="18" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="893" y="889" text-anchor="middle" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#dc2626">No</text>
+        <polyline points="450,885 320,885 320,190 317,190" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow-red)" />
+
+        <!-- Box Construir Entidad -> INSERT Oracle (Carril 3 -> 4) -->
+        <line x1="1175" y1="995" x2="1283" y2="995" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- INSERT Oracle -> Commit Atómico -->
+        <line x1="1430" y1="990" x2="1430" y2="1023" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+
+        <!-- Commit Atómico -> Retorno a Carril Mayorista (Confirmación) -->
+        <polyline points="1430,1070 1430,1110 345,1110 345,995 312,995" fill="none" stroke="#16a34a" stroke-width="2.2" marker-end="url(#arrow-green)" />
+
+        <!-- Confirmación Exitosa -> Nodo Fin -->
+        <line x1="190" y1="1020" x2="190" y2="1053" stroke="#0f172a" stroke-width="2" marker-end="url(#arrow)" />
+      </svg>
+
+    </div>
+  </div>
+
+</body>
+</html>

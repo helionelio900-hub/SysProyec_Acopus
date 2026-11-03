@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SITRA-ORO · Despedida y Cierre</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #020b19;
+      --navy2: #071426;
+      --navy-card: rgba(6, 19, 38, 0.88);
+      --gold: #f2b736;
+      --gold-soft: #f8cf76;
+      --text: #f7f9fc;
+      --text-soft: #cbd5e1;
+      --dim: #94a3b8;
+      --line: rgba(139, 178, 225, .20);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--navy);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+    }
+
+    .slide {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      min-width: 1200px;
+      overflow: hidden;
+      background: var(--navy);
+    }
+
+    /* Foto de fondo real La Rinconada en Alta Definición (2048x1152) */
+    .cbg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .cbg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 72% center;
+      filter: saturate(1.06) contrast(1.04);
+      image-rendering: auto;
+    }
+    .cbg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(2, 11, 25, .96) 0%, rgba(2, 11, 25, .86) 38%, rgba(2, 11, 25, .42) 62%, rgba(2, 11, 25, .04) 100%),
+        linear-gradient(180deg, rgba(2, 11, 25, .75) 0%, transparent 25%, transparent 75%, rgba(2, 11, 25, .88) 100%);
+    }
+
+    /* Header */
+    header {
+      position: absolute;
+      z-index: 5;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 74px;
+      padding: 0 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(2, 11, 25, .78);
+      border-bottom: 1px solid rgba(139, 178, 225, .14);
+      backdrop-filter: blur(10px);
+    }
+    .upeu { height: 42px; filter: brightness(0) invert(1); }
+    .career { display: flex; align-items: center; gap: 12px; }
+    .career img { width: 40px; height: 40px; object-fit: contain; }
+    .career small {
+      display: block;
+      color: #bdcbe0;
+      font: 600 10px/1 'Plus Jakarta Sans', sans-serif;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .career b {
+      display: block;
+      margin-top: 4px;
+      font-size: 13.5px;
+      letter-spacing: -.02em;
+    }
+
+    /* Contenido central alineado a la izquierda para despejar al minero en la montaña */
+    .wrap {
+      position: relative;
+      z-index: 2;
+      height: calc(100% - 124px);
+      margin-top: 74px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 6vw;
+      max-width: 840px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--gold);
+      font: 700 12.5px/1 'Plus Jakarta Sans', sans-serif;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      animation: fadeInDown .6s ease-out both;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 36px;
+      height: 2px;
+      border-radius: 4px;
+      background: var(--gold);
+    }
+
+    h1 {
+      font-size: clamp(54px, 5.6vw, 86px);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -.035em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      animation: zoomIn .7s cubic-bezier(.2, .8, .2, 1) .15s both;
+    }
+    h1 .w { color: #ffffff; }
+    h1 .g {
+      color: var(--gold);
+      text-shadow: 0 0 35px rgba(242, 183, 54, .55);
+    }
+
+    .verse {
+      font-size: clamp(16.5px, 1.5vw, 20.5px);
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.55;
+      color: #f1f5f9;
+      max-width: 48ch;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, .8);
+      margin-bottom: 12px;
+      animation: fadeInUp .65s ease-out .3s both;
+    }
+
+    .ref {
+      display: inline-block;
+      align-self: flex-start;
+      padding: 5px 16px;
+      background: rgba(7, 20, 38, .85);
+      border: 1px solid rgba(242, 183, 54, .45);
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--gold-soft);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+      margin-bottom: 24px;
+      animation: fadeInUp .65s ease-out .45s both;
+    }
+
+    /* Tarjeta del Equipo y Docente (Tipografía ejecutiva y legible) */
+    .team-card {
+      background: var(--navy-card);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--gold);
+      border-radius: 12px;
+      padding: 16px 24px;
+      backdrop-filter: blur(12px);
+      display: inline-flex;
+      flex-direction: column;
+      gap: 10px;
+      animation: fadeInUp .7s ease-out .6s both;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+    }
+    .team-names {
+      font-size: 17.5px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -.01em;
+    }
+    .team-names i {
+      font-style: normal;
+      color: var(--gold);
+      font-size: 12px;
+    }
+
+    .team-meta {
+      font-size: 13px;
+      font-weight: 500;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      line-height: 1.4;
+    }
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .meta-item .lb {
+      color: var(--gold);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: .08em;
+    }
+    .meta-item b {
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .meta-tag {
+      background: rgba(242, 183, 54, 0.16);
+      border: 1px solid rgba(242, 183, 54, 0.38);
+      color: var(--gold-soft);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: .05em;
+    }
+    .meta-sep {
+      color: rgba(139, 178, 225, .45);
+      font-size: 11px;
+    }
+
+    .location-tag {
+      position: absolute;
+      right: 48px;
+      bottom: 68px;
+      z-index: 3;
+      background: rgba(7, 20, 38, 0.90);
+      border: 1px solid rgba(242, 183, 54, 0.35);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: #dce7f5;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .location-tag i { color: var(--gold); font-style: normal; }
+
+    /* Footer */
+    footer {
+      position: absolute;
+      z-index: 5;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 50px;
+      padding: 0 48px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      border-top: 1px solid rgba(139, 178, 225, .14);
+      background: rgba(2, 11, 25, .86);
+      backdrop-filter: blur(8px);
+    }
+    .count {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #dce7f5;
+      font: 600 11.5px/1 'Plus Jakarta Sans', sans-serif;
+      letter-spacing: .12em;
+    }
+    .count::before {
+      content: "";
+      width: 36px;
+      height: 3px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--gold), rgba(242, 183, 54, .08));
+    }
+    .dots { display: flex; gap: 8px; }
+    .dots i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid rgba(139, 178, 225, .45);
+    }
+    .dots i.on {
+      width: 24px;
+      border-radius: 8px;
+      border-color: var(--gold);
+      background: var(--gold);
+    }
+    .brand-wrap {
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .brand {
+      color: #b8c6dc;
+      font: 600 11.5px/1 'Plus Jakarta Sans', sans-serif;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .fullscreen-hint {
+      color: #cbd5e1;
+      font: 600 11px/1 'Plus Jakarta Sans', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(139, 178, 225, .20);
+      background: rgba(7, 20, 38, 0.7);
+      transition: all .2s ease;
+    }
+    .fullscreen-hint:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    @keyframes fadeInDown {
+      0% { opacity: 0; transform: translateY(-12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(14px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes zoomIn {
+      0% { opacity: 0; transform: scale(.96); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+<section class="slide">
+  <!-- Foto de fondo real La Rinconada en Alta Resolución (2048x1152) -->
+  <div class="cbg" aria-hidden="true">
+    <img src="assets/rinconada_minero_hd.png" alt="Minero en La Rinconada Puno">
+  </div>
+
+  <header>
+    <img class="upeu" src="assets/upeu.png" alt="Universidad Peruana Unión">
+    <div class="career">
+      <img src="assets/ingenieria-sistemas.png" alt="Ingeniería de Sistemas">
+      <div>
+        <small>Escuela Profesional de</small>
+        <b>Ingeniería de Sistemas</b>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="eyebrow">SITRA-ORO · EQUIPO 05</div>
+    <h1><span class="w">MUCHAS </span><span class="g">GRACIAS</span></h1>
+    <p class="verse">&ldquo;Y todo lo que hac&eacute;is, hacedlo de coraz&oacute;n, como para el Se&ntilde;or y no para los hombres.&rdquo;</p>
+    <span class="ref">Colosenses 3:23</span>
+    
+    <div class="team-card">
+      <div class="team-names">
+        <span>Faijo Calisaya Helio Paul</span>
+        <i>●</i>
+        <span>Figueroa Chambi Jhymel Nelio</span>
+      </div>
+      <div class="team-meta">
+        <span class="meta-item"><span class="lb">Docente</span><b>Ing. Abel Angel Sull&oacute;n Macalup&uacute;</b></span>
+        <span class="meta-sep">●</span>
+        <span class="meta-item"><span class="lb">UPeU</span><b>Campus Juliaca</b></span>
+        <span class="meta-sep">●</span>
+        <span class="meta-tag">LP2 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="location-tag">
+    <i>🏔️</i> <span>LA RINCONADA · 5,100 M.S.N.M. · PUNO, PERÚ</span>
+  </div>
+
+  <footer>
+    <div class="count">05 / 05</div>
+    <div class="dots" aria-label="Navegación">
+      <i></i><i></i><i></i><i></i><i class="on"></i>
+    </div>
+    <div class="brand-wrap">
+      <span class="brand">SITRA-ORO · UPEU JULIACA</span>
+      <button class="fullscreen-hint" id="fsBtn" type="button" title="Pantalla completa (tecla F)">
+        ⛶ <span>pantalla completa</span>
+      </button>
+    </div>
+  </footer>
+</section>
+
+<script>
+  (() => {
+    "use strict";
+    const fsBtn = document.getElementById("fsBtn");
+    if (fsBtn) {
+      fsBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.();
+        } else {
+          document.exitFullscreen?.();
+        }
+      });
+    }
+  })();
+</script>
+</body>
+</html>

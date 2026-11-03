@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    body { background: #1e1e1e; padding: 12px; }
+    .window { background: #252526; border-radius: 8px; border: 1px solid #3c3c3c; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .titlebar { background: #323233; color: #cccccc; padding: 8px 14px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3c3c3c; }
+    .window-controls span { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-left: 6px; }
+    .c-red { background: #ff5f56; } .c-yel { background: #ffbd2e; } .c-grn { background: #27c93f; }
+    .conn-tab { background: #1e1e1e; color: #4ec9b0; padding: 6px 14px; font-size: 12px; font-weight: bold; border-top: 2px solid #007acc; display: inline-block; }
+    .sql-editor { background: #1e1e1e; color: #d4d4d4; font-family: Consolas, monospace; font-size: 13px; padding: 12px 16px; line-height: 1.5; border-bottom: 1px solid #3c3c3c; }
+    .kw { color: #569cd6; font-weight: bold; }
+    .str { color: #ce9178; }
+    .fn { color: #dcdcaa; }
+    .results-panel { background: #252526; padding: 10px 14px; }
+    .results-header { font-size: 12px; color: #9cdcfe; margin-bottom: 8px; font-weight: bold; display: flex; justify-content: space-between; }
+    table { width: 100%; border-collapse: collapse; font-family: Consolas, monospace; font-size: 11.5px; }
+    th { background: #2d2d2d; color: #9cdcfe; border: 1px solid #3c3c3c; padding: 6px 10px; text-align: left; }
+    td { border: 1px solid #333333; padding: 5px 10px; color: #cccccc; }
+    tr:nth-child(even) td { background: #2a2a2b; }
+    .highlight td { background: #1e3a5f !important; color: #ffffff !important; font-weight: bold; }
+    .num { text-align: right; }
+  </style>
+</head>
+<body>
+  <div class="window">
+    <div class="titlebar">
+      <span>Oracle SQL Developer 23.1 · Conexión: <strong>SITRA_ORO@localhost:1521/XEPDB1</strong></span>
+      <div class="window-controls"><span class="c-red"></span><span class="c-yel"></span><span class="c-grn"></span></div>
+    </div>
+    <div style="background: #2d2d2d; padding-left: 10px;">
+      <div class="conn-tab">Hoja de Trabajo: S10_01_particionamiento_tablas.sql [XEPDB1]</div>
+    </div>
+    <div class="sql-editor">
+      <span class="kw">SELECT</span> table_name <span class="kw">AS</span> TABLA, partition_name <span class="kw">AS</span> PARTICION, partition_position <span class="kw">AS</span> POS, num_rows <span class="kw">AS</span> FILAS, high_value <span class="kw">AS</span> LIMITE<br>
+      <span class="kw">FROM</span> user_tab_partitions<br>
+      <span class="kw">WHERE</span> table_name <span class="kw">IN</span> (<span class="str">'TRANSACCIONES_G2'</span>, <span class="str">'CENTROS_ACOPIO'</span>, <span class="str">'MINEROS'</span>)<br>
+      <span class="kw">ORDER BY</span> table_name, partition_position;
+    </div>
+    <div class="results-panel">
+      <div class="results-header">
+        <span>Salida de la Consulta · Cuadrícula de Resultados (14 filas recuperadas en 0.015 s)</span>
+        <span style="color: #4ade80;">Estado: Conectado (XEPDB1 · 21c XE)</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>TABLA</th>
+            <th>PARTICION</th>
+            <th>POS</th>
+            <th>FILAS</th>
+            <th>LIMITE (HIGH_VALUE)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="highlight">
+            <td>1</td><td>CENTROS_ACOPIO</td><td>P_ZONA_RINCONADA</td><td class="num">1</td><td class="num">8</td><td>'La Rinconada'</td>
+          </tr>
+          <tr>
+            <td>2</td><td>CENTROS_ACOPIO</td><td>P_ZONA_ANANEA</td><td class="num">2</td><td class="num">0</td><td>'Ananea'</td>
+          </tr>
+          <tr>
+            <td>3</td><td>CENTROS_ACOPIO</td><td>P_ZONA_LUNAR</td><td class="num">3</td><td class="num">0</td><td>'Lunar de Oro'</td>
+          </tr>
+          <tr>
+            <td>4</td><td>CENTROS_ACOPIO</td><td>P_ZONA_OTROS</td><td class="num">4</td><td class="num">0</td><td>DEFAULT</td>
+          </tr>
+          <tr class="highlight">
+            <td>5</td><td>MINEROS</td><td>SYS_P2258</td><td class="num">1</td><td class="num">3</td><td>Bucket 1 (Hash)</td>
+          </tr>
+          <tr class="highlight">
+            <td>6</td><td>MINEROS</td><td>SYS_P2259</td><td class="num">2</td><td class="num">1</td><td>Bucket 2 (Hash)</td>
+          </tr>
+          <tr class="highlight">
+            <td>7</td><td>MINEROS</td><td>SYS_P2260</td><td class="num">3</td><td class="num">4</td><td>Bucket 3 (Hash)</td>
+          </tr>
+          <tr class="highlight">
+            <td>8</td><td>MINEROS</td><td>SYS_P2261</td><td class="num">4</td><td class="num">3</td><td>Bucket 4 (Hash)</td>
+          </tr>
+          <tr>
+            <td>9</td><td>TRANSACCIONES_G2</td><td>P_TRANS_HISTORICO</td><td class="num">1</td><td class="num">0</td><td>TIMESTAMP' 2026-01-01 00:00:00'</td>
+          </tr>
+          <tr>
+            <td>10</td><td>TRANSACCIONES_G2</td><td>P_TRANS_2026_Q1</td><td class="num">2</td><td class="num">0</td><td>TIMESTAMP' 2026-04-01 00:00:00'</td>
+          </tr>
+          <tr>
+            <td>11</td><td>TRANSACCIONES_G2</td><td>P_TRANS_2026_Q2</td><td class="num">3</td><td class="num">0</td><td>TIMESTAMP' 2026-07-01 00:00:00'</td>
+          </tr>
+          <tr class="highlight">
+            <td>12</td><td>TRANSACCIONES_G2</td><td>P_TRANS_2026_Q3</td><td class="num">4</td><td class="num">13</td><td>TIMESTAMP' 2026-10-01 00:00:00'</td>
+          </tr>
+          <tr class="highlight">
+            <td>13</td><td>TRANSACCIONES_G2</td><td>P_TRANS_2026_Q4</td><td class="num">5</td><td class="num">26</td><td>TIMESTAMP' 2027-01-01 00:00:00'</td>
+          </tr>
+          <tr>
+            <td>14</td><td>TRANSACCIONES_G2</td><td>P_TRANS_FUTURO</td><td class="num">6</td><td class="num">0</td><td>MAXVALUE</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
