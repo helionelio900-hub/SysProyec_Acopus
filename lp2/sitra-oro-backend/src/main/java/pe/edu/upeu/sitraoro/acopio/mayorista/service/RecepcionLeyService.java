@@ -55,8 +55,16 @@ public class RecepcionLeyService {
     public List<RecepcionLeyResponse> listar(Long idCentro) {
         var items = idCentro == null ? recepciones.findAllByOrderByFechaDescIdRecepcionDesc()
                 : recepciones.findByCentroAcopio_IdCentroAcopioOrderByFechaDescIdRecepcionDesc(idCentro);
-        Set<Long> agrupadas = new HashSet<>(jdbc.queryForList("SELECT ID_ORIGEN FROM RECEPCION_ACUMULADA", Long.class));
+        final Set<Long> agrupadas = obtenerIdsAgrupadas();
         return items.stream().filter(r -> !agrupadas.contains(r.getIdRecepcion())).map(this::respuesta).toList();
+    }
+
+    private Set<Long> obtenerIdsAgrupadas() {
+        try {
+            return new HashSet<>(jdbc.queryForList("SELECT ID_ORIGEN FROM RECEPCION_ACUMULADA", Long.class));
+        } catch (org.springframework.dao.DataAccessException e) {
+            return Collections.emptySet();
+        }
     }
     public record ReporteCompras(java.time.LocalDate desde, java.time.LocalDate hasta, long operaciones,
       long partidas, BigDecimal pesoFundidoG, BigDecimal subtotal, BigDecimal adelanto, BigDecimal total,
@@ -86,7 +94,7 @@ public class RecepcionLeyService {
             var revision = request.entregas().stream().filter(o -> o.id().equals(id)).findFirst().orElseThrow().revision();
             if (!Objects.equals(r.getRevisionLey(), revision) || idExportacion(id) != null
                     || detalles.existsByRecepcion_IdRecepcion(id)
-                    || !jdbc.queryForList("SELECT ID_ORIGEN FROM RECEPCION_ACUMULADA WHERE ID_ORIGEN = ?", Long.class, id).isEmpty())
+                    || esAcumulada(id))
                 throw new ConflictException("Una entrega ya fue procesada. Actualiza el resumen.");
             if (centro == null) centro = r.getCentroAcopio().getIdCentroAcopio();
             if (!centro.equals(r.getCentroAcopio().getIdCentroAcopio())) throw new IllegalArgumentException("Las entregas deben pertenecer al mismo acopiador");
@@ -110,7 +118,7 @@ public class RecepcionLeyService {
     public RecepcionLeyResponse guardar(Long id, RecepcionLeyRequest request) {
         var calculo = calcular(request);
         var recepcion = recepciones.bloquearPorId(id).orElseThrow(() -> new ResourceNotFoundException("Lote recibido no encontrado: " + id));
-        if (!jdbc.queryForList("SELECT ID_ORIGEN FROM RECEPCION_ACUMULADA WHERE ID_ORIGEN = ?", Long.class, id).isEmpty())
+        if (esAcumulada(id))
             throw new ConflictException("La entrega pertenece a un análisis acumulado");
         if (idExportacion(id) != null) throw new ConflictException("El lote recibido ya integra un lote de exportación y no puede modificarse");
         if (!Objects.equals(recepcion.getRevisionLey(), request.revision()))
@@ -153,6 +161,14 @@ public class RecepcionLeyService {
         return new RecepcionLeyResponse(r.getIdRecepcion(), r.getFecha(), r.getCentroAcopio() == null ? -r.getIdRecepcion() : r.getCentroAcopio().getIdCentroAcopio(), r.getNombreAcopiador(),
                 r.getRevisionLey(), exportacion != null ? "EN_LOTE" : filas.isEmpty() ? "PENDIENTE" : "VALORIZADO", exportacion,
                 !filas.isEmpty() ? filas.stream().map(RecepcionLeyResponse.Detalle::pesoSinFundirG).reduce(BigDecimal.ZERO, BigDecimal::add) : sumarPeso(r, false), pesoRojo, pesoVerde, peso, subtotal, adelanto, filas.isEmpty() ? numeroHistorico(r.getTotal()) : subtotal.subtract(adelanto), filas);
+    }
+
+    private boolean esAcumulada(Long id) {
+        try {
+            return !jdbc.queryForList("SELECT ID_ORIGEN FROM RECEPCION_ACUMULADA WHERE ID_ORIGEN = ?", Long.class, id).isEmpty();
+        } catch (org.springframework.dao.DataAccessException e) {
+            return false;
+        }
     }
 
     private Long idExportacion(Long id) {

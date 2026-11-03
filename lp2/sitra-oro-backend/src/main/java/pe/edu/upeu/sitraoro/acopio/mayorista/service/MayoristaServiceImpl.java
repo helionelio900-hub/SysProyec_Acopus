@@ -2,6 +2,8 @@ package pe.edu.upeu.sitraoro.acopio.mayorista.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.sitraoro.acopio.mayorista.dto.DetalleLiquidacionResponse;
@@ -37,6 +39,15 @@ public class MayoristaServiceImpl implements MayoristaService {
     public LiquidacionG1Response procesarLiquidacionSemanal(LiquidacionG1Request request) {
         throw new ConflictException(
                 "El cálculo del pago al acopiador no está definido. Usa el precio referencial solo para consulta.");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<LiquidacionG1Response> buscar(EstadoLiquidacion estado, LocalDateTime desde, LocalDateTime hasta,
+                                             Pageable pageable) {
+        validarRango(desde, hasta);
+        return liquidacionG1Repository.buscar(estado, desde, hasta, pageable)
+                .map(this::mapToResponse);
     }
 
     @Override

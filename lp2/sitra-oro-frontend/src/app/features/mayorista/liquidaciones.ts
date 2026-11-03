@@ -1,24 +1,12 @@
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { OperacionesService } from '../../core/api/operaciones.service';
+import { MercadoLiveService, DatosOroMercado, DatosDolarMercado } from '../../core/api/mercado-live.service';
 
-export interface DatosOroMercado {
-  bid: number;
-  ask: number;
-  ultimo: number;
-  cambio24h: number;
-  max24h: number;
-  min24h: number;
-}
-
-export interface DatosDolarMercado {
-  interbancario: number;
-  sunatCompra?: number;
-  sunatVenta?: number;
-}
+export type { DatosOroMercado, DatosDolarMercado };
 
 @Component({
   selector: 'app-liquidaciones-mayorista',
@@ -26,7 +14,7 @@ export interface DatosDolarMercado {
   templateUrl: './liquidaciones.html',
   styleUrl: './liquidaciones.css',
 })
-export class LiquidacionesMayorista implements OnInit, AfterViewInit {
+export class LiquidacionesMayorista implements OnInit, AfterViewInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly http = inject(HttpClient);
   private readonly service = inject(OperacionesService);
@@ -36,10 +24,13 @@ export class LiquidacionesMayorista implements OnInit, AfterViewInit {
   protected readonly preciosColor = signal<{ color: string; precioGramoPen: number; fechaPublicacion: string }[]>([]);
   protected readonly colores = ['ROJO', 'VERDE'] as const;
 
-  // Monitoreo en vivo de mercado
-  protected readonly oroMercado = signal<DatosOroMercado | null>(null);
-  protected readonly dolarMercado = signal<DatosDolarMercado | null>(null);
-  protected readonly cargandoMercado = signal(false);
+  // Monitoreo en vivo de mercado delegado al servicio global
+  protected readonly mercado = inject(MercadoLiveService);
+  protected readonly oroMercado = this.mercado.oroMercado;
+  protected readonly dolarMercado = this.mercado.dolarMercado;
+  protected readonly cargandoMercado = this.mercado.cargandoMercado;
+  protected readonly ultimoTickHora = this.mercado.ultimoTickHora;
+  protected readonly titilarPrecio = this.mercado.titilarPrecio;
   protected readonly tipoGrafica = signal<'DUAL' | 'ORO' | 'DOLAR'>('DUAL');
 
   protected readonly calculandoPrecio = signal(false);
@@ -77,81 +68,24 @@ export class LiquidacionesMayorista implements OnInit, AfterViewInit {
       this.errorPrecio.set('');
     });
 
-    this.cargarMercado();
+    // Monitoreo gestionado por MercadoLiveService
   }
 
   ngAfterViewInit(): void {
     this.renderGrafica();
   }
 
+  ngOnDestroy(): void {}
+
   protected cargarMercado(): void {
-    this.cargandoMercado.set(true);
-
-    // 1. Oro Spot (Kitco / PAXG respaldo 1:1 onza Troy física LBMA)
-    this.http.get<any>('https://api.binance.com/api/v3/ticker/24hr?symbol=PAXGUSDT').subscribe({
-      next: (data) => {
-        this.oroMercado.set({
-          bid: Number(data.bidPrice),
-          ask: Number(data.askPrice),
-          ultimo: Number(data.lastPrice),
-          cambio24h: Number(data.priceChangePercent),
-          max24h: Number(data.highPrice),
-          min24h: Number(data.lowPrice),
-        });
-        this.cargandoMercado.set(false);
-      },
-      error: () => {
-        // Fallback referencial
-        this.oroMercado.set({
-          bid: 4174.70,
-          ask: 4176.70,
-          ultimo: 4175.33,
-          cambio24h: 0.25,
-          max24h: 4190.70,
-          min24h: 4156.70,
-        });
-        this.cargandoMercado.set(false);
-      },
-    });
-
-    // 2. Dólar Perú (USD/PEN)
-    this.http.get<any>('https://open.er-api.com/v6/latest/USD').subscribe({
-      next: (data) => {
-        const pen = data?.rates?.PEN ?? 3.4365;
-        this.dolarMercado.update((prev) => ({
-          interbancario: pen,
-          sunatCompra: prev?.sunatCompra ?? 3.423,
-          sunatVenta: prev?.sunatVenta ?? 3.431,
-        }));
-      },
-      error: () => {
-        this.dolarMercado.set({
-          interbancario: 3.4365,
-          sunatCompra: 3.423,
-          sunatVenta: 3.431,
-        });
-      },
-    });
-
-    // 3. SUNAT oficial (Perú)
-    this.http.get<any>('https://api.apis.net.pe/v1/tipo-cambio-sunat').subscribe({
-      next: (data) => {
-        if (data?.compra && data?.venta) {
-          this.dolarMercado.update((prev) => ({
-            interbancario: prev?.interbancario ?? Number(data.venta),
-            sunatCompra: Number(data.compra),
-            sunatVenta: Number(data.venta),
-          }));
-        }
-      },
-      error: () => {},
-    });
+    this.mercado.recargar();
   }
 
   protected aplicarOro(): void {
     const oro = this.oroMercado();
     if (!oro) return;
-    this.form.patchValue({ cotizacionOnzaUsd: Number(oro.bid.toFixed(2)) });
+    const precio = oro.ultimo || oro.bid;
+    this.form.patchValue({ cotizacionOnzaUsd: Number(precio.toFixed(2)) });
   }
 
   protected aplicarDolar(): void {

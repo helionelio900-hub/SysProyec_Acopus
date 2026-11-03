@@ -1,0 +1,15 @@
+export const environment = {
+  production: true,
+  apiBaseUrl: 'http://localhost:48088',
+  backendUrl: 'http://localhost:48088',
+  keycloak: {
+    issuer: 'http://localhost:48080/realms/Sitra_oro',
+    clientId: 'sitra-oro-frontend',
+    redirectUri: 'http://localhost:4300/auth/callback',
+    scope: 'openid profile email',
+  },
+  keycloakUrl: 'http://localhost:48080/realms/Sitra_oro/protocol/openid-connect/token',
+  keycloakClientId: 'sitra-oro-frontend',
+  tokenLifespanSeconds: 300,
+  tokenLifespanDemoSeconds: 30,
+};

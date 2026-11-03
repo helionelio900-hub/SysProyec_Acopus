@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface ResumenDashboard {
@@ -221,6 +221,14 @@ export interface GuardarLoteExportacion {
   fecha: string;
   partidas: { idLiquidacionG1: number; lecturaDecimal: number }[];
 }
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
 export interface ReporteLiquidaciones {
   agregado: { totalLiquidaciones: number; montoTotal: number; ticketPromedio: number };
   liquidaciones: {
@@ -343,12 +351,25 @@ export class OperacionesService {
   eliminarRecepcionMayorista(id: number): Observable<void> {
     return this.http.delete<void>(this.url(`/api/v1/mayorista/recepciones/${id}`));
   }
-  liquidaciones(estado?: string, desde?: string, hasta?: string): Observable<Liquidacion[]> {
-    let params = new HttpParams().set('ordenarPor', 'fechaLiquidacion').set('direccion', 'DESC');
+  buscarLiquidacionesPaginado(
+    estado?: string,
+    desde?: string,
+    hasta?: string,
+    page = 0,
+    size = 20,
+    sort = 'fechaLiquidacion,desc',
+  ): Observable<PageResponse<Liquidacion>> {
+    let params = new HttpParams().set('page', page).set('size', size).set('sort', sort);
     if (estado) params = params.set('estado', estado);
     if (desde) params = params.set('desde', desde);
     if (hasta) params = params.set('hasta', hasta);
-    return this.http.get<Liquidacion[]>(this.url('/api/v1/mayorista/liquidaciones'), { params });
+    return this.http.get<PageResponse<Liquidacion>>(this.url('/api/v1/mayorista/liquidaciones'), { params });
+  }
+
+  liquidaciones(estado?: string, desde?: string, hasta?: string): Observable<Liquidacion[]> {
+    return this.buscarLiquidacionesPaginado(estado, desde, hasta, 0, 50).pipe(
+      map(res => res.content)
+    );
   }
   reporteLiquidaciones(estado?: string, desde?: string, hasta?: string): Observable<ReporteLiquidaciones> {
     let params = new HttpParams();

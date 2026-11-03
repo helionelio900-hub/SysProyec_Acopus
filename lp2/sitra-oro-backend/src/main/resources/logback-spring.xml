@@ -11,15 +11,25 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/bomerp.log</file>
+        <file>logs/sitraoro.log</file>
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/bomerp-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>logs/sitraoro-%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>7</maxHistory>
         </rollingPolicy>
     </appender>
+
+    <springProfile name="dev">
+        <logger name="pe.edu.upeu.sitraoro" level="DEBUG"/>
+    </springProfile>
+
+    <springProfile name="prod">
+        <logger name="pe.edu.upeu.sitraoro" level="INFO"/>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="org.hibernate" level="WARN"/>
+    </springProfile>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

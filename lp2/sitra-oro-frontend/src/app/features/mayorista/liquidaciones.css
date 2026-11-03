@@ -208,6 +208,12 @@
   font-weight: 900;
   color: #f8fafc;
   letter-spacing: -0.01em;
+  transition: color 0.2s ease-out;
+}
+
+.caja-precio .monto.precio-flash {
+  color: #38bdf8 !important;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
 }
 
 .caja-precio .monto-sec {

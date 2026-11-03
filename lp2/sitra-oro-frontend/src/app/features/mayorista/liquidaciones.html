@@ -35,7 +35,7 @@
             <span class="activo-icono">🥇</span>
             <div>
               <span class="activo-nombre">ORO SPOT (XAU / USD)</span>
-              <span class="activo-sub">Kitco / Bullion Spot</span>
+              <span class="activo-sub">Kitco / Bullion Spot @if (ultimoTickHora()) { · En vivo: {{ ultimoTickHora() }} }</span>
             </div>
           </div>
           @if (oroMercado(); as oro) {
@@ -48,18 +48,18 @@
         @if (oroMercado(); as oro) {
           <div class="precio-cuerpo">
             <div class="caja-precio principal">
-              <span class="label">BID (Precio Compra)</span>
-              <strong class="monto">$ {{ oro.bid | number:'1.2-2' }}</strong>
+              <span class="label">PRECIO SPOT (EN VIVO)</span>
+              <strong class="monto" [class.precio-flash]="titilarPrecio()">$ {{ oro.ultimo | number:'1.2-2' }}</strong>
             </div>
             <div class="caja-precio">
-              <span class="label">ASK</span>
-              <strong class="monto-sec">$ {{ oro.ask | number:'1.2-2' }}</strong>
+              <span class="label">BID / ASK</span>
+              <strong class="monto-sec">$ {{ oro.bid | number:'1.2-2' }} / ${{ oro.ask | number:'1.2-2' }}</strong>
             </div>
           </div>
           <div class="rango-barra">
             <span class="rango-texto">Rango 24h: <b>${{ oro.min24h | number:'1.1-1' }}</b> - <b>${{ oro.max24h | number:'1.1-1' }}</b></span>
             <button type="button" class="btn-copiar-campo" (click)="aplicarOro()">
-              Usar ${{ oro.bid | number:'1.2-2' }} en Onza
+              Usar ${{ oro.ultimo | number:'1.2-2' }} en Onza
             </button>
           </div>
         } @else {

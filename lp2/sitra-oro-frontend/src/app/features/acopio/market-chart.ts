@@ -1,41 +1,119 @@
-import { Component, computed, inject } from '@angular/core';
-import { MarketCotizacionesService } from '../../core/api/market-cotizaciones.service';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { AfterViewInit, Component, ElementRef, ViewChild, inject, signal } from '@angular/core';
+import { MercadoLiveService } from '../../core/api/mercado-live.service';
 
 @Component({
   selector: 'app-market-chart',
+  imports: [CommonModule, DecimalPipe],
   templateUrl: './market-chart.html',
   styleUrl: './market-chart.css',
 })
+export class MarketChart implements AfterViewInit {
+  protected readonly mercado = inject(MercadoLiveService);
 
-export class MarketChart {
-  protected readonly market = inject(MarketCotizacionesService);
+  @ViewChild('contenedorGrafica') private contenedorGrafica?: ElementRef<HTMLDivElement>;
 
-  protected readonly sparklineData = computed(() => {
-    const pts = this.market.historialSemanal();
-    if (!pts.length) return { line: '', area: '', min: 0, max: 0, points: [] };
+  protected readonly oroMercado = this.mercado.oroMercado;
+  protected readonly dolarMercado = this.mercado.dolarMercado;
+  protected readonly cargandoMercado = this.mercado.cargandoMercado;
+  protected readonly ultimoTickHora = this.mercado.ultimoTickHora;
+  protected readonly titilarPrecio = this.mercado.titilarPrecio;
 
-    const width = 320;
-    const height = 70;
-    const padding = 8;
+  protected readonly tipoGrafica = signal<'DUAL' | 'ORO' | 'DOLAR'>('DUAL');
 
-    const values = pts.map((p) => p.precioPen);
-    const min = Math.min(...values) - 1;
-    const max = Math.max(...values) + 1;
-    const range = max - min || 1;
+  ngAfterViewInit(): void {
+    this.renderGrafica();
+  }
 
-    const stepX = (width - padding * 2) / (pts.length - 1);
+  protected cambiarGrafica(tipo: 'DUAL' | 'ORO' | 'DOLAR'): void {
+    this.tipoGrafica.set(tipo);
+    this.renderGrafica();
+  }
 
-    const coords = pts.map((p, i) => {
-      const x = padding + i * stepX;
-      const y = height - padding - ((p.precioPen - min) / range) * (height - padding * 2);
-      return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
-    });
+  protected recargar(): void {
+    this.mercado.recargar();
+  }
 
-    const linePath = coords.map((c, i) => (i === 0 ? `M ${c.x},${c.y}` : `L ${c.x},${c.y}`)).join(' ');
-    const last = coords[coords.length - 1];
-    const first = coords[0];
-    const areaPath = `${linePath} L ${last.x},${height} L ${first.x},${height} Z`;
+  private renderGrafica(): void {
+    if (!this.contenedorGrafica) return;
+    const el = this.contenedorGrafica.nativeElement;
+    el.innerHTML = '';
 
-    return { line: linePath, area: areaPath, min, max, points: coords };
-  });
+    const tipo = this.tipoGrafica();
+
+    if (tipo === 'DUAL') {
+      const widgetWrap = document.createElement('div');
+      widgetWrap.className = 'tradingview-widget-container';
+      widgetWrap.style.height = '420px';
+      widgetWrap.style.width = '100%';
+
+      const inner = document.createElement('div');
+      inner.className = 'tradingview-widget-container__widget';
+      inner.style.height = '100%';
+      inner.style.width = '100%';
+      widgetWrap.appendChild(inner);
+
+      const s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js';
+      s.async = true;
+      s.text = JSON.stringify({
+        symbols: [
+          ['Oro Spot Kitco', 'OANDA:XAUUSD|1D'],
+          ['Dólar Perú Bloomberg', 'FX_IDC:USDPEN|1D'],
+        ],
+        chartOnly: false,
+        width: '100%',
+        height: 420,
+        locale: 'es',
+        colorTheme: 'dark',
+        autosize: true,
+        showVolume: false,
+        scalePosition: 'right',
+        scaleMode: 'Normal',
+        fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+        fontSize: '10',
+        noTimeScale: false,
+        valuesTracking: '1',
+        chartType: 'area',
+        lineColor: '#d4af37',
+        bottomColor: 'rgba(212, 175, 55, 0.05)',
+        topColor: 'rgba(212, 175, 55, 0.4)',
+      });
+      widgetWrap.appendChild(s);
+      el.appendChild(widgetWrap);
+    } else {
+      const symbol = tipo === 'ORO' ? 'OANDA:XAUUSD' : 'FX_IDC:USDPEN';
+      const widgetWrap = document.createElement('div');
+      widgetWrap.className = 'tradingview-widget-container';
+      widgetWrap.style.height = '450px';
+      widgetWrap.style.width = '100%';
+
+      const inner = document.createElement('div');
+      inner.className = 'tradingview-widget-container__widget';
+      inner.style.height = 'calc(100% - 32px)';
+      inner.style.width = '100%';
+      widgetWrap.appendChild(inner);
+
+      const s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+      s.async = true;
+      s.text = JSON.stringify({
+        width: '100%',
+        height: '450',
+        symbol: symbol,
+        interval: 'D',
+        timezone: 'America/Lima',
+        theme: 'dark',
+        style: '1',
+        locale: 'es',
+        allow_symbol_change: true,
+        calendar: false,
+        support_host: 'https://www.tradingview.com',
+      });
+      widgetWrap.appendChild(s);
+      el.appendChild(widgetWrap);
+    }
+  }
 }

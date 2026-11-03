@@ -1,6 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, effect, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { MercadoLiveService } from './mercado-live.service';
 
 export interface CotizacionMarket {
   simbolo: string;
@@ -22,6 +23,7 @@ export interface SparklinePoint {
 })
 export class MarketCotizacionesService {
   private readonly http = inject(HttpClient);
+  private readonly mercadoLive = inject(MercadoLiveService);
 
   // Ticker items
   readonly tickers = signal<CotizacionMarket[]>([
@@ -88,6 +90,62 @@ export class MarketCotizacionesService {
 
   constructor() {
     this.sincronizarConBackend();
+    this.sincronizarConMercadoLive();
+  }
+
+  private sincronizarConMercadoLive(): void {
+    effect(() => {
+      const oro = this.mercadoLive.oroMercado();
+      const dolar = this.mercadoLive.dolarMercado();
+
+      if (!oro && !dolar) return;
+
+      const oroVal = oro?.ultimo || oro?.bid;
+      const dolarVal = dolar?.sunatVenta || dolar?.interbancario;
+      const cambioOro = oro?.cambio24h ?? 0;
+
+      this.tickers.update((items) =>
+        items.map((item) => {
+          if (item.simbolo === 'XAU/USD' && oroVal) {
+            return { ...item, valor: oroVal, variacion24h: Number(cambioOro.toFixed(2)) };
+          }
+          if (item.simbolo === 'USD/PEN' && dolarVal) {
+            return { ...item, valor: Number(dolarVal.toFixed(3)) };
+          }
+          if (item.simbolo === 'XAU/PEN' && oroVal && dolarVal) {
+            return {
+              ...item,
+              valor: Number((oroVal * dolarVal).toFixed(2)),
+              variacion24h: Number(cambioOro.toFixed(2)),
+            };
+          }
+          if (item.simbolo === 'ORO 24K' && oroVal && dolarVal) {
+            const gramo24k = (oroVal * dolarVal) / 31.1035;
+            return {
+              ...item,
+              valor: Number(gramo24k.toFixed(2)),
+              variacion24h: Number(cambioOro.toFixed(2)),
+            };
+          }
+          return item;
+        }),
+      );
+
+      if (oroVal && dolarVal) {
+        const gramoHoy = (oroVal * dolarVal) / 31.1035;
+        this.historialSemanal.update((pts) => {
+          const nuevos = [...pts];
+          if (nuevos.length > 0) {
+            nuevos[nuevos.length - 1] = {
+              dia: 'Hoy',
+              precioPen: Number(gramoHoy.toFixed(2)),
+              precioUsd: Number(oroVal.toFixed(2)),
+            };
+          }
+          return nuevos;
+        });
+      }
+    });
   }
 
   sincronizarConBackend(): void {

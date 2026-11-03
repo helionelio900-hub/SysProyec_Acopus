@@ -7,6 +7,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { OperacionesService, ResumenDashboard } from '../../core/api/operaciones.service';
 import { MarketCotizacionesService } from '../../core/api/market-cotizaciones.service';
+import { MercadoLiveService } from '../../core/api/mercado-live.service';
 import { MarketChart } from './market-chart';
 
 @Component({
@@ -18,6 +19,7 @@ import { MarketChart } from './market-chart';
 export class InicioAcopio implements OnInit {
   private readonly operaciones = inject(OperacionesService);
   protected readonly market = inject(MarketCotizacionesService);
+  protected readonly mercado = inject(MercadoLiveService);
 
   protected readonly resumen = signal<ResumenDashboard | null>(null);
   protected readonly cargando = signal(true);

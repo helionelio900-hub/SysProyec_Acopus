@@ -16,6 +16,7 @@ public class ConsultaDniController {
     private final ConcurrentHashMap<String, Ventana> limites = new ConcurrentHashMap<>();
     private record Ventana(long inicio, int consultas) {}
     public record Resultado(String nombresApellidos) {}
+    public record ResultadoRuc(String ruc, String razonSocial, String direccion, String estado, String condicion) {}
 
     public ConsultaDniController(@Value("${sitra.identidad.codart-token:}") String token) {
         this.token = token;
@@ -33,7 +34,7 @@ public class ConsultaDniController {
         limites.entrySet().removeIf(e -> ahora - e.getValue().inicio() >= 60_000);
         Ventana ventana = limites.compute(request.getRemoteAddr(), (ip, anterior) ->
                 anterior == null ? new Ventana(ahora, 1) : new Ventana(anterior.inicio(), anterior.consultas() + 1));
-        if (ventana.consultas() > 5) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Espera un minuto antes de volver a consultar");
+        if (ventana.consultas() > 10) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Espera un minuto antes de volver a consultar");
         try {
             Map<?, ?> respuesta = cliente.get().uri("/api/v1/consultas/reniec/dni/{dni}", dni)
                     .headers(h -> { h.setBearerAuth(token); h.setContentType(org.springframework.http.MediaType.APPLICATION_JSON); })
@@ -48,6 +49,32 @@ public class ConsultaDniController {
             return new Resultado(nombre);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se pudo consultar el DNI. Ingresa tus nombres manualmente");
+        }
+    }
+
+    @GetMapping("/ruc/{ruc}")
+    public ResultadoRuc consultarRuc(@PathVariable String ruc, jakarta.servlet.http.HttpServletRequest request) {
+        if (!ruc.matches("\\d{11}")) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ingresa un RUC de 11 dígitos");
+        if (token.isBlank()) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Consulta de RUC no configurada");
+        long ahora = System.currentTimeMillis();
+        limites.entrySet().removeIf(e -> ahora - e.getValue().inicio() >= 60_000);
+        Ventana ventana = limites.compute(request.getRemoteAddr(), (ip, anterior) ->
+                anterior == null ? new Ventana(ahora, 1) : new Ventana(anterior.inicio(), anterior.consultas() + 1));
+        if (ventana.consultas() > 15) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Espera un minuto antes de volver a consultar");
+        try {
+            Map<?, ?> respuesta = cliente.get().uri("/api/v1/consultas/sunat/ruc/{ruc}", ruc)
+                    .headers(h -> { h.setBearerAuth(token); h.setContentType(org.springframework.http.MediaType.APPLICATION_JSON); })
+                    .retrieve().body(Map.class);
+            if (respuesta == null || !Boolean.TRUE.equals(respuesta.get("success"))) throw new IllegalStateException();
+            if (!(respuesta.get("result") instanceof Map<?, ?> datos)) throw new IllegalStateException();
+            String razonSocial = campo(datos, "razon_social", "razonSocial", "nombre_o_razon_social");
+            String direccion = campo(datos, "direccion", "domicilio_fiscal");
+            String estado = campo(datos, "estado");
+            String condicion = campo(datos, "condicion");
+            if (razonSocial.isBlank()) throw new IllegalStateException("Razón social no encontrada");
+            return new ResultadoRuc(ruc, razonSocial, direccion, estado, condicion);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "No se pudo consultar el RUC en SUNAT. Ingresa los datos manualmente");
         }
     }
     private static String campo(Map<?, ?> datos, String... claves) {

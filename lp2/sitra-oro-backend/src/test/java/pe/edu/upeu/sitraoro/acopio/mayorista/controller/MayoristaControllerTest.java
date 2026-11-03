@@ -147,9 +147,10 @@ class MayoristaControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/mayorista/liquidaciones - Consulta con filtros/orden (200 OK)")
+    @DisplayName("GET /api/v1/mayorista/liquidaciones - Consulta paginada (200 OK)")
     void buscarLiquidaciones_200() throws Exception {
-        when(mayoristaService.buscar(any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(mayoristaService.buscar(any(), any(), any(), any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
 
         mockMvc.perform(get("/api/v1/mayorista/liquidaciones"))
                 .andExpect(status().isOk());

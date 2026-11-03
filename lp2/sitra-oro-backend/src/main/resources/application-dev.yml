@@ -8,6 +8,10 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: oracle.jdbc.OracleDriver
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   jpa:
     open-in-view: false
     hibernate:
@@ -31,7 +35,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: "*"
   endpoint:
     health:
       show-details: always
@@ -45,4 +49,7 @@ sitraoro:
     mayorista:
       documento: ${SITRAORO_BOOTSTRAP_MAYORISTA_DOCUMENTO:}
       clave: ${SITRAORO_BOOTSTRAP_MAYORISTA_CLAVE:}
+sitra:
+  identidad:
+    codart-token: ${SITRA_IDENTIDAD_CODART_TOKEN:Ia6TNace6uayn8OrukeiWuzTiGcy4GKxNCQe5fOKbNOzozJmR8ApQwRkbNmy}
 

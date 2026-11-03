@@ -7,6 +7,7 @@ import {
   ZonaAcopio,
   Liquidacion,
   ReporteLiquidaciones,
+  PageResponse,
   PrecioReferencial,
   RecepcionLey, GuardarRecepcionLey, CalculoLey, LoteExportacion,
 } from '../../core/api/operaciones.service';
@@ -67,6 +68,10 @@ export class MayoristaPreviewService {
     }));
   }
   lotesExportacion(): Observable<LoteExportacion[]> { return of(structuredClone(this.lotesLeyDemo)); }
+  eliminarRecepcionMayorista(id: number): Observable<void> {
+    this.recepcionesLeyDemo = this.recepcionesLeyDemo.filter(r => r.idRecepcion !== id);
+    return of(void 0);
+  }
   enviarRecepcionesALote(ids: number[]): Observable<LoteExportacion> {
     const recibidas = this.recepcionesLeyDemo.filter(r => ids.includes(r.idRecepcion));
     const lote: LoteExportacion = {
@@ -166,6 +171,17 @@ export class MayoristaPreviewService {
       tipoCambioUsdPen,
       precioGramoUsd: Math.round((cotizacionOnzaUsd / 31.1035) * 10000) / 10000,
       precioGramoPen: Math.round((cotizacionOnzaUsd * tipoCambioUsdPen / 31.1035) * 100) / 100,
+    });
+  }
+
+  buscarLiquidacionesPaginado(): Observable<PageResponse<Liquidacion>> {
+    const list = this.liquidacionesDemo.map((item) => ({ ...item, detalles: [...item.detalles] }));
+    return of({
+      content: list,
+      totalElements: list.length,
+      totalPages: 1,
+      size: list.length,
+      number: 0,
     });
   }
 

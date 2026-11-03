@@ -54,7 +54,7 @@ export class CentrosMayorista implements OnInit {
     this.cargar();
     this.cargarZonas();
 
-    // Consulta automática de DNI del acopiador en RENIEC
+    // Consulta automática de DNI (RENIEC) o RUC (SUNAT) del acopiador
     this.form.controls.documentoAcopiador.valueChanges
       .pipe(
         tap(() => {
@@ -64,36 +64,68 @@ export class CentrosMayorista implements OnInit {
         }),
         debounceTime(500),
         distinctUntilChanged(),
-        switchMap((dni) => {
-          const limpio = (dni || '').trim();
-          if (!/^\d{8}$/.test(limpio)) return of(null);
-          this.consultandoDniAcopiador.set(true);
-          this.estadoDniAcopiador.set('Consultando DNI en RENIEC...');
-          return this.http
-            .get<{ nombresApellidos: string }>(
-              `${environment.apiBaseUrl}/api/v1/publico/identidad/dni/${limpio}`
-            )
-            .pipe(
-              map((datos) =>
-                this.form.controls.documentoAcopiador.value.trim() === limpio ? datos : null
-              ),
-              catchError(() => {
-                if (this.form.controls.documentoAcopiador.value.trim() === limpio) {
-                  this.estadoDniAcopiador.set(
-                    'No se pudo verificar el DNI automáticamente.'
-                  );
-                }
-                return of(null);
-              })
-            );
+        switchMap((doc) => {
+          const limpio = (doc || '').trim();
+          if (/^\d{8}$/.test(limpio)) {
+            this.consultandoDniAcopiador.set(true);
+            this.estadoDniAcopiador.set('Consultando DNI en RENIEC...');
+            return this.http
+              .get<{ nombresApellidos: string }>(
+                `${environment.apiBaseUrl}/api/v1/publico/identidad/dni/${limpio}`
+              )
+              .pipe(
+                map((datos) =>
+                  this.form.controls.documentoAcopiador.value.trim() === limpio
+                    ? { tipo: 'DNI', nombre: datos.nombresApellidos, direccion: '' }
+                    : null
+                ),
+                catchError(() => {
+                  if (this.form.controls.documentoAcopiador.value.trim() === limpio) {
+                    this.estadoDniAcopiador.set('No se pudo verificar el DNI automáticamente.');
+                  }
+                  return of(null);
+                })
+              );
+          } else if (/^\d{11}$/.test(limpio)) {
+            this.consultandoDniAcopiador.set(true);
+            this.estadoDniAcopiador.set('Consultando RUC en SUNAT...');
+            return this.http
+              .get<{ ruc: string; razonSocial: string; direccion: string; estado: string; condicion: string }>(
+                `${environment.apiBaseUrl}/api/v1/publico/identidad/ruc/${limpio}`
+              )
+              .pipe(
+                map((datos) =>
+                  this.form.controls.documentoAcopiador.value.trim() === limpio
+                    ? { tipo: 'RUC', nombre: datos.razonSocial, direccion: datos.direccion }
+                    : null
+                ),
+                catchError(() => {
+                  if (this.form.controls.documentoAcopiador.value.trim() === limpio) {
+                    this.estadoDniAcopiador.set('No se pudo verificar el RUC en SUNAT.');
+                  }
+                  return of(null);
+                })
+              );
+          }
+          return of(null);
         }),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((datos) => {
         this.consultandoDniAcopiador.set(false);
         if (datos) {
-          this.nombreAcopiadorConsultado.set(datos.nombresApellidos);
-          this.estadoDniAcopiador.set('Nombre obtenido por consulta de DNI.');
+          this.nombreAcopiadorConsultado.set(datos.nombre);
+          if (datos.tipo === 'RUC') {
+            this.estadoDniAcopiador.set(`Razón Social obtenida de SUNAT: ${datos.nombre}`);
+            if (datos.direccion && !this.form.controls.direccion.value) {
+              this.form.controls.direccion.setValue(datos.direccion);
+            }
+            if (!this.form.controls.nombre.value) {
+              this.form.controls.nombre.setValue(datos.nombre);
+            }
+          } else {
+            this.estadoDniAcopiador.set('Nombre obtenido por consulta de DNI en RENIEC.');
+          }
         }
       });
   }

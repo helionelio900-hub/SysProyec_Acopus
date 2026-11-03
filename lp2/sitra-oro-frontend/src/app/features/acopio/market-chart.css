@@ -1,234 +1,284 @@
 :host {
   display: block;
+  margin-bottom: 1.75rem;
 }
 
-.market-overview-grid {
-  display: grid;
-  grid-template-columns: 1.7fr 1fr;
-  gap: 1.25rem;
-  margin-bottom: 1.75rem;
-  animation: fadeIn 0.4s ease-out;
+.panel-mercado-vivo {
+  background: #111827;
+  color: #f9fafb;
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease-out;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.terminal-card {
-  background: linear-gradient(145deg, rgba(11, 24, 42, 0.9) 0%, rgba(6, 14, 25, 0.96) 100%);
-  border: 1px solid rgba(70, 110, 160, 0.35);
-  border-radius: 1.15rem;
-  padding: 1.5rem 1.65rem;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  transition: border-color 0.2s ease, transform 0.2s ease;
-}
-
-.terminal-card:hover {
-  border-color: rgba(245, 158, 11, 0.45);
-  transform: translateY(-2px);
-}
-
-.card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.15rem;
-}
-
-.card-tag {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  color: #94a3b8;
-  text-transform: uppercase;
-}
-
-.tag-accent { width: 7px; height: 7px; border-radius: 2px; background: #f59e0b; }
-.cyan-accent { background: #06b6d4; }
-
-.chart-stats {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  font-family: Consolas, monospace;
-  font-size: 0.72rem;
-  font-weight: 750;
-}
-.stat-high { color: #34d399; }
-.stat-low { color: #f87171; }
-
-.pill-cyan {
-  font-size: 0.68rem;
-  font-weight: 850;
-  color: #22d3ee;
-  background: rgba(6, 182, 212, 0.12);
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-}
-
-.chart-body {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.chart-price-display {
-  display: flex;
-  flex-direction: column;
-}
-
-.chart-label {
-  font-size: 0.76rem;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
-}
-
-.chart-main-price {
-  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
-  font-weight: 900;
-  color: #ffffff;
-  letter-spacing: -0.035em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  margin-bottom: 0.45rem;
-}
-
-.chart-unit {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #94a3b8;
-}
-
-.chart-badge-up {
-  font-size: 0.72rem;
-  font-weight: 850;
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  padding: 0.15rem 0.5rem;
-  border-radius: 6px;
-  vertical-align: middle;
-}
-
-.chart-sub-rates {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  font-size: 0.76rem;
-  color: #64748b;
-}
-
-.chart-sub-rates strong {
-  color: #cbd5e1;
-}
-
-.svg-chart-container {
-  flex-grow: 1;
-  max-width: 320px;
-  display: flex;
-  flex-direction: column;
-}
-
-.sparkline-svg {
-  width: 100%;
-  height: 65px;
-  overflow: visible;
-  filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.25));
-}
-
-.chart-days {
+.mercado-cabecera {
   display: flex;
   justify-content: space-between;
-  font-size: 0.68rem;
-  color: #64748b;
-  margin-top: 0.35rem;
-  font-family: Consolas, monospace;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-bottom: 1px solid #1f2937;
+  padding-bottom: 1rem;
+  margin-bottom: 1.2rem;
 }
 
-.today-day {
-  color: #f59e0b;
-  font-weight: 800;
-}
-
-/* Arbitrage Grid */
-.arbitrage-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  margin-bottom: 1rem;
-}
-
-.arb-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.arb-k {
-  font-size: 0.72rem;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 0.15rem;
-}
-
-.arb-v {
+.mercado-titular h2 {
+  margin: 0.25rem 0 0.15rem;
   font-size: 1.25rem;
-  font-weight: 850;
-  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  color: #f3f4f6;
   letter-spacing: -0.02em;
 }
 
-.text-white { color: #ffffff; }
-.text-warm { color: #fca5a5; }
-.text-emerald { color: #34d399; }
-
-.arb-c {
-  font-size: 0.73rem;
-  color: #64748b;
+.mercado-titular p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #9ca3af;
 }
 
-.arb-divider {
-  height: 1px;
-  background: rgba(70, 110, 160, 0.25);
+.badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-.arb-footer {
-  margin-top: auto;
-  padding-top: 0.65rem;
-  border-top: 1px dashed rgba(70, 110, 160, 0.25);
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+  animation: pulse 1.6s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.mercado-acciones {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.btn-recargar {
+  background: #1f2937;
+  color: #e5e7eb;
+  border: 1px solid #374151;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-recargar:hover:not(:disabled) {
+  background: #374151;
+  color: #fff;
+}
+
+/* Tarjetas de Mercado (Oro & Dólar) */
+.mercado-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.tarjeta-mercado {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.tarjeta-oro {
+  border-left: 4px solid #f59e0b;
+}
+
+.tarjeta-dolar {
+  border-left: 4px solid #10b981;
+}
+
+.tarjeta-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.activo-info {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.73rem;
+  gap: 0.5rem;
+}
+
+.activo-icono {
+  font-size: 1.4rem;
+}
+
+.activo-nombre {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: 0.02em;
+}
+
+.activo-sub {
+  display: block;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.variacion {
+  font-size: 0.78rem;
+  font-weight: 750;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+}
+.variacion.subida {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+.variacion.bajada {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.activo-badge-oficial {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.precio-cuerpo {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 0.75rem;
+  background: #0f172a;
+  padding: 0.75rem 0.9rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  border: 1px solid #1e293b;
+}
+
+.caja-precio .label {
+  display: block;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+
+.caja-precio .monto {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease-out;
+}
+
+.caja-precio .monto.precio-flash {
+  color: #38bdf8 !important;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+}
+
+.caja-precio .monto-sec {
+  font-size: 0.95rem;
+  font-weight: 750;
+  color: #cbd5e1;
+}
+
+.rango-barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  padding-top: 0.25rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rango-ref {
+  font-size: 0.7rem;
   color: #64748b;
 }
 
-@media (max-width: 1100px) {
-  .market-overview-grid {
-    grid-template-columns: 1fr;
-  }
+.cargando-aviso {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+/* Gráficas TradingView */
+.mercado-grafica-panel {
+  border: 1px solid #334155;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.grafica-pestanas {
+  display: flex;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  overflow-x: auto;
+}
+
+.btn-tab-grafica {
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.65rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.btn-tab-grafica:hover {
+  color: #f1f5f9;
+}
+.btn-tab-grafica.activa {
+  color: #f59e0b;
+  border-bottom-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.contenedor-tradingview {
+  min-height: 420px;
+  background: #111827;
 }
 
 @media (max-width: 768px) {
-  .chart-body {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .svg-chart-container {
-    max-width: 100%;
-    width: 100%;
+  .mercado-tarjetas {
+    grid-template-columns: 1fr;
   }
 }

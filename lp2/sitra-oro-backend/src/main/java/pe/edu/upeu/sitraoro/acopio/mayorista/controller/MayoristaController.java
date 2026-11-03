@@ -13,6 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.DecimalMax;
@@ -117,22 +121,20 @@ public class MayoristaController {
     }
 
     @GetMapping("/liquidaciones")
-    @Operation(summary = "Consulta liquidaciones con filtros combinados y ordenamiento opcionales")
+    @Operation(summary = "Consulta liquidaciones con filtros, ordenamiento y paginación")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Liquidaciones encontradas",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = LiquidacionG1Response.class)))),
+            @ApiResponse(responseCode = "200", description = "Liquidaciones encontradas paginadas"),
             @ApiResponse(responseCode = "400", description = "Filtro u ordenamiento inválido",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<List<LiquidacionG1Response>> buscar(
+    public ResponseEntity<Page<LiquidacionG1Response>> buscar(
             @RequestParam(required = false) EstadoLiquidacion estado,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime desde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime hasta,
-            @RequestParam(defaultValue = "fechaLiquidacion") String ordenarPor,
-            @RequestParam(defaultValue = "DESC") String direccion) {
-        log.info("Consultando liquidaciones estado={} desde={} hasta={} ordenarPor={} direccion={}",
-                estado, desde, hasta, ordenarPor, direccion);
-        return ResponseEntity.ok(mayoristaService.buscar(estado, desde, hasta, ordenarPor, direccion));
+            @PageableDefault(size = 20, sort = "fechaLiquidacion", direction = Sort.Direction.DESC) Pageable pageable) {
+        log.info("Consultando liquidaciones paginadas estado={} desde={} hasta={} pageable={}",
+                estado, desde, hasta, pageable);
+        return ResponseEntity.ok(mayoristaService.buscar(estado, desde, hasta, pageable));
     }
 
     @GetMapping("/liquidaciones/resumen")

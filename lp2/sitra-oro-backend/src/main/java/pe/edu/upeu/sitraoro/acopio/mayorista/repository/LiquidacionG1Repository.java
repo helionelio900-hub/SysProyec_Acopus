@@ -1,5 +1,7 @@
 package pe.edu.upeu.sitraoro.acopio.mayorista.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,6 +45,18 @@ public interface LiquidacionG1Repository extends JpaRepository<LiquidacionG1, Lo
                                @Param("desde") LocalDateTime desde,
                                @Param("hasta") LocalDateTime hasta,
                                Sort sort);
+
+    @EntityGraph(attributePaths = "detalles")
+    @Query("""
+        SELECT l FROM LiquidacionG1 l
+        WHERE (:estado IS NULL OR l.estado = :estado)
+          AND (:desde IS NULL OR l.fechaLiquidacion >= :desde)
+          AND (:hasta IS NULL OR l.fechaLiquidacion <= :hasta)
+        """)
+    Page<LiquidacionG1> buscar(@Param("estado") EstadoLiquidacion estado,
+                               @Param("desde") LocalDateTime desde,
+                               @Param("hasta") LocalDateTime hasta,
+                               Pageable pageable);
 
     @Query("""
         SELECT new pe.edu.upeu.sitraoro.acopio.mayorista.dto.LiquidacionResumen(

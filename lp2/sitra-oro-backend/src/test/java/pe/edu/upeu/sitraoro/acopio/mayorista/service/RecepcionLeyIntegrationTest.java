@@ -29,6 +29,7 @@ class RecepcionLeyIntegrationTest {
     private CentroAcopio centro;
 
     @BeforeEach void preparar() {
+        jdbc.execute("CREATE TABLE IF NOT EXISTS RECEPCION_ACUMULADA (ID_ORIGEN BIGINT, ID_ACUMULADA BIGINT)");
         jdbc.execute("CREATE TABLE IF NOT EXISTS LOTE_RECEPCIONES (ID_RECEPCION BIGINT PRIMARY KEY REFERENCES MAYORISTA_RECEPCIONES(ID_RECEPCION), ID_LOTE BIGINT NOT NULL REFERENCES LOTES_EXPORTACION(ID_LOTE) ON DELETE CASCADE, PESO_ROJO_G DECIMAL(10,3) NOT NULL, PESO_VERDE_G DECIMAL(10,3) NOT NULL, PESO_FUNDIDO_G DECIMAL(14,3))");
         centro = centros.saveAndFlush(CentroAcopio.builder().nombre("Centro " + UUID.randomUUID()).zona("Pruebas")
                 .direccion("Dirección de prueba").idCuentaAcopiador(Math.abs(UUID.randomUUID().getMostSignificantBits())).activo(true).build());
