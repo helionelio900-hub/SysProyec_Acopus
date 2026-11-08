@@ -409,7 +409,7 @@ p_red = p()
 run(p_red, "Justificación empírica: ", bold=True, color=NAVY)
 run(p_red, "Se instrumentó la medición de tiempos de respuesta en ", color=BODY)
 run(p_red, "CentroAcopioServiceImpl.java", bold=True, color=NAVY)
-run(p_red, ". La primera petición física contra Oracle XE tardó ", color=BODY)
+run(p_red, ". La primera petición física contra Oracle Free 23c tardó ", color=BODY)
 run(p_red, "241 ms a 284 ms", bold=True, color=RED)
 run(p_red, " registrando en consola 'Listando centros de acopio activos - consulta real a la base'. Las peticiones posteriores resueltas desde memoria RAM con Redis respondieron en ", color=BODY)
 run(p_red, "4 ms a 9 ms", bold=True, color=BLUE)
@@ -569,7 +569,7 @@ preguntas = [
      "Las operaciones de escritura (POST, PUT, DELETE, PATCH) son mutaciones de estado que alteran la base de datos bajo garantías ACID. Si se aplicara Cache-Control a un endpoint de escritura, el navegador interceptaría las llamadas subsecuentes sirviendo una respuesta almacenada en disco o memoria local, impidiendo que la transacción llegue físicamente al servidor y generando graves inconsistencias financieras o pérdida de operaciones de compra de oro."),
 
     ("3. ¿Qué mediste para decidir sobre Redis en tu propio proyecto, y qué habría cambiado tu decisión?",
-     "Se midió la frecuencia de invocación del catálogo de centros de acopio activos (/api/v1/publico/centros-acopio), observando más de 18 solicitudes en 5 minutos con tiempos de 241 ms a 284 ms contra Oracle XE. Con Redis, la latencia cayó a 4 ms - 9 ms (98% de reducción). Mi decisión habría sido DESCARTAR Redis si los centros cambiaran continuamente por minuto o si las consultas requirieran filtros dinámicos no cacheables."),
+     "Se midió la frecuencia de invocación del catálogo de centros de acopio activos (/api/v1/publico/centros-acopio), observando más de 18 solicitudes en 5 minutos con tiempos de 241 ms a 284 ms contra Oracle Free 23c. Con Redis, la latencia cayó a 4 ms - 9 ms (98% de reducción). Mi decisión habría sido DESCARTAR Redis si los centros cambiaran continuamente por minuto o si las consultas requirieran filtros dinámicos no cacheables."),
 
     ("4. ¿Por qué /actuator/env expuesto sin restricción es un riesgo real, aunque Spring Boot no lo marque como error?",
      "/actuator/env expone todas las variables de entorno del sistema operativo y de la JVM: rutas físicas, puertos, perfiles y secretos de conexión a bases de datos o llaves JWT si no han sido sanitizadas. Es un vector de ataque de enumeración pasiva crítico que permite a un atacante vulnerar la infraestructura sin atacar el código."),
