@@ -102,6 +102,33 @@
         <label>Adelanto (S/)<input type="number" min="0" step="0.01" formControlName="adelanto" /></label>
         <div class="pago-final"><span>Total a pagar</span><strong>{{ calculo() ? 'S/ ' + (calculo()!.total | numeroClaro:'1.2-2') : '—' }}</strong></div>
       </div>
+      <div class="pago-resumen pago-moneda">
+        <label>Moneda de pago
+          <select formControlName="monedaPago">
+            <option value="PEN">Soles (S/)</option>
+            <option value="USD">Dólares (US$)</option>
+          </select>
+        </label>
+        @if (pagoEnDolares()) {
+          <label>Tipo de cambio del pago<input type="number" min="0.0001" step="0.0001" formControlName="tipoCambioPago" [placeholder]="tipoCambioPago() || '3.7500'" /></label>
+          <div class="pago-final"><span>Pagar en dólares</span><strong>{{ totalEnDolares() === null ? '—' : 'US$ ' + (totalEnDolares()! | numeroClaro:'1.2-2') }}</strong></div>
+        }
+      </div>
+      @if (adelantosCentro().length) {
+        <fieldset class="adelantos-pago">
+          <legend>Adelantos pendientes de este centro</legend>
+          <p class="ayuda">Marca los adelantos que se descuentan en este pago. El campo Adelanto se llena con su suma en soles.</p>
+          @for (a of adelantosCentro(); track a.idAdelanto) {
+            <label class="adelanto-opcion">
+              <input type="checkbox" [checked]="adelantosElegidos().includes(a.idAdelanto)" [disabled]="guardando()" (change)="alternarAdelanto(a, $any($event.target).checked)" />
+              <span>#{{ a.idAdelanto }} · {{ a.fecha | date:'dd/MM/yyyy' }} · {{ a.moneda === 'USD' ? 'US$' : 'S/' }} {{ a.monto | numeroClaro:'1.2-2' }}
+                @if (a.moneda === 'USD') { (S/ {{ a.montoPen | numeroClaro:'1.2-2' }}) }
+                @if (a.observacion) { · {{ a.observacion }} }</span>
+            </label>
+          }
+          @if (adelantosElegidos().length) { <small>Seleccionado: S/ {{ sumaAdelantosElegidos() | numeroClaro:'1.2-2' }}</small> }
+        </fieldset>
+      }
       <div class="form-actions">@if (calculando()) { <span role="status">Calculando importes…</span> }
         <button mat-stroked-button type="button" class="button-secondary" [disabled]="guardando()" (click)="cancelar()">Cancelar</button>
         <button mat-flat-button type="submit" class="button-primary" [disabled]="guardando() || calculando() || form.invalid || !calculoValidado() || !!errorCalculo()">Revisar y registrar</button>
@@ -309,7 +336,7 @@
               <li>Ley {{ partida.ley | numeroClaro:'1.0-4' }} · % {{ partida.porcentaje | numeroClaro:'1.0-4' }}% · {{ partida.pesoSinFundirG | numeroClaro:'1.0-3' }} g recibidos · {{ partida.pesoFundidoG | numeroClaro:'1.0-3' }} g fundidos · S/ {{ partida.totalPen | numeroClaro:'1.2-2' }}</li>
             }
           </ul>
-          <dl><dt>Peso fundido</dt><dd>{{ calculo()?.pesoFundidoG | numeroClaro:'1.3-3' }} g</dd><dt>Total material</dt><dd>S/ {{ calculo()?.subtotal | numeroClaro:'1.2-2' }}</dd><dt>Adelanto</dt><dd>S/ {{ calculo()?.adelanto | numeroClaro:'1.2-2' }}</dd><dt>Total a pagar</dt><dd class="importe">S/ {{ calculo()?.total | numeroClaro:'1.2-2' }}</dd></dl>
+          <dl><dt>Peso fundido</dt><dd>{{ calculo()?.pesoFundidoG | numeroClaro:'1.3-3' }} g</dd><dt>Total material</dt><dd>S/ {{ calculo()?.subtotal | numeroClaro:'1.2-2' }}</dd><dt>Adelanto</dt><dd>S/ {{ calculo()?.adelanto | numeroClaro:'1.2-2' }}</dd><dt>Total a pagar</dt><dd class="importe">S/ {{ calculo()?.total | numeroClaro:'1.2-2' }}</dd>@if (pagoEnDolares()) {<dt>Se paga en dólares</dt><dd class="importe">US$ {{ totalEnDolares() | numeroClaro:'1.2-2' }} (T.C. {{ tipoCambioPago() | numeroClaro:'1.4-4' }})</dd>}@if (adelantosElegidos().length) {<dt>Adelantos descontados</dt><dd>{{ adelantosElegidos().length }} (S/ {{ sumaAdelantosElegidos() | numeroClaro:'1.2-2' }})</dd>}</dl>
         } @else if (accion === 'exportar') {
           <p>Se reunirán {{ seleccionados().length }} lotes recibidos con {{ pesoSeleccionado() | numeroClaro:'1.3-3' }} g fundidos. Se conservará la ley de cada partida.</p><p>Los lotes incluidos quedarán bloqueados para edición mientras pertenezcan a exportación.</p>
         } @else if (accion === 'eliminar') {
@@ -441,6 +468,7 @@
             <div><span>Total material:</span> <strong>S/ {{ fDinero(t.subtotal ?? t.total + t.adelanto) }}</strong></div>
             <div><span>Adelanto descontado:</span> <strong>- S/ {{ fDinero(t.adelanto) }}</strong></div>
             <div class="ticket-gran-total"><span>TOTAL A PAGAR:</span> <strong>S/ {{ fDinero(t.total) }}</strong></div>
+            @if (t.monedaPago === 'USD' && t.totalPagoMoneda != null) { <div><span>Pago en dólares:</span> <strong>US$ {{ fDinero(t.totalPagoMoneda) }}</strong></div> }
           </div>
 
           <div class="ticket-barcode-box">

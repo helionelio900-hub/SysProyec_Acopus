@@ -9,7 +9,7 @@ import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators, Validati
 import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, debounceTime, map, of, switchMap, tap } from 'rxjs';
-import { CalculoLey, DetalleLey, GuardarRecepcionLey, OperacionesService, PartidaLey, RecepcionLey } from '../../core/api/operaciones.service';
+import { Adelanto, CalculoLey, DetalleLey, GuardarRecepcionLey, MonedaPago, OperacionesService, PartidaLey, RecepcionLey } from '../../core/api/operaciones.service';
 import { MercadoLiveService } from '../../core/api/mercado-live.service';
 import { MAYORISTA_VISTA_PREVIA } from './mayorista-preview';
 
@@ -185,6 +185,8 @@ export class RecepcionMayorista implements OnInit {
   private revisionFormulario = 0;
   protected readonly form = this.fb.nonNullable.group({
     adelanto: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
+    monedaPago: ['PEN' as MonedaPago],
+    tipoCambioPago: this.fb.control<number | null>(null, [Validators.min(0.0001), Validators.pattern(/^\d+(\.\d{1,4})?$/)]),
     detalles: this.fb.array([this.nuevaFila()], {
       validators: (control: AbstractControl): ValidationErrors | null => {
         const filas = control.value as { ley: number | null }[];
@@ -224,6 +226,38 @@ export class RecepcionMayorista implements OnInit {
     return { detalles, pesoFundidoG:Number(peso)/1000, subtotal:Number(subtotal)/100, adelanto:valores.adelanto, total:Number(subtotal - adelanto)/100 };
   });
   protected get partidas() { return this.form.controls.detalles; }
+
+  /** Adelantos del centro que pueden descontarse en este pago (pendientes o ya aplicados a este lote). */
+  protected readonly adelantosCentro = signal<Adelanto[]>([]);
+  protected readonly adelantosElegidos = signal<number[]>([]);
+  protected readonly sumaAdelantosElegidos = computed(() =>
+    Math.round(this.adelantosCentro().filter(a => this.adelantosElegidos().includes(a.idAdelanto))
+      .reduce((s, a) => s + a.montoPen, 0) * 100) / 100);
+  /** Tipo de cambio del pago: el ingresado o, si está vacío, el de la primera partida (igual que el backend). */
+  protected readonly tipoCambioPago = computed(() => {
+    const v = this.valoresCalculo();
+    return Number(v.tipoCambioPago) || Number(v.detalles[0]?.tipoCambio) || 0;
+  });
+  protected readonly totalEnDolares = computed(() => {
+    const calc = this.calculo(); const tc = this.tipoCambioPago();
+    return calc && tc > 0 ? Math.round((calc.total / tc) * 100) / 100 : null;
+  });
+  protected readonly pagoEnDolares = computed(() => this.valoresCalculo().monedaPago === 'USD');
+  protected alternarAdelanto(a: Adelanto, marcado: boolean): void {
+    if (this.guardando()) return;
+    this.adelantosElegidos.update(ids => marcado ? [...new Set([...ids, a.idAdelanto])] : ids.filter(id => id !== a.idAdelanto));
+    this.form.controls.adelanto.setValue(this.sumaAdelantosElegidos());
+  }
+  private cargarAdelantosCentro(r: RecepcionLey): void {
+    this.adelantosCentro.set([]);
+    this.adelantosElegidos.set(r.idsAdelantos ?? []);
+    if (!(r.idCentroAcopio > 0)) return;
+    this.api.adelantos(r.idCentroAcopio).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: lista => this.adelantosCentro.set(lista.filter(a =>
+        a.estado === 'PENDIENTE' || (r.idRecepcion > 0 && a.idRecepcion === r.idRecepcion))),
+      error: () => this.adelantosCentro.set([]),
+    });
+  }
   protected readonly visibles = computed(() => this.registros().filter(r =>
     (this.seccion() === 'historial' || (this.seccion() === 'exportacion' ? r.estado === 'VALORIZADO' : r.estado !== 'EN_LOTE')) &&
     (!this.filtro() || `${r.idRecepcion} ${r.nombreAcopiador}`.toLowerCase().includes(this.filtro().toLowerCase()))));
@@ -377,7 +411,9 @@ export class RecepcionMayorista implements OnInit {
       if (verde > 0) this.partidas.push(this.nuevaFila({ tipoOro: 'VERDE', pesoSinFundirG: verde }), { emitEvent: false });
       if (!this.partidas.length) this.partidas.push(this.nuevaFila({ pesoSinFundirG: r.pesoDeclaradoG || undefined }), { emitEvent: false });
     }
+    this.form.patchValue({ monedaPago: r.monedaPago ?? 'PEN', tipoCambioPago: r.tipoCambioPago ?? null }, { emitEvent: false });
     this.form.controls.adelanto.setValue(r.adelanto);
+    this.cargarAdelantosCentro(r);
     setTimeout(() => document.getElementById('editor-lote')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   }
   protected analizarAcumulado(grupo: GrupoAcopiador): void {
@@ -499,6 +535,9 @@ export class RecepcionMayorista implements OnInit {
       adelanto: calc.adelanto,
       total: calc.total,
       detalles: calc.detalles,
+      monedaPago: this.pagoEnDolares() ? 'USD' : 'PEN',
+      tipoCambioPago: this.pagoEnDolares() ? this.tipoCambioPago() : null,
+      totalPagoMoneda: this.pagoEnDolares() ? this.totalEnDolares() ?? calc.total : calc.total,
     };
     this.imprimirTicket(sim);
   }
@@ -1023,6 +1062,11 @@ export class RecepcionMayorista implements OnInit {
             <span>TOTAL A PAGAR:</span>
             <strong>S/ ${fDinero(r.total)}</strong>
           </div>
+          ${r.monedaPago === 'USD' && r.totalPagoMoneda != null ? `
+          <div class="totales-row">
+            <span>Pago en dólares (T.C. ${fTC(r.tipoCambioPago ?? 0)}):</span>
+            <strong>US$ ${fDinero(r.totalPagoMoneda)}</strong>
+          </div>` : ''}
         </div>
 
         <div class="barcode-box">
@@ -1085,10 +1129,14 @@ export class RecepcionMayorista implements OnInit {
   private solicitud(): GuardarRecepcionLey {
     const raw = this.partidas.getRawValue() as (PartidaLey & { tipoOro?: string })[];
     const detalles: PartidaLey[] = raw.map(({ tipoOro, ...p }) => p);
+    const moneda = this.form.controls.monedaPago.value;
     return {
       revision: this.editando()?.revision ?? 0,
       adelanto: this.form.controls.adelanto.value,
       detalles,
+      monedaPago: moneda,
+      tipoCambioPago: moneda === 'USD' ? this.form.controls.tipoCambioPago.value || null : null,
+      idsAdelantos: this.adelantosElegidos(),
     };
   }
   private nuevaFila(p?: Partial<PartidaLey>) {

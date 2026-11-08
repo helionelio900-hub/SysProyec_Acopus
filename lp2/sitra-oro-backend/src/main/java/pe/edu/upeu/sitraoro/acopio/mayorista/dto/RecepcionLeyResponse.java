@@ -7,10 +7,14 @@ public record RecepcionLeyResponse(Long idRecepcion, LocalDate fecha, Long idCen
         String nombreAcopiador, long revision, String estado, Long idLoteExportacion,
         BigDecimal pesoDeclaradoG, BigDecimal pesoRojoSinFundirG, BigDecimal pesoVerdeSinFundirG,
         BigDecimal pesoFundidoG, BigDecimal subtotal,
-        BigDecimal adelanto, BigDecimal total, List<Detalle> detalles) {
+        BigDecimal adelanto, BigDecimal total, List<Detalle> detalles,
+        String monedaPago, BigDecimal tipoCambioPago, BigDecimal totalPagoMoneda,
+        List<Long> idsAdelantos) {
     public record Detalle(Long idLey, BigDecimal onza, BigDecimal ley, BigDecimal porcentaje,
             BigDecimal tipoCambio, BigDecimal pesoSinFundirG, BigDecimal pesoFundidoG,
             BigDecimal precioUsd, BigDecimal precioPen, BigDecimal totalPen) {}
+    /** total está en soles; totalPagoMoneda es el mismo importe en la moneda de pago elegida. */
     public record Calculo(List<Detalle> detalles, BigDecimal pesoFundidoG, BigDecimal subtotal,
-            BigDecimal adelanto, BigDecimal total) {}
+            BigDecimal adelanto, BigDecimal total,
+            String monedaPago, BigDecimal tipoCambioPago, BigDecimal totalPagoMoneda) {}
 }

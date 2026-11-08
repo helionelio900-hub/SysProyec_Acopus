@@ -26,6 +26,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -105,7 +107,7 @@ public class SecurityConfig {
                         authorize.requestMatchers(HttpMethod.POST, "/api/v1/seguridad/login").permitAll();
                     }
                     authorize
-                        .requestMatchers("/actuator/health", "/actuator/health/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/actuator/**", "/error", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/cotizador/**", "/api/v1/publico/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/minero/registro").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/perfil").authenticated()
@@ -118,7 +120,20 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/minero/**").hasRole("MINERO")
                         .anyRequest().authenticated();
                 })
-                .oauth2ResourceServer(resource -> resource.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+                .oauth2ResourceServer(resource -> resource
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
+                        // Deja en el log el motivo de cada rechazo; sin esto los 401/403 no aparecen.
+                        .authenticationEntryPoint((request, response, ex) -> {
+                            log.warn("401 {} {}: {}", request.getMethod(), request.getRequestURI(), ex.getMessage());
+                            new BearerTokenAuthenticationEntryPoint().commence(request, response, ex);
+                        })
+                        .accessDeniedHandler((request, response, ex) -> {
+                            log.warn("403 {} {} roles={}: {}", request.getMethod(), request.getRequestURI(),
+                                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication() == null ? "[]"
+                                            : org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getAuthorities(),
+                                    ex.getMessage());
+                            new BearerTokenAccessDeniedHandler().handle(request, response, ex);
+                        }));
         return http.build();
     }
 }

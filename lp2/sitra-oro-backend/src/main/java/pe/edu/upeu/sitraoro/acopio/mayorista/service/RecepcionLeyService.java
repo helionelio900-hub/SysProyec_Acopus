@@ -21,6 +21,7 @@ public class RecepcionLeyService {
     private final LeyOroRepository leyes;
     private final JdbcTemplate jdbc;
     private final Validator validator;
+    private final AdelantoService adelantos;
 
     public RecepcionLeyResponse.Calculo calcular(RecepcionLeyRequest request) {
         var errores = validator.validate(request);
@@ -48,7 +49,17 @@ public class RecepcionLeyService {
             subtotal = subtotal.add(total);
         }
         if (request.adelanto().compareTo(subtotal) > 0) throw new MayoristaReglaException("ADELANTO_SUPERA_TOTAL", "El adelanto no puede superar el total de material");
-        return new RecepcionLeyResponse.Calculo(filas, peso, subtotal, request.adelanto(), subtotal.subtract(request.adelanto()));
+        // La valorización se lleva siempre en soles; si el pago es en dólares se convierte el neto a pagar.
+        BigDecimal aPagar = subtotal.subtract(request.adelanto());
+        String moneda = request.monedaEfectiva();
+        BigDecimal tipoCambioPago = null;
+        BigDecimal totalPagoMoneda = aPagar;
+        if ("USD".equals(moneda)) {
+            tipoCambioPago = request.tipoCambioPago() != null ? request.tipoCambioPago() : request.detalles().getFirst().tipoCambio();
+            totalPagoMoneda = aPagar.divide(tipoCambioPago, 2, RoundingMode.HALF_UP);
+        }
+        return new RecepcionLeyResponse.Calculo(filas, peso, subtotal, request.adelanto(), aPagar,
+                moneda, tipoCambioPago, totalPagoMoneda);
     }
 
     @Transactional(readOnly = true)
@@ -111,7 +122,7 @@ public class RecepcionLeyService {
         conjunta.setVerde(DatosOro.builder().pesoSinFundirG(verde).build());
         recepciones.saveAndFlush(conjunta);
         for (var r : origenes) jdbc.update("INSERT INTO RECEPCION_ACUMULADA (ID_ORIGEN, ID_ACUMULADA) VALUES (?, ?)", r.getIdRecepcion(), conjunta.getIdRecepcion());
-        return guardar(conjunta.getIdRecepcion(), new RecepcionLeyRequest(0L, request.analisis().adelanto(), request.analisis().detalles()));
+        return guardar(conjunta.getIdRecepcion(), request.analisis().conRevision(0L));
     }
 
     @Transactional
@@ -123,6 +134,9 @@ public class RecepcionLeyService {
         if (idExportacion(id) != null) throw new ConflictException("El lote recibido ya integra un lote de exportación y no puede modificarse");
         if (!Objects.equals(recepcion.getRevisionLey(), request.revision()))
             throw new ConflictException("Otra operación actualizó este lote. Actualiza los datos y vuelve a abrirlo.");
+        // Se validan y descuentan los adelantos antes de tocar el lote: si fallan, nada cambia.
+        Long idCentro = recepcion.getCentroAcopio() == null ? null : recepcion.getCentroAcopio().getIdCentroAcopio();
+        adelantos.aplicar(id, idCentro, request.adelantosSeleccionados(), calculo.adelanto());
         detalles.deleteAll(detalles.findByRecepcion_IdRecepcionOrderByIdDetalle(id));
         detalles.flush();
         for (var fila : calculo.detalles()) {
@@ -144,6 +158,9 @@ public class RecepcionLeyService {
         recepcion.setRevisionLey(recepcion.getRevisionLey() + 1);
         recepcion.setDescuento(calculo.adelanto().toPlainString());
         recepcion.setTotal(calculo.total().toPlainString());
+        recepcion.setMonedaPago(calculo.monedaPago());
+        recepcion.setTipoCambioPago(calculo.tipoCambioPago());
+        recepcion.setTotalPagoMoneda(calculo.totalPagoMoneda());
         recepciones.saveAndFlush(recepcion);
         return respuesta(recepcion);
     }
@@ -160,7 +177,10 @@ public class RecepcionLeyService {
         BigDecimal pesoVerde = r.getVerde() != null ? r.getVerde().getPesoSinFundirG() : null;
         return new RecepcionLeyResponse(r.getIdRecepcion(), r.getFecha(), r.getCentroAcopio() == null ? -r.getIdRecepcion() : r.getCentroAcopio().getIdCentroAcopio(), r.getNombreAcopiador(),
                 r.getRevisionLey(), exportacion != null ? "EN_LOTE" : filas.isEmpty() ? "PENDIENTE" : "VALORIZADO", exportacion,
-                !filas.isEmpty() ? filas.stream().map(RecepcionLeyResponse.Detalle::pesoSinFundirG).reduce(BigDecimal.ZERO, BigDecimal::add) : sumarPeso(r, false), pesoRojo, pesoVerde, peso, subtotal, adelanto, filas.isEmpty() ? numeroHistorico(r.getTotal()) : subtotal.subtract(adelanto), filas);
+                !filas.isEmpty() ? filas.stream().map(RecepcionLeyResponse.Detalle::pesoSinFundirG).reduce(BigDecimal.ZERO, BigDecimal::add) : sumarPeso(r, false), pesoRojo, pesoVerde, peso, subtotal, adelanto, filas.isEmpty() ? numeroHistorico(r.getTotal()) : subtotal.subtract(adelanto), filas,
+                r.getMonedaPago() == null ? "PEN" : r.getMonedaPago(), r.getTipoCambioPago(),
+                r.getTotalPagoMoneda() != null ? r.getTotalPagoMoneda() : (filas.isEmpty() ? numeroHistorico(r.getTotal()) : subtotal.subtract(adelanto)),
+                adelantos.idsDescontados(r.getIdRecepcion()));
     }
 
     private boolean esAcumulada(Long id) {

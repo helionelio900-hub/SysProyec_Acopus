@@ -24,6 +24,6 @@ public class CompraDirectaMayoristaController {
    recepcion.setNombreAcopiador("Compra directa");
    recepciones.saveAndFlush(recepcion);
    recepcion.setNombreAcopiador("Compra directa · Registro #"+recepcion.getIdRecepcion());
-   return analisis.guardar(recepcion.getIdRecepcion(),new RecepcionLeyRequest(0L,request.analisis().adelanto(),request.analisis().detalles()));
+   return analisis.guardar(recepcion.getIdRecepcion(),request.analisis().conRevision(0L));
  }
 }

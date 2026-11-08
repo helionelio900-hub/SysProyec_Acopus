@@ -154,10 +154,14 @@ export interface DetalleLey extends PartidaLey {
   precioPen: number;
   totalPen: number;
 }
+export type MonedaPago = 'PEN' | 'USD';
 export interface GuardarRecepcionLey {
   revision: number;
   adelanto: number;
   detalles: PartidaLey[];
+  monedaPago?: MonedaPago;
+  tipoCambioPago?: number | null;
+  idsAdelantos?: number[];
 }
 export interface CalculoLey {
   detalles: DetalleLey[];
@@ -165,6 +169,9 @@ export interface CalculoLey {
   subtotal: number;
   adelanto: number;
   total: number;
+  monedaPago?: MonedaPago;
+  tipoCambioPago?: number | null;
+  totalPagoMoneda?: number;
 }
 export interface RecepcionLey {
   idRecepcion: number;
@@ -182,6 +189,70 @@ export interface RecepcionLey {
   adelanto: number;
   total: number;
   detalles: DetalleLey[];
+  monedaPago?: MonedaPago;
+  tipoCambioPago?: number | null;
+  totalPagoMoneda?: number;
+  idsAdelantos?: number[];
+}
+export type EstadoAdelanto = 'PENDIENTE' | 'DESCONTADO' | 'ANULADO';
+export interface Adelanto {
+  idAdelanto: number;
+  idCentroAcopio: number;
+  nombreCentro: string;
+  fecha: string;
+  moneda: MonedaPago;
+  monto: number;
+  tipoCambio: number | null;
+  montoPen: number;
+  observacion: string | null;
+  estado: EstadoAdelanto;
+  idRecepcion: number | null;
+}
+export interface CrearAdelanto {
+  idCentroAcopio: number;
+  fecha?: string;
+  moneda: MonedaPago;
+  monto: number;
+  tipoCambio?: number | null;
+  observacion?: string;
+}
+export interface SaldoAdelantos {
+  idCentroAcopio: number | null;
+  cantidadPendientes: number;
+  saldoPen: number;
+  saldoUsd: number;
+  pendientes: Adelanto[];
+}
+export interface DiaDashboard {
+  fecha: string;
+  operaciones: number;
+  pesoFundidoG: number;
+  ingresoPen: number;
+  ingresoUsd: number;
+  pagadoPen: number;
+  adelantosEntregadosPen: number;
+}
+export interface DashboardMayorista {
+  desde: string;
+  hasta: string;
+  hoy: DiaDashboard;
+  periodo: {
+    operaciones: number;
+    pesoFundidoG: number;
+    ingresoPen: number;
+    ingresoUsd: number;
+    pagadoPen: number;
+    ticketPromedioPen: number;
+    promedioDiarioPen: number;
+    adelantosEntregadosPen: number;
+    mejorDia: string | null;
+    mejorDiaIngresoPen: number;
+  };
+  serieDiaria: DiaDashboard[];
+  topCentros: { idCentroAcopio: number; nombre: string; operaciones: number; pesoFundidoG: number; ingresoPen: number }[];
+  pagosPorMoneda: { moneda: MonedaPago; operaciones: number; monto: number }[];
+  adelantos: { pendientes: number; saldoPendientePen: number; entregadosPeriodoPen: number; entregadosPeriodo: number };
+  estados: { pendientes: number; valorizados: number; enLote: number };
 }
 export type CrearRecepcionMayorista = Omit<RecepcionMayorista, 'idRecepcion' | 'nombreAcopiador'>;
 export interface Liquidacion {
@@ -259,6 +330,29 @@ export class OperacionesService {
     return `${environment.apiBaseUrl}${path}`;
   }
 
+  dashboardMayorista(desde?: string, hasta?: string): Observable<DashboardMayorista> {
+    let params = new HttpParams();
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
+    return this.http.get<DashboardMayorista>(this.url('/api/v1/mayorista/dashboard'), { params });
+  }
+  adelantos(idCentroAcopio?: number, estado?: EstadoAdelanto): Observable<Adelanto[]> {
+    let params = new HttpParams();
+    if (idCentroAcopio) params = params.set('idCentroAcopio', idCentroAcopio);
+    if (estado) params = params.set('estado', estado);
+    return this.http.get<Adelanto[]>(this.url('/api/v1/mayorista/adelantos'), { params });
+  }
+  saldoAdelantos(idCentroAcopio?: number): Observable<SaldoAdelantos> {
+    let params = new HttpParams();
+    if (idCentroAcopio) params = params.set('idCentroAcopio', idCentroAcopio);
+    return this.http.get<SaldoAdelantos>(this.url('/api/v1/mayorista/adelantos/saldo'), { params });
+  }
+  registrarAdelanto(request: CrearAdelanto): Observable<Adelanto> {
+    return this.http.post<Adelanto>(this.url('/api/v1/mayorista/adelantos'), request);
+  }
+  anularAdelanto(id: number): Observable<Adelanto> {
+    return this.http.patch<Adelanto>(this.url(`/api/v1/mayorista/adelantos/${id}/anular`), {});
+  }
   dashboard(): Observable<ResumenDashboard> {
     return this.http.get<ResumenDashboard>(this.url('/api/v1/dashboard/consolidado'));
   }

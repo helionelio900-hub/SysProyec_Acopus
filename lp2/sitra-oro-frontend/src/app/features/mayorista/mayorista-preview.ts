@@ -10,6 +10,7 @@ import {
   PageResponse,
   PrecioReferencial,
   RecepcionLey, GuardarRecepcionLey, CalculoLey, LoteExportacion,
+  Adelanto, CrearAdelanto, DashboardMayorista, EstadoAdelanto, SaldoAdelantos,
 } from '../../core/api/operaciones.service';
 
 export const MAYORISTA_VISTA_PREVIA = new InjectionToken<boolean>('Mayorista vista previa', {
@@ -150,6 +151,63 @@ export class MayoristaPreviewService {
 
   centros(): Observable<CentroAcopio[]> {
     return of(this.centrosDemo.map((centro) => ({ ...centro })));
+  }
+
+  private adelantosDemo: Adelanto[] = [
+    { idAdelanto: 1, idCentroAcopio: 901, nombreCentro: 'Centro de ejemplo · Rinconada', fecha: new Date().toISOString().slice(0, 10),
+      moneda: 'USD', monto: 300, tipoCambio: 3.75, montoPen: 1125, observacion: 'Adelanto de ejemplo', estado: 'PENDIENTE', idRecepcion: null },
+  ];
+  dashboardMayorista(): Observable<DashboardMayorista> {
+    const hoy = new Date();
+    const serieDiaria = Array.from({ length: 30 }, (_, i) => {
+      const d = new Date(hoy); d.setDate(hoy.getDate() - 29 + i);
+      const ingresoPen = i % 3 === 0 ? 0 : Math.round(8000 + 6000 * Math.sin(i / 3) ** 2);
+      return { fecha: d.toISOString().slice(0, 10), operaciones: ingresoPen ? 1 + (i % 3) : 0, pesoFundidoG: ingresoPen / 360,
+        ingresoPen, ingresoUsd: Math.round(ingresoPen / 3.75), pagadoPen: Math.round(ingresoPen * 0.95), adelantosEntregadosPen: i === 29 ? 1125 : 0 };
+    });
+    const ingresoPen = serieDiaria.reduce((s, d) => s + d.ingresoPen, 0);
+    const operaciones = serieDiaria.reduce((s, d) => s + d.operaciones, 0);
+    const mejor = serieDiaria.reduce((a, b) => (b.ingresoPen > a.ingresoPen ? b : a));
+    return of({
+      desde: serieDiaria[0].fecha, hasta: serieDiaria[29].fecha, hoy: serieDiaria[29],
+      periodo: { operaciones, pesoFundidoG: serieDiaria.reduce((s, d) => s + d.pesoFundidoG, 0), ingresoPen,
+        ingresoUsd: serieDiaria.reduce((s, d) => s + d.ingresoUsd, 0), pagadoPen: serieDiaria.reduce((s, d) => s + d.pagadoPen, 0),
+        ticketPromedioPen: Math.round(ingresoPen / operaciones), promedioDiarioPen: Math.round(ingresoPen / 30),
+        adelantosEntregadosPen: 1125, mejorDia: mejor.fecha, mejorDiaIngresoPen: mejor.ingresoPen },
+      serieDiaria,
+      topCentros: [
+        { idCentroAcopio: 901, nombre: 'Centro de ejemplo · Rinconada', operaciones: 22, pesoFundidoG: 480, ingresoPen: ingresoPen * 0.62 },
+        { idCentroAcopio: 902, nombre: 'Centro de ejemplo · Ananea', operaciones: 14, pesoFundidoG: 290, ingresoPen: ingresoPen * 0.38 },
+      ],
+      pagosPorMoneda: [{ moneda: 'PEN', operaciones: operaciones - 6, monto: ingresoPen * 0.7 }, { moneda: 'USD', operaciones: 6, monto: ingresoPen * 0.3 / 3.75 }],
+      adelantos: { pendientes: this.adelantosDemo.filter(a => a.estado === 'PENDIENTE').length,
+        saldoPendientePen: this.adelantosDemo.filter(a => a.estado === 'PENDIENTE').reduce((s, a) => s + a.montoPen, 0),
+        entregadosPeriodoPen: 1125, entregadosPeriodo: 1 },
+      estados: { pendientes: 2, valorizados: 5, enLote: 3 },
+    });
+  }
+  adelantos(idCentroAcopio?: number, estado?: EstadoAdelanto): Observable<Adelanto[]> {
+    return of(this.adelantosDemo.filter(a => (!idCentroAcopio || a.idCentroAcopio === idCentroAcopio) && (!estado || a.estado === estado)).map(a => ({ ...a })));
+  }
+  saldoAdelantos(idCentroAcopio?: number): Observable<SaldoAdelantos> {
+    const pendientes = this.adelantosDemo.filter(a => a.estado === 'PENDIENTE' && (!idCentroAcopio || a.idCentroAcopio === idCentroAcopio));
+    return of({ idCentroAcopio: idCentroAcopio ?? null, cantidadPendientes: pendientes.length,
+      saldoPen: pendientes.reduce((s, a) => s + a.montoPen, 0),
+      saldoUsd: pendientes.filter(a => a.moneda === 'USD').reduce((s, a) => s + a.monto, 0), pendientes });
+  }
+  registrarAdelanto(request: CrearAdelanto): Observable<Adelanto> {
+    const centro = this.centrosDemo.find(c => c.idCentroAcopio === request.idCentroAcopio);
+    const nuevo: Adelanto = { idAdelanto: this.adelantosDemo.length + 1, idCentroAcopio: request.idCentroAcopio,
+      nombreCentro: centro ? `${centro.nombre} · ${centro.zona}` : 'Centro de ejemplo', fecha: request.fecha ?? new Date().toISOString().slice(0, 10),
+      moneda: request.moneda, monto: request.monto, tipoCambio: request.tipoCambio ?? null,
+      montoPen: request.moneda === 'USD' ? Number((request.monto * (request.tipoCambio ?? 0)).toFixed(2)) : request.monto,
+      observacion: request.observacion ?? null, estado: 'PENDIENTE', idRecepcion: null };
+    this.adelantosDemo = [nuevo, ...this.adelantosDemo];
+    return of({ ...nuevo });
+  }
+  anularAdelanto(id: number): Observable<Adelanto> {
+    this.adelantosDemo = this.adelantosDemo.map(a => (a.idAdelanto === id ? { ...a, estado: 'ANULADO' } : a));
+    return of({ ...this.adelantosDemo.find(a => a.idAdelanto === id)! });
   }
 
   reporteLiquidaciones(): Observable<ReporteLiquidaciones> {

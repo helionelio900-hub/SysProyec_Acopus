@@ -66,6 +66,19 @@ public class RecepcionMayorista {
     @Column(name = "TOTAL", length = 100)
     private String total;
 
+    /** Moneda en que se paga al acopiador: PEN (soles) o USD (dólares). */
+    @Builder.Default
+    @Column(name = "MONEDA_PAGO", nullable = false, length = 3)
+    private String monedaPago = "PEN";
+
+    /** Tipo de cambio USD/PEN usado para convertir el total a pagar cuando se paga en dólares. */
+    @Column(name = "TIPO_CAMBIO_PAGO", precision = 10, scale = 4)
+    private BigDecimal tipoCambioPago;
+
+    /** Total a pagar expresado en la moneda de pago. */
+    @Column(name = "TOTAL_PAGO_MONEDA", precision = 18, scale = 2)
+    private BigDecimal totalPagoMoneda;
+
     @Column(name = "FECHA_CREACION", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
 

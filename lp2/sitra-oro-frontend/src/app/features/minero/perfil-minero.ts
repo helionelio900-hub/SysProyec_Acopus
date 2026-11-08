@@ -5,7 +5,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { SesionService } from '../../core/auth/sesion.service';
+import { AuthService } from '../../core/auth/auth.service';
 import { EntregaMinero } from '../../core/api/entregas-minero';
 
 interface Perfil {
@@ -39,7 +39,7 @@ export class PerfilMinero implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
-  private readonly sesion = inject(SesionService);
+  private readonly auth = inject(AuthService);
   protected readonly perfil = signal<Perfil | null>(null);
   protected readonly centros = signal<Centro[]>([]);
   protected readonly form = this.fb.nonNullable.group({
@@ -130,8 +130,9 @@ export class PerfilMinero implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!sessionStorage.getItem('sitraoro.accessToken')) {
-      void this.router.navigateByUrl('/ingresar');
+    // El token de Keycloak lo administra AuthService (la clave antigua 'sitraoro.accessToken' ya no se usa).
+    if (!this.auth.autenticado()) {
+      void this.auth.iniciarLogin('/minero/cuenta');
       return;
     }
     this.http.get<Perfil>(`${environment.apiBaseUrl}/api/v1/minero/perfil`).subscribe({
@@ -186,6 +187,6 @@ export class PerfilMinero implements OnInit {
   }
 
   protected cerrarSesion(): void {
-    this.sesion.cerrar();
+    this.auth.cerrarSesion();
   }
 }
