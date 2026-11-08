@@ -1,5 +1,6 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, registerLocaleData } from '@angular/common';
+import localeEsPe from '@angular/common/locales/es-PE';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
@@ -14,6 +15,9 @@ import {
 } from '../../core/api/operaciones.service';
 import { MAYORISTA_VISTA_PREVIA } from './mayorista-preview';
 import { MarketCotizacionesService } from '../../core/api/market-cotizaciones.service';
+
+// Nombres de días y meses en español para las fechas del resumen.
+registerLocaleData(localeEsPe, 'es-PE');
 
 type Rango = 7 | 30 | 90;
 
@@ -42,6 +46,9 @@ export class InicioMayorista implements OnInit {
   protected readonly errorAdelanto = signal('');
 
   protected readonly horaActual = signal(this.hora());
+  protected readonly fechaActual = ((f: string) => f.charAt(0).toUpperCase() + f.slice(1))(
+    new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+  );
 
   protected readonly formAdelanto = this.fb.nonNullable.group({
     idCentroAcopio: [0, [Validators.required, Validators.min(1)]],

@@ -1,6 +1,6 @@
 <section class="workspace mayorista-workspace">
   <header class="page-head">
-    <div><span class="eyebrow">MAYORISTA · ANÁLISIS Y VALORIZACIÓN</span>
+    <div>
       <h1>Lotes recibidos por ley</h1>
       <p>Registra las leyes de cada lote, su fundición y el importe a pagar al acopiador.</p>
     </div>
@@ -32,9 +32,9 @@
         <p>{{ lote.fecha | date:'dd/MM/yyyy' }} ·
           @if (lote.pesoRojoSinFundirG || lote.pesoVerdeSinFundirG) {
             <span>Clasificación del acopiador:
-              @if (lote.pesoRojoSinFundirG) { 🔴 <strong>{{ lote.pesoRojoSinFundirG | numeroClaro:'1.3-3' }} g Rojo</strong> }
+              @if (lote.pesoRojoSinFundirG) { <i class="punto-oro punto-rojo" aria-hidden="true"></i><strong>{{ lote.pesoRojoSinFundirG | numeroClaro:'1.3-3' }} g Rojo</strong> }
               @if (lote.pesoRojoSinFundirG && lote.pesoVerdeSinFundirG) { + }
-              @if (lote.pesoVerdeSinFundirG) { 🟢 <strong>{{ lote.pesoVerdeSinFundirG | numeroClaro:'1.3-3' }} g Verde</strong> }
+              @if (lote.pesoVerdeSinFundirG) { <i class="punto-oro punto-verde" aria-hidden="true"></i><strong>{{ lote.pesoVerdeSinFundirG | numeroClaro:'1.3-3' }} g Verde</strong> }
               · Suma sin fundir: <strong>{{ lote.pesoDeclaradoG | numeroClaro:'1.3-3' }} g</strong>
             </span>
           } @else {
@@ -47,14 +47,14 @@
       <div class="mercado-bar-editor">
         <div class="mercado-bar-info">
           <span class="badge-live-sm"><span class="live-dot-sm"></span> EN VIVO</span>
-          <span class="mercado-dato">🥇 ORO SPOT: <strong [class.precio-flash-sm]="titilarPrecio()">${{ (oroMercado()?.ultimo || oroMercado()?.bid || 0) | number:'1.2-2' }}</strong></span>
-          <span class="mercado-dato">💵 DÓLAR: <strong>S/ {{ (dolarMercado()?.sunatVenta || dolarMercado()?.interbancario || 0) | number:'1.3-4' }}</strong></span>
+          <span class="mercado-dato">Oro spot: <strong [class.precio-flash-sm]="titilarPrecio()">${{ (oroMercado()?.ultimo || oroMercado()?.bid || 0) | number:'1.2-2' }}</strong></span>
+          <span class="mercado-dato">Dólar: <strong>S/ {{ (dolarMercado()?.sunatVenta || dolarMercado()?.interbancario || 0) | number:'1.3-4' }}</strong></span>
           @if (ultimoTickHora()) {
             <small class="mercado-hora">· {{ ultimoTickHora() }}</small>
           }
         </div>
         <button type="button" class="btn-aplicar-valores-editor" (click)="aplicarValoresMercado()" [disabled]="!oroMercado() && !dolarMercado()">
-          ⚡ Aplicar valores al formulario
+          Usar estos valores en las partidas
         </button>
       </div>
       <div class="table-wrap" tabindex="0" aria-label="Partidas del lote, desplaza horizontalmente para ver todos los campos">
@@ -68,8 +68,8 @@
                     <span class="lote-num">{{ compraDirecta() ? 'Nueva compra' : origenesAcumulados().length ? 'Acumulado' : '#' + lote.idRecepcion }}</span>
                     @if (!compraDirecta() && lote.idCentroAcopio > 0) {
                       <select formControlName="tipoOro" class="select-color-oro" [attr.aria-label]="'Tipo de oro de partida ' + (i + 1)">
-                        <option value="ROJO">🔴 Oro Rojo</option>
-                        <option value="VERDE">🟢 Oro Verde</option>
+                        <option value="ROJO">Oro rojo</option>
+                        <option value="VERDE">Oro verde</option>
                       </select>
                     }
                     <small>{{ lote.nombreAcopiador }}</small>
@@ -97,38 +97,91 @@
       @if (partidas.hasError('leyRepetida')) { <p class="feedback error" role="alert">Una ley está repetida. Reúne sus pesos en una sola partida o ingresa una ley distinta.</p> }
       @if (partidas.hasError('cantidadPartidas')) { <p class="feedback error" role="alert">El registro debe contener entre 1 y 200 partidas.</p> }
       @if (errorCalculo()) { <p class="feedback error" role="alert">{{ errorCalculo() }}</p> }
-      <div class="pago-resumen">
-        <div><span>Total material</span><strong>{{ calculo() ? 'S/ ' + (calculo()!.subtotal | numeroClaro:'1.2-2') : '—' }}</strong></div>
-        <label>Adelanto (S/)<input type="number" min="0" step="0.01" formControlName="adelanto" /></label>
-        <div class="pago-final"><span>Total a pagar</span><strong>{{ calculo() ? 'S/ ' + (calculo()!.total | numeroClaro:'1.2-2') : '—' }}</strong></div>
-      </div>
-      <div class="pago-resumen pago-moneda">
-        <label>Moneda de pago
-          <select formControlName="monedaPago">
-            <option value="PEN">Soles (S/)</option>
-            <option value="USD">Dólares (US$)</option>
-          </select>
-        </label>
-        @if (pagoEnDolares()) {
-          <label>Tipo de cambio del pago<input type="number" min="0.0001" step="0.0001" formControlName="tipoCambioPago" [placeholder]="tipoCambioPago() || '3.7500'" /></label>
-          <div class="pago-final"><span>Pagar en dólares</span><strong>{{ totalEnDolares() === null ? '—' : 'US$ ' + (totalEnDolares()! | numeroClaro:'1.2-2') }}</strong></div>
-        }
-      </div>
-      @if (adelantosCentro().length) {
-        <fieldset class="adelantos-pago">
-          <legend>Adelantos pendientes de este centro</legend>
-          <p class="ayuda">Marca los adelantos que se descuentan en este pago. El campo Adelanto se llena con su suma en soles.</p>
-          @for (a of adelantosCentro(); track a.idAdelanto) {
-            <label class="adelanto-opcion">
-              <input type="checkbox" [checked]="adelantosElegidos().includes(a.idAdelanto)" [disabled]="guardando()" (change)="alternarAdelanto(a, $any($event.target).checked)" />
-              <span>#{{ a.idAdelanto }} · {{ a.fecha | date:'dd/MM/yyyy' }} · {{ a.moneda === 'USD' ? 'US$' : 'S/' }} {{ a.monto | numeroClaro:'1.2-2' }}
-                @if (a.moneda === 'USD') { (S/ {{ a.montoPen | numeroClaro:'1.2-2' }}) }
-                @if (a.observacion) { · {{ a.observacion }} }</span>
-            </label>
+      <section class="liquidacion" aria-labelledby="liquidacion-titulo">
+        <div class="liq-adelantos">
+          <div class="liq-head">
+            <div>
+              <h3 id="liquidacion-titulo">Liquidación del pago</h3>
+            </div>
+            @if (adelantosCentro().length) {
+              <span class="liq-chip">{{ adelantosCentro().length }} adelanto(s) del centro · S/ {{ saldoAdelantosCentro() | numeroClaro:'1.2-2' }}</span>
+            }
+          </div>
+
+          @if (!(lote.idCentroAcopio > 0)) {
+            <p class="liq-vacio">Compra directa al minero: no hay adelantos de centro que descontar.</p>
+          } @else if (cargandoAdelantos()) {
+            <p class="liq-vacio" role="status">Buscando adelantos pendientes del centro…</p>
+          } @else if (!adelantosCentro().length) {
+            <p class="liq-vacio">Este centro no tiene adelantos pendientes. Se paga el total del material.</p>
+          } @else {
+            <div class="liq-lista-head">
+              <span>Adelantos a descontar</span>
+              <button type="button" class="liq-link" [disabled]="guardando()"
+                (click)="marcarTodosAdelantos(adelantosElegidos().length !== adelantosCentro().length)">
+                {{ adelantosElegidos().length === adelantosCentro().length ? 'Quitar todos' : 'Descontar todos' }}
+              </button>
+            </div>
+            <ul class="liq-lista">
+              @for (a of adelantosCentro(); track a.idAdelanto) {
+                <li>
+                  <label class="liq-adelanto" [class.activo]="adelantosElegidos().includes(a.idAdelanto)">
+                    <input type="checkbox" [checked]="adelantosElegidos().includes(a.idAdelanto)" [disabled]="guardando()"
+                      (change)="alternarAdelanto(a, $any($event.target).checked)" />
+                    <span class="liq-adelanto-info">
+                      <strong>Adelanto #{{ a.idAdelanto }}</strong>
+                      <small>{{ a.fecha | date:'dd/MM/yyyy' }}{{ a.observacion ? ' · ' + a.observacion : '' }}</small>
+                    </span>
+                    <span class="liq-adelanto-monto">
+                      <strong>S/ {{ a.montoPen | numeroClaro:'1.2-2' }}</strong>
+                      @if (a.moneda === 'USD') { <small>US$ {{ a.monto | numeroClaro:'1.2-2' }} · T.C. {{ a.tipoCambio | numeroClaro:'1.4-4' }}</small> }
+                    </span>
+                  </label>
+                </li>
+              }
+            </ul>
           }
-          @if (adelantosElegidos().length) { <small>Seleccionado: S/ {{ sumaAdelantosElegidos() | numeroClaro:'1.2-2' }}</small> }
-        </fieldset>
-      }
+
+          <details class="liq-extra" [open]="adelantoExtraValor() > 0">
+            <summary>Agregar otro descuento manual</summary>
+            <label>Monto en soles (S/)
+              <input type="number" min="0" step="0.01" formControlName="adelantoExtra" placeholder="0.00" />
+            </label>
+            <small>Úsalo para un adelanto entregado fuera del sistema. Quedará registrado como descuento del lote.</small>
+          </details>
+        </div>
+
+        <aside class="liq-resumen" aria-live="polite">
+          <dl>
+            <div><dt>Total material</dt><dd>{{ calculo() ? 'S/ ' + (calculo()!.subtotal | numeroClaro:'1.2-2') : '—' }}</dd></div>
+            @if (sumaAdelantosElegidos() > 0) {
+              <div class="liq-resta"><dt>Adelantos descontados ({{ adelantosElegidos().length }})</dt><dd>− S/ {{ sumaAdelantosElegidos() | numeroClaro:'1.2-2' }}</dd></div>
+            }
+            @if (adelantoExtraValor() > 0) {
+              <div class="liq-resta"><dt>Descuento manual</dt><dd>− S/ {{ adelantoExtraValor() | numeroClaro:'1.2-2' }}</dd></div>
+            }
+            <div class="liq-neto"><dt>Neto a pagar</dt><dd>{{ calculo() ? 'S/ ' + (calculo()!.total | numeroClaro:'1.2-2') : '—' }}</dd></div>
+          </dl>
+
+          @if (descuentoExcedeTotal()) {
+            <p class="liq-alerta" role="alert">Los descuentos superan el total del material. Desmarca algún adelanto o reduce el descuento manual.</p>
+          }
+
+          <div class="liq-moneda">
+            <span id="liq-moneda-label">Pagar en</span>
+            <div class="liq-segmento" role="radiogroup" aria-labelledby="liq-moneda-label">
+              <button type="button" role="radio" [attr.aria-checked]="!pagoEnDolares()" [class.activo]="!pagoEnDolares()" (click)="elegirMoneda('PEN')">Soles S/</button>
+              <button type="button" role="radio" [attr.aria-checked]="pagoEnDolares()" [class.activo]="pagoEnDolares()" (click)="elegirMoneda('USD')">Dólares US$</button>
+            </div>
+          </div>
+          @if (pagoEnDolares()) {
+            <label class="liq-tc">Tipo de cambio del pago
+              <input type="number" min="0.0001" step="0.0001" formControlName="tipoCambioPago" [placeholder]="tipoCambioPago() || '3.7500'" />
+            </label>
+            <div class="liq-usd"><span>Se entrega</span><strong>{{ totalEnDolares() === null ? '—' : 'US$ ' + (totalEnDolares()! | numeroClaro:'1.2-2') }}</strong></div>
+          }
+        </aside>
+      </section>
       <div class="form-actions">@if (calculando()) { <span role="status">Calculando importes…</span> }
         <button mat-stroked-button type="button" class="button-secondary" [disabled]="guardando()" (click)="cancelar()">Cancelar</button>
         <button mat-flat-button type="submit" class="button-primary" [disabled]="guardando() || calculando() || form.invalid || !calculoValidado() || !!errorCalculo()">Revisar y registrar</button>
@@ -249,7 +302,7 @@
                         @if (seccion() === 'exportacion') { <td></td> }
                         <td class="lote-id">
                           <span class="lote-num">#{{ r.idRecepcion }}</span>
-                          <span class="badge-oro badge-rojo">🔴 Oro Rojo</span>
+                          <span class="badge-oro badge-rojo">Oro rojo</span>
                           <small>{{ r.fecha | date:'dd/MM/yyyy' }}</small>
                         </td>
                         <td colspan="4" class="pendiente">Sin ley registrada.</td>
@@ -271,7 +324,7 @@
                         @if (seccion() === 'exportacion') { <td></td> }
                         <td class="lote-id">
                           <span class="lote-num">#{{ r.idRecepcion }}</span>
-                          <span class="badge-oro badge-verde">🟢 Oro Verde</span>
+                          <span class="badge-oro badge-verde">Oro verde</span>
                           <small>{{ r.fecha | date:'dd/MM/yyyy' }}</small>
                         </td>
                         <td colspan="4" class="pendiente">Sin ley registrada.</td>
@@ -283,8 +336,8 @@
                         @if (seccion() === 'exportacion') { <td></td> }
                         <td class="lote-id">
                           <span class="lote-num">#{{ r.idRecepcion }}</span>
-                          @if (r.pesoRojoSinFundirG) { <span class="badge-oro badge-rojo">🔴 Oro Rojo</span> }
-                          @if (r.pesoVerdeSinFundirG) { <span class="badge-oro badge-verde">🟢 Oro Verde</span> }
+                          @if (r.pesoRojoSinFundirG) { <span class="badge-oro badge-rojo">Oro rojo</span> }
+                          @if (r.pesoVerdeSinFundirG) { <span class="badge-oro badge-verde">Oro verde</span> }
                           <small>{{ r.fecha | date:'dd/MM/yyyy' }}</small>
                         </td>
                         <td colspan="4" class="pendiente">Sin ley registrada.</td>

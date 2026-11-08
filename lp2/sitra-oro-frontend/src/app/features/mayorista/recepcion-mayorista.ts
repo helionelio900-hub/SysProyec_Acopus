@@ -185,6 +185,8 @@ export class RecepcionMayorista implements OnInit {
   private revisionFormulario = 0;
   protected readonly form = this.fb.nonNullable.group({
     adelanto: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
+    // Descuento adicional escrito a mano; el campo adelanto = adelantos marcados + este monto.
+    adelantoExtra: [0, [Validators.min(0), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
     monedaPago: ['PEN' as MonedaPago],
     tipoCambioPago: this.fb.control<number | null>(null, [Validators.min(0.0001), Validators.pattern(/^\d+(\.\d{1,4})?$/)]),
     detalles: this.fb.array([this.nuevaFila()], {
@@ -243,19 +245,54 @@ export class RecepcionMayorista implements OnInit {
     return calc && tc > 0 ? Math.round((calc.total / tc) * 100) / 100 : null;
   });
   protected readonly pagoEnDolares = computed(() => this.valoresCalculo().monedaPago === 'USD');
+  protected readonly cargandoAdelantos = signal(false);
+  protected readonly adelantoExtraValor = computed(() => Number(this.valoresCalculo().adelantoExtra) || 0);
+  protected readonly saldoAdelantosCentro = computed(() =>
+    Math.round(this.adelantosCentro().reduce((s, a) => s + a.montoPen, 0) * 100) / 100);
+  /** Los descuentos no pueden superar el total del material (el backend también lo rechaza). */
+  protected readonly descuentoExcedeTotal = computed(() => {
+    const subtotal = this.calculo()?.subtotal;
+    return subtotal != null && Number(this.valoresCalculo().adelanto) > subtotal;
+  });
   protected alternarAdelanto(a: Adelanto, marcado: boolean): void {
     if (this.guardando()) return;
     this.adelantosElegidos.update(ids => marcado ? [...new Set([...ids, a.idAdelanto])] : ids.filter(id => id !== a.idAdelanto));
-    this.form.controls.adelanto.setValue(this.sumaAdelantosElegidos());
+    this.aplicarDescuentos();
+  }
+  protected marcarTodosAdelantos(marcar: boolean): void {
+    if (this.guardando()) return;
+    this.adelantosElegidos.set(marcar ? this.adelantosCentro().map(a => a.idAdelanto) : []);
+    this.aplicarDescuentos();
+  }
+  protected elegirMoneda(moneda: MonedaPago): void {
+    if (!this.guardando()) this.form.controls.monedaPago.setValue(moneda);
+  }
+  /** El campo adelanto que viaja al backend es la suma de adelantos marcados más el descuento manual. */
+  private aplicarDescuentos(): void {
+    const total = Math.round((this.sumaAdelantosElegidos() + (Number(this.form.controls.adelantoExtra.value) || 0)) * 100) / 100;
+    if (this.form.controls.adelanto.value !== total) this.form.controls.adelanto.setValue(total);
   }
   private cargarAdelantosCentro(r: RecepcionLey): void {
     this.adelantosCentro.set([]);
     this.adelantosElegidos.set(r.idsAdelantos ?? []);
     if (!(r.idCentroAcopio > 0)) return;
+    this.cargandoAdelantos.set(true);
     this.api.adelantos(r.idCentroAcopio).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: lista => this.adelantosCentro.set(lista.filter(a =>
-        a.estado === 'PENDIENTE' || (r.idRecepcion > 0 && a.idRecepcion === r.idRecepcion))),
-      error: () => this.adelantosCentro.set([]),
+      next: lista => {
+        if (this.editando()?.idRecepcion !== r.idRecepcion) return;
+        const disponibles = lista.filter(a =>
+          a.estado === 'PENDIENTE' || (r.idRecepcion > 0 && a.idRecepcion === r.idRecepcion));
+        this.adelantosCentro.set(disponibles);
+        const nuevo = !r.detalles.length && !(r.idsAdelantos?.length) && !r.adelanto;
+        // Lote por valorizar: se aplican de oficio los adelantos pendientes del centro.
+        if (nuevo) this.adelantosElegidos.set(disponibles.map(a => a.idAdelanto));
+        // Lote ya valorizado: lo que no corresponde a adelantos vinculados queda como descuento manual.
+        const extra = nuevo ? 0 : Math.max(0, Math.round((r.adelanto - this.sumaAdelantosElegidos()) * 100) / 100);
+        this.form.controls.adelantoExtra.setValue(extra, { emitEvent: false });
+        this.aplicarDescuentos();
+        this.cargandoAdelantos.set(false);
+      },
+      error: () => { this.adelantosCentro.set([]); this.cargandoAdelantos.set(false); },
     });
   }
   protected readonly visibles = computed(() => this.registros().filter(r =>
@@ -354,6 +391,7 @@ export class RecepcionMayorista implements OnInit {
 
   ngOnInit(): void {
     if (this.route.snapshot.queryParamMap.get('seccion') === 'exportacion') this.seccion.set('exportacion');
+    this.form.controls.adelantoExtra.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.aplicarDescuentos());
     this.form.valueChanges.pipe(
       tap(() => { this.valoresCalculo.set(this.form.getRawValue()); this.formularioValido.set(this.form.valid); this.revisionFormulario++; this.calculoServidor.set(null); this.errorCalculo.set(''); this.calculando.set(false); }),
       debounceTime(350),
@@ -411,7 +449,8 @@ export class RecepcionMayorista implements OnInit {
       if (verde > 0) this.partidas.push(this.nuevaFila({ tipoOro: 'VERDE', pesoSinFundirG: verde }), { emitEvent: false });
       if (!this.partidas.length) this.partidas.push(this.nuevaFila({ pesoSinFundirG: r.pesoDeclaradoG || undefined }), { emitEvent: false });
     }
-    this.form.patchValue({ monedaPago: r.monedaPago ?? 'PEN', tipoCambioPago: r.tipoCambioPago ?? null }, { emitEvent: false });
+    this.form.patchValue({ monedaPago: r.monedaPago ?? 'PEN', tipoCambioPago: r.tipoCambioPago ?? null,
+      adelantoExtra: r.idsAdelantos?.length ? 0 : r.adelanto }, { emitEvent: false });
     this.form.controls.adelanto.setValue(r.adelanto);
     this.cargarAdelantosCentro(r);
     setTimeout(() => document.getElementById('editor-lote')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));

@@ -23,118 +23,47 @@
     </div>
   </aside>
 
-  <!-- ENCABEZADO EJECUTIVO DE PLANTA MAYORISTA -->
-  <header class="terminal-hero">
-    <div class="hero-left">
-      <div class="hero-breadcrumb">
-        <span class="station-chip">
-          <span class="pulse-beacon"></span>
-          PLANTA CENTRAL ACTIVA
-        </span>
-        <span class="market-status">
-          <span class="dot-green"></span> LBMA / COMEX: CONECTADO
-        </span>
-        <span class="terminal-clock">{{ horaActual() }} (UTC-5)</span>
-      </div>
-      <h1 class="hero-title">Supervisión Mayorista y Planta</h1>
-      <p class="hero-desc">
-        Tablero del dinero que entra al sistema cada día, pagos en soles y dólares, adelantos a los centros de acopio y estado de los lotes.
+  <header class="dash-header">
+    <div>
+      <h1>Resumen mayorista</h1>
+      <p>
+        <span class="dash-fecha">{{ fechaActual }}</span> · <time>{{ horaActual() }}</time>
+        @if (tablero(); as t) { · Datos del {{ t.desde | date: 'dd/MM' }} al {{ t.hasta | date: 'dd/MM/yyyy' }} }
       </p>
     </div>
-
-
-    <div class="hero-right">
-      <div class="security-card">
-        <div class="sec-header">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-          <span>AUTENTICACIÓN REFORZADA</span>
-        </div>
-        <div class="sec-body">
-          <strong>Keycloak · OIDC RS256</strong>
-          <small>Auditoría de rol G1_MAYORISTA</small>
-        </div>
-      </div>
+    <div class="dash-rango" role="group" aria-label="Periodo del resumen">
+      @for (dias of [7, 30, 90]; track dias) {
+        <button type="button" [class.activo]="rango() === dias" [attr.aria-pressed]="rango() === dias" (click)="cambiarRango($any(dias))">{{ dias }} días</button>
+      }
+      <button type="button" class="dash-refrescar" (click)="cargarTablero()" [disabled]="cargando()">{{ cargando() ? 'Actualizando…' : 'Actualizar' }}</button>
     </div>
   </header>
 
-  <!-- TABLERO MAYORISTA: DINERO QUE ENTRA, PAGOS POR MONEDA Y ADELANTOS -->
-  <section class="kpi-section" aria-labelledby="tablero-titulo">
-    <div class="dash-toolbar">
-      <div class="section-tag-bar">
-        <span class="tag-square"></span>
-        <h2 id="tablero-titulo">TABLERO FINANCIERO · {{ tablero() ? (tablero()!.desde | date: 'dd/MM') + ' – ' + (tablero()!.hasta | date: 'dd/MM/yyyy') : 'CARGANDO' }}</h2>
-      </div>
-      <div class="dash-rango" role="group" aria-label="Rango del tablero">
-        @for (dias of [7, 30, 90]; track dias) {
-          <button type="button" [class.activo]="rango() === dias" [attr.aria-pressed]="rango() === dias" (click)="cambiarRango($any(dias))">{{ dias }} días</button>
-        }
-        <button type="button" class="dash-refrescar" (click)="cargarTablero()" [disabled]="cargando()">Actualizar</button>
-      </div>
-    </div>
+  @if (error()) {
+    <div class="error-panel" role="alert"><span>{{ error() }}</span></div>
+  }
 
-    @if (error()) {
-      <div class="error-panel" role="alert"><span>{{ error() }}</span></div>
-    }
-
-    <div class="kpi-grid dash-kpis">
-      <article class="kpi-tile featured-kpi">
-        <div class="tile-top">
-          <div class="kpi-icon-wrap icon-gold">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-          <span class="kpi-tag tag-gold">HOY</span>
-        </div>
-        <div class="kpi-main">
-          <span class="kpi-label">Dinero que entra hoy</span>
-          <strong class="kpi-val text-gold">{{ cargando() && !tablero() ? '…' : dinero(tablero()?.hoy?.ingresoPen) }}</strong>
-          <span class="kpi-subtext">≈ {{ dinero(tablero()?.hoy?.ingresoUsd, 'USD') }} · {{ tablero()?.hoy?.operaciones ?? 0 }} lote(s) valorizados hoy</span>
-        </div>
-      </article>
-
-      <article class="kpi-tile">
-        <div class="tile-top">
-          <div class="kpi-icon-wrap icon-blue">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg>
-          </div>
-          <span class="kpi-tag tag-blue">{{ rango() }} DÍAS</span>
-        </div>
-        <div class="kpi-main">
-          <span class="kpi-label">Ingreso del periodo</span>
-          <strong class="kpi-val">{{ dinero(tablero()?.periodo?.ingresoPen) }}</strong>
-          <span class="kpi-subtext">Promedio diario {{ dinero(tablero()?.periodo?.promedioDiarioPen) }} · {{ dinero(tablero()?.periodo?.ingresoUsd, 'USD') }}</span>
-        </div>
-      </article>
-
-      <article class="kpi-tile">
-        <div class="tile-top">
-          <div class="kpi-icon-wrap icon-emerald">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
-          </div>
-          <span class="kpi-tag tag-emerald">PAGADO</span>
-        </div>
-        <div class="kpi-main">
-          <span class="kpi-label">Neto pagado a acopiadores</span>
-          <strong class="kpi-val">{{ dinero(tablero()?.periodo?.pagadoPen) }}</strong>
-          <span class="kpi-subtext">{{ tablero()?.periodo?.operaciones ?? 0 }} lotes · ticket promedio {{ dinero(tablero()?.periodo?.ticketPromedioPen) }}</span>
-        </div>
-      </article>
-
-      <article class="kpi-tile">
-        <div class="tile-top">
-          <div class="kpi-icon-wrap icon-gold">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
-          </div>
-          <span class="kpi-tag tag-gold">ADELANTOS</span>
-        </div>
-        <div class="kpi-main">
-          <span class="kpi-label">Adelantos por descontar</span>
-          <strong class="kpi-val">{{ dinero(tablero()?.adelantos?.saldoPendientePen) }}</strong>
-          <span class="kpi-subtext">{{ tablero()?.adelantos?.pendientes ?? 0 }} pendiente(s) · entregado en el periodo {{ dinero(tablero()?.adelantos?.entregadosPeriodoPen) }}</span>
-        </div>
-      </article>
-    </div>
+  <section class="dash-kpis" aria-label="Indicadores del periodo" [attr.aria-busy]="cargando()">
+    <article class="dash-kpi dash-kpi-principal">
+      <h2>Dinero que entra hoy</h2>
+      <strong>{{ cargando() && !tablero() ? '…' : dinero(tablero()?.hoy?.ingresoPen) }}</strong>
+      <p>≈ {{ dinero(tablero()?.hoy?.ingresoUsd, 'USD') }} · {{ tablero()?.hoy?.operaciones ?? 0 }} lote(s) valorizado(s) hoy</p>
+    </article>
+    <article class="dash-kpi">
+      <h2>Ingreso de los últimos {{ rango() }} días</h2>
+      <strong>{{ dinero(tablero()?.periodo?.ingresoPen) }}</strong>
+      <p>Promedio diario {{ dinero(tablero()?.periodo?.promedioDiarioPen) }}</p>
+    </article>
+    <article class="dash-kpi">
+      <h2>Neto pagado a acopiadores</h2>
+      <strong>{{ dinero(tablero()?.periodo?.pagadoPen) }}</strong>
+      <p>{{ tablero()?.periodo?.operaciones ?? 0 }} lotes · promedio {{ dinero(tablero()?.periodo?.ticketPromedioPen) }}</p>
+    </article>
+    <article class="dash-kpi" [class.dash-kpi-alerta]="(tablero()?.adelantos?.pendientes ?? 0) > 0">
+      <h2>Adelantos por descontar</h2>
+      <strong>{{ dinero(tablero()?.adelantos?.saldoPendientePen) }}</strong>
+      <p>{{ tablero()?.adelantos?.pendientes ?? 0 }} pendiente(s) · <a href="#adelantos-titulo">ver adelantos</a></p>
+    </article>
   </section>
 
   <!-- GRÁFICO: DINERO QUE ENTRA POR DÍA -->
@@ -170,7 +99,7 @@
           <tbody>
             @for (d of diasConMovimiento(); track d.fecha) {
               <tr>
-                <td class="text-muted">{{ d.fecha | date: 'EEE dd/MM/yyyy' }}</td>
+                <td class="text-muted">{{ d.fecha | date: 'EEE dd/MM/yyyy' : '' : 'es-PE' }}</td>
                 <td class="text-center">{{ d.operaciones }}</td>
                 <td class="text-right font-mono">{{ d.pesoFundidoG | number: '1.3-3' }} g</td>
                 <td class="text-right font-mono text-gold font-bold">{{ dinero(d.ingresoPen) }}</td>
@@ -297,83 +226,15 @@
     }
   </section>
 
-  <!-- PIPELINE OPERATIVO MAYORISTA (4 ESTACIONES) -->
-  <section class="pipeline-section" aria-labelledby="pipeline-titulo">
-    <div class="section-tag-bar">
-      <span class="tag-square"></span>
-      <h2 id="pipeline-titulo">FLUJO DE PROCESAMIENTO EN PLANTA</h2>
-    </div>
-
-    <div class="pipeline-grid">
-      <!-- Etapa 1 -->
-      <article class="pipeline-card">
-        <div class="card-step-header">
-          <span class="step-num">01</span>
-          <span class="step-badge">LOGÍSTICA</span>
-        </div>
-        <h3 class="card-title">Centros de Acopio</h3>
-        <p class="card-desc">Administra las sucursales descentralizadas y las cuentas vinculadas a operadores de balanza autorizados.</p>
-        <a class="pipeline-link" [routerLink]="vistaPrevia ? '/vista-previa/mayorista/centros' : '/mayorista/centros'">
-          <span>Gestionar red de centros</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-        </a>
-      </article>
-
-      <!-- Etapa 2 -->
-      <article class="pipeline-card highlight-pipeline">
-        <div class="card-step-header">
-          <span class="step-num">02</span>
-          <span class="step-badge badge-gold">TRANSACCIÓN</span>
-        </div>
-        <h3 class="card-title">Compra al Acopiador</h3>
-        <p class="card-desc">Recepción directa de partidas de oro acopiadas, ponderación de ley, ensaye físico y liquidación en planta.</p>
-        <a class="pipeline-link link-primary" [routerLink]="vistaPrevia ? '/vista-previa/mayorista/recepcion' : '/mayorista/recepcion'">
-          <span>Registrar compra mayorista</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-        </a>
-      </article>
-
-      <!-- Etapa 3 -->
-      <article class="pipeline-card">
-        <div class="card-step-header">
-          <span class="step-num">03</span>
-          <span class="step-badge">AUDITORÍA</span>
-        </div>
-        <h3 class="card-title">Liquidaciones</h3>
-        <p class="card-desc">Historial fiscal de liquidaciones emitidas, tarifas de valorización por onza y vouchers bancarios asociados.</p>
-        <a class="pipeline-link" [routerLink]="vistaPrevia ? '/vista-previa/mayorista/liquidaciones' : '/mayorista/liquidaciones'">
-          <span>Auditar liquidaciones</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-        </a>
-      </article>
-
-      <!-- Etapa 4 -->
-      <article class="pipeline-card">
-        <div class="card-step-header">
-          <span class="step-num">04</span>
-          <span class="step-badge">EXPORTACIÓN</span>
-        </div>
-        <h3 class="card-title">Lotes de Exportación</h3>
-        <p class="card-desc">Consolida lotes de mineral con leyes certificadas y precintos de seguridad para exportación a refinería.</p>
-        <a class="pipeline-link" [routerLink]="vistaPrevia ? '/vista-previa/mayorista/consolidacion' : '/mayorista/consolidacion'">
-          <span>Consolidar partidas</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-        </a>
-      </article>
-    </div>
-  </section>
-
-  <!-- AUDITORÍA INSTITUCIONAL -->
-  <footer class="audit-strip">
-    <div class="audit-left">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-        <polyline points="22 4 12 14.01 9 11.01"/>
-      </svg>
-      <span>PLATAFORMA MAYORISTA AUDITADA · TRAZABILIDAD ORACLE XE · TOKEN KEYCLOAK ACTIVO</span>
-    </div>
-    <div class="audit-right">
-      <span>SITRA-ORO v2.4</span>
-    </div>
-  </footer>
+  <nav class="dash-accesos" aria-label="Accesos rápidos">
+    <a [routerLink]="vistaPrevia ? '/vista-previa/mayorista/recepcion' : '/mayorista/recepcion'" class="dash-acceso-principal">
+      <strong>Valorizar lotes recibidos</strong><span>Registrar ley, pesos y pago al acopiador</span>
+    </a>
+    <a [routerLink]="vistaPrevia ? '/vista-previa/mayorista/consolidacion' : '/mayorista/consolidacion'">
+      <strong>Lotes de exportación</strong><span>Agrupar lotes valorizados para despacho</span>
+    </a>
+    <a [routerLink]="vistaPrevia ? '/vista-previa/mayorista/centros' : '/mayorista/centros'">
+      <strong>Centros de acopio</strong><span>Centros, zonas y cuentas de acopiadores</span>
+    </a>
+  </nav>
 </section>
