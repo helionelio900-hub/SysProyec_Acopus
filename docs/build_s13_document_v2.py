@@ -584,6 +584,8 @@ for q_text, ans_text in preguntas:
     ap = p(after=4)
     run(ap, ans_text, color=BODY, size=8.5)
 
+doc.add_page_break()
+
 # 7. Anexo: Feedback Oficial de la Sesión
 heading("7. Anexo: Feedback Oficial de la Sesión", level=1)
 p_fb = p(after=3)
