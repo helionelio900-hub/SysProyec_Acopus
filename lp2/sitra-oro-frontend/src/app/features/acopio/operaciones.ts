@@ -9,9 +9,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { Minero } from './mineros/minero';
 import { MineroService } from './mineros/minero.service';
 import { EntregasRecibidas } from './entregas-recibidas';
+import { ComprobanteCompra } from './comprobante-compra';
 import {
   AcumuladosAcopio,
   CompraAcopio,
+  PrestamoMinero,
   AjusteCompra,
   OperacionesService,
   ReporteEntregasAcopiador,
@@ -20,7 +22,7 @@ import {
 
 @Component({
   selector: 'app-operaciones-acopio',
-  imports: [ReactiveFormsModule, DatePipe, MatButtonModule, EntregasRecibidas],
+  imports: [ReactiveFormsModule, DatePipe, MatButtonModule, EntregasRecibidas, ComprobanteCompra],
   templateUrl: './operaciones.html',
   styleUrls: ['./operaciones.css', './operaciones-confirmacion.css', './operaciones-compra.css'],
 })
@@ -28,6 +30,8 @@ export class OperacionesAcopio implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private readonly servicio = inject(OperacionesService);
+  /** Compra cuyo comprobante digital está abierto (el acopio no tiene ticketera). */
+  protected readonly comprobante = signal<CompraAcopio | null>(null);
   private readonly minerosService = inject(MineroService);
   private readonly http = inject(HttpClient);
   protected readonly solicitudesAceptadas = signal<EntregaMinero[]>([]);
@@ -56,7 +60,7 @@ export class OperacionesAcopio implements OnInit {
   }
   private readonly confirmacionEntrega = viewChild.required<ElementRef<HTMLDialogElement>>('confirmacionEntrega');
   private readonly confirmacionCompra = viewChild.required<ElementRef<HTMLDialogElement>>('confirmacionCompra');
-  protected readonly seccionActiva = signal<'recepcion' | 'entrega' | 'historial' | 'reporte'>('entrega');
+  protected readonly seccionActiva = signal<'recepcion' | 'entrega' | 'historial' | 'prestamos' | 'reporte'>('entrega');
   protected abrirCompraSolicitada(solicitud: EntregaMinero): void {
     if (this.guardando() || this.enviandoMayorista()) return;
     this.solicitudesAceptadas.update(items => [...items.filter(s => s.ID_SOLICITUD !== solicitud.ID_SOLICITUD), solicitud]);
@@ -78,6 +82,7 @@ export class OperacionesAcopio implements OnInit {
     { id: 'recepcion', nombre: 'Recepción de mineros' },
     { id: 'entrega', nombre: 'Preparar entrega' },
     { id: 'historial', nombre: 'Historial de compras' },
+    { id: 'prestamos', nombre: 'Préstamos a mineros' },
     { id: 'reporte', nombre: 'Reporte de entregas' },
   ] as const;
   protected readonly mineros = signal<Minero[]>([]);
@@ -164,12 +169,13 @@ export class OperacionesAcopio implements OnInit {
   private crearPartida() {
     return this.fb.nonNullable.group({
       tipoOro: ['ROJO' as 'ROJO' | 'VERDE', Validators.required],
-      pesoSinFundirG: [0, [Validators.required, Validators.min(0.001), Validators.max(9999999.999), Validators.pattern(/^\d+(\.\d{1,3})?$/)]],
-      pesoFundidoNetoG: [0, [Validators.required, Validators.min(0.001), Validators.max(9999999.999), Validators.pattern(/^\d+(\.\d{1,3})?$/)]],
+      // Vacíos al empezar: el acopiador escribe el peso sin tener que borrar un 0.
+      pesoSinFundirG: [null as number | null, [Validators.required, Validators.min(0.001), Validators.max(9999999.999), Validators.pattern(/^\d+(\.\d{1,3})?$/)]],
+      pesoFundidoNetoG: [null as number | null, [Validators.required, Validators.min(0.001), Validators.max(9999999.999), Validators.pattern(/^\d+(\.\d{1,3})?$/)]],
       aplicarAjuste: [false],
-      precioAjustePen: [0],
+      precioAjustePen: [null as number | null],
     }, { validators: (control: AbstractControl): ValidationErrors | null => {
-      const precio = control.get('precioAjustePen')?.value;
+      const precio = Number(control.get('precioAjustePen')?.value);
       return control.get('aplicarAjuste')?.value &&
         (!Number.isFinite(precio) || precio <= 0 || precio > 99999999.99 || !/^\d+(\.\d{1,2})?$/.test(String(precio)))
         ? { precioExcepcionalInvalido: true } : null;
@@ -183,14 +189,95 @@ export class OperacionesAcopio implements OnInit {
   private readonly valoresPartidas = signal(this.partidasCompra.getRawValue());
   protected readonly resumenCompra = computed(() => {
     const lineas = this.valoresPartidas().map((partida) => {
-      const precio = partida.aplicarAjuste ? partida.precioAjustePen : this.precioRegistroVigente(partida.tipoOro);
-      const importe = precio && precio > 0 && partida.pesoFundidoNetoG > 0
-        ? Math.round((partida.pesoFundidoNetoG * precio + Number.EPSILON) * 100) / 100 : 0;
-      return { precio, importe, peso: partida.pesoFundidoNetoG };
+      const precio = partida.aplicarAjuste ? Number(partida.precioAjustePen) || 0 : this.precioRegistroVigente(partida.tipoOro);
+      const peso = Number(partida.pesoFundidoNetoG) || 0;
+      const importe = precio && precio > 0 && peso > 0
+        ? Math.round((peso * precio + Number.EPSILON) * 100) / 100 : 0;
+      return { precio, importe, peso };
     });
     return { lineas, total: Math.round(lineas.reduce((sum, linea) => sum + linea.importe, 0) * 100) / 100,
       peso: Math.round(lineas.reduce((sum, linea) => sum + (linea.peso || 0), 0) * 1000) / 1000 };
   });
+  // ---- Préstamos del minero y liquidación del pago (solo soles) ----
+  protected readonly prestamosMinero = signal<PrestamoMinero[]>([]);
+  protected readonly prestamosElegidos = signal<number[]>([]);
+  protected readonly cargandoPrestamosMinero = signal(false);
+  protected readonly descuentoManual = this.fb.control<number | null>(null, [Validators.min(0), Validators.pattern(/^\d+(\.\d{1,2})?$/)]);
+  private readonly valorDescuentoManual = signal(0);
+  protected readonly liquidacion = computed(() => {
+    const material = this.resumenCompra().total;
+    const prestamos = Math.round(this.prestamosMinero().filter(p => this.prestamosElegidos().includes(p.idPrestamo))
+      .reduce((s, p) => s + p.montoPen, 0) * 100) / 100;
+    const manual = this.valorDescuentoManual();
+    const neto = Math.round((material - prestamos - manual) * 100) / 100;
+    return { material, prestamos, manual, neto, excede: material > 0 && neto < 0 };
+  });
+  protected alternarPrestamo(id: number, marcado: boolean): void {
+    if (this.guardando()) return;
+    this.prestamosElegidos.update(ids => marcado ? [...new Set([...ids, id])] : ids.filter(x => x !== id));
+  }
+  private cargarPrestamosMinero(idMinero: number): void {
+    this.prestamosMinero.set([]);
+    this.prestamosElegidos.set([]);
+    if (!idMinero) return;
+    this.cargandoPrestamosMinero.set(true);
+    this.servicio.prestamos(idMinero, 'PENDIENTE').subscribe({
+      next: (lista) => {
+        this.cargandoPrestamosMinero.set(false);
+        if (Number(this.form.controls.idMinero.value) !== idMinero) return;
+        this.prestamosMinero.set(lista);
+        // Lo que el minero debe se descuenta de oficio; el acopiador puede desmarcarlo.
+        this.prestamosElegidos.set(lista.map(p => p.idPrestamo));
+      },
+      error: () => this.cargandoPrestamosMinero.set(false),
+    });
+  }
+
+  // ---- Sección "Préstamos a mineros" ----
+  protected readonly prestamosPendientes = signal<PrestamoMinero[]>([]);
+  protected readonly totalPrestado = computed(() => this.prestamosPendientes().reduce((s, p) => s + p.montoPen, 0));
+  protected readonly guardandoPrestamo = signal(false);
+  protected readonly mensajePrestamo = signal('');
+  protected readonly errorPrestamo = signal('');
+  protected readonly formPrestamo = this.fb.nonNullable.group({
+    idMinero: [0, [Validators.required, Validators.min(1)]],
+    montoPen: [null as number | null, [Validators.required, Validators.min(0.01), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
+    observacion: ['', Validators.maxLength(200)],
+  });
+  protected cargarPrestamosPendientes(): void {
+    this.servicio.prestamos(undefined, 'PENDIENTE').subscribe({
+      next: (lista) => this.prestamosPendientes.set(lista),
+      error: () => this.errorPrestamo.set('No se pudieron cargar los préstamos.'),
+    });
+  }
+  protected registrarPrestamo(): void {
+    this.mensajePrestamo.set(''); this.errorPrestamo.set('');
+    const v = this.formPrestamo.getRawValue();
+    if (this.formPrestamo.invalid || !v.montoPen) {
+      this.formPrestamo.markAllAsTouched();
+      this.errorPrestamo.set('Elige el minero y escribe un monto mayor que cero.');
+      return;
+    }
+    this.guardandoPrestamo.set(true);
+    this.servicio.registrarPrestamo({ idMinero: Number(v.idMinero), montoPen: Number(v.montoPen), observacion: v.observacion.trim() || undefined }).subscribe({
+      next: (p) => {
+        this.guardandoPrestamo.set(false);
+        this.mensajePrestamo.set(`Préstamo #${p.idPrestamo} de ${this.dinero(p.montoPen)} a ${p.minero}. Se descontará al pagarle su próxima compra.`);
+        this.formPrestamo.reset({ idMinero: 0, montoPen: null, observacion: '' });
+        this.cargarPrestamosPendientes();
+        if (Number(this.form.controls.idMinero.value) === p.idMinero) this.cargarPrestamosMinero(p.idMinero);
+      },
+      error: (e: HttpErrorResponse) => { this.guardandoPrestamo.set(false); this.errorPrestamo.set(e.error?.message ?? 'No se pudo registrar el préstamo.'); },
+    });
+  }
+  protected anularPrestamo(p: PrestamoMinero): void {
+    if (!confirm(`¿Anular el préstamo #${p.idPrestamo} de ${this.dinero(p.montoPen)} a ${p.minero}?`)) return;
+    this.servicio.anularPrestamo(p.idPrestamo).subscribe({
+      next: () => { this.mensajePrestamo.set(`Préstamo #${p.idPrestamo} anulado.`); this.cargarPrestamosPendientes(); },
+      error: (e: HttpErrorResponse) => this.errorPrestamo.set(e.error?.message ?? 'No se pudo anular el préstamo.'),
+    });
+  }
+
   protected agregarPartida(): void {
     if (!this.guardando() && this.partidasCompra.length < 200) this.partidasCompra.push(this.crearPartida());
   }
@@ -201,7 +288,11 @@ export class OperacionesAcopio implements OnInit {
     return this.mineros().find(minero => minero.idMinero === this.form.controls.idMinero.value)?.nombresApellidos ?? '';
   }
   ngOnInit(): void {
-    this.form.controls.idMinero.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+    this.descuentoManual.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((v) => this.valorDescuentoManual.set(Math.max(Number(v) || 0, 0)));
+    this.cargarPrestamosPendientes();
+    this.form.controls.idMinero.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((idMinero) => {
+      this.cargarPrestamosMinero(Number(idMinero));
       const solicitudes = this.solicitudesDelMinero();
       this.seleccionarSolicitud(solicitudes.length === 1 ? solicitudes[0].ID_SOLICITUD : 0);
     });
@@ -282,6 +373,10 @@ export class OperacionesAcopio implements OnInit {
       this.error.set('Selecciona un minero y completa los pesos y precios de todas las partidas.');
       return;
     }
+    if (this.liquidacion().excede) {
+      this.error.set('Los préstamos y descuentos superan el valor del oro. Desmarca un préstamo o reduce el descuento.');
+      return;
+    }
     if (this.resumenCompra().lineas.some(linea => !linea.precio || linea.precio <= 0)) {
       this.error.set('Una partida no tiene precio publicado. Ingresa un precio excepcional para esa partida.');
       return;
@@ -299,15 +394,22 @@ export class OperacionesAcopio implements OnInit {
         idMinero: value.idMinero,
         ...(this.solicitudCompra() ? { idSolicitud: this.solicitudCompra()!.ID_SOLICITUD } : {}),
         detalles: value.detalles.map(({ aplicarAjuste, precioAjustePen, ...partida }) => ({
-          ...partida,
-          ...(aplicarAjuste ? { precioAplicadoPen: precioAjustePen } : {}),
+          tipoOro: partida.tipoOro,
+          pesoSinFundirG: Number(partida.pesoSinFundirG),
+          pesoFundidoNetoG: Number(partida.pesoFundidoNetoG),
+          ...(aplicarAjuste ? { precioAplicadoPen: Number(precioAjustePen) } : {}),
         })),
+        idsPrestamos: this.prestamosElegidos(),
+        descuentoManualPen: this.valorDescuentoManual() || null,
       })
       .subscribe({
         next: (resultado) => {
           this.mensaje.set(
             `Compra #${resultado.idCompraG2} registrada con ${resultado.detalles.length} partida(s). Total pagado al minero: ${this.dinero(resultado.totalPagadoPen)}.`,
           );
+          this.comprobante.set(resultado);
+          this.descuentoManual.reset(null);
+          this.cargarPrestamosPendientes();
           this.partidasCompra.clear();
           this.partidasCompra.push(this.crearPartida());
           this.form.reset({ idMinero: 0 });

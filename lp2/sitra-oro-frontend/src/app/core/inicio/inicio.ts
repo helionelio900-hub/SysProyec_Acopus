@@ -1,8 +1,10 @@
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ClimaService } from '../api/clima.service';
+import { ClimaEfectos } from './clima-efectos';
 import { environment } from '../../../environments/environment';
 
 interface CotizacionEstimada {
@@ -23,12 +25,28 @@ interface CentroAcopio {
 
 @Component({
   selector: 'app-inicio',
-  imports: [RouterLink, FormsModule, CurrencyPipe, DecimalPipe],
+  imports: [RouterLink, FormsModule, CurrencyPipe, DecimalPipe, ClimaEfectos],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css',
 })
-export class Inicio implements OnInit {
+export class Inicio implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
+  private readonly route = inject(ActivatedRoute);
+  protected readonly climaService = inject(ClimaService);
+  protected readonly clima = this.climaService.clima;
+  /** Mientras llega el clima se decide día/noche con la hora local (Perú, UTC-5). */
+  protected readonly esNoche = computed(() => {
+    const c = this.clima();
+    if (c) return !c.esDia;
+    const hora = new Date().getHours();
+    return hora >= 18 || hora < 6;
+  });
+  protected readonly hayNubes = computed(() => ['nublado', 'niebla', 'nieve', 'llovizna', 'lluvia', 'tormenta', 'granizo']
+    .includes(this.clima()?.tipo ?? ''));
+  protected readonly temperatura = computed(() => {
+    const t = this.clima()?.temperatura;
+    return t === null || t === undefined ? '' : `${Math.round(t)} °C`;
+  });
   protected readonly peso = signal<number | null>(null);
   protected readonly color = signal('ROJO');
   protected readonly preciosColor = signal<{ color: string; precioGramoPen: number; fechaPublicacion: string }[]>([]);
@@ -50,6 +68,12 @@ export class Inicio implements OnInit {
   ngOnInit(): void {
     this.cargarPrecio();
     this.cargarCentros();
+    const q = this.route.snapshot.queryParamMap;
+    this.climaService.iniciar({ tipo: q.get('clima'), hora: q.get('hora') });
+  }
+
+  ngOnDestroy(): void {
+    this.climaService.detener();
   }
 
   protected cargarPrecio(): void {

@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { EntregaMinero } from './entregas-minero';
 
 export interface ResumenDashboard {
   sumatoriaGramosOroRojo: number;
@@ -71,13 +72,35 @@ export interface CrearCompraAcopio {
   idSolicitud?: number;
   idMinero: number;
   detalles: Omit<CrearTransaccion, 'idMinero'>[];
+  /** Préstamos pendientes del minero que se descuentan en esta compra. */
+  idsPrestamos?: number[];
+  /** Otro descuento en soles. */
+  descuentoManualPen?: number | null;
 }
 export interface CompraAcopio {
   idCompraG2: number;
   minero: TransaccionAcopio['minero'];
   fechaCompra: string;
+  /** Valor del material (suma de partidas). */
   totalPagadoPen: number;
   detalles: TransaccionAcopio[];
+  descuentoPen?: number;
+  descuentoManualPen?: number;
+  /** Lo que se entregó al minero tras descontar préstamos. */
+  netoPagadoPen?: number;
+  idsPrestamos?: number[];
+}
+export type EstadoPrestamo = 'PENDIENTE' | 'DESCONTADO' | 'ANULADO';
+export interface PrestamoMinero {
+  idPrestamo: number;
+  idMinero: number;
+  minero: string;
+  documentoMinero: string;
+  fecha: string;
+  montoPen: number;
+  observacion: string | null;
+  estado: EstadoPrestamo;
+  idCompraG2: number | null;
 }
 export interface EnviarComprasMayorista {
   idsComprasAcopiador: number[];
@@ -254,6 +277,40 @@ export interface DashboardMayorista {
   adelantos: { pendientes: number; saldoPendientePen: number; entregadosPeriodoPen: number; entregadosPeriodo: number };
   estados: { pendientes: number; valorizados: number; enLote: number };
 }
+export interface MovimientoCaja {
+  idMovimiento: number;
+  fecha: string;
+  moneda: MonedaPago;
+  tipo: 'INGRESO' | 'EGRESO';
+  origen: 'SALDO_INICIAL' | 'EXPORTADOR' | 'MAYORISTA' | 'MANUAL' | 'PAGO_LOTE' | 'ADELANTO' | 'PAGO_COMPRA' | 'PRESTAMO';
+  monto: number;
+  concepto: string;
+  idReferencia: number | null;
+  anulado: boolean;
+  anulable: boolean;
+}
+export interface ResumenCaja {
+  saldoPen: number;
+  saldoUsd: number;
+  mesPen: { ingresos: number; egresos: number };
+  mesUsd: { ingresos: number; egresos: number };
+  ultimos: MovimientoCaja[];
+}
+export interface CrearMovimientoCaja {
+  tipo: 'INGRESO' | 'EGRESO';
+  moneda: MonedaPago;
+  monto: number;
+  concepto: string;
+  fecha?: string;
+  saldoInicial: boolean;
+}
+export interface IngresoExportador {
+  montoUsd?: number | null;
+  montoPen?: number | null;
+  idLoteExportacion?: number | null;
+  concepto?: string;
+  fecha?: string;
+}
 export type CrearRecepcionMayorista = Omit<RecepcionMayorista, 'idRecepcion' | 'nombreAcopiador'>;
 export interface Liquidacion {
   idLiquidacionG1: number;
@@ -353,6 +410,43 @@ export class OperacionesService {
   anularAdelanto(id: number): Observable<Adelanto> {
     return this.http.patch<Adelanto>(this.url(`/api/v1/mayorista/adelantos/${id}/anular`), {});
   }
+  prestamos(idMinero?: number, estado?: EstadoPrestamo): Observable<PrestamoMinero[]> {
+    let params = new HttpParams();
+    if (idMinero) params = params.set('idMinero', idMinero);
+    if (estado) params = params.set('estado', estado);
+    return this.http.get<PrestamoMinero[]>(this.url('/api/v1/acopio/prestamos'), { params });
+  }
+  registrarPrestamo(request: { idMinero: number; montoPen: number; observacion?: string }): Observable<PrestamoMinero> {
+    return this.http.post<PrestamoMinero>(this.url('/api/v1/acopio/prestamos'), request);
+  }
+  anularPrestamo(id: number): Observable<PrestamoMinero> {
+    return this.http.patch<PrestamoMinero>(this.url(`/api/v1/acopio/prestamos/${id}/anular`), {});
+  }
+  cajaAcopio(): Observable<ResumenCaja> {
+    return this.http.get<ResumenCaja>(this.url('/api/v1/acopio/caja'));
+  }
+  registrarMovimientoCajaAcopio(request: CrearMovimientoCaja): Observable<MovimientoCaja> {
+    return this.http.post<MovimientoCaja>(this.url('/api/v1/acopio/caja/movimientos'), request);
+  }
+  /** El acopiador recibe y registra solo soles. */
+  registrarPagoMayoristaAcopio(request: { montoPen: number; concepto?: string }): Observable<MovimientoCaja[]> {
+    return this.http.post<MovimientoCaja[]>(this.url('/api/v1/acopio/caja/mayorista'), request);
+  }
+  anularMovimientoCajaAcopio(id: number): Observable<MovimientoCaja> {
+    return this.http.patch<MovimientoCaja>(this.url(`/api/v1/acopio/caja/movimientos/${id}/anular`), {});
+  }
+  caja(): Observable<ResumenCaja> {
+    return this.http.get<ResumenCaja>(this.url('/api/v1/mayorista/caja'));
+  }
+  registrarMovimientoCaja(request: CrearMovimientoCaja): Observable<MovimientoCaja> {
+    return this.http.post<MovimientoCaja>(this.url('/api/v1/mayorista/caja/movimientos'), request);
+  }
+  registrarIngresoExportador(request: IngresoExportador): Observable<MovimientoCaja[]> {
+    return this.http.post<MovimientoCaja[]>(this.url('/api/v1/mayorista/caja/exportador'), request);
+  }
+  anularMovimientoCaja(id: number): Observable<MovimientoCaja> {
+    return this.http.patch<MovimientoCaja>(this.url(`/api/v1/mayorista/caja/movimientos/${id}/anular`), {});
+  }
   dashboard(): Observable<ResumenDashboard> {
     return this.http.get<ResumenDashboard>(this.url('/api/v1/dashboard/consolidado'));
   }
@@ -370,6 +464,10 @@ export class OperacionesService {
   }
   acumulados(): Observable<AcumuladosAcopio> {
     return this.http.get<AcumuladosAcopio>(this.url('/api/v1/acopio/acumulados-semanales'));
+  }
+  /** Solicitudes de entrega de oro que los mineros enviaron al centro. */
+  solicitudesEntrega(): Observable<EntregaMinero[]> {
+    return this.http.get<EntregaMinero[]>(this.url('/api/v1/acopio/solicitudes-entrega'));
   }
   solicitudes(): Observable<SolicitudMinero[]> {
     return this.http.get<SolicitudMinero[]>(this.url('/api/v1/acopio/mineros/cuentas-pendientes'));

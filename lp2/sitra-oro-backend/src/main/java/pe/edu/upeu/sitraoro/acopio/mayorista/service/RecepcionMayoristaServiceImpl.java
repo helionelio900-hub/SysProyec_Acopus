@@ -35,6 +35,7 @@ public class RecepcionMayoristaServiceImpl implements EntregaMayoristaPort {
     private final org.springframework.jdbc.core.JdbcTemplate jdbc;
     private final AuditoriaService auditoriaService;
     private final AdelantoService adelantoService;
+    private final CajaService cajaService;
 
     @Transactional(readOnly = true)
     public List<RecepcionMayoristaResponse> listar(Long idCentroAcopio) {
@@ -150,6 +151,8 @@ public class RecepcionMayoristaServiceImpl implements EntregaMayoristaPort {
         acopiadorService.desvincularComprasRecepcion(id);
         // Los adelantos descontados en este lote vuelven a quedar pendientes para el centro.
         adelantoService.liberar(id);
+        // El pago de un lote eliminado ya no sale de la caja.
+        cajaService.anularAutomatico(pe.edu.upeu.sitraoro.acopio.mayorista.entity.OrigenMovimientoCaja.PAGO_LOTE, id);
         repository.delete(actual);
         auditoriaService.registrar(null, "ANULAR", "RECEPCION_MAYORISTA", id,
                 "Eliminacion de recepcion mayorista id=" + id);

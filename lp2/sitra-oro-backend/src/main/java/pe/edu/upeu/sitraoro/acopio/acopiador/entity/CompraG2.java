@@ -3,6 +3,7 @@ package pe.edu.upeu.sitraoro.acopio.acopiador.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import pe.edu.upeu.sitraoro.acopio.parametros.entity.Minero;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,14 @@ public class CompraG2 {
 
     @Column(name = "FECHA_COMPRA", nullable = false, updatable = false)
     private LocalDateTime fechaCompra;
+
+    /** Préstamos descontados más el descuento manual, en soles. */
+    @Column(name = "DESCUENTO_PEN", nullable = false, precision = 14, scale = 2)
+    private BigDecimal descuentoPen = BigDecimal.ZERO;
+
+    /** Descuento escrito a mano (lo que no proviene de préstamos registrados). */
+    @Column(name = "DESCUENTO_MANUAL_PEN", nullable = false, precision = 14, scale = 2)
+    private BigDecimal descuentoManualPen = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.PERSIST)
     @OrderBy("idTransaccionG2 ASC")

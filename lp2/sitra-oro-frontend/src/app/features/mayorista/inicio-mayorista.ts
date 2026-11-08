@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { DatePipe, DecimalPipe, registerLocaleData } from '@angular/common';
 import localeEsPe from '@angular/common/locales/es-PE';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -14,6 +14,7 @@ import {
   OperacionesService,
 } from '../../core/api/operaciones.service';
 import { MAYORISTA_VISTA_PREVIA } from './mayorista-preview';
+import { CajaPanel } from '../../core/caja/caja-panel';
 import { MarketCotizacionesService } from '../../core/api/market-cotizaciones.service';
 
 // Nombres de días y meses en español para las fechas del resumen.
@@ -23,7 +24,7 @@ type Rango = 7 | 30 | 90;
 
 @Component({
   selector: 'app-inicio-mayorista',
-  imports: [RouterLink, DatePipe, DecimalPipe, MatButtonModule, ReactiveFormsModule],
+  imports: [RouterLink, DatePipe, DecimalPipe, MatButtonModule, ReactiveFormsModule, CajaPanel],
   templateUrl: './inicio-mayorista.html',
   styleUrl: './inicio-mayorista.css',
 })
@@ -46,6 +47,9 @@ export class InicioMayorista implements OnInit {
   protected readonly errorAdelanto = signal('');
 
   protected readonly horaActual = signal(this.hora());
+
+  /** Panel de caja compartido; se recarga cuando cambian los adelantos. */
+  private readonly cajaPanel = viewChild(CajaPanel);
   protected readonly fechaActual = ((f: string) => f.charAt(0).toUpperCase() + f.slice(1))(
     new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
   );
@@ -165,6 +169,7 @@ export class InicioMayorista implements OnInit {
           this.formAdelanto.markAsUntouched();
           this.cargarAdelantos();
           this.cargarTablero();
+          this.cajaPanel()?.cargar();
         },
         error: (e: HttpErrorResponse) => {
           this.guardandoAdelanto.set(false);
@@ -180,6 +185,7 @@ export class InicioMayorista implements OnInit {
         this.mensajeAdelanto.set(`Adelanto #${a.idAdelanto} anulado.`);
         this.cargarAdelantos();
         this.cargarTablero();
+        this.cajaPanel()?.cargar();
       },
       error: (e: HttpErrorResponse) => this.errorAdelanto.set(e.error?.message ?? 'No se pudo anular el adelanto.'),
     });

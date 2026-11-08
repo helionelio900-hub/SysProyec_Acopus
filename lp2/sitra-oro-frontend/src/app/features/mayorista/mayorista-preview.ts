@@ -11,6 +11,7 @@ import {
   PrecioReferencial,
   RecepcionLey, GuardarRecepcionLey, CalculoLey, LoteExportacion,
   Adelanto, CrearAdelanto, DashboardMayorista, EstadoAdelanto, SaldoAdelantos,
+  CrearMovimientoCaja, IngresoExportador, MovimientoCaja, ResumenCaja,
 } from '../../core/api/operaciones.service';
 
 export const MAYORISTA_VISTA_PREVIA = new InjectionToken<boolean>('Mayorista vista previa', {
@@ -157,6 +158,45 @@ export class MayoristaPreviewService {
     { idAdelanto: 1, idCentroAcopio: 901, nombreCentro: 'Centro de ejemplo · Rinconada', fecha: new Date().toISOString().slice(0, 10),
       moneda: 'USD', monto: 300, tipoCambio: 3.75, montoPen: 1125, observacion: 'Adelanto de ejemplo', estado: 'PENDIENTE', idRecepcion: null },
   ];
+  private cajaDemo: MovimientoCaja[] = [
+    { idMovimiento: 3, fecha: new Date().toISOString().slice(0, 10), moneda: 'USD', tipo: 'EGRESO', origen: 'ADELANTO', monto: 300,
+      concepto: 'Adelanto #1 · Centro de ejemplo · Rinconada', idReferencia: 1, anulado: false, anulable: false },
+    { idMovimiento: 2, fecha: new Date().toISOString().slice(0, 10), moneda: 'USD', tipo: 'INGRESO', origen: 'EXPORTADOR', monto: 48500,
+      concepto: 'Pago del exportador · lote de exportación #3', idReferencia: 3, anulado: false, anulable: true },
+    { idMovimiento: 1, fecha: new Date().toISOString().slice(0, 10), moneda: 'PEN', tipo: 'INGRESO', origen: 'SALDO_INICIAL', monto: 180000,
+      concepto: 'Saldo de apertura', idReferencia: null, anulado: false, anulable: true },
+  ];
+  caja(): Observable<ResumenCaja> {
+    const vivos = this.cajaDemo.filter(m => !m.anulado);
+    const saldo = (moneda: string) => vivos.filter(m => m.moneda === moneda).reduce((s, m) => s + (m.tipo === 'INGRESO' ? m.monto : -m.monto), 0);
+    const mes = (moneda: string, tipo: string) => vivos.filter(m => m.moneda === moneda && m.tipo === tipo).reduce((s, m) => s + m.monto, 0);
+    return of({ saldoPen: saldo('PEN'), saldoUsd: saldo('USD'),
+      mesPen: { ingresos: mes('PEN', 'INGRESO'), egresos: mes('PEN', 'EGRESO') },
+      mesUsd: { ingresos: mes('USD', 'INGRESO'), egresos: mes('USD', 'EGRESO') },
+      ultimos: this.cajaDemo.map(m => ({ ...m })) });
+  }
+  registrarMovimientoCaja(r: CrearMovimientoCaja): Observable<MovimientoCaja> {
+    const nuevo: MovimientoCaja = { idMovimiento: this.cajaDemo.length + 1, fecha: r.fecha ?? new Date().toISOString().slice(0, 10),
+      moneda: r.moneda, tipo: r.tipo, origen: r.saldoInicial ? 'SALDO_INICIAL' : 'MANUAL', monto: r.monto, concepto: r.concepto,
+      idReferencia: null, anulado: false, anulable: true };
+    this.cajaDemo = [nuevo, ...this.cajaDemo];
+    return of({ ...nuevo });
+  }
+  registrarIngresoExportador(r: IngresoExportador): Observable<MovimientoCaja[]> {
+    const creados: MovimientoCaja[] = [];
+    for (const [moneda, monto] of [['USD', r.montoUsd], ['PEN', r.montoPen]] as const) {
+      if (!monto) continue;
+      creados.push({ idMovimiento: this.cajaDemo.length + creados.length + 1, fecha: new Date().toISOString().slice(0, 10), moneda,
+        tipo: 'INGRESO', origen: 'EXPORTADOR', monto, concepto: r.concepto || 'Pago del exportador',
+        idReferencia: r.idLoteExportacion ?? null, anulado: false, anulable: true });
+    }
+    this.cajaDemo = [...creados.reverse(), ...this.cajaDemo];
+    return of(creados);
+  }
+  anularMovimientoCaja(id: number): Observable<MovimientoCaja> {
+    this.cajaDemo = this.cajaDemo.map(m => (m.idMovimiento === id ? { ...m, anulado: true, anulable: false } : m));
+    return of({ ...this.cajaDemo.find(m => m.idMovimiento === id)! });
+  }
   dashboardMayorista(): Observable<DashboardMayorista> {
     const hoy = new Date();
     const serieDiaria = Array.from({ length: 30 }, (_, i) => {

@@ -82,11 +82,11 @@
                 <div class="partida-heading"><strong>Partida {{ i + 1 }}</strong><button mat-stroked-button type="button" (click)="quitarPartida(i)" [disabled]="guardando() || partidasCompra.length === 1" [attr.aria-label]="'Quitar partida ' + (i + 1)">Quitar</button></div>
                 <div class="partida-fields">
                   <label>Grupo del historial<select formControlName="tipoOro"><option value="ROJO">Rojo</option><option value="VERDE">Verde</option></select></label>
-                  <label>Peso recibido (g)<input type="number" min="0.001" max="9999999.999" step="0.001" formControlName="pesoSinFundirG" /></label>
-                  <label>Peso fundido (g)<input type="number" min="0.001" max="9999999.999" step="0.001" formControlName="pesoFundidoNetoG" /></label>
+                  <label>Peso recibido (g)<input type="number" min="0.001" max="9999999.999" step="0.001" inputmode="decimal" placeholder="0.000" formControlName="pesoSinFundirG" /></label>
+                  <label>Peso fundido (g)<input type="number" min="0.001" max="9999999.999" step="0.001" inputmode="decimal" placeholder="0.000" formControlName="pesoFundidoNetoG" /></label>
                   <label>Precio por gramo (S/)
                     @if (partida.controls.aplicarAjuste.value) {
-                      <input type="number" min="0.01" max="99999999.99" step="0.01" formControlName="precioAjustePen" />
+                      <input type="number" min="0.01" max="99999999.99" step="0.01" inputmode="decimal" placeholder="0.00" formControlName="precioAjustePen" />
                     } @else {
                       <input type="text" readonly [value]="resumenCompra().lineas[i].precio === undefined ? 'Sin precio publicado' : dinero(resumenCompra().lineas[i].precio!)" />
                     }
@@ -95,12 +95,60 @@
                 </div>
                 <label class="compact-price-option"><input type="checkbox" formControlName="aplicarAjuste" /> Usar precio excepcional para esta partida</label>
                 @if (partida.touched && partida.invalid) { <p class="field-error" role="alert">Completa ambos pesos mayores que cero (hasta 3 decimales) y un precio válido (hasta 2 decimales).</p> }
-                @if (partida.controls.pesoSinFundirG.value > 0 && partida.controls.pesoFundidoNetoG.value > partida.controls.pesoSinFundirG.value) { <p class="notice">El peso fundido supera al peso recibido. Revisa esta partida.</p> }
+                @if ((partida.controls.pesoSinFundirG.value ?? 0) > 0 && (partida.controls.pesoFundidoNetoG.value ?? 0) > (partida.controls.pesoSinFundirG.value ?? 0)) { <p class="notice">El peso fundido supera al peso recibido. Revisa esta partida.</p> }
               </div>
             }
           </div>
+          <section class="liquidacion liquidacion-acopio" aria-labelledby="liquidacion-acopio-titulo">
+            <div class="liq-adelantos">
+              <div class="liq-head">
+                <div><h3 id="liquidacion-acopio-titulo">Liquidación del pago</h3></div>
+                @if (prestamosMinero().length) {
+                  <span class="liq-chip">{{ prestamosMinero().length }} préstamo(s) pendiente(s) · {{ dinero(liquidacion().prestamos) }} a descontar</span>
+                }
+              </div>
+              @if (!form.controls.idMinero.value) {
+                <p class="liq-vacio">Elige al minero para ver si tiene préstamos por descontar.</p>
+              } @else if (cargandoPrestamosMinero()) {
+                <p class="liq-vacio" role="status">Buscando préstamos del minero…</p>
+              } @else if (!prestamosMinero().length) {
+                <p class="liq-vacio">Este minero no tiene préstamos pendientes. Se le paga el total del oro.</p>
+              } @else {
+                <div class="liq-lista-head"><span>Préstamos a descontar</span></div>
+                <ul class="liq-lista">
+                  @for (p of prestamosMinero(); track p.idPrestamo) {
+                    <li>
+                      <label class="liq-adelanto" [class.activo]="prestamosElegidos().includes(p.idPrestamo)">
+                        <input type="checkbox" [checked]="prestamosElegidos().includes(p.idPrestamo)" [disabled]="guardando()"
+                          (change)="alternarPrestamo(p.idPrestamo, $any($event.target).checked)" />
+                        <span class="liq-adelanto-info"><strong>Préstamo #{{ p.idPrestamo }}</strong><small>{{ p.fecha | date: 'dd/MM/yyyy' }}{{ p.observacion ? ' · ' + p.observacion : '' }}</small></span>
+                        <span class="liq-adelanto-monto"><strong>{{ dinero(p.montoPen) }}</strong></span>
+                      </label>
+                    </li>
+                  }
+                </ul>
+              }
+              <details class="liq-extra" [open]="liquidacion().manual > 0">
+                <summary>Agregar otro descuento</summary>
+                <label>Monto en soles (S/)
+                  <input type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" [formControl]="descuentoManual" />
+                </label>
+                <small>Para una deuda del minero que no registraste como préstamo.</small>
+              </details>
+            </div>
+            <aside class="liq-resumen" aria-live="polite">
+              <dl>
+                <div><dt>Valor del oro</dt><dd>{{ dinero(liquidacion().material) }}</dd></div>
+                @if (liquidacion().prestamos > 0) { <div class="liq-resta"><dt>Préstamos descontados ({{ prestamosElegidos().length }})</dt><dd>− {{ dinero(liquidacion().prestamos) }}</dd></div> }
+                @if (liquidacion().manual > 0) { <div class="liq-resta"><dt>Otro descuento</dt><dd>− {{ dinero(liquidacion().manual) }}</dd></div> }
+                <div class="liq-neto"><dt>Pagar al minero</dt><dd>{{ dinero(liquidacion().neto) }}</dd></div>
+              </dl>
+              @if (liquidacion().excede) { <p class="liq-alerta" role="alert">Los descuentos superan el valor del oro. Desmarca un préstamo o reduce el descuento.</p> }
+              <p class="liq-nota">Pago en efectivo, solo en soles.</p>
+            </aside>
+          </section>
           <div class="purchase-save-summary" aria-live="polite">
-            <div><span>{{ partidasCompra.length }} partida(s) · {{ gramos(resumenCompra().peso) }} fundidos</span><strong>Total estimado: {{ dinero(resumenCompra().total) }}</strong><small>El sistema confirma el precio y el importe de cada partida al guardar.</small></div>
+            <div><span>{{ partidasCompra.length }} partida(s) · {{ gramos(resumenCompra().peso) }} fundidos</span><strong>Pagar al minero: {{ dinero(liquidacion().neto) }}</strong><small>El sistema confirma el precio y el importe de cada partida al guardar.</small></div>
             <div class="purchase-save-actions"><button mat-stroked-button type="button" [disabled]="guardando()" (click)="registroDesdeEntrega.set(false)">Cancelar</button><button mat-flat-button class="button-primary" type="submit" [disabled]="guardando() || cargandoMineros() || !!errorMineros() || !mineros().length">{{ guardando() ? 'Guardando…' : 'Revisar y guardar compra' }}</button></div>
           </div>
           @if (cargandoMineros()) { <p class="notice" role="status">Cargando mineros…</p> }
@@ -191,6 +239,7 @@
               }
             </tbody></table></div>
             <p class="purchase-history-note">Total vigente de partidas no anuladas. Las partidas anuladas permanecen visibles para trazabilidad.</p>
+            <button type="button" class="comprobante-abrir" (click)="comprobante.set(cabecera)">Ver comprobante</button>
           </details>
         }
       </div>
@@ -310,6 +359,42 @@
         </form>
       </section>
     }
+    <section [hidden]="seccionActiva() !== 'prestamos'" class="panel prestamos-panel" aria-labelledby="prestamos-titulo">
+      <h3 id="prestamos-titulo">Préstamos a mineros</h3>
+      <p>Registra el dinero que prestas o adelantas a un minero. Queda pendiente y se descuenta solo cuando le compras su oro.</p>
+      <form class="prestamo-form" [formGroup]="formPrestamo" (ngSubmit)="registrarPrestamo()">
+        <label>Minero
+          <select formControlName="idMinero"><option [ngValue]="0">Seleccionar minero</option>
+            @for (minero of mineros(); track minero.idMinero) { <option [ngValue]="minero.idMinero">{{ minero.nombresApellidos }} · {{ minero.documentoIdentidad }}</option> }
+          </select>
+        </label>
+        <label>Monto (S/)<input type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" formControlName="montoPen" /></label>
+        <label class="prestamo-observacion">Observación (opcional)<input type="text" maxlength="200" placeholder="Ej.: para víveres, pasaje" formControlName="observacion" /></label>
+        <button mat-flat-button class="button-primary" type="submit" [disabled]="guardandoPrestamo()">{{ guardandoPrestamo() ? 'Guardando…' : 'Registrar préstamo' }}</button>
+      </form>
+      @if (errorPrestamo()) { <p class="feedback error" role="alert">{{ errorPrestamo() }}</p> }
+      @if (mensajePrestamo()) { <p class="feedback" role="status">{{ mensajePrestamo() }}</p> }
+      <div class="prestamos-total"><span>Prestado y pendiente de cobrar</span><strong>{{ dinero(totalPrestado()) }}</strong></div>
+      @if (prestamosPendientes().length) {
+        <div class="table-wrap"><table>
+          <thead><tr><th>N.º</th><th>Fecha</th><th>Minero</th><th>Monto</th><th>Observación</th><th></th></tr></thead>
+          <tbody>
+            @for (p of prestamosPendientes(); track p.idPrestamo) {
+              <tr>
+                <td>#{{ p.idPrestamo }}</td>
+                <td>{{ p.fecha | date: 'dd/MM/yyyy' }}</td>
+                <td><strong>{{ p.minero }}</strong><small>{{ p.documentoMinero }}</small></td>
+                <td>{{ dinero(p.montoPen) }}</td>
+                <td>{{ p.observacion || '—' }}</td>
+                <td><button mat-stroked-button type="button" (click)="anularPrestamo(p)">Anular</button></td>
+              </tr>
+            }
+          </tbody>
+        </table></div>
+      } @else {
+        <p class="empty-state">No hay préstamos pendientes.</p>
+      }
+    </section>
     <section [hidden]="seccionActiva() !== 'reporte'" class="panel report-panel" aria-labelledby="report-title">
       <span class="panel-kicker">ENTREGAS REGISTRADAS</span>
       <h3 id="report-title">Reporte de entregas al mayorista</h3>
@@ -344,7 +429,11 @@
         <div class="confirmation-purchase"><div><strong>Partida {{ $index + 1 }}</strong><span>{{ gramos(linea.peso) }} × {{ dinero(linea.precio ?? 0) }}/g</span></div><strong>{{ dinero(linea.importe) }}</strong></div>
       }
     </div>
-    <p class="purchase-confirmation-total">Total estimado <strong>{{ dinero(resumenCompra().total) }}</strong></p>
+    <p class="purchase-confirmation-total">Valor del oro <strong>{{ dinero(liquidacion().material) }}</strong></p>
+    @if (liquidacion().prestamos + liquidacion().manual > 0) {
+      <p class="purchase-confirmation-total">Préstamos y descuentos <strong>− {{ dinero(liquidacion().prestamos + liquidacion().manual) }}</strong></p>
+    }
+    <p class="purchase-confirmation-total">Pagar al minero <strong>{{ dinero(liquidacion().neto) }}</strong></p>
     <p class="confirmation-note">Se guardarán todas las partidas juntas. El sistema calculará y confirmará los importes definitivos.</p>
     <footer class="confirmation-actions"><button mat-stroked-button type="button" autofocus (click)="cancelarRegistroCompra()">Volver a revisar</button><button mat-flat-button class="button-primary" type="button" [disabled]="guardando() || form.invalid" (click)="confirmarRegistroCompra()">Confirmar compra</button></footer>
   </dialog>
@@ -416,3 +505,4 @@
     </div>
   }
 </section>
+<app-comprobante-compra [compra]="comprobante()" (cerrado)="comprobante.set(null)" />

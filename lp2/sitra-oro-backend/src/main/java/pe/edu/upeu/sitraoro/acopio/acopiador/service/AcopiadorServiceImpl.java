@@ -38,6 +38,8 @@ public class AcopiadorServiceImpl implements AcopiadorService {
     private final CompraG2Repository compraG2Repository;
     private final pe.edu.upeu.sitraoro.acopio.parametros.repository.MineroRepository mineros;
     private final pe.edu.upeu.sitraoro.acopio.minero.service.EntregaMineroService solicitudesEntrega;
+    private final PrestamoMineroService prestamos;
+    private final CajaAcopioService caja;
 
     @Override
     @Transactional
@@ -71,6 +73,17 @@ public class AcopiadorServiceImpl implements AcopiadorService {
             compra.agregarPartida(partida);
         }
         var guardada = compraG2Repository.saveAndFlush(compra);
+        // Préstamos del minero y descuento manual: se restan del pago, nunca más que el valor del material.
+        BigDecimal material = guardada.getDetalles().stream().map(TransaccionG2::getTotalPagadoPen).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal manual = request.descuentoManualPen() == null ? BigDecimal.ZERO : request.descuentoManualPen().setScale(2, RoundingMode.HALF_UP);
+        BigDecimal descuento = prestamos.descontar(request.idsPrestamos(), idCentroAcopio, minero.getIdMinero(), guardada.getIdCompraG2()).add(manual);
+        if (descuento.compareTo(material) > 0)
+            throw new IllegalArgumentException("Los préstamos y descuentos (S/ " + descuento.toPlainString()
+                    + ") superan el valor del oro (S/ " + material.toPlainString() + ")");
+        guardada.setDescuentoPen(descuento);
+        guardada.setDescuentoManualPen(manual);
+        // Lo que se entregó al minero sale de la caja del centro (el préstamo ya salió cuando se entregó).
+        caja.registrarPagoCompra(idCentroAcopio, guardada.getIdCompraG2(), material.subtract(descuento), minero.getNombresApellidos());
         if (request.idSolicitud() != null) solicitudesEntrega.vincularCompra(request.idSolicitud(), guardada.getIdCompraG2());
         return respuestaCompra(guardada);
     }
@@ -86,8 +99,11 @@ public class AcopiadorServiceImpl implements AcopiadorService {
         var detalles = compra.getDetalles().stream().map(transaccionG2Mapper::toResponse).toList();
         BigDecimal total = detalles.stream().filter(partida -> !partida.anulada())
                 .map(TransaccionG2Response::totalPagadoPen).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal descuento = compra.getDescuentoPen() == null ? BigDecimal.ZERO : compra.getDescuentoPen();
+        BigDecimal manual = compra.getDescuentoManualPen() == null ? BigDecimal.ZERO : compra.getDescuentoManualPen();
         return new CompraG2Response(compra.getIdCompraG2(), transaccionG2Mapper.toResumen(compra.getMinero()),
-                compra.getFechaCompra(), total, detalles);
+                compra.getFechaCompra(), total, detalles, descuento, manual,
+                total.subtract(descuento).max(BigDecimal.ZERO), prestamos.idsDescontados(compra.getIdCompraG2()));
     }
 
     @Override

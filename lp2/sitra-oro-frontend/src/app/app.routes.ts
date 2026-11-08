@@ -6,6 +6,7 @@ import {
   MAYORISTA_VISTA_PREVIA,
   MayoristaPreviewService,
 } from './features/mayorista/mayorista-preview';
+import { AcopioPreviewService } from './features/acopio/acopio-preview';
 
 export const routes: Routes = [
   {
@@ -43,6 +44,20 @@ export const routes: Routes = [
     path: 'sin-acceso',
     title: 'Acceso restringido | SITRA-ORO',
     loadComponent: () => import('./core/layout/sin-acceso').then((m) => m.SinAcceso),
+  },
+  {
+    // Solo en desarrollo: resumen del acopiador con datos ficticios para revisar el diseño sin iniciar sesión.
+    path: 'vista-previa/acopio',
+    canMatch: [() => isDevMode()],
+    providers: [{ provide: OperacionesService, useClass: AcopioPreviewService }],
+    loadComponent: () => import('./features/acopio/acopio-preview').then((m) => m.AcopioPreview),
+    children: [
+      {
+        path: '',
+        title: 'Vista previa acopio | SITRA-ORO',
+        loadComponent: () => import('./features/acopio/inicio-acopio').then((m) => m.InicioAcopio),
+      },
+    ],
   },
   {
     path: 'vista-previa/mayorista',

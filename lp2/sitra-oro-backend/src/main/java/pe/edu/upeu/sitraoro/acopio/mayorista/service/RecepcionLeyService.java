@@ -22,6 +22,7 @@ public class RecepcionLeyService {
     private final JdbcTemplate jdbc;
     private final Validator validator;
     private final AdelantoService adelantos;
+    private final CajaService caja;
 
     public RecepcionLeyResponse.Calculo calcular(RecepcionLeyRequest request) {
         var errores = validator.validate(request);
@@ -161,6 +162,8 @@ public class RecepcionLeyService {
         recepcion.setMonedaPago(calculo.monedaPago());
         recepcion.setTipoCambioPago(calculo.tipoCambioPago());
         recepcion.setTotalPagoMoneda(calculo.totalPagoMoneda());
+        // El neto pagado sale de la caja; si el lote se revaloriza, reemplaza al pago anterior.
+        caja.registrarPagoLote(id, calculo.monedaPago(), calculo.totalPagoMoneda(), recepcion.getNombreAcopiador());
         recepciones.saveAndFlush(recepcion);
         return respuesta(recepcion);
     }

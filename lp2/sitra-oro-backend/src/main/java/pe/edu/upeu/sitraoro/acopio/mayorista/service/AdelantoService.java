@@ -35,6 +35,7 @@ public class AdelantoService {
     private final AdelantoAcopioRepository repository;
     private final CentroAcopioRepository centros;
     private final AuditoriaService auditoriaService;
+    private final CajaService caja;
 
     @Transactional
     public AdelantoResponse registrar(AdelantoRequest request) {
@@ -62,6 +63,9 @@ public class AdelantoService {
                 .observacion(limpiar(request.observacion()))
                 .estado(EstadoAdelanto.PENDIENTE)
                 .build());
+        // El adelanto sale de la caja en la moneda en que se entregó.
+        caja.registrarAdelanto(guardado.getIdAdelanto(), guardado.getMoneda(), guardado.getMonto(),
+                centro.getNombre() + " · " + centro.getZona(), guardado.getFecha());
         auditoriaService.registrar(null, "CREAR", "ADELANTO_ACOPIO", guardado.getIdAdelanto(),
                 "Adelanto " + request.moneda() + " " + monto.toPlainString() + " a centro=" + centro.getNombre());
         return respuesta(guardado);
@@ -90,6 +94,7 @@ public class AdelantoService {
             throw new ConflictException("Solo se puede anular un adelanto pendiente. Este ya está " + adelanto.getEstado());
         }
         adelanto.setEstado(EstadoAdelanto.ANULADO);
+        caja.anularAutomatico(pe.edu.upeu.sitraoro.acopio.mayorista.entity.OrigenMovimientoCaja.ADELANTO, id);
         auditoriaService.registrar(null, "ANULAR", "ADELANTO_ACOPIO", id, "Anulación de adelanto id=" + id);
         return respuesta(adelanto);
     }
