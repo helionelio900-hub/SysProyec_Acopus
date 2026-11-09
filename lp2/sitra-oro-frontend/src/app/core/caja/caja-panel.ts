@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { Observable } from 'rxjs';
@@ -118,6 +118,8 @@ type Ambito = 'mayorista' | 'acopio';
 })
 export class CajaPanel implements OnInit {
   readonly ambito = input<Ambito>('mayorista');
+  /** Avisa el saldo cada vez que la caja se vuelve a leer (al abrirla o tras un ingreso, egreso o anulación). */
+  readonly cargada = output<ResumenCaja>();
   private readonly api = inject(OperacionesService);
   private readonly fb = inject(FormBuilder);
 
@@ -156,7 +158,7 @@ export class CajaPanel implements OnInit {
   cargar(): void {
     const peticion: Observable<ResumenCaja> = this.ambito() === 'mayorista' ? this.api.caja() : this.api.cajaAcopio();
     peticion.subscribe({
-      next: (datos) => { this.caja.set(datos); this.error.set(''); },
+      next: (datos) => { this.caja.set(datos); this.error.set(''); this.cargada.emit(datos); },
       error: (e: HttpErrorResponse) => this.error.set(e.status === 403 ? 'Tu cuenta no tiene permiso para ver la caja.' : 'No se pudo cargar la caja.'),
     });
   }

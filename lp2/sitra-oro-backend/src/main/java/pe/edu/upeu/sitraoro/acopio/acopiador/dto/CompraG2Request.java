@@ -12,13 +12,20 @@ public record CompraG2Request(
     /** Préstamos pendientes del minero que se descuentan en esta compra. */
     @Size(max = 50) List<@NotNull @Positive Long> idsPrestamos,
     /** Otro descuento en soles (por ejemplo, una deuda no registrada como préstamo). */
-    @DecimalMin("0") @Digits(integer = 12, fraction = 2) BigDecimal descuentoManualPen
+    @DecimalMin("0") @Digits(integer = 12, fraction = 2) BigDecimal descuentoManualPen,
+    /** Motivo del descuento manual; obligatorio cuando hay descuento manual. */
+    @Size(max = 200) String motivoDescuento
 ) {
+    public CompraG2Request(Long idMinero, List<PartidaCompraRequest> detalles, Long idSolicitud,
+                           List<Long> idsPrestamos, BigDecimal descuentoManualPen) {
+        this(idMinero, detalles, idSolicitud, idsPrestamos, descuentoManualPen, null);
+    }
+
     public CompraG2Request(Long idMinero, List<PartidaCompraRequest> detalles) {
-        this(idMinero, detalles, null, null, null);
+        this(idMinero, detalles, null, null, null, null);
     }
 
     public CompraG2Request(Long idMinero, List<PartidaCompraRequest> detalles, Long idSolicitud) {
-        this(idMinero, detalles, idSolicitud, null, null);
+        this(idMinero, detalles, idSolicitud, null, null, null);
     }
 }

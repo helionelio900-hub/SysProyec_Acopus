@@ -76,6 +76,8 @@ export interface CrearCompraAcopio {
   idsPrestamos?: number[];
   /** Otro descuento en soles. */
   descuentoManualPen?: number | null;
+  /** Por qué se hizo el otro descuento (obligatorio si hay descuento). */
+  motivoDescuento?: string | null;
 }
 export interface CompraAcopio {
   idCompraG2: number;
@@ -89,6 +91,8 @@ export interface CompraAcopio {
   /** Lo que se entregó al minero tras descontar préstamos. */
   netoPagadoPen?: number;
   idsPrestamos?: number[];
+  /** Motivo del otro descuento. */
+  motivoDescuento?: string | null;
 }
 export type EstadoPrestamo = 'PENDIENTE' | 'DESCONTADO' | 'ANULADO';
 export interface PrestamoMinero {

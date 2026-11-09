@@ -46,6 +46,18 @@ class CajaIntegrationTest {
         jdbc.execute("CREATE TABLE IF NOT EXISTS RECEPCION_ACUMULADA (ID_ORIGEN BIGINT, ID_ACUMULADA BIGINT)");
         centro = centros.saveAndFlush(CentroAcopio.builder().nombre("Centro " + UUID.randomUUID()).zona("Pruebas")
                 .direccion("Dirección").idCuentaAcopiador(Math.abs(UUID.randomUUID().getMostSignificantBits())).activo(true).build());
+        // Dinero en caja para que los adelantos de las pruebas tengan de dónde salir.
+        caja.registrarManual(new MovimientoManualRequest("INGRESO", "PEN", b("100000"), "Fondo de prueba", HOY, false));
+        caja.registrarManual(new MovimientoManualRequest("INGRESO", "USD", b("100000"), "Fondo de prueba", HOY, false));
+    }
+
+    @Test
+    void noSeEntregaUnAdelantoMayorAlSaldoDeEsaMoneda() {
+        BigDecimal pen = caja.resumen().saldoPen();
+        var error = assertThrows(pe.edu.upeu.sitraoro.exception.MayoristaReglaException.class,
+                () -> adelantos.registrar(new AdelantoRequest(centro.getIdCentroAcopio(), HOY, "PEN", pen.add(b("1")), null, null)));
+        assertTrue(error.getMessage().contains("No hay suficiente dinero en caja"));
+        assertEquals(0, pen.compareTo(caja.resumen().saldoPen()), "un adelanto rechazado no toca la caja");
     }
 
     @Test

@@ -12,9 +12,6 @@ import {
   TransaccionAcopio,
 } from '../../core/api/operaciones.service';
 import { EntregaMinero } from '../../core/api/entregas-minero';
-import { MarketCotizacionesService } from '../../core/api/market-cotizaciones.service';
-import { MarketChart } from './market-chart';
-import { CajaPanel } from '../../core/caja/caja-panel';
 
 registerLocaleData(localeEsPe, 'es-PE');
 
@@ -33,14 +30,13 @@ function diaLocal(fecha: string | Date): string {
  */
 @Component({
   selector: 'app-inicio-acopio',
-  imports: [RouterLink, DatePipe, DecimalPipe, MarketChart, CajaPanel],
+  imports: [RouterLink, DatePipe, DecimalPipe],
   templateUrl: './inicio-acopio.html',
   styleUrl: './inicio-acopio.css',
 })
 export class InicioAcopio implements OnInit {
   private readonly operaciones = inject(OperacionesService);
   private readonly destroyRef = inject(DestroyRef);
-  protected readonly market = inject(MarketCotizacionesService);
 
   protected readonly rango = signal<Rango>(30);
   protected readonly cargando = signal(true);
@@ -50,6 +46,7 @@ export class InicioAcopio implements OnInit {
   protected readonly prestamos = signal<PrestamoMinero[]>([]);
   protected readonly cuentasPorAprobar = signal<SolicitudMinero[]>([]);
   protected readonly entregasPorAtender = signal<EntregaMinero[]>([]);
+  protected readonly saldoCaja = signal<number | null>(null);
 
   protected readonly horaActual = signal(this.hora());
   protected readonly fechaActual = ((f: string) => f.charAt(0).toUpperCase() + f.slice(1))(
@@ -159,6 +156,7 @@ export class InicioAcopio implements OnInit {
       prestamos: this.operaciones.prestamos(undefined, 'PENDIENTE').pipe(catchError(() => of<PrestamoMinero[]>([]))),
       cuentas: this.operaciones.solicitudes().pipe(catchError(() => of<SolicitudMinero[]>([]))),
       entregas: this.operaciones.solicitudesEntrega().pipe(catchError(() => of<EntregaMinero[]>([]))),
+      caja: this.operaciones.cajaAcopio().pipe(catchError(() => of(null))),
     }).subscribe({
       next: (r) => {
         this.compras.set([...r.compras].sort((a, b) => b.fechaCompra.localeCompare(a.fechaCompra)));
@@ -166,6 +164,7 @@ export class InicioAcopio implements OnInit {
         this.prestamos.set(r.prestamos);
         this.cuentasPorAprobar.set(r.cuentas);
         this.entregasPorAtender.set(r.entregas.filter((e) => e.ESTADO === 'PENDIENTE'));
+        this.saldoCaja.set(r.caja?.saldoPen ?? null);
         this.cargando.set(false);
       },
       error: (e) => {

@@ -30,12 +30,16 @@ class PrestamoMineroIntegrationTest {
 
     @Autowired AcopiadorService compras;
     @Autowired PrestamoMineroService prestamos;
+    @Autowired CajaAcopioService caja;
     @Autowired MineroRepository mineros;
     private Long idMinero;
 
     @BeforeEach
     void preparar() {
         idMinero = minero(CENTRO);
+        // Dinero en caja para que los adelantos de las pruebas tengan de dónde salir.
+        caja.registrarManual(new pe.edu.upeu.sitraoro.acopio.acopiador.dto.CajaAcopioDtos.MovimientoManualRequest(
+                "INGRESO", "PEN", b("100000"), "Fondo de prueba", null, false), CENTRO);
     }
 
     @Test
@@ -45,17 +49,24 @@ class PrestamoMineroIntegrationTest {
 
         // 10 g × S/ 350 = S/ 3 500; menos S/ 500 de préstamo y S/ 100 de descuento manual.
         var compra = compras.registrarCompraConDetalles(new CompraG2Request(idMinero, List.of(partida("10", "350")),
-                null, List.of(prestamo.idPrestamo()), b("100")), CENTRO);
+                null, List.of(prestamo.idPrestamo()), b("100"), "Deuda de herramientas"), CENTRO);
         assertEquals(0, b("3500").compareTo(compra.totalPagadoPen()));
         assertEquals(0, b("600").compareTo(compra.descuentoPen()));
         assertEquals(0, b("100").compareTo(compra.descuentoManualPen()));
         assertEquals(0, b("2900").compareTo(compra.netoPagadoPen()));
+        assertEquals("Deuda de herramientas", compra.motivoDescuento());
         assertEquals(List.of(prestamo.idPrestamo()), compra.idsPrestamos());
 
         var descontado = prestamos.listar(CENTRO, idMinero, null).getFirst();
         assertEquals("DESCONTADO", descontado.estado());
         assertEquals(compra.idCompraG2(), descontado.idCompraG2());
         assertTrue(prestamos.listar(CENTRO, idMinero, EstadoPrestamo.PENDIENTE).isEmpty());
+    }
+
+    @Test
+    void elDescuentoManualExigeMotivo() {
+        assertThrows(IllegalArgumentException.class, () -> compras.registrarCompraConDetalles(new CompraG2Request(idMinero,
+                List.of(partida("2", "300")), null, null, b("50"), "  "), CENTRO));
     }
 
     @Test

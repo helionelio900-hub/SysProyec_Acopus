@@ -53,7 +53,7 @@
 
   <section class="quote-section" id="cotizar">
     <div class="section-intro">
-      <span class="eyebrow eyebrow-dark">COTIZACIÓN REFERENCIAL</span>
+      
       <h2>¿Cuánto podría valer<br />lo que tienes?</h2>
       <p>Consulta el precio referencial en soles publicado por el mayorista y calcula un estimado con tu peso aproximado.</p>
       <p class="honesty-note"><span aria-hidden="true">ⓘ</span> Es solo una referencia. El monto final se determina en el acopio al pesar y evaluar el mineral.</p>
@@ -87,7 +87,7 @@
   </section>
 
   <section class="steps-section" id="como-funciona">
-    <div class="section-heading"><div><span class="eyebrow">ASÍ DE SIMPLE</span><h2>Primero te informas.<br /><em>Luego tú decides.</em></h2></div><p>No necesitas saber términos técnicos. Empieza con lo que conoces: el peso aproximado de tu oro.</p></div>
+    <div class="section-heading"><div><h2>Primero te informas.<br /><em>Luego tú decides.</em></h2></div><p>No necesitas saber términos técnicos. Empieza con lo que conoces: el peso aproximado de tu oro.</p></div>
     <div class="steps-grid">
       <article class="step-card"><span class="step-number">01</span><div class="step-symbol">⌕</div><h3>Consulta</h3><p>Ingresa el peso aproximado y mira cuánto sería el estimado de hoy.</p><span class="step-tag">SIN REGISTRO</span></article>
       <article class="step-card"><span class="step-number">02</span><div class="step-symbol">⌖</div><h3>Encuentra un acopio</h3><p>Revisa los centros disponibles y elige a cuál te gustaría llevar tu mineral.</p><span class="step-tag">TÚ ELIGES</span></article>
@@ -97,7 +97,7 @@
   </section>
 
   <section class="centers-section" id="acopios">
-    <div class="centers-heading"><div><span class="eyebrow eyebrow-dark">CERCA DE TU RUTA</span><h2>Elige dónde<br />te queda mejor.</h2></div><p>Cuando quieras entregar, podrás acercarte al centro que te resulte conveniente.</p></div>
+    <div class="centers-heading"><div><h2>Elige dónde<br />te queda mejor.</h2></div><p>Cuando quieras entregar, podrás acercarte al centro que te resulte conveniente.</p></div>
     @if (cargandoCentros()) { <div class="centers-state" aria-live="polite">Buscando centros disponibles…</div> }
     @if (errorCentros()) { <div class="centers-state" role="status">Por ahora no pudimos cargar los centros. Puedes consultar nuevamente más tarde. <button class="retry-link" type="button" (click)="cargarCentros()">Intentar otra vez</button></div> }
     @if (!cargandoCentros() && !errorCentros() && centros().length === 0) { <div class="centers-state">Todavía no hay centros publicados. Vuelve pronto para consultar los puntos disponibles.</div> }
@@ -112,7 +112,7 @@
   </section>
 
   <section class="account-section" id="registro">
-    <div class="account-copy"><span class="eyebrow">TU CUENTA, A TU MANERA</span><h2>¿Quieres tener<br />todo a la mano?</h2><p>Con una cuenta puedes volver cuando quieras, incluso si cambiaste de celular. Inicia sesión con tu documento y la clave que elegiste.</p><div class="account-actions"><a class="button button-gold" routerLink="/minero/registro">Crear mi cuenta <span aria-hidden="true">→</span></a><a class="login-link" routerLink="/minero/ingresar">Ya tengo cuenta <span aria-hidden="true">↗</span></a></div></div>
+    <div class="account-copy"><h2>¿Quieres tener<br />todo a la mano?</h2><p>Con una cuenta puedes volver cuando quieras, incluso si cambiaste de celular. Inicia sesión con tu documento y la clave que elegiste.</p><div class="account-actions"><a class="button button-gold" routerLink="/minero/registro">Crear mi cuenta <span aria-hidden="true">→</span></a><a class="login-link" routerLink="/minero/ingresar">Ya tengo cuenta <span aria-hidden="true">↗</span></a></div></div>
     <div class="account-visual" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="account-medallion"><span>Au</span><small>Tu acceso<br />desde donde estés</small></div><span class="visual-star star-one">✳</span><span class="visual-star star-two">✧</span><span class="visual-line"></span></div>
   </section>
 

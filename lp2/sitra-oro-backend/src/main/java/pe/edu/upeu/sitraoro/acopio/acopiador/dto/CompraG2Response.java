@@ -12,12 +12,21 @@ public record CompraG2Response(
     /** Préstamos y descuento manual restados al pagar. */
     BigDecimal descuentoPen, BigDecimal descuentoManualPen,
     /** Lo que efectivamente se entregó al minero. */
-    BigDecimal netoPagadoPen, List<Long> idsPrestamos
+    BigDecimal netoPagadoPen, List<Long> idsPrestamos,
+    /** Motivo del descuento manual (vacío si no hubo). */
+    String motivoDescuento
 ) {
+    public CompraG2Response(Long idCompraG2, MineroResumen minero, LocalDateTime fechaCompra, BigDecimal totalPagadoPen,
+                            List<TransaccionG2Response> detalles, BigDecimal descuentoPen, BigDecimal descuentoManualPen,
+                            BigDecimal netoPagadoPen, List<Long> idsPrestamos) {
+        this(idCompraG2, minero, fechaCompra, totalPagadoPen, detalles, descuentoPen, descuentoManualPen,
+                netoPagadoPen, idsPrestamos, null);
+    }
+
     /** Compra sin préstamos ni descuentos: el neto es el total del material. */
     public CompraG2Response(Long idCompraG2, MineroResumen minero, LocalDateTime fechaCompra,
                             BigDecimal totalPagadoPen, List<TransaccionG2Response> detalles) {
         this(idCompraG2, minero, fechaCompra, totalPagadoPen, detalles, BigDecimal.ZERO, BigDecimal.ZERO,
-                totalPagadoPen, List.of());
+                totalPagadoPen, List.of(), null);
     }
 }

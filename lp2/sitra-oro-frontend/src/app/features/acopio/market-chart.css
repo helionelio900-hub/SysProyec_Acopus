@@ -62,13 +62,6 @@
   height: 6px;
   border-radius: 50%;
   background: #ef4444;
-  box-shadow: 0 0 6px #ef4444;
-  animation: pulse 1.6s infinite ease-in-out;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
 }
 
 .mercado-acciones {
@@ -112,11 +105,11 @@
 }
 
 .tarjeta-oro {
-  border-left: 4px solid #f59e0b;
+  border-color: rgba(245, 158, 11, 0.45);
 }
 
 .tarjeta-dolar {
-  border-left: 4px solid #10b981;
+  border-color: rgba(16, 185, 129, 0.45);
 }
 
 .tarjeta-top {
@@ -178,11 +171,10 @@
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 0.75rem;
-  background: #0f172a;
-  padding: 0.75rem 0.9rem;
-  border-radius: 8px;
+  padding: 0.75rem 0;
   margin-bottom: 0.75rem;
-  border: 1px solid #1e293b;
+  border-top: 1px solid #334155;
+  border-bottom: 1px solid #334155;
 }
 
 .caja-precio .label {

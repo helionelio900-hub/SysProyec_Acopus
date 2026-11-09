@@ -1,0 +1,88 @@
+<section class="workspace mayorista-workspace resumen-ordenado">
+  <header class="dash-header">
+    <div>
+      <h1>Caja y adelantos</h1>
+      <p>Tu dinero en soles y dólares, lo que te paga el exportador y los adelantos entregados a centros de acopio.</p>
+    </div>
+  </header>
+
+  <app-caja-panel ambito="mayorista" (cargada)="saldos.set($event)" />
+
+  <section class="dash-panel" aria-labelledby="adelantos-titulo">
+    <div class="dash-panel-head">
+      <div>
+        <h2 id="adelantos-titulo">Adelantos a centros de acopio</h2>
+        <p>Registra el dinero que entregas antes de recibir el oro. Queda pendiente y se descuenta al pagar el siguiente lote del centro.</p>
+      </div>
+      @if (adelantosPendientes().length) {
+        <span class="dash-chip">Por descontar: {{ dinero(totalPendientePen()) }}</span>
+      }
+    </div>
+    @if (saldos(); as s) {
+      <p class="adelanto-saldos" [class.adelanto-sin-saldo]="sinSaldo()">
+        Disponible en caja:
+        <b [class.activo]="formAdelanto.controls.moneda.value === 'PEN'">{{ dinero(s.saldoPen) }}</b> en soles ·
+        <b [class.activo]="formAdelanto.controls.moneda.value === 'USD'">{{ dinero(s.saldoUsd, 'USD') }}</b> en dólares
+      </p>
+    }
+    <form class="adelanto-form" [formGroup]="formAdelanto" (ngSubmit)="registrarAdelanto()">
+      <label class="adelanto-centro">Centro de acopio
+        <select formControlName="idCentroAcopio">
+          <option [ngValue]="0" disabled>Selecciona…</option>
+          @for (c of centrosActivos(); track c.idCentroAcopio) {
+            <option [ngValue]="c.idCentroAcopio">{{ c.nombre }} · {{ c.zona }}</option>
+          }
+        </select>
+      </label>
+      <label>Moneda
+        <select formControlName="moneda">
+          <option value="PEN">Soles (S/)</option>
+          <option value="USD">Dólares (US$)</option>
+        </select>
+      </label>
+      <label [class.adelanto-monto-ancho]="formAdelanto.controls.moneda.value !== 'USD'">Monto {{ formAdelanto.controls.moneda.value === 'USD' ? '(US$)' : '(S/)' }}
+        <input type="number" min="0.01" step="0.01" formControlName="monto" [attr.aria-invalid]="sinSaldo()" />
+      </label>
+      @if (formAdelanto.controls.moneda.value === 'USD') {
+        <label>Tipo de cambio
+          <input type="number" min="0.0001" step="0.0001" formControlName="tipoCambio" />
+        </label>
+      }
+      <label class="adelanto-observacion">Observación (opcional)
+        <input type="text" maxlength="200" formControlName="observacion" placeholder="Ej.: adelanto para transporte" />
+      </label>
+      <button mat-flat-button type="submit" class="button-primary adelanto-boton" [disabled]="guardandoAdelanto() || sinSaldo()">Registrar adelanto</button>
+    </form>
+    @if (sinSaldo()) {
+      <p class="feedback error" role="alert">No hay suficiente dinero en caja en {{ formAdelanto.controls.moneda.value === 'USD' ? 'dólares' : 'soles' }} para este adelanto. Registra primero el ingreso en la caja de arriba.</p>
+    }
+    @if (formAdelanto.controls.moneda.value === 'USD' && formAdelanto.controls.monto.value > 0) {
+      <p class="dash-nota">Equivale a {{ dinero(formAdelanto.controls.monto.value * formAdelanto.controls.tipoCambio.value) }} para descontar del pago.</p>
+    }
+    @if (errorAdelanto()) { <p class="feedback error" role="alert">{{ errorAdelanto() }}</p> }
+    @if (mensajeAdelanto()) { <p class="feedback" role="status">{{ mensajeAdelanto() }}</p> }
+
+    @if (adelantosPendientes().length) {
+      <div class="pro-table-wrapper dash-tabla">
+        <table class="terminal-table">
+          <thead><tr><th>N.º</th><th>Fecha</th><th>Centro</th><th class="text-right">Monto</th><th class="text-right">Equivale (S/)</th><th>Observación</th><th></th></tr></thead>
+          <tbody>
+            @for (a of adelantosPendientes(); track a.idAdelanto) {
+              <tr>
+                <td><span class="code-badge">#{{ a.idAdelanto }}</span></td>
+                <td class="text-muted">{{ a.fecha | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ a.nombreCentro }}</td>
+                <td class="text-right font-mono font-bold">{{ dinero(a.monto, a.moneda) }}</td>
+                <td class="text-right font-mono">{{ dinero(a.montoPen) }}</td>
+                <td class="text-muted">{{ a.observacion || '—' }}</td>
+                <td><button type="button" class="dash-anular" (click)="anularAdelanto(a)">Anular</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="dash-vacio">No hay adelantos pendientes.</p>
+    }
+  </section>
+</section>

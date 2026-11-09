@@ -31,6 +31,7 @@ class AdelantoMonedaDashboardIntegrationTest {
 
     @Autowired RecepcionLeyService ley;
     @Autowired AdelantoService adelantos;
+    @Autowired CajaService caja;
     @Autowired DashboardMayoristaService dashboard;
     @Autowired RecepcionMayoristaServiceImpl recepcionesService;
     @Autowired CentroAcopioRepository centros;
@@ -42,6 +43,9 @@ class AdelantoMonedaDashboardIntegrationTest {
     void preparar() {
         jdbc.execute("CREATE TABLE IF NOT EXISTS RECEPCION_ACUMULADA (ID_ORIGEN BIGINT, ID_ACUMULADA BIGINT)");
         centro = nuevoCentro();
+        // Dinero en caja para que los adelantos de las pruebas tengan de dónde salir.
+        caja.registrarManual(new CajaDtos.MovimientoManualRequest("INGRESO", "PEN", b("100000"), "Fondo de prueba", HOY, false));
+        caja.registrarManual(new CajaDtos.MovimientoManualRequest("INGRESO", "USD", b("100000"), "Fondo de prueba", HOY, false));
     }
 
     @Test

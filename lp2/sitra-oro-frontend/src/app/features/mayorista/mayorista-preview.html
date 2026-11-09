@@ -12,13 +12,16 @@
   </header>
   <aside class="sidebar" aria-label="Navegación de la vista previa">
     <p class="section">Espacio mayorista</p>
+    <a routerLink="/vista-previa/mayorista" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Resumen</a>
     <a routerLink="/vista-previa/mayorista/recepcion" routerLinkActive="active"
       >Compra al acopiador</a
     >
+    <a routerLink="/vista-previa/mayorista/caja" routerLinkActive="active">Caja y adelantos</a>
     <a routerLink="/vista-previa/mayorista/consolidacion" routerLinkActive="active"
       >Lotes para exportación</a
     >
     <a routerLink="/vista-previa/mayorista/centros" routerLinkActive="active">Centros y cuentas</a>
+    <a routerLink="/vista-previa/mayorista/mercado" routerLinkActive="active">Mercado del oro</a>
   </aside>
   <main class="content" id="main-content">
     <p class="preview-banner" role="status">

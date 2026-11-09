@@ -76,12 +76,16 @@ public class AcopiadorServiceImpl implements AcopiadorService {
         // Préstamos del minero y descuento manual: se restan del pago, nunca más que el valor del material.
         BigDecimal material = guardada.getDetalles().stream().map(TransaccionG2::getTotalPagadoPen).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal manual = request.descuentoManualPen() == null ? BigDecimal.ZERO : request.descuentoManualPen().setScale(2, RoundingMode.HALF_UP);
+        String motivo = request.motivoDescuento() == null || request.motivoDescuento().isBlank() ? null : request.motivoDescuento().trim();
+        if (manual.signum() > 0 && motivo == null)
+            throw new IllegalArgumentException("Escribe el motivo del descuento (por ejemplo: deuda de víveres, herramientas)");
         BigDecimal descuento = prestamos.descontar(request.idsPrestamos(), idCentroAcopio, minero.getIdMinero(), guardada.getIdCompraG2()).add(manual);
         if (descuento.compareTo(material) > 0)
             throw new IllegalArgumentException("Los préstamos y descuentos (S/ " + descuento.toPlainString()
                     + ") superan el valor del oro (S/ " + material.toPlainString() + ")");
         guardada.setDescuentoPen(descuento);
         guardada.setDescuentoManualPen(manual);
+        guardada.setDescuentoMotivo(manual.signum() > 0 ? motivo : null);
         // Lo que se entregó al minero sale de la caja del centro (el préstamo ya salió cuando se entregó).
         caja.registrarPagoCompra(idCentroAcopio, guardada.getIdCompraG2(), material.subtract(descuento), minero.getNombresApellidos());
         if (request.idSolicitud() != null) solicitudesEntrega.vincularCompra(request.idSolicitud(), guardada.getIdCompraG2());
@@ -103,7 +107,8 @@ public class AcopiadorServiceImpl implements AcopiadorService {
         BigDecimal manual = compra.getDescuentoManualPen() == null ? BigDecimal.ZERO : compra.getDescuentoManualPen();
         return new CompraG2Response(compra.getIdCompraG2(), transaccionG2Mapper.toResumen(compra.getMinero()),
                 compra.getFechaCompra(), total, detalles, descuento, manual,
-                total.subtract(descuento).max(BigDecimal.ZERO), prestamos.idsDescontados(compra.getIdCompraG2()));
+                total.subtract(descuento).max(BigDecimal.ZERO), prestamos.idsDescontados(compra.getIdCompraG2()),
+                compra.getDescuentoMotivo());
     }
 
     @Override

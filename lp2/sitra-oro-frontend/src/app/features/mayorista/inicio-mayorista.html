@@ -1,28 +1,4 @@
-<section class="workspace mayorista-workspace">
-  <!-- 1. TICKER TAPE INTERNACIONAL ESTILO BLOOMBERG / KITCO -->
-  <aside class="market-ticker-tape" aria-label="Cotizaciones de mercado">
-    <div class="ticker-badge">
-      <span class="live-dot"></span>
-      <span>KITCO & FX SPOT</span>
-    </div>
-    <div class="ticker-scroll">
-      <div class="ticker-track">
-        @for (item of market.tickers(); track item.simbolo) {
-          <div class="ticker-item">
-            <span class="ticker-sym">{{ item.simbolo }}</span>
-            <span class="ticker-val">
-              {{ item.moneda === 'USD' ? '$' : 'S/' }} {{ item.valor | number: (item.simbolo === 'USD/PEN' ? '1.3-3' : '1.2-2') }}
-            </span>
-            <span class="ticker-change" [class.up]="item.variacion24h >= 0" [class.down]="item.variacion24h < 0">
-              {{ item.variacion24h >= 0 ? '▲ +' : '▼ ' }}{{ item.variacion24h }}%
-            </span>
-            <span class="ticker-name">{{ item.nombre }}</span>
-          </div>
-        }
-      </div>
-    </div>
-  </aside>
-
+<section class="workspace mayorista-workspace resumen-ordenado">
   <header class="dash-header">
     <div>
       <h1>Resumen mayorista</h1>
@@ -43,6 +19,13 @@
     <div class="error-panel" role="alert"><span>{{ error() }}</span></div>
   }
 
+  @if ((tablero()?.estados?.pendientes ?? 0) > 0) {
+    <div class="acopio-atencion" role="status">
+      <strong>Necesita tu atención</strong>
+      <a [routerLink]="ruta('recepcion')">{{ tablero()!.estados.pendientes }} lote(s) recibidos por valorizar</a>
+    </div>
+  }
+
   <section class="dash-kpis" aria-label="Indicadores del periodo" [attr.aria-busy]="cargando()">
     <article class="dash-kpi dash-kpi-principal">
       <h2>Dinero que entra hoy</h2>
@@ -50,193 +33,137 @@
       <p>≈ {{ dinero(tablero()?.hoy?.ingresoUsd, 'USD') }} · {{ tablero()?.hoy?.operaciones ?? 0 }} lote(s) valorizado(s) hoy</p>
     </article>
     <article class="dash-kpi">
+      <h2>Dinero en caja</h2>
+      <strong>{{ caja() ? dinero(caja()!.saldoPen) : '—' }}</strong>
+      <p>{{ caja() ? dinero(caja()!.saldoUsd, 'USD') + ' en dólares · ' : '' }}<a [routerLink]="ruta('caja')">ver caja</a></p>
+    </article>
+    <article class="dash-kpi">
       <h2>Ingreso de los últimos {{ rango() }} días</h2>
       <strong>{{ dinero(tablero()?.periodo?.ingresoPen) }}</strong>
       <p>Promedio diario {{ dinero(tablero()?.periodo?.promedioDiarioPen) }}</p>
     </article>
-    <article class="dash-kpi">
-      <h2>Neto pagado a acopiadores</h2>
-      <strong>{{ dinero(tablero()?.periodo?.pagadoPen) }}</strong>
-      <p>{{ tablero()?.periodo?.operaciones ?? 0 }} lotes · promedio {{ dinero(tablero()?.periodo?.ticketPromedioPen) }}</p>
-    </article>
     <article class="dash-kpi" [class.dash-kpi-alerta]="(tablero()?.adelantos?.pendientes ?? 0) > 0">
       <h2>Adelantos por descontar</h2>
       <strong>{{ dinero(tablero()?.adelantos?.saldoPendientePen) }}</strong>
-      <p>{{ tablero()?.adelantos?.pendientes ?? 0 }} pendiente(s) · <a href="#adelantos-titulo">ver adelantos</a></p>
+      <p>{{ tablero()?.adelantos?.pendientes ?? 0 }} pendiente(s) · <a [routerLink]="ruta('caja')">ver adelantos</a></p>
     </article>
   </section>
 
-  <!-- CAJA DEL MAYORISTA -->
-  <app-caja-panel ambito="mayorista" />
-
-  <!-- GRÁFICO: DINERO QUE ENTRA POR DÍA -->
-  <section class="dash-panel" aria-labelledby="grafico-titulo">
-    <div class="dash-panel-head">
-      <div>
-        <h2 id="grafico-titulo">Dinero que entra por día</h2>
-        <p>Valor del oro recibido y valorizado por ley, según la fecha del lote.</p>
-      </div>
-      @if (tablero()?.periodo?.mejorDia) {
-        <span class="dash-chip">Mejor día: {{ tablero()!.periodo.mejorDia | date: 'dd/MM' }} · {{ dinero(tablero()!.periodo.mejorDiaIngresoPen) }}</span>
-      }
-    </div>
-    @if (barras().length) {
-      <div class="dash-chart" role="img" [attr.aria-label]="'Ingreso diario de ' + barras().length + ' días'">
-        @for (b of barras(); track b.fecha) {
-          <div class="dash-col" [title]="tituloBarra(b)">
-            <div class="dash-bar" [style.height.%]="b.altura" [class.dash-bar-vacia]="!b.ingresoPen"></div>
-            <span class="dash-x">{{ b.etiqueta ? (b.fecha | date: 'dd/MM') : '' }}</span>
-          </div>
+  <div class="acopio-fila acopio-fila-principal">
+    <section class="dash-panel" aria-labelledby="grafico-titulo">
+      <div class="dash-panel-head">
+        <div>
+          <h2 id="grafico-titulo">Dinero que entra por día</h2>
+          <p>{{ tablero()?.periodo?.operaciones ?? 0 }} lotes · neto pagado a acopiadores {{ dinero(tablero()?.periodo?.pagadoPen) }}</p>
+        </div>
+        @if (tablero()?.periodo?.mejorDia) {
+          <span class="dash-chip">Mejor día: {{ tablero()!.periodo.mejorDia | date: 'dd/MM' }} · {{ dinero(tablero()!.periodo.mejorDiaIngresoPen) }}</span>
         }
       </div>
-    } @else if (cargando()) {
-      <div class="loading-panel"><div class="gold-spinner"></div><p>Cargando ingresos diarios…</p></div>
-    }
-
-    @if (diasConMovimiento().length) {
-      <div class="pro-table-wrapper dash-tabla">
-        <table class="terminal-table">
-          <thead>
-            <tr><th>Fecha</th><th class="text-center">Lotes</th><th class="text-right">Peso fundido</th><th class="text-right">Entra (S/)</th><th class="text-right">Entra (US$)</th><th class="text-right">Pagado neto</th><th class="text-right">Adelantos entregados</th></tr>
-          </thead>
-          <tbody>
-            @for (d of diasConMovimiento(); track d.fecha) {
-              <tr>
-                <td class="text-muted">{{ d.fecha | date: 'EEE dd/MM/yyyy' : '' : 'es-PE' }}</td>
-                <td class="text-center">{{ d.operaciones }}</td>
-                <td class="text-right font-mono">{{ d.pesoFundidoG | number: '1.3-3' }} g</td>
-                <td class="text-right font-mono text-gold font-bold">{{ dinero(d.ingresoPen) }}</td>
-                <td class="text-right font-mono">{{ dinero(d.ingresoUsd, 'USD') }}</td>
-                <td class="text-right font-mono">{{ dinero(d.pagadoPen) }}</td>
-                <td class="text-right font-mono">{{ d.adelantosEntregadosPen ? dinero(d.adelantosEntregadosPen) : '—' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    } @else if (!cargando()) {
-      <p class="dash-vacio">Aún no hay lotes valorizados ni adelantos en este rango.</p>
-    }
-  </section>
-
-  <!-- MONEDA, CENTROS Y ESTADO DE LOTES -->
-  <section class="dash-grid-3" aria-label="Distribución de pagos y lotes">
-    <article class="dash-panel">
-      <h2>Pagos por moneda</h2>
-      @for (m of tablero()?.pagosPorMoneda ?? []; track m.moneda) {
-        <div class="dash-fila">
-          <span><b>{{ m.moneda === 'PEN' ? 'Soles' : 'Dólares' }}</b> · {{ m.operaciones }} lote(s)</span>
-          <strong>{{ dinero(m.monto, m.moneda) }}</strong>
+      @if (barras().length) {
+        <div class="dash-chart" role="img" [attr.aria-label]="'Ingreso diario de ' + barras().length + ' días'">
+          @for (b of barras(); track b.fecha) {
+            <div class="dash-col" [title]="tituloBarra(b)">
+              <div class="dash-bar" [style.height.%]="b.altura" [class.dash-bar-vacia]="!b.ingresoPen"></div>
+              <span class="dash-x">{{ b.etiqueta ? (b.fecha | date: 'dd/MM') : '' }}</span>
+            </div>
+          }
         </div>
+      } @else if (cargando()) {
+        <div class="loading-panel"><div class="gold-spinner"></div><p>Cargando ingresos diarios…</p></div>
       }
-      <div class="dash-split" [attr.aria-label]="participacionUsd() + '% pagado en dólares'">
-        <span class="dash-split-pen" [style.width.%]="100 - participacionUsd()"></span>
-        <span class="dash-split-usd" [style.width.%]="participacionUsd()"></span>
+
+      @if (diasConMovimiento().length) {
+        <details class="resumen-detalle">
+          <summary>Ver el detalle de los últimos días</summary>
+          <div class="pro-table-wrapper dash-tabla">
+            <table class="terminal-table">
+              <thead>
+                <tr><th>Fecha</th><th class="text-center">Lotes</th><th class="text-right">Peso fundido</th><th class="text-right">Entra (S/)</th><th class="text-right">Entra (US$)</th><th class="text-right">Pagado neto</th><th class="text-right">Adelantos</th></tr>
+              </thead>
+              <tbody>
+                @for (d of diasConMovimiento(); track d.fecha) {
+                  <tr>
+                    <td class="text-muted">{{ d.fecha | date: 'EEE dd/MM/yyyy' : '' : 'es-PE' }}</td>
+                    <td class="text-center">{{ d.operaciones }}</td>
+                    <td class="text-right font-mono">{{ d.pesoFundidoG | number: '1.3-3' }} g</td>
+                    <td class="text-right font-mono text-gold font-bold">{{ dinero(d.ingresoPen) }}</td>
+                    <td class="text-right font-mono">{{ dinero(d.ingresoUsd, 'USD') }}</td>
+                    <td class="text-right font-mono">{{ dinero(d.pagadoPen) }}</td>
+                    <td class="text-right font-mono">{{ d.adelantosEntregadosPen ? dinero(d.adelantosEntregadosPen) : '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </details>
+      } @else if (!cargando()) {
+        <p class="dash-vacio">Aún no hay lotes valorizados ni adelantos en este rango.</p>
+      }
+    </section>
+
+    <section class="dash-panel" aria-labelledby="estado-titulo">
+      <h2 id="estado-titulo">Estado de los lotes</h2>
+      <p>{{ totalLotes() }} lote(s) recibidos en total.</p>
+      <div class="acopio-lista">
+        <div class="dash-fila"><span>Pendientes de valorizar</span><strong>{{ tablero()?.estados?.pendientes ?? 0 }}</strong></div>
+        <div class="dash-fila"><span>Valorizados</span><strong>{{ tablero()?.estados?.valorizados ?? 0 }}</strong></div>
+        <div class="dash-fila"><span>En lote de exportación</span><strong>{{ tablero()?.estados?.enLote ?? 0 }}</strong></div>
       </div>
-      <small class="dash-nota">{{ 100 - participacionUsd() }}% en soles · {{ participacionUsd() }}% en dólares (convertido al tipo de cambio actual)</small>
-    </article>
-
-    <article class="dash-panel">
-      <h2>Centros que más venden</h2>
-      @for (c of tablero()?.topCentros ?? []; track c.idCentroAcopio) {
-        <div class="dash-centro">
-          <div class="dash-fila"><span>{{ c.nombre }}</span><strong>{{ dinero(c.ingresoPen) }}</strong></div>
-          <div class="dash-meter"><span [style.width.%]="(c.ingresoPen / maxCentro()) * 100"></span></div>
-          <small class="dash-nota">{{ c.operaciones }} lote(s) · {{ c.pesoFundidoG | number: '1.3-3' }} g</small>
-        </div>
-      } @empty {
-        <p class="dash-vacio">Sin compras valorizadas en el rango.</p>
-      }
-    </article>
-
-    <article class="dash-panel">
-      <h2>Estado de los lotes</h2>
-      <div class="dash-fila"><span>Pendientes de valorizar</span><strong>{{ tablero()?.estados?.pendientes ?? 0 }}</strong></div>
-      <div class="dash-fila"><span>Valorizados</span><strong>{{ tablero()?.estados?.valorizados ?? 0 }}</strong></div>
-      <div class="dash-fila"><span>En lote de exportación</span><strong>{{ tablero()?.estados?.enLote ?? 0 }}</strong></div>
       <div class="dash-split">
         <span class="dash-split-pend" [style.width.%]="totalLotes() ? (tablero()!.estados.pendientes / totalLotes()) * 100 : 0"></span>
         <span class="dash-split-pen" [style.width.%]="totalLotes() ? (tablero()!.estados.valorizados / totalLotes()) * 100 : 0"></span>
         <span class="dash-split-usd" [style.width.%]="totalLotes() ? (tablero()!.estados.enLote / totalLotes()) * 100 : 0"></span>
       </div>
-      <a class="view-history-link" [routerLink]="vistaPrevia ? '/vista-previa/mayorista/recepcion' : '/mayorista/recepcion'">Ir a lotes recibidos</a>
-    </article>
-  </section>
+      <a class="view-history-link acopio-pie" [routerLink]="ruta('recepcion')">Ir a lotes recibidos</a>
+    </section>
+  </div>
 
-  <!-- ADELANTOS A CENTROS DE ACOPIO -->
-  <section class="dash-panel" aria-labelledby="adelantos-titulo">
-    <div class="dash-panel-head">
-      <div>
-        <h2 id="adelantos-titulo">Adelantos a centros de acopio</h2>
-        <p>Registra el dinero que entregas antes de recibir el oro. Queda pendiente y se descuenta al pagar el siguiente lote del centro.</p>
+  <div class="acopio-fila">
+    <section class="dash-panel" aria-labelledby="moneda-titulo">
+      <h2 id="moneda-titulo">Pagos por moneda</h2>
+      <div class="acopio-lista">
+        @for (m of tablero()?.pagosPorMoneda ?? []; track m.moneda) {
+          <div class="dash-fila">
+            <span><b>{{ m.moneda === 'PEN' ? 'Soles' : 'Dólares' }}</b> · {{ m.operaciones }} lote(s)</span>
+            <strong>{{ dinero(m.monto, m.moneda) }}</strong>
+          </div>
+        }
       </div>
-    </div>
-    <form class="dash-form" [formGroup]="formAdelanto" (ngSubmit)="registrarAdelanto()">
-      <label>Centro de acopio
-        <select formControlName="idCentroAcopio">
-          <option [ngValue]="0" disabled>Selecciona…</option>
-          @for (c of centrosActivos(); track c.idCentroAcopio) {
-            <option [ngValue]="c.idCentroAcopio">{{ c.nombre }} · {{ c.zona }}</option>
-          }
-        </select>
-      </label>
-      <label>Moneda
-        <select formControlName="moneda">
-          <option value="PEN">Soles (S/)</option>
-          <option value="USD">Dólares (US$)</option>
-        </select>
-      </label>
-      <label>Monto
-        <input type="number" min="0.01" step="0.01" formControlName="monto" />
-      </label>
-      @if (formAdelanto.controls.moneda.value === 'USD') {
-        <label>Tipo de cambio
-          <input type="number" min="0.0001" step="0.0001" formControlName="tipoCambio" />
-        </label>
-      }
-      <label class="dash-form-ancho">Observación
-        <input type="text" maxlength="200" formControlName="observacion" placeholder="Ej.: adelanto para transporte" />
-      </label>
-      <button mat-flat-button type="submit" class="button-primary" [disabled]="guardandoAdelanto()">Registrar adelanto</button>
-    </form>
-    @if (formAdelanto.controls.moneda.value === 'USD' && formAdelanto.controls.monto.value > 0) {
-      <p class="dash-nota">Equivale a {{ dinero(formAdelanto.controls.monto.value * formAdelanto.controls.tipoCambio.value) }} para descontar del pago.</p>
-    }
-    @if (errorAdelanto()) { <p class="feedback error" role="alert">{{ errorAdelanto() }}</p> }
-    @if (mensajeAdelanto()) { <p class="feedback" role="status">{{ mensajeAdelanto() }}</p> }
+      <div class="dash-split" [attr.aria-label]="participacionUsd() + '% pagado en dólares'">
+        <span class="dash-split-pen" [style.width.%]="100 - participacionUsd()"></span>
+        <span class="dash-split-usd" [style.width.%]="participacionUsd()"></span>
+      </div>
+      <small class="dash-nota">{{ 100 - participacionUsd() }}% en soles · {{ participacionUsd() }}% en dólares (convertido al tipo de cambio actual)</small>
+    </section>
 
-    @if (adelantosPendientes().length) {
-      <div class="pro-table-wrapper dash-tabla">
-        <table class="terminal-table">
-          <thead><tr><th>N.º</th><th>Fecha</th><th>Centro</th><th class="text-right">Monto</th><th class="text-right">Equivale (S/)</th><th>Observación</th><th></th></tr></thead>
-          <tbody>
-            @for (a of adelantosPendientes(); track a.idAdelanto) {
-              <tr>
-                <td><span class="code-badge">#{{ a.idAdelanto }}</span></td>
-                <td class="text-muted">{{ a.fecha | date: 'dd/MM/yyyy' }}</td>
-                <td>{{ a.nombreCentro }}</td>
-                <td class="text-right font-mono font-bold">{{ dinero(a.monto, a.moneda) }}</td>
-                <td class="text-right font-mono">{{ dinero(a.montoPen) }}</td>
-                <td class="text-muted">{{ a.observacion || '—' }}</td>
-                <td><button type="button" class="dash-anular" (click)="anularAdelanto(a)">Anular</button></td>
-              </tr>
-            }
-          </tbody>
-        </table>
+    <section class="dash-panel" aria-labelledby="centros-titulo">
+      <h2 id="centros-titulo">Centros que más venden</h2>
+      <div class="acopio-lista">
+        @for (c of tablero()?.topCentros ?? []; track c.idCentroAcopio) {
+          <div class="dash-centro">
+            <div class="dash-fila"><span>{{ c.nombre }}</span><strong>{{ dinero(c.ingresoPen) }}</strong></div>
+            <div class="dash-meter"><span [style.width.%]="(c.ingresoPen / maxCentro()) * 100"></span></div>
+            <small class="dash-nota">{{ c.operaciones }} lote(s) · {{ c.pesoFundidoG | number: '1.3-3' }} g</small>
+          </div>
+        } @empty {
+          <p class="dash-vacio">Sin compras valorizadas en el rango.</p>
+        }
       </div>
-    } @else {
-      <p class="dash-vacio">No hay adelantos pendientes.</p>
-    }
-  </section>
+    </section>
+  </div>
 
   <nav class="dash-accesos" aria-label="Accesos rápidos">
-    <a [routerLink]="vistaPrevia ? '/vista-previa/mayorista/recepcion' : '/mayorista/recepcion'" class="dash-acceso-principal">
+    <a [routerLink]="ruta('recepcion')" class="dash-acceso-principal">
       <strong>Valorizar lotes recibidos</strong><span>Registrar ley, pesos y pago al acopiador</span>
     </a>
-    <a [routerLink]="vistaPrevia ? '/vista-previa/mayorista/consolidacion' : '/mayorista/consolidacion'">
+    <a [routerLink]="ruta('caja')">
+      <strong>Caja y adelantos</strong><span>Saldo, exportador y adelantos a centros</span>
+    </a>
+    <a [routerLink]="ruta('consolidacion')">
       <strong>Lotes de exportación</strong><span>Agrupar lotes valorizados para despacho</span>
     </a>
-    <a [routerLink]="vistaPrevia ? '/vista-previa/mayorista/centros' : '/mayorista/centros'">
+    <a [routerLink]="ruta('centros')">
       <strong>Centros de acopio</strong><span>Centros, zonas y cuentas de acopiadores</span>
     </a>
   </nav>

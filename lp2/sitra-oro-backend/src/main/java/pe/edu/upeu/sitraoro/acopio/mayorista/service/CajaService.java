@@ -10,6 +10,7 @@ import pe.edu.upeu.sitraoro.acopio.mayorista.entity.TipoMovimientoCaja;
 import pe.edu.upeu.sitraoro.acopio.mayorista.repository.MovimientoCajaRepository;
 import pe.edu.upeu.sitraoro.auditoria.service.AuditoriaService;
 import pe.edu.upeu.sitraoro.exception.ConflictException;
+import pe.edu.upeu.sitraoro.exception.MayoristaReglaException;
 import pe.edu.upeu.sitraoro.exception.ResourceNotFoundException;
 
 import java.math.BigDecimal;
@@ -102,9 +103,22 @@ public class CajaService {
                 "Pago del lote #" + idRecepcion + " · " + acopiador, idRecepcion, null);
     }
 
-    /** Egreso por un adelanto entregado a un centro de acopio, en la moneda en que se entregó. */
+    /**
+     * Egreso por un adelanto entregado a un centro de acopio, en la moneda en que se entregó. No se puede
+     * entregar más dinero del que hay en caja en esa moneda: la caja nunca queda en negativo por un adelanto.
+     */
     @Transactional
     public void registrarAdelanto(Long idAdelanto, String moneda, BigDecimal monto, String centro, LocalDate fecha) {
+        BigDecimal disponible = repository.saldo(moneda);
+        if (disponible == null) disponible = BigDecimal.ZERO;
+        if (disponible.compareTo(monto) < 0) {
+            String simbolo = "USD".equals(moneda) ? "US$ " : "S/ ";
+            throw new MayoristaReglaException("SALDO_INSUFICIENTE",
+                    "No hay suficiente dinero en caja en " + ("USD".equals(moneda) ? "dólares" : "soles")
+                            + ": tienes " + simbolo + disponible.setScale(2, RoundingMode.HALF_UP).toPlainString()
+                            + " y el adelanto es de " + simbolo + monto.setScale(2, RoundingMode.HALF_UP).toPlainString()
+                            + ". Registra primero el ingreso en la caja.");
+        }
         guardar(TipoMovimientoCaja.EGRESO, OrigenMovimientoCaja.ADELANTO, moneda, monto,
                 "Adelanto #" + idAdelanto + " · " + centro, idAdelanto, fecha);
     }

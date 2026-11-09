@@ -64,7 +64,7 @@ app-inicio :is(h1,h2,h3,p) { margin-top: 0; }
 @media (max-width: 600px) { .public-header { min-height: 66px; gap: .5rem; padding: .6rem 5%; }.public-brand { font-size: .85rem; }.public-brand img { width: 34px; height: 34px; }.public-header nav { display: none; }.header-actions { gap: .7rem; }.header-login { font-size: .72rem; }.header-register { min-height: 44px; padding: 0 .65rem; font-size: .68rem; }.hero { min-height: 650px; padding: 1.5rem 7%; align-items: end; }.hero-content { padding: 4rem 0 6rem; }.hero h1 { font-size: clamp(3.5rem,18vw,5.8rem); }.hero-copy { max-width: 430px; font-size: .98rem; }.hero-actions { align-items: stretch; flex-direction: column; max-width: 340px; }.hero-actions .button { justify-content: space-between; }.hero-proof { gap: .55rem; font-size: .69rem; }.hero-caption { right: 7%; bottom: 1.2rem; }.scroll-cue { left: 7%; bottom: 1rem; }.quote-section,.centers-section { padding: 4.5rem 7%; }.section-intro h2,.centers-heading h2,.account-copy h2 { font-size: 2.8rem; }.quote-card { padding: 1.2rem; }.steps-section { padding: 4.5rem 7%; }.section-heading { align-items: start; flex-direction: column; gap: .75rem; margin-bottom: 2rem; }.section-heading h2 { font-size: 2.8rem; }.steps-grid { grid-template-columns: 1fr; }.step-card,.step-card+.step-card { min-height: unset; padding: 1.2rem 0; border-left: 0; border-bottom: 1px solid #ffffff28; }.step-card:last-child { border-bottom: 0; }.step-symbol { margin: .7rem 0 .4rem; }.step-card p { margin-bottom: .6rem; }.center-card { gap: .7rem; padding: .9rem .7rem; }.center-pin { flex-basis: 36px; width: 36px; height: 36px; }.center-status { font-size: 0; }.center-status i { width: 8px; height: 8px; }.account-section { grid-template-columns: 1fr; }.account-copy { padding: 4.2rem 7%; }.account-visual { min-height: 300px; }.orbit { width: 270px; }.orbit-two { width: 200px; }.footer { padding: 2rem 7%; }.footer nav { gap: .8rem 1.1rem; } }
 
 /* === app/features/mayorista/inicio-mayorista.css === */
-app-inicio-mayorista {
+:is(app-inicio-mayorista, app-caja-mayorista) {
   display: block;
 }
 
@@ -820,7 +820,7 @@ app-inicio-mayorista {
 }
 
 /* === app/features/mayorista/mayorista-ui.css === */
-app-inicio-mayorista, app-recepcion-mayorista, app-centros-mayorista, app-liquidaciones-mayorista, app-consolidacion-mayorista {
+:is(app-inicio-mayorista, app-caja-mayorista), app-recepcion-mayorista, app-centros-mayorista, app-liquidaciones-mayorista, app-consolidacion-mayorista {
   display: block;
 }
 
@@ -3910,7 +3910,7 @@ input.ng-invalid.ng-touched { border-color:#c63c39 !important; background:#fff5f
 
 /* ==================== RESUMEN MAYORISTA: refinamiento ==================== */
 /* El resumen va sobre el fondo oscuro del panel; el marco claro es de las otras pantallas mayoristas. */
-app-inicio-mayorista .mayorista-workspace { background: transparent; border: 0; box-shadow: none; padding: 0 0 2rem; color: #edf3fb; color-scheme: dark; }
+:is(app-inicio-mayorista, app-caja-mayorista) .mayorista-workspace { background: transparent; border: 0; box-shadow: none; padding: 0 0 2rem; color: #edf3fb; color-scheme: dark; }
 .dash-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem 2rem; flex-wrap: wrap; margin: 1.25rem 0 1.25rem; }
 .dash-header h1 { margin: 0 0 .3rem; font-size: 1.75rem; font-weight: 750; letter-spacing: -.02em; color: #f8fafc; line-height: 1.15; }
 .dash-header p { margin: 0; color: #a7b7cc; font-size: .9rem; }
@@ -3966,7 +3966,7 @@ app-inicio-mayorista .mayorista-workspace { background: transparent; border: 0; 
   --mat-button-filled-label-text-tracking: 0;
   --mat-button-filled-container-shape: .68rem;
 }
-app-inicio-mayorista .mayorista-workspace { --mat-button-filled-container-color: #f59e0b; --mat-button-filled-label-text-color: #1a1200; }
+:is(app-inicio-mayorista, app-caja-mayorista) .mayorista-workspace { --mat-button-filled-container-color: #f59e0b; --mat-button-filled-label-text-color: #1a1200; }
 
 /* ==================== EDITOR DE LOTES: la tabla de partidas cabe sin desplazar ==================== */
 .editor-table { min-width: 960px; }
@@ -4029,8 +4029,8 @@ html {
 .caja-anulado td { opacity: .55; text-decoration: line-through; }
 .caja-anulado td:last-child { text-decoration: none; }
 @media (max-width: 640px) { .caja-saldos { grid-template-columns: 1fr; } }
-app-inicio-mayorista .dash-panel .feedback, app-caja-panel .feedback { border: 1px solid rgba(110, 231, 183, .35); background: rgba(16, 185, 129, .12); color: #a7f3d0; }
-app-inicio-mayorista .dash-panel .feedback.error, app-caja-panel .feedback.error { border-color: rgba(248, 113, 113, .4); background: rgba(239, 68, 68, .12); color: #fecaca; }
+:is(app-inicio-mayorista, app-caja-mayorista) .dash-panel .feedback, app-caja-panel .feedback { border: 1px solid rgba(110, 231, 183, .35); background: rgba(16, 185, 129, .12); color: #a7f3d0; }
+:is(app-inicio-mayorista, app-caja-mayorista) .dash-panel .feedback.error, app-caja-panel .feedback.error { border-color: rgba(248, 113, 113, .4); background: rgba(239, 68, 68, .12); color: #fecaca; }
 
 /* ==================== COMPROBANTE DIGITAL DEL ACOPIO ==================== */
 .comprobante-dialogo { width: min(560px, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); padding: 0; border: 0; border-radius: 16px; background: #fbfaf7; color: #101923; box-shadow: 0 24px 70px rgba(2, 8, 20, .45); }
@@ -4106,3 +4106,113 @@ app-caja-panel { display: block; color: #edf3fb; }
 .acopio-mercado { margin-bottom: 1.5rem; }
 .acopio-mercado > h2 { margin: 0 0 .8rem; font-size: 1.05rem; font-weight: 800; color: #f8fafc; }
 app-caja-panel .liq-alerta { border-color: rgba(248, 113, 113, .45); background: rgba(239, 68, 68, .12); color: #fecaca; }
+
+
+/* ==================== CORRECCIONES DEL DETECTOR DE IMPECCABLE ==================== */
+/* Inicio público: el título de "Cómo funciona" quedaba oscuro sobre fondo oscuro (1:1). */
+.steps-section .section-heading h2 { color: #ffffff; }
+.steps-section .section-heading h2 em { color: var(--gold, #efb735); }
+.steps-section .section-heading p { color: #b9c3cc; }
+/* Textos secundarios con contraste AA (≥ 4,5:1) sobre crema y blanco. */
+app-inicio { --muted: #5f676d; }
+.honesty-note, .quote-card-top small, .weight-input span, .quote-foot, .center-info p { color: #5f676d; }
+.quote-foot { font-size: .78rem; }
+.quote-price > div > span { font-size: .78rem; }
+/* Textos funcionales de al menos 11 px. */
+.hero-caption { font-size: .72rem; }
+.estimate-label, .step-tag, .center-status { font-size: .72rem; }
+.account-medallion { box-shadow: 0 18px 40px rgba(0, 0, 0, .35); }
+
+/* Cinta de cotizaciones: letra legible y gris con contraste suficiente. */
+.ticker-badge span, .ticker-name { font-size: .75rem; }
+.ticker-name { color: #a3b1c2; }
+/* Punto "en vivo" quieto: el parpadeo infinito distrae sin informar. */
+.live-dot { animation: none !important; }
+
+/* Notas y encabezados de tabla en los dashboards oscuros. */
+.dash-nota { color: #a3b1c2; }
+.dash-tabla .terminal-table th { color: #a3b1c2; }
+.dash-form input::placeholder, app-caja-panel input::placeholder { color: #8d9db1; opacity: 1; }
+.rango-ref { color: #a3b1c2 !important; }
+
+/* Sin tarjetas dentro de tarjetas: dentro de un panel, saldos y tablas van planos. */
+.dash-panel .caja-saldo { border: 0; border-top: 1px solid rgba(70, 110, 160, .3); border-radius: 0; background: transparent; padding: .9rem 0 0; }
+.dash-panel .pro-table-wrapper { border: 0; border-top: 1px solid rgba(70, 110, 160, .3); border-radius: 0; background: transparent; box-shadow: none; }
+.resumen-acopiador .table-wrap { border: 0; border-top: 1px solid #dce3ee; border-radius: 0; box-shadow: none; background: transparent; }
+
+/* ==================== RESUMEN DEL ACOPIADOR ORDENADO ==================== */
+/* Menos bloques y más aire: la caja y el mercado tienen su propia página. */
+:is(.resumen-acopio, .resumen-ordenado) .dash-header { margin-bottom: 2rem; }
+:is(.resumen-acopio, .resumen-ordenado) .acopio-atencion { margin: 0 0 2rem; }
+:is(.resumen-acopio, .resumen-ordenado) .dash-kpis { gap: 1.25rem; margin-bottom: 2.25rem; }
+:is(.resumen-acopio, .resumen-ordenado) .dash-kpi { padding: 1.35rem 1.4rem; }
+.acopio-fila { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; margin-bottom: 2.25rem; }
+.acopio-fila-principal { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); }
+.acopio-fila > .dash-panel { margin: 0; padding: 1.6rem 1.75rem; display: flex; flex-direction: column; gap: .9rem; }
+.acopio-lista { display: flex; flex-direction: column; gap: .75rem; }
+.acopio-lista .acopio-compra { padding: .6rem 0; }
+.acopio-pie { margin-top: auto; padding-top: .5rem; }
+:is(.resumen-acopio, .resumen-ordenado) .dash-accesos { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.25rem; }
+.pagina-acopio .market-ticker-tape { margin-bottom: 1.75rem; }
+@media (max-width: 1100px) { .acopio-fila, .acopio-fila-principal { grid-template-columns: 1fr; } :is(.resumen-acopio, .resumen-ordenado) .dash-accesos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { :is(.resumen-acopio, .resumen-ordenado) .dash-accesos { grid-template-columns: 1fr; } .acopio-fila > .dash-panel { padding: 1.25rem; } }
+.resumen-detalle { margin-top: .4rem; }
+.resumen-detalle summary { cursor: pointer; width: fit-content; padding: .35rem 0; color: #fbbf24; font-weight: 700; font-size: .88rem; }
+.resumen-detalle[open] summary { margin-bottom: .6rem; }
+.resumen-ordenado .acopio-atencion a { color: #fde7b0; font-weight: 700; text-underline-offset: 3px; }
+.resumen-ordenado app-caja-panel .dash-panel, .resumen-ordenado > .dash-panel { margin-bottom: 2.25rem; }
+.adelanto-disponible { display: block; margin-top: .35rem; font-size: .78rem; font-weight: 600; color: #a3b1c2; }
+.adelanto-disponible.adelanto-sin-saldo { color: #fca5a5; }
+/* Formulario de adelantos: dos filas alineadas (datos del adelanto / observación y botón). */
+.dash-panel .adelanto-saldos { margin: 0 0 1.1rem; font-size: .86rem; color: #a3b1c2; }
+.adelanto-saldos b { color: #cbd5e1; font-variant-numeric: tabular-nums; }
+.adelanto-saldos b.activo { color: #fbbf24; }
+.adelanto-saldos.adelanto-sin-saldo b.activo { color: #fca5a5; }
+.adelanto-form { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1rem 1rem; align-items: end; margin-bottom: 1rem; }
+.adelanto-form label { display: flex; flex-direction: column; gap: .4rem; min-width: 0; font-size: .78rem; font-weight: 700; color: #94a3b8; }
+.adelanto-form input, .adelanto-form select { width: 100%; min-width: 0; min-height: 44px; box-sizing: border-box; background: rgba(6, 16, 29, .75); color: #f8fafc; border: 1px solid rgba(70, 110, 160, .4); border-radius: .6rem; padding: .55rem .7rem; font-size: .9rem; }
+.adelanto-form input[aria-invalid="true"] { border-color: #f87171; }
+.adelanto-form .adelanto-centro { grid-column: span 3; }
+.adelanto-form .adelanto-monto-ancho { grid-column: span 2; }
+.adelanto-form .adelanto-observacion { grid-column: span 4; }
+.adelanto-form .adelanto-boton { grid-column: span 2; min-height: 44px; border-radius: .6rem; background: #f59e0b; color: #1a1200; font-family: inherit; font-weight: 750; }
+.adelanto-form .adelanto-boton:hover:not(:disabled) { background: #fbbf24; }
+.adelanto-form .adelanto-boton:disabled { opacity: .55; }
+@media (max-width: 900px) {
+  .adelanto-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adelanto-form .adelanto-centro, .adelanto-form .adelanto-observacion, .adelanto-form .adelanto-boton { grid-column: 1 / -1; }
+  .adelanto-form .adelanto-monto-ancho { grid-column: auto; }
+}
+@media (max-width: 520px) { .adelanto-form { grid-template-columns: 1fr; } .adelanto-form > * { grid-column: 1 / -1 !important; } }
+
+/* ==================== ACOPIADOR: MERMA, MOTIVO DEL DESCUENTO Y ADELANTOS A MINEROS ==================== */
+/* Partida: Grupo · Recibido · Fundido · Merma · Precio · Importe. */
+.partida-fields { grid-template-columns: repeat(3, minmax(100px, 1fr)) minmax(96px, .75fr) minmax(105px, 1fr) minmax(120px, .85fr); }
+.partida-merma strong { color: #8a5a00; gap: .4rem; }
+.partida-merma strong small { color: #6c7b90; font-size: .78rem; font-weight: 650; }
+@media (max-width: 1000px) { .partida-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .partida-fields { grid-template-columns: 1fr 1fr; } }
+/* Otro descuento: monto y motivo lado a lado. */
+.liq-extra-campos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: .8rem; margin: .7rem 0 .4rem; }
+.liq-extra-campos label { display: flex; flex-direction: column; gap: .35rem; font-size: .8rem; font-weight: 700; color: #33465f; }
+.liq-extra-campos input { width: 100%; min-height: 42px; box-sizing: border-box; padding: .5rem .7rem; border: 1px solid #cfd8e3; border-radius: .6rem; background: #fff; color: #17283f; font: inherit; }
+.liq-extra-campos input[aria-invalid="true"] { border-color: #c63c39; }
+@media (max-width: 560px) { .liq-extra-campos { grid-template-columns: 1fr; } }
+.confirmation-descuento { color: #8a2c22; }
+/* Adelantos a mineros: el mismo orden que en el mayorista, en el tema claro del acopiador. */
+.prestamos-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: .9rem; }
+.prestamos-head h3 { margin: 0 0 .3rem; }
+.prestamos-head p { margin: 0; color: var(--muted, #6c7b90); }
+.prestamos-panel .adelanto-saldos { margin: 0 0 1rem; font-size: .88rem; color: #53667f; }
+.prestamos-panel .adelanto-saldos b.activo { color: #8a5a00; }
+.prestamos-panel .adelanto-saldos.adelanto-sin-saldo b.activo { color: #b42318; }
+.prestamos-panel .adelanto-form { margin: 0 0 1rem; }
+.prestamos-panel .adelanto-form label { color: #33465f; font-size: .82rem; }
+.prestamos-panel .adelanto-form input, .prestamos-panel .adelanto-form select { background: #fff; color: #17283f; border: 1px solid #cfd8e3; }
+.prestamos-panel .adelanto-form input[aria-invalid="true"] { border-color: #c63c39; }
+.prestamos-panel .adelanto-form .prestamo-monto { grid-column: span 3; }
+@media (max-width: 900px) { .prestamos-panel .adelanto-form .prestamo-monto { grid-column: 1 / -1; } }
+.prestamos-panel td.num, .prestamos-panel th.num { text-align: right; font-variant-numeric: tabular-nums; }
+/* Formularios oscuros: un campo vacío no se pinta de rosado, solo marca el borde. */
+:is(.adelanto-form, .dash-form, app-caja-panel) :is(input, select).ng-invalid.ng-touched { background: rgba(6, 16, 29, .75) !important; border-color: #f87171 !important; }
+.prestamos-panel .adelanto-form :is(input, select).ng-invalid.ng-touched { background: #fff !important; border-color: #c63c39 !important; }

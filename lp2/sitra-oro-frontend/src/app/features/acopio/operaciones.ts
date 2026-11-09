@@ -82,7 +82,7 @@ export class OperacionesAcopio implements OnInit {
     { id: 'recepcion', nombre: 'Recepción de mineros' },
     { id: 'entrega', nombre: 'Preparar entrega' },
     { id: 'historial', nombre: 'Historial de compras' },
-    { id: 'prestamos', nombre: 'Préstamos a mineros' },
+    { id: 'prestamos', nombre: 'Adelantos a mineros' },
     { id: 'reporte', nombre: 'Reporte de entregas' },
   ] as const;
   protected readonly mineros = signal<Minero[]>([]);
@@ -191,12 +191,19 @@ export class OperacionesAcopio implements OnInit {
     const lineas = this.valoresPartidas().map((partida) => {
       const precio = partida.aplicarAjuste ? Number(partida.precioAjustePen) || 0 : this.precioRegistroVigente(partida.tipoOro);
       const peso = Number(partida.pesoFundidoNetoG) || 0;
+      const recibido = Number(partida.pesoSinFundirG) || 0;
       const importe = precio && precio > 0 && peso > 0
         ? Math.round((peso * precio + Number.EPSILON) * 100) / 100 : 0;
-      return { precio, importe, peso };
+      // Merma: lo que se pierde al fundir (peso recibido − peso fundido).
+      const merma = recibido > 0 && peso > 0 && recibido >= peso ? Math.round((recibido - peso) * 1000) / 1000 : 0;
+      const pctMerma = recibido > 0 && merma > 0 ? Math.round((merma / recibido) * 1000) / 10 : 0;
+      return { precio, importe, peso, recibido, merma, pctMerma };
     });
+    const recibido = Math.round(lineas.reduce((sum, linea) => sum + linea.recibido, 0) * 1000) / 1000;
+    const merma = Math.round(lineas.reduce((sum, linea) => sum + linea.merma, 0) * 1000) / 1000;
     return { lineas, total: Math.round(lineas.reduce((sum, linea) => sum + linea.importe, 0) * 100) / 100,
-      peso: Math.round(lineas.reduce((sum, linea) => sum + (linea.peso || 0), 0) * 1000) / 1000 };
+      peso: Math.round(lineas.reduce((sum, linea) => sum + (linea.peso || 0), 0) * 1000) / 1000,
+      recibido, merma, pctMerma: recibido > 0 ? Math.round((merma / recibido) * 1000) / 10 : 0 };
   });
   // ---- Préstamos del minero y liquidación del pago (solo soles) ----
   protected readonly prestamosMinero = signal<PrestamoMinero[]>([]);
@@ -204,6 +211,11 @@ export class OperacionesAcopio implements OnInit {
   protected readonly cargandoPrestamosMinero = signal(false);
   protected readonly descuentoManual = this.fb.control<number | null>(null, [Validators.min(0), Validators.pattern(/^\d+(\.\d{1,2})?$/)]);
   private readonly valorDescuentoManual = signal(0);
+  /** Por qué se hace el otro descuento; se imprime en el comprobante. */
+  protected readonly motivoDescuento = this.fb.nonNullable.control('', Validators.maxLength(200));
+  /** Préstamos marcados para descontar, con su detalle, para mostrarlos en la liquidación. */
+  protected readonly prestamosADescontar = computed(() =>
+    this.prestamosMinero().filter(p => this.prestamosElegidos().includes(p.idPrestamo)));
   protected readonly liquidacion = computed(() => {
     const material = this.resumenCompra().total;
     const prestamos = Math.round(this.prestamosMinero().filter(p => this.prestamosElegidos().includes(p.idPrestamo))
@@ -239,6 +251,19 @@ export class OperacionesAcopio implements OnInit {
   protected readonly guardandoPrestamo = signal(false);
   protected readonly mensajePrestamo = signal('');
   protected readonly errorPrestamo = signal('');
+  /** Dinero en la caja del centro, para no adelantar más de lo que hay. */
+  protected readonly saldoCaja = signal<number | null>(null);
+  private readonly montoPrestamo = signal(0);
+  protected readonly prestamoSinSaldo = computed(() => {
+    const saldo = this.saldoCaja();
+    return saldo !== null && this.montoPrestamo() > saldo;
+  });
+  protected cargarSaldoCaja(): void {
+    this.servicio.cajaAcopio().subscribe({
+      next: (c) => this.saldoCaja.set(c.saldoPen),
+      error: () => this.saldoCaja.set(null),
+    });
+  }
   protected readonly formPrestamo = this.fb.nonNullable.group({
     idMinero: [0, [Validators.required, Validators.min(1)]],
     montoPen: [null as number | null, [Validators.required, Validators.min(0.01), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
@@ -262,18 +287,20 @@ export class OperacionesAcopio implements OnInit {
     this.servicio.registrarPrestamo({ idMinero: Number(v.idMinero), montoPen: Number(v.montoPen), observacion: v.observacion.trim() || undefined }).subscribe({
       next: (p) => {
         this.guardandoPrestamo.set(false);
-        this.mensajePrestamo.set(`Préstamo #${p.idPrestamo} de ${this.dinero(p.montoPen)} a ${p.minero}. Se descontará al pagarle su próxima compra.`);
+        this.mensajePrestamo.set(`Adelanto #${p.idPrestamo} de ${this.dinero(p.montoPen)} a ${p.minero}. Se descontará al pagarle su próxima compra.`);
         this.formPrestamo.reset({ idMinero: 0, montoPen: null, observacion: '' });
+        this.formPrestamo.markAsUntouched();
         this.cargarPrestamosPendientes();
+        this.cargarSaldoCaja();
         if (Number(this.form.controls.idMinero.value) === p.idMinero) this.cargarPrestamosMinero(p.idMinero);
       },
-      error: (e: HttpErrorResponse) => { this.guardandoPrestamo.set(false); this.errorPrestamo.set(e.error?.message ?? 'No se pudo registrar el préstamo.'); },
+      error: (e: HttpErrorResponse) => { this.guardandoPrestamo.set(false); this.errorPrestamo.set(e.error?.message ?? 'No se pudo registrar el adelanto.'); },
     });
   }
   protected anularPrestamo(p: PrestamoMinero): void {
-    if (!confirm(`¿Anular el préstamo #${p.idPrestamo} de ${this.dinero(p.montoPen)} a ${p.minero}?`)) return;
+    if (!confirm(`¿Anular el adelanto #${p.idPrestamo} de ${this.dinero(p.montoPen)} a ${p.minero}? El dinero vuelve a la caja.`)) return;
     this.servicio.anularPrestamo(p.idPrestamo).subscribe({
-      next: () => { this.mensajePrestamo.set(`Préstamo #${p.idPrestamo} anulado.`); this.cargarPrestamosPendientes(); },
+      next: () => { this.mensajePrestamo.set(`Adelanto #${p.idPrestamo} anulado. El dinero volvió a la caja.`); this.cargarPrestamosPendientes(); this.cargarSaldoCaja(); },
       error: (e: HttpErrorResponse) => this.errorPrestamo.set(e.error?.message ?? 'No se pudo anular el préstamo.'),
     });
   }
@@ -291,6 +318,9 @@ export class OperacionesAcopio implements OnInit {
     this.descuentoManual.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((v) => this.valorDescuentoManual.set(Math.max(Number(v) || 0, 0)));
     this.cargarPrestamosPendientes();
+    this.cargarSaldoCaja();
+    this.formPrestamo.controls.montoPen.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((v) => this.montoPrestamo.set(Number(v) || 0));
     this.form.controls.idMinero.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((idMinero) => {
       this.cargarPrestamosMinero(Number(idMinero));
       const solicitudes = this.solicitudesDelMinero();
@@ -373,6 +403,11 @@ export class OperacionesAcopio implements OnInit {
       this.error.set('Selecciona un minero y completa los pesos y precios de todas las partidas.');
       return;
     }
+    if (this.liquidacion().manual > 0 && !this.motivoDescuento.value.trim()) {
+      this.motivoDescuento.markAsTouched();
+      this.error.set('Escribe el motivo del otro descuento (por ejemplo: deuda de víveres, herramientas).');
+      return;
+    }
     if (this.liquidacion().excede) {
       this.error.set('Los préstamos y descuentos superan el valor del oro. Desmarca un préstamo o reduce el descuento.');
       return;
@@ -401,6 +436,7 @@ export class OperacionesAcopio implements OnInit {
         })),
         idsPrestamos: this.prestamosElegidos(),
         descuentoManualPen: this.valorDescuentoManual() || null,
+        motivoDescuento: this.valorDescuentoManual() ? this.motivoDescuento.value.trim() : null,
       })
       .subscribe({
         next: (resultado) => {
@@ -409,6 +445,8 @@ export class OperacionesAcopio implements OnInit {
           );
           this.comprobante.set(resultado);
           this.descuentoManual.reset(null);
+          this.motivoDescuento.reset('');
+          this.cargarSaldoCaja();
           this.cargarPrestamosPendientes();
           this.partidasCompra.clear();
           this.partidasCompra.push(this.crearPartida());

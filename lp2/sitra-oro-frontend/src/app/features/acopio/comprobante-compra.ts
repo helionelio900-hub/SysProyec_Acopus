@@ -29,13 +29,14 @@ import { CompraAcopio } from '../../core/api/operaciones.service';
           </dl>
 
           <table class="comprobante-tabla">
-            <thead><tr><th>Oro</th><th class="num">Recibido</th><th class="num">Fundido</th><th class="num">Precio / g</th><th class="num">Importe</th></tr></thead>
+            <thead><tr><th>Oro</th><th class="num">Recibido</th><th class="num">Fundido</th><th class="num">Merma</th><th class="num">Precio / g</th><th class="num">Importe</th></tr></thead>
             <tbody>
               @for (p of partidasVigentes(); track p.idTransaccionG2) {
                 <tr>
                   <td><i class="punto-oro" [class.punto-rojo]="p.tipoOro === 'ROJO'" [class.punto-verde]="p.tipoOro === 'VERDE'" aria-hidden="true"></i>{{ p.tipoOro === 'ROJO' ? 'Rojo' : 'Verde' }}</td>
                   <td class="num">{{ gramos(p.pesoSinFundirG) }}</td>
                   <td class="num">{{ gramos(p.pesoFundidoNetoG) }}</td>
+                  <td class="num">{{ gramos(merma(p)) }}</td>
                   <td class="num">{{ dinero(p.precioAplicadoPen) }}</td>
                   <td class="num">{{ dinero(p.totalPagadoPen) }}</td>
                 </tr>
@@ -46,7 +47,12 @@ import { CompraAcopio } from '../../core/api/operaciones.service';
           @if (descuento() > 0) {
             <dl class="comprobante-descuentos">
               <div><dt>Valor del oro</dt><dd>{{ dinero(c.totalPagadoPen) }}</dd></div>
-              <div><dt>Préstamos y descuentos</dt><dd>− {{ dinero(descuento()) }}</dd></div>
+              @if (descuentoPrestamos() > 0) {
+                <div><dt>Préstamos descontados{{ c.idsPrestamos?.length ? ' (N.º ' + c.idsPrestamos!.join(', N.º ') + ')' : '' }}</dt><dd>− {{ dinero(descuentoPrestamos()) }}</dd></div>
+              }
+              @if (descuentoManual() > 0) {
+                <div><dt>Otro descuento{{ c.motivoDescuento ? ': ' + c.motivoDescuento : '' }}</dt><dd>− {{ dinero(descuentoManual()) }}</dd></div>
+              }
             </dl>
           }
           <div class="comprobante-total"><span>Total pagado al minero</span><strong>{{ dinero(neto()) }}</strong></div>
@@ -87,6 +93,32 @@ export class ComprobanteCompra {
     return this.compra()?.descuentoPen ?? 0;
   }
 
+  /** Parte del descuento que viene de préstamos registrados. */
+  protected descuentoPrestamos(): number {
+    return Math.max(this.descuento() - this.descuentoManual(), 0);
+  }
+
+  /** Descuento escrito a mano por el acopiador (con su motivo). */
+  protected descuentoManual(): number {
+    return this.compra()?.descuentoManualPen ?? 0;
+  }
+
+  /** Lo que se pierde al fundir: peso recibido menos peso fundido. */
+  protected merma(p: { pesoSinFundirG: number; pesoFundidoNetoG: number }): number {
+    return Math.max(Math.round((p.pesoSinFundirG - p.pesoFundidoNetoG) * 1000) / 1000, 0);
+  }
+
+  /** Líneas de descuento para el texto y la imagen. */
+  private lineasDescuento(): [string, number][] {
+    const c = this.compra();
+    const lineas: [string, number][] = [];
+    if (this.descuentoPrestamos() > 0)
+      lineas.push([`Préstamos descontados${c?.idsPrestamos?.length ? ' (N.º ' + c.idsPrestamos.join(', ') + ')' : ''}`, this.descuentoPrestamos()]);
+    if (this.descuentoManual() > 0)
+      lineas.push([`Otro descuento${c?.motivoDescuento ? ': ' + c.motivoDescuento : ''}`, this.descuentoManual()]);
+    return lineas;
+  }
+
   /** Lo que realmente recibió el minero. */
   protected neto(): number {
     const c = this.compra();
@@ -113,11 +145,12 @@ export class ComprobanteCompra {
     const c = this.compra();
     if (!c) return '';
     const lineas = this.partidasVigentes().map((p) =>
-      `• Oro ${p.tipoOro === 'ROJO' ? 'rojo' : 'verde'}: ${this.gramos(p.pesoFundidoNetoG)} × ${this.dinero(p.precioAplicadoPen)} = ${this.dinero(p.totalPagadoPen)}`);
+      `• Oro ${p.tipoOro === 'ROJO' ? 'rojo' : 'verde'}: recibido ${this.gramos(p.pesoSinFundirG)}, fundido ${this.gramos(p.pesoFundidoNetoG)} (merma ${this.gramos(this.merma(p))}) × ${this.dinero(p.precioAplicadoPen)} = ${this.dinero(p.totalPagadoPen)}`);
     return [`*SITRA-ORO · Comprobante de compra N.º ${c.idCompraG2}*`, this.centro() || 'Centro de acopio',
       `Minero: ${c.minero.nombresApellidos} (DNI ${c.minero.documentoIdentidad})`,
       `Fecha: ${new Date(c.fechaCompra).toLocaleString('es-PE')}`, ...lineas,
-      ...(this.descuento() > 0 ? [`Valor del oro: ${this.dinero(c.totalPagadoPen)}`, `Préstamos y descuentos: −${this.dinero(this.descuento())}`] : []),
+      ...(this.descuento() > 0 ? [`Valor del oro: ${this.dinero(c.totalPagadoPen)}`,
+        ...this.lineasDescuento().map(([t, v]) => `${t}: −${this.dinero(v)}`)] : []),
       `*Total pagado: ${this.dinero(this.neto())}*`].join('\n');
   }
 
@@ -171,7 +204,8 @@ export class ComprobanteCompra {
     const margen = 36;
     const derecha = ancho - margen;
     const conDescuento = this.descuento() > 0;
-    const alto = 402 + partidas.length * 48 + (conDescuento ? 64 : 0);
+    const descuentos = this.lineasDescuento();
+    const alto = 402 + partidas.length * 48 + (conDescuento ? 36 + descuentos.length * 28 : 0);
     const canvas = document.createElement('canvas');
     canvas.width = ancho * escala;
     canvas.height = alto * escala;
@@ -212,7 +246,7 @@ export class ComprobanteCompra {
     // Tabla de partidas
     y += 16;
     const columnas: [string, number, CanvasTextAlign][] = [
-      ['ORO', margen, 'left'], ['RECIBIDO', 300, 'right'], ['FUNDIDO', 420, 'right'], ['PRECIO / G', 560, 'right'], ['IMPORTE', derecha, 'right'],
+      ['ORO', margen, 'left'], ['RECIBIDO', 250, 'right'], ['FUNDIDO', 360, 'right'], ['MERMA', 460, 'right'], ['PRECIO / G', 572, 'right'], ['IMPORTE', derecha, 'right'],
     ];
     for (const [titulo, x, alinear] of columnas) texto(titulo, x, y, '700 12px', '#6e7880', alinear);
     y += 14; linea(y, '#e7e4dc');
@@ -221,9 +255,10 @@ export class ComprobanteCompra {
       ctx.fillStyle = p.tipoOro === 'ROJO' ? '#c2410c' : '#4d7c0f';
       ctx.beginPath(); ctx.arc(margen + 6, y - 5, 6, 0, Math.PI * 2); ctx.fill();
       texto(p.tipoOro === 'ROJO' ? 'Rojo' : 'Verde', margen + 18, y, '500 15px', '#101923');
-      texto(this.gramos(p.pesoSinFundirG), 300, y, '500 15px', '#101923', 'right');
-      texto(this.gramos(p.pesoFundidoNetoG), 420, y, '500 15px', '#101923', 'right');
-      texto(this.dinero(p.precioAplicadoPen), 560, y, '500 15px', '#101923', 'right');
+      texto(this.gramos(p.pesoSinFundirG), 250, y, '500 14px', '#101923', 'right');
+      texto(this.gramos(p.pesoFundidoNetoG), 360, y, '500 14px', '#101923', 'right');
+      texto(this.gramos(this.merma(p)), 460, y, '500 14px', '#6e7880', 'right');
+      texto(this.dinero(p.precioAplicadoPen), 572, y, '500 14px', '#101923', 'right');
       texto(this.dinero(p.totalPagadoPen), derecha, y, '600 15px', '#101923', 'right');
       y += 18; linea(y, '#efece5');
     }
@@ -233,9 +268,12 @@ export class ComprobanteCompra {
       y += 30;
       texto('Valor del oro', margen, y, '500 15px', '#6e7880');
       texto(this.dinero(c.totalPagadoPen), derecha, y, '600 15px', '#101923', 'right');
-      y += 28;
-      texto('Préstamos y descuentos', margen, y, '500 15px', '#6e7880');
-      texto(`− ${this.dinero(this.descuento())}`, derecha, y, '600 15px', '#b42318', 'right');
+      for (const [etiqueta, valor] of descuentos) {
+        y += 28;
+        const corta = etiqueta.length > 58 ? etiqueta.slice(0, 57) + '…' : etiqueta;
+        texto(corta, margen, y, '500 15px', '#6e7880');
+        texto(`− ${this.dinero(valor)}`, derecha, y, '600 15px', '#b42318', 'right');
+      }
     }
     y += 26; linea(y, '#101923', 2);
     y += 42;

@@ -47,17 +47,21 @@ export class Layout implements OnInit, OnDestroy {
       return [
         { ruta: '/acopio', texto: 'Resumen' },
         { ruta: '/acopio/operaciones', texto: 'Compras de oro' },
+        { ruta: '/acopio/caja', texto: 'Caja' },
         { ruta: '/acopio/mineros', texto: 'Mineros' },
         { ruta: '/acopio/solicitudes', texto: 'Cuentas por aprobar' },
+        { ruta: '/acopio/mercado', texto: 'Mercado del oro' },
       ];
     }
     if (rol === 'G1_MAYORISTA') {
       return [
         { ruta: '/mayorista', texto: 'Resumen' },
         { ruta: '/mayorista/recepcion', texto: 'Compra al acopiador' },
+        { ruta: '/mayorista/caja', texto: 'Caja y adelantos' },
         { ruta: '/mayorista/liquidaciones', texto: 'Liquidaciones' },
         { ruta: '/mayorista/consolidacion', texto: 'Lotes para exportación' },
         { ruta: '/mayorista/centros', texto: 'Centros y cuentas' },
+        { ruta: '/mayorista/mercado', texto: 'Mercado del oro' },
       ];
     }
     if (rol === 'MINERO') {

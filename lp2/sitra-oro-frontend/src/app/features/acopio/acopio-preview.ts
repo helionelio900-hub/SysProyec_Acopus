@@ -1,5 +1,5 @@
 import { Component, Injectable } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import {
   CompraAcopio,
@@ -114,7 +114,7 @@ export class AcopioPreviewService {
 /** Marco de la vista previa del acopiador (mismo diseño que la del mayorista). */
 @Component({
   selector: 'app-acopio-preview',
-  imports: [RouterLink, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   styleUrl: '../mayorista/mayorista-preview.css',
   template: `
     <div class="shell preview-shell">
@@ -124,7 +124,9 @@ export class AcopioPreviewService {
       </header>
       <aside class="sidebar" aria-label="Navegación de la vista previa">
         <p class="section">Espacio de trabajo</p>
-        <a routerLink="/vista-previa/acopio" class="active">Resumen</a>
+        <a routerLink="/vista-previa/acopio" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Resumen</a>
+        <a routerLink="/vista-previa/acopio/caja" routerLinkActive="active">Caja</a>
+        <a routerLink="/vista-previa/acopio/mercado" routerLinkActive="active">Mercado del oro</a>
       </aside>
       <main class="content" id="main-content">
         <p class="preview-banner" role="status">Vista previa de desarrollo · Datos ficticios de demostración, no operaciones reales</p>

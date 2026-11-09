@@ -1,20 +1,16 @@
-import { Component, DestroyRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe, registerLocaleData } from '@angular/common';
 import localeEsPe from '@angular/common/locales/es-PE';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
-  Adelanto,
-  CentroAcopio,
   DashboardMayorista,
   DiaDashboard,
   MonedaPago,
   OperacionesService,
+  ResumenCaja,
 } from '../../core/api/operaciones.service';
 import { MAYORISTA_VISTA_PREVIA } from './mayorista-preview';
-import { CajaPanel } from '../../core/caja/caja-panel';
 import { MarketCotizacionesService } from '../../core/api/market-cotizaciones.service';
 
 // Nombres de días y meses en español para las fechas del resumen.
@@ -24,13 +20,12 @@ type Rango = 7 | 30 | 90;
 
 @Component({
   selector: 'app-inicio-mayorista',
-  imports: [RouterLink, DatePipe, DecimalPipe, MatButtonModule, ReactiveFormsModule, CajaPanel],
+  imports: [RouterLink, DatePipe, DecimalPipe],
   templateUrl: './inicio-mayorista.html',
   styleUrl: './inicio-mayorista.css',
 })
 export class InicioMayorista implements OnInit {
   private readonly operaciones = inject(OperacionesService);
-  private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly market = inject(MarketCotizacionesService);
   protected readonly vistaPrevia = inject(MAYORISTA_VISTA_PREVIA);
@@ -39,28 +34,13 @@ export class InicioMayorista implements OnInit {
   protected readonly tablero = signal<DashboardMayorista | null>(null);
   protected readonly cargando = signal(true);
   protected readonly error = signal('');
-  protected readonly centros = signal<CentroAcopio[]>([]);
-  protected readonly centrosActivos = computed(() => this.centros().filter((c) => c.activo));
-  protected readonly adelantosPendientes = signal<Adelanto[]>([]);
-  protected readonly guardandoAdelanto = signal(false);
-  protected readonly mensajeAdelanto = signal('');
-  protected readonly errorAdelanto = signal('');
+  protected readonly caja = signal<ResumenCaja | null>(null);
 
   protected readonly horaActual = signal(this.hora());
 
-  /** Panel de caja compartido; se recarga cuando cambian los adelantos. */
-  private readonly cajaPanel = viewChild(CajaPanel);
   protected readonly fechaActual = ((f: string) => f.charAt(0).toUpperCase() + f.slice(1))(
     new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
   );
-
-  protected readonly formAdelanto = this.fb.nonNullable.group({
-    idCentroAcopio: [0, [Validators.required, Validators.min(1)]],
-    moneda: ['PEN' as MonedaPago, Validators.required],
-    monto: [0, [Validators.required, Validators.min(0.01)]],
-    tipoCambio: [3.75, [Validators.min(0.0001)]],
-    observacion: ['', Validators.maxLength(200)],
-  });
 
   /** Barras del gráfico: altura relativa al mejor día del rango. */
   protected readonly barras = computed(() => {
@@ -99,10 +79,9 @@ export class InicioMayorista implements OnInit {
     const reloj = setInterval(() => this.horaActual.set(this.hora()), 1000);
     this.destroyRef.onDestroy(() => clearInterval(reloj));
     this.cargarTablero();
-    this.cargarAdelantos();
-    this.operaciones.centros().subscribe({
-      next: (datos) => this.centros.set(datos),
-      error: () => this.centros.set([]),
+    this.operaciones.caja().subscribe({
+      next: (datos) => this.caja.set(datos),
+      error: () => this.caja.set(null),
     });
   }
 
@@ -134,61 +113,9 @@ export class InicioMayorista implements OnInit {
     });
   }
 
-  private cargarAdelantos(): void {
-    this.operaciones.adelantos(undefined, 'PENDIENTE').subscribe({
-      next: (datos) => this.adelantosPendientes.set(datos),
-      error: () => this.adelantosPendientes.set([]),
-    });
-  }
-
-  protected registrarAdelanto(): void {
-    this.mensajeAdelanto.set('');
-    this.errorAdelanto.set('');
-    const v = this.formAdelanto.getRawValue();
-    if (this.formAdelanto.invalid || (v.moneda === 'USD' && !(v.tipoCambio > 0))) {
-      this.formAdelanto.markAllAsTouched();
-      this.errorAdelanto.set('Elige el centro, ingresa un monto mayor que cero y, si es en dólares, el tipo de cambio.');
-      return;
-    }
-    this.guardandoAdelanto.set(true);
-    this.operaciones
-      .registrarAdelanto({
-        idCentroAcopio: Number(v.idCentroAcopio),
-        moneda: v.moneda,
-        monto: Number(v.monto),
-        tipoCambio: v.moneda === 'USD' ? Number(v.tipoCambio) : null,
-        observacion: v.observacion.trim() || undefined,
-      })
-      .subscribe({
-        next: (a) => {
-          this.guardandoAdelanto.set(false);
-          this.mensajeAdelanto.set(
-            `Adelanto #${a.idAdelanto} registrado: ${this.dinero(a.monto, a.moneda)} para ${a.nombreCentro}. Se descontará al pagar su próximo lote.`,
-          );
-          this.formAdelanto.patchValue({ monto: 0, observacion: '' });
-          this.formAdelanto.markAsUntouched();
-          this.cargarAdelantos();
-          this.cargarTablero();
-          this.cajaPanel()?.cargar();
-        },
-        error: (e: HttpErrorResponse) => {
-          this.guardandoAdelanto.set(false);
-          this.errorAdelanto.set(e.error?.message ?? 'No se pudo registrar el adelanto.');
-        },
-      });
-  }
-
-  protected anularAdelanto(a: Adelanto): void {
-    if (!confirm(`¿Anular el adelanto #${a.idAdelanto} de ${this.dinero(a.monto, a.moneda)}?`)) return;
-    this.operaciones.anularAdelanto(a.idAdelanto).subscribe({
-      next: () => {
-        this.mensajeAdelanto.set(`Adelanto #${a.idAdelanto} anulado.`);
-        this.cargarAdelantos();
-        this.cargarTablero();
-        this.cajaPanel()?.cargar();
-      },
-      error: (e: HttpErrorResponse) => this.errorAdelanto.set(e.error?.message ?? 'No se pudo anular el adelanto.'),
-    });
+  /** Ruta de una sección del mayorista, dentro o fuera de la vista previa. */
+  protected ruta(seccion: string): string {
+    return (this.vistaPrevia ? '/vista-previa/mayorista/' : '/mayorista/') + seccion;
   }
 
   protected dinero(valor: number | null | undefined, moneda: MonedaPago = 'PEN'): string {

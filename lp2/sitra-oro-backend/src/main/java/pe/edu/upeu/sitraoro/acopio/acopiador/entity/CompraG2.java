@@ -35,6 +35,10 @@ public class CompraG2 {
     @Column(name = "DESCUENTO_MANUAL_PEN", nullable = false, precision = 14, scale = 2)
     private BigDecimal descuentoManualPen = BigDecimal.ZERO;
 
+    /** Por qué se hizo el descuento manual (se imprime en el comprobante). */
+    @Column(name = "DESCUENTO_MOTIVO", length = 200)
+    private String descuentoMotivo;
+
     @OneToMany(mappedBy = "compra", cascade = CascadeType.PERSIST)
     @OrderBy("idTransaccionG2 ASC")
     private List<TransaccionG2> detalles = new ArrayList<>();

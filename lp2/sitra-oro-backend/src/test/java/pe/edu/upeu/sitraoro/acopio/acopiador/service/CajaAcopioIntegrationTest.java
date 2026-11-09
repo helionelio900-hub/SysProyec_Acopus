@@ -57,10 +57,20 @@ class CajaAcopioIntegrationTest {
 
     @Test
     void anularUnPrestamoDevuelveElDinero() {
+        caja.registrarManual(new MovimientoManualRequest("INGRESO", "PEN", b("1000"), "Fondo", null, false), CENTRO);
         var prestamo = prestamos.registrar(new PrestamoRequest(idMinero, b("200"), null, null), CENTRO);
-        assertEquals(0, b("-200").compareTo(caja.resumen(CENTRO).saldoPen()));
+        assertEquals(0, b("800").compareTo(caja.resumen(CENTRO).saldoPen()));
         prestamos.anular(prestamo.idPrestamo(), CENTRO);
-        assertEquals(0, BigDecimal.ZERO.compareTo(caja.resumen(CENTRO).saldoPen()));
+        assertEquals(0, b("1000").compareTo(caja.resumen(CENTRO).saldoPen()));
+    }
+
+    @Test
+    void noSeAdelantaMasDineroDelQueHayEnCaja() {
+        caja.registrarManual(new MovimientoManualRequest("INGRESO", "PEN", b("100"), "Fondo", null, false), CENTRO);
+        var error = assertThrows(ConflictException.class,
+                () -> prestamos.registrar(new PrestamoRequest(idMinero, b("150"), null, null), CENTRO));
+        assertTrue(error.getMessage().contains("No hay suficiente dinero en caja"));
+        assertEquals(0, b("100").compareTo(caja.resumen(CENTRO).saldoPen()), "un adelanto rechazado no toca la caja");
     }
 
     @Test
@@ -84,6 +94,7 @@ class CajaAcopioIntegrationTest {
 
     @Test
     void losMovimientosAutomaticosNoSeAnulanAMano() {
+        caja.registrarManual(new MovimientoManualRequest("INGRESO", "PEN", b("100"), "Fondo", null, false), CENTRO);
         prestamos.registrar(new PrestamoRequest(idMinero, b("50"), null, null), CENTRO);
         var automatico = caja.listar(CENTRO, null, null).getFirst();
         assertEquals("PRESTAMO", automatico.origen());

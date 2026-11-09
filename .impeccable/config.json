@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-11-08T20:46:39.042Z",
+        "reason": "Fuente base de todo SITRA-ORO; cambiarla es un rediseño tipográfico aparte"
+      }
+    ]
+  }
+}

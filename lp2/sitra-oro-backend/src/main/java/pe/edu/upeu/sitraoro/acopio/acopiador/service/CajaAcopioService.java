@@ -85,9 +85,18 @@ public class CajaAcopioService {
         guardar(idCentro, false, OrigenCajaAcopio.PAGO_COMPRA, "PEN", neto, "Compra #" + idCompra + " · " + minero, idCompra, null);
     }
 
-    /** Egreso por un préstamo entregado al minero (en soles). */
+    /**
+     * Egreso por un adelanto o préstamo entregado al minero (en soles). No se entrega más dinero del que hay en
+     * la caja del centro: la caja nunca queda en negativo por un adelanto.
+     */
     @Transactional
     public void registrarPrestamo(Long idCentro, Long idPrestamo, BigDecimal monto, String minero, LocalDate fecha) {
+        BigDecimal disponible = repository.saldo(idCentro, "PEN");
+        if (disponible == null) disponible = BigDecimal.ZERO;
+        if (disponible.compareTo(monto) < 0)
+            throw new ConflictException("No hay suficiente dinero en caja: tienes S/ " + disponible.setScale(2, RoundingMode.HALF_UP).toPlainString()
+                    + " y el adelanto es de S/ " + monto.setScale(2, RoundingMode.HALF_UP).toPlainString()
+                    + ". Registra primero el ingreso en la caja.");
         guardar(idCentro, false, OrigenCajaAcopio.PRESTAMO, "PEN", monto, "Préstamo #" + idPrestamo + " · " + minero, idPrestamo, fecha);
     }
 

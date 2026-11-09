@@ -57,6 +57,16 @@ export const routes: Routes = [
         title: 'Vista previa acopio | SITRA-ORO',
         loadComponent: () => import('./features/acopio/inicio-acopio').then((m) => m.InicioAcopio),
       },
+      {
+        path: 'caja',
+        title: 'Vista previa caja | SITRA-ORO',
+        loadComponent: () => import('./features/acopio/caja-acopio').then((m) => m.CajaAcopio),
+      },
+      {
+        path: 'mercado',
+        title: 'Vista previa mercado | SITRA-ORO',
+        loadComponent: () => import('./features/acopio/mercado-acopio').then((m) => m.MercadoAcopio),
+      },
     ],
   },
   {
@@ -74,6 +84,16 @@ export const routes: Routes = [
         title: 'Vista previa resumen | SITRA-ORO',
         loadComponent: () =>
           import('./features/mayorista/inicio-mayorista').then((m) => m.InicioMayorista),
+      },
+      {
+        path: 'caja',
+        title: 'Vista previa caja | SITRA-ORO',
+        loadComponent: () => import('./features/mayorista/caja-mayorista').then((m) => m.CajaMayorista),
+      },
+      {
+        path: 'mercado',
+        title: 'Vista previa mercado | SITRA-ORO',
+        loadComponent: () => import('./features/acopio/mercado-acopio').then((m) => m.MercadoAcopio),
       },
       {
         path: 'centros',
@@ -113,6 +133,20 @@ export const routes: Routes = [
         canActivate: [rolGuard],
         data: { roles: ['G2_ACOPIADOR'] },
         loadComponent: () => import('./features/acopio/inicio-acopio').then((m) => m.InicioAcopio),
+      },
+      {
+        path: 'acopio/caja',
+        title: 'Caja del centro | SITRA-ORO',
+        canActivate: [rolGuard],
+        data: { roles: ['G2_ACOPIADOR'] },
+        loadComponent: () => import('./features/acopio/caja-acopio').then((m) => m.CajaAcopio),
+      },
+      {
+        path: 'acopio/mercado',
+        title: 'Mercado del oro | SITRA-ORO',
+        canActivate: [rolGuard],
+        data: { roles: ['G2_ACOPIADOR'] },
+        loadComponent: () => import('./features/acopio/mercado-acopio').then((m) => m.MercadoAcopio),
       },
       {
         path: 'acopio/mineros',
@@ -161,6 +195,20 @@ export const routes: Routes = [
         data: { roles: ['G1_MAYORISTA'] },
         loadComponent: () =>
           import('./features/mayorista/inicio-mayorista').then((m) => m.InicioMayorista),
+      },
+      {
+        path: 'mayorista/caja',
+        title: 'Caja y adelantos | SITRA-ORO',
+        canActivate: [rolGuard],
+        data: { roles: ['G1_MAYORISTA'] },
+        loadComponent: () => import('./features/mayorista/caja-mayorista').then((m) => m.CajaMayorista),
+      },
+      {
+        path: 'mayorista/mercado',
+        title: 'Mercado del oro | SITRA-ORO',
+        canActivate: [rolGuard],
+        data: { roles: ['G1_MAYORISTA'] },
+        loadComponent: () => import('./features/acopio/mercado-acopio').then((m) => m.MercadoAcopio),
       },
       {
         path: 'mayorista/centros',

@@ -1,27 +1,4 @@
 <section class="terminal-workspace resumen-acopio">
-  <aside class="market-ticker-tape" aria-label="Cotizaciones de mercado">
-    <div class="ticker-badge">
-      <span class="live-dot"></span>
-      <span>KITCO & FX SPOT</span>
-    </div>
-    <div class="ticker-scroll">
-      <div class="ticker-track">
-        @for (item of market.tickers(); track item.simbolo) {
-          <div class="ticker-item">
-            <span class="ticker-sym">{{ item.simbolo }}</span>
-            <span class="ticker-val">
-              {{ item.moneda === 'USD' ? '$' : 'S/' }} {{ item.valor | number: (item.simbolo === 'USD/PEN' ? '1.3-3' : '1.2-2') }}
-            </span>
-            <span class="ticker-change" [class.up]="item.variacion24h >= 0" [class.down]="item.variacion24h < 0">
-              {{ item.variacion24h >= 0 ? '▲ +' : '▼ ' }}{{ item.variacion24h }}%
-            </span>
-            <span class="ticker-name">{{ item.nombre }}</span>
-          </div>
-        }
-      </div>
-    </div>
-  </aside>
-
   <header class="dash-header">
     <div>
       <h1>Resumen del acopio</h1>
@@ -39,29 +16,6 @@
     <div class="error-panel" role="alert"><span>{{ error() }}</span></div>
   }
 
-  <section class="dash-kpis" aria-label="Indicadores del acopio" [attr.aria-busy]="cargando()">
-    <article class="dash-kpi dash-kpi-principal">
-      <h2>Pagado hoy a mineros</h2>
-      <strong>{{ cargando() && !compras().length ? '…' : dinero(hoy().pagado) }}</strong>
-      <p>{{ hoy().compras }} compra(s) · {{ gramos(hoy().gramos) }} fundidos</p>
-    </article>
-    <article class="dash-kpi">
-      <h2>Oro por enviar al mayorista</h2>
-      <strong>{{ gramos(porEnviar().total) }}</strong>
-      <p>Valor de compra {{ dinero(porEnviar().valor) }} · <a routerLink="/acopio/operaciones">preparar entrega</a></p>
-    </article>
-    <article class="dash-kpi">
-      <h2>Compras de los últimos {{ rango() }} días</h2>
-      <strong>{{ dinero(periodo().valorOro) }}</strong>
-      <p>{{ periodo().compras }} compras · {{ gramos(periodo().gramos) }} · {{ periodo().mineros }} minero(s)</p>
-    </article>
-    <article class="dash-kpi" [class.dash-kpi-alerta]="porCobrar().cantidad > 0">
-      <h2>Préstamos por cobrar</h2>
-      <strong>{{ dinero(porCobrar().total) }}</strong>
-      <p>{{ porCobrar().cantidad }} préstamo(s) a {{ porCobrar().mineros }} minero(s) · <a routerLink="/acopio/operaciones">ver préstamos</a></p>
-    </article>
-  </section>
-
   @if (pendientes() > 0) {
     <div class="acopio-atencion" role="status">
       <strong>Necesita tu atención</strong>
@@ -73,93 +27,109 @@
     </div>
   }
 
-  <app-caja-panel ambito="acopio" />
-
-  <section class="dash-panel" aria-labelledby="oro-dia-titulo">
-    <div class="dash-panel-head">
-      <div>
-        <h2 id="oro-dia-titulo">Oro comprado por día</h2>
-        <p>Gramos fundidos de las compras a mineros, según la fecha de compra.</p>
-      </div>
-      @if (mejorDia(); as m) {
-        <span class="dash-chip">Mejor día: {{ m.fecha | date: 'dd/MM' }} · {{ gramos(m.gramos) }}</span>
-      }
-    </div>
-    @if (periodo().compras) {
-      <div class="dash-chart" role="img" [attr.aria-label]="'Gramos comprados por día durante ' + rango() + ' días'">
-        @for (b of barras(); track b.fecha) {
-          <div class="dash-col" [title]="tituloBarra(b)">
-            <div class="dash-bar" [style.height.%]="b.altura" [class.dash-bar-vacia]="!b.gramos"></div>
-            <span class="dash-x">{{ b.etiqueta ? (b.fecha | date: 'dd/MM') : '' }}</span>
-          </div>
-        }
-      </div>
-    } @else if (!cargando()) {
-      <p class="dash-vacio">Aún no hay compras en este periodo. Cuando registres compras, verás aquí cuánto oro entra cada día.</p>
-    }
+  <section class="dash-kpis" aria-label="Indicadores del acopio" [attr.aria-busy]="cargando()">
+    <article class="dash-kpi dash-kpi-principal">
+      <h2>Pagado hoy a mineros</h2>
+      <strong>{{ cargando() && !compras().length ? '…' : dinero(hoy().pagado) }}</strong>
+      <p>{{ hoy().compras }} compra(s) · {{ gramos(hoy().gramos) }} fundidos</p>
+    </article>
+    <article class="dash-kpi">
+      <h2>Dinero en caja</h2>
+      <strong>{{ saldoCaja() === null ? '—' : dinero(saldoCaja()) }}</strong>
+      <p><a routerLink="/acopio/caja">Ver movimientos de caja</a></p>
+    </article>
+    <article class="dash-kpi">
+      <h2>Oro por enviar al mayorista</h2>
+      <strong>{{ gramos(porEnviar().total) }}</strong>
+      <p>Valor de compra {{ dinero(porEnviar().valor) }}</p>
+    </article>
+    <article class="dash-kpi" [class.dash-kpi-alerta]="porCobrar().cantidad > 0">
+      <h2>Préstamos por cobrar</h2>
+      <strong>{{ dinero(porCobrar().total) }}</strong>
+      <p>{{ porCobrar().cantidad }} préstamo(s) a {{ porCobrar().mineros }} minero(s)</p>
+    </article>
   </section>
 
-  <section class="dash-grid-3" aria-label="Detalle del acopio">
-    <article class="dash-panel">
-      <h2>Oro por enviar</h2>
-      <div class="dash-fila"><span><i class="punto-oro punto-rojo" aria-hidden="true"></i>Oro rojo</span><strong>{{ gramos(porEnviar().rojo.gramos) }}</strong></div>
-      <div class="dash-fila"><span><i class="punto-oro punto-verde" aria-hidden="true"></i>Oro verde</span><strong>{{ gramos(porEnviar().verde.gramos) }}</strong></div>
+  <div class="acopio-fila acopio-fila-principal">
+    <section class="dash-panel" aria-labelledby="oro-dia-titulo">
+      <div class="dash-panel-head">
+        <div>
+          <h2 id="oro-dia-titulo">Oro comprado por día</h2>
+          <p>{{ periodo().compras }} compras · {{ gramos(periodo().gramos) }} en los últimos {{ rango() }} días</p>
+        </div>
+        @if (mejorDia(); as m) {
+          <span class="dash-chip">Mejor día: {{ m.fecha | date: 'dd/MM' }} · {{ gramos(m.gramos) }}</span>
+        }
+      </div>
+      @if (periodo().compras) {
+        <div class="dash-chart" role="img" [attr.aria-label]="'Gramos comprados por día durante ' + rango() + ' días'">
+          @for (b of barras(); track b.fecha) {
+            <div class="dash-col" [title]="tituloBarra(b)">
+              <div class="dash-bar" [style.height.%]="b.altura" [class.dash-bar-vacia]="!b.gramos"></div>
+              <span class="dash-x">{{ b.etiqueta ? (b.fecha | date: 'dd/MM') : '' }}</span>
+            </div>
+          }
+        </div>
+      } @else if (!cargando()) {
+        <p class="dash-vacio">Aún no hay compras en este periodo. Cuando registres compras, verás aquí cuánto oro entra cada día.</p>
+      }
+    </section>
+
+    <section class="dash-panel" aria-labelledby="por-enviar-titulo">
+      <h2 id="por-enviar-titulo">Oro por enviar</h2>
+      <p>{{ porEnviar().partidas }} partida(s) listas para la próxima entrega.</p>
+      <div class="acopio-lista">
+        <div class="dash-fila"><span><i class="punto-oro punto-rojo" aria-hidden="true"></i>Oro rojo</span><strong>{{ gramos(porEnviar().rojo.gramos) }}</strong></div>
+        <div class="dash-fila"><span><i class="punto-oro punto-verde" aria-hidden="true"></i>Oro verde</span><strong>{{ gramos(porEnviar().verde.gramos) }}</strong></div>
+      </div>
       <div class="dash-split" [attr.aria-label]="(porEnviar().pctRojo | number: '1.0-0') + '% rojo'">
         <span class="acopio-split-rojo" [style.width.%]="porEnviar().pctRojo"></span>
         <span class="acopio-split-verde" [style.width.%]="porEnviar().total ? 100 - porEnviar().pctRojo : 0"></span>
       </div>
-      <small class="dash-nota">{{ porEnviar().partidas }} partida(s) disponibles para la próxima entrega.</small>
-      <a class="view-history-link" routerLink="/acopio/operaciones">Preparar entrega al mayorista</a>
-    </article>
+      <a class="view-history-link acopio-pie" routerLink="/acopio/operaciones">Preparar entrega al mayorista</a>
+    </section>
+  </div>
 
-    <article class="dash-panel">
-      <h2>Últimas compras</h2>
-      @for (c of ultimasCompras(); track c.idCompraG2) {
-        <div class="acopio-compra">
-          <div><strong>{{ c.minero.nombresApellidos }}</strong><small>N.º {{ c.idCompraG2 }} · {{ c.fechaCompra | date: 'dd/MM · HH:mm' }}</small></div>
-          <b>{{ dinero(neto(c)) }}</b>
-        </div>
-      } @empty {
-        <p class="dash-vacio">Todavía no registraste compras.</p>
-      }
-      @if (ultimasCompras().length) { <a class="view-history-link" routerLink="/acopio/operaciones">Ver historial y comprobantes</a> }
-    </article>
-
-    <article class="dash-panel">
-      <h2>En los últimos {{ rango() }} días</h2>
-      <div class="dash-fila"><span>Valor del oro comprado</span><strong>{{ dinero(periodo().valorOro) }}</strong></div>
-      <div class="dash-fila"><span>Entregado a mineros</span><strong>{{ dinero(periodo().pagado) }}</strong></div>
-      <div class="dash-fila"><span>Descontado por préstamos</span><strong>{{ dinero(periodo().valorOro - periodo().pagado) }}</strong></div>
-      <div class="dash-fila"><span>Precio promedio por gramo</span><strong>{{ dinero(periodo().precioPromedio) }}</strong></div>
-      <div class="dash-fila"><span>Mineros atendidos</span><strong>{{ periodo().mineros }}</strong></div>
-    </article>
-  </section>
-
-  <section class="acopio-mercado" aria-labelledby="mercado-titulo">
-    <h2 id="mercado-titulo">Mercado del oro</h2>
-    @defer (on viewport; prefetch on idle) {
-      <app-market-chart />
-    } @placeholder (minimum 300ms) {
-      <div class="market-chart-skeleton" aria-hidden="true">
-        <div class="skeleton-tile shimmer"><div class="sk-head"></div><div class="sk-body"></div></div>
-        <div class="skeleton-tile shimmer"><div class="sk-head"></div><div class="sk-body"></div></div>
+  <div class="acopio-fila">
+    <section class="dash-panel" aria-labelledby="ultimas-titulo">
+      <h2 id="ultimas-titulo">Últimas compras</h2>
+      <div class="acopio-lista">
+        @for (c of ultimasCompras(); track c.idCompraG2) {
+          <div class="acopio-compra">
+            <div><strong>{{ c.minero.nombresApellidos }}</strong><small>N.º {{ c.idCompraG2 }} · {{ c.fechaCompra | date: 'dd/MM · HH:mm' }}</small></div>
+            <b>{{ dinero(neto(c)) }}</b>
+          </div>
+        } @empty {
+          <p class="dash-vacio">Todavía no registraste compras.</p>
+        }
       </div>
-    } @loading (after 100ms; minimum 200ms) {
-      <div class="market-loading-bar" role="status">Cargando cotizaciones…</div>
-    } @error {
-      <p class="dash-vacio" role="alert">No se pudo cargar el gráfico del mercado.</p>
-    }
-  </section>
+      @if (ultimasCompras().length) { <a class="view-history-link acopio-pie" routerLink="/acopio/operaciones">Ver historial y comprobantes</a> }
+    </section>
+
+    <section class="dash-panel" aria-labelledby="periodo-titulo">
+      <h2 id="periodo-titulo">En los últimos {{ rango() }} días</h2>
+      <div class="acopio-lista">
+        <div class="dash-fila"><span>Valor del oro comprado</span><strong>{{ dinero(periodo().valorOro) }}</strong></div>
+        <div class="dash-fila"><span>Entregado a mineros</span><strong>{{ dinero(periodo().pagado) }}</strong></div>
+        <div class="dash-fila"><span>Descontado por préstamos</span><strong>{{ dinero(periodo().valorOro - periodo().pagado) }}</strong></div>
+        <div class="dash-fila"><span>Precio promedio por gramo</span><strong>{{ dinero(periodo().precioPromedio) }}</strong></div>
+        <div class="dash-fila"><span>Mineros atendidos</span><strong>{{ periodo().mineros }}</strong></div>
+      </div>
+    </section>
+  </div>
 
   <nav class="dash-accesos" aria-label="Accesos rápidos">
     <a routerLink="/acopio/operaciones" class="dash-acceso-principal">
       <strong>Registrar compra</strong><span>Pesar, fundir y pagar al minero</span>
     </a>
+    <a routerLink="/acopio/caja">
+      <strong>Caja</strong><span>Pagos del mayorista y gastos</span>
+    </a>
     <a routerLink="/acopio/mineros">
       <strong>Mineros</strong><span>Registrar y consultar a tus mineros</span>
     </a>
-    <a routerLink="/acopio/solicitudes">
-      <strong>Cuentas y solicitudes</strong><span>Aprobar mineros y entregas de oro</span>
+    <a routerLink="/acopio/mercado">
+      <strong>Mercado del oro</strong><span>Precio internacional y tipo de cambio</span>
     </a>
   </nav>
 </section>
