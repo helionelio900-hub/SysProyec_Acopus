@@ -4216,3 +4216,6 @@ app-inicio { --muted: #5f676d; }
 /* Formularios oscuros: un campo vacío no se pinta de rosado, solo marca el borde. */
 :is(.adelanto-form, .dash-form, app-caja-panel) :is(input, select).ng-invalid.ng-touched { background: rgba(6, 16, 29, .75) !important; border-color: #f87171 !important; }
 .prestamos-panel .adelanto-form :is(input, select).ng-invalid.ng-touched { background: #fff !important; border-color: #c63c39 !important; }
+/* Caja y adelantos del acopiador: Minero y Monto en la primera fila, Observación y botón en la segunda. */
+.adelanto-form .adelanto-monto-acopio { grid-column: span 3; }
+@media (max-width: 900px) { .adelanto-form .adelanto-monto-acopio { grid-column: 1 / -1; } }

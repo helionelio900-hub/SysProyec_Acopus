@@ -6,7 +6,8 @@ import {
   MAYORISTA_VISTA_PREVIA,
   MayoristaPreviewService,
 } from './features/mayorista/mayorista-preview';
-import { AcopioPreviewService } from './features/acopio/acopio-preview';
+import { AcopioPreviewService, MinerosPreviewService } from './features/acopio/acopio-preview';
+import { MineroService } from './features/acopio/mineros/minero.service';
 
 export const routes: Routes = [
   {
@@ -49,7 +50,10 @@ export const routes: Routes = [
     // Solo en desarrollo: resumen del acopiador con datos ficticios para revisar el diseño sin iniciar sesión.
     path: 'vista-previa/acopio',
     canMatch: [() => isDevMode()],
-    providers: [{ provide: OperacionesService, useClass: AcopioPreviewService }],
+    providers: [
+      { provide: OperacionesService, useClass: AcopioPreviewService },
+      { provide: MineroService, useClass: MinerosPreviewService },
+    ],
     loadComponent: () => import('./features/acopio/acopio-preview').then((m) => m.AcopioPreview),
     children: [
       {
@@ -136,7 +140,7 @@ export const routes: Routes = [
       },
       {
         path: 'acopio/caja',
-        title: 'Caja del centro | SITRA-ORO',
+        title: 'Caja y adelantos | SITRA-ORO',
         canActivate: [rolGuard],
         data: { roles: ['G2_ACOPIADOR'] },
         loadComponent: () => import('./features/acopio/caja-acopio').then((m) => m.CajaAcopio),

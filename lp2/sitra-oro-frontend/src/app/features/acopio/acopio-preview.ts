@@ -57,6 +57,9 @@ export class AcopioPreviewService {
       }
     }
     this.cajaDemo = [
+      ...this.prestamosDemo.map((p, i): MovimientoCaja => ({ idMovimiento: 50 + i, fecha: p.fecha, moneda: 'PEN', tipo: 'EGRESO',
+        origen: 'PRESTAMO', monto: p.montoPen, concepto: `Préstamo #${p.idPrestamo} · ${p.minero}`, idReferencia: p.idPrestamo,
+        anulado: false, anulable: false })),
       { idMovimiento: 2, fecha: new Date().toISOString().slice(0, 10), moneda: 'PEN', tipo: 'INGRESO', origen: 'MAYORISTA', monto: 42000,
         concepto: 'Pago del mayorista · liquidación de la semana', idReferencia: null, anulado: false, anulable: true },
       { idMovimiento: 1, fecha: fechaHace(29).slice(0, 10), moneda: 'PEN', tipo: 'INGRESO', origen: 'SALDO_INICIAL', monto: 260000,
@@ -67,13 +70,14 @@ export class AcopioPreviewService {
   compras(): Observable<CompraAcopio[]> { return of(structuredClone(this.comprasDemo)); }
   transacciones(): Observable<TransaccionAcopio[]> { return of(structuredClone(this.partidasDemo)); }
   prestamos(): Observable<PrestamoMinero[]> {
-    return of([
+    return of(structuredClone(this.prestamosDemo));
+  }
+  private prestamosDemo: PrestamoMinero[] = [
       { idPrestamo: 4, idMinero: 2, minero: MINEROS[1].nombresApellidos, documentoMinero: MINEROS[1].documentoIdentidad,
         fecha: fechaHace(2).slice(0, 10), montoPen: 800, observacion: 'Para víveres', estado: 'PENDIENTE', idCompraG2: null },
       { idPrestamo: 5, idMinero: 3, minero: MINEROS[2].nombresApellidos, documentoMinero: MINEROS[2].documentoIdentidad,
         fecha: fechaHace(1).slice(0, 10), montoPen: 350, observacion: 'Pasaje a Juliaca', estado: 'PENDIENTE', idCompraG2: null },
-    ]);
-  }
+  ];
   solicitudes(): Observable<SolicitudMinero[]> {
     return of([{ documentoIdentidad: '71880213', idMinero: 9, idCentroAcopioPreferido: 21 }]);
   }
@@ -84,8 +88,9 @@ export class AcopioPreviewService {
   cajaAcopio(): Observable<ResumenCaja> {
     const vivos = this.cajaDemo.filter((m) => !m.anulado);
     const pagos = this.comprasDemo.reduce((s, c) => s + (c.netoPagadoPen ?? c.totalPagadoPen), 0);
-    const saldo = vivos.reduce((s, m) => s + (m.tipo === 'INGRESO' ? m.monto : -m.monto), 0) - pagos - 1150;
-    return of({ saldoPen: saldo, saldoUsd: 0, mesPen: { ingresos: 302000, egresos: pagos + 1150 }, mesUsd: { ingresos: 0, egresos: 0 },
+    const prestado = vivos.filter((m) => m.origen === 'PRESTAMO').reduce((s, m) => s + m.monto, 0);
+    const saldo = vivos.reduce((s, m) => s + (m.tipo === 'INGRESO' ? m.monto : -m.monto), 0) - pagos;
+    return of({ saldoPen: saldo, saldoUsd: 0, mesPen: { ingresos: 302000, egresos: pagos + prestado }, mesUsd: { ingresos: 0, egresos: 0 },
       ultimos: [...this.cajaDemo, ...this.comprasDemo.slice(-4).reverse().map((c, i) => ({
         idMovimiento: 100 + i, fecha: c.fechaCompra.slice(0, 10), moneda: 'PEN' as const, tipo: 'EGRESO' as const, origen: 'PAGO_COMPRA' as const,
         monto: c.netoPagadoPen ?? c.totalPagadoPen, concepto: `Compra #${c.idCompraG2} · ${c.minero.nombresApellidos}`,
@@ -105,9 +110,33 @@ export class AcopioPreviewService {
     this.cajaDemo = [nuevo, ...this.cajaDemo];
     return of([{ ...nuevo }]);
   }
+  registrarPrestamo(r: { idMinero: number; montoPen: number; observacion?: string }): Observable<PrestamoMinero> {
+    const m = MINEROS.find((x) => x.idMinero === r.idMinero) ?? MINEROS[0];
+    const nuevo: PrestamoMinero = { idPrestamo: 100 + this.prestamosDemo.length, idMinero: m.idMinero, minero: m.nombresApellidos,
+      documentoMinero: m.documentoIdentidad, fecha: new Date().toISOString().slice(0, 10), montoPen: r.montoPen,
+      observacion: r.observacion ?? null, estado: 'PENDIENTE', idCompraG2: null };
+    this.prestamosDemo = [nuevo, ...this.prestamosDemo];
+    this.cajaDemo = [{ idMovimiento: 900 + this.prestamosDemo.length, fecha: nuevo.fecha, moneda: 'PEN', tipo: 'EGRESO', origen: 'PRESTAMO',
+      monto: r.montoPen, concepto: `Préstamo #${nuevo.idPrestamo} · ${m.nombresApellidos}`, idReferencia: nuevo.idPrestamo, anulado: false, anulable: false }, ...this.cajaDemo];
+    return of({ ...nuevo });
+  }
+  anularPrestamo(id: number): Observable<PrestamoMinero> {
+    const p = this.prestamosDemo.find((x) => x.idPrestamo === id)!;
+    this.prestamosDemo = this.prestamosDemo.filter((x) => x.idPrestamo !== id);
+    this.cajaDemo = this.cajaDemo.map((m) => (m.origen === 'PRESTAMO' && m.idReferencia === id ? { ...m, anulado: true } : m));
+    return of({ ...p, estado: 'ANULADO' });
+  }
   anularMovimientoCajaAcopio(id: number): Observable<MovimientoCaja> {
     this.cajaDemo = this.cajaDemo.map((m) => (m.idMovimiento === id ? { ...m, anulado: true, anulable: false } : m));
     return of({ ...this.cajaDemo.find((m) => m.idMovimiento === id)! });
+  }
+}
+
+/** Mineros ficticios para la vista previa (sustituye al servicio real de mineros). */
+@Injectable()
+export class MinerosPreviewService {
+  listar(): Observable<{ idMinero: number; documentoIdentidad: string; nombresApellidos: string; fechaRegistro: string }[]> {
+    return of(MINEROS.map((m) => ({ ...m, fechaRegistro: fechaHace(60) })));
   }
 }
 
@@ -125,7 +154,7 @@ export class AcopioPreviewService {
       <aside class="sidebar" aria-label="Navegación de la vista previa">
         <p class="section">Espacio de trabajo</p>
         <a routerLink="/vista-previa/acopio" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Resumen</a>
-        <a routerLink="/vista-previa/acopio/caja" routerLinkActive="active">Caja</a>
+        <a routerLink="/vista-previa/acopio/caja" routerLinkActive="active">Caja y adelantos</a>
         <a routerLink="/vista-previa/acopio/mercado" routerLinkActive="active">Mercado del oro</a>
       </aside>
       <main class="content" id="main-content">

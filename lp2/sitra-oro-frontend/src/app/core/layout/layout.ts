@@ -47,7 +47,7 @@ export class Layout implements OnInit, OnDestroy {
       return [
         { ruta: '/acopio', texto: 'Resumen' },
         { ruta: '/acopio/operaciones', texto: 'Compras de oro' },
-        { ruta: '/acopio/caja', texto: 'Caja' },
+        { ruta: '/acopio/caja', texto: 'Caja y adelantos' },
         { ruta: '/acopio/mineros', texto: 'Mineros' },
         { ruta: '/acopio/solicitudes', texto: 'Cuentas por aprobar' },
         { ruta: '/acopio/mercado', texto: 'Mercado del oro' },

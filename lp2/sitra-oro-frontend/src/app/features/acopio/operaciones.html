@@ -140,7 +140,7 @@
                       [attr.aria-invalid]="liquidacion().manual > 0 && !motivoDescuento.value.trim() && motivoDescuento.touched" />
                   </label>
                 </div>
-                <small>Para una deuda del minero que no registraste como adelanto. El motivo sale en el comprobante.</small>
+                <small>Para una deuda del minero que no registraste como adelanto (los adelantos se registran en <a routerLink="/acopio/caja">Caja y adelantos</a>). El motivo sale en el comprobante.</small>
               </details>
             </div>
             <aside class="liq-resumen" aria-live="polite">
@@ -368,50 +368,6 @@
         </form>
       </section>
     }
-    <section [hidden]="seccionActiva() !== 'prestamos'" class="panel prestamos-panel" aria-labelledby="prestamos-titulo">
-      <div class="prestamos-head">
-        <div>
-          <h3 id="prestamos-titulo">Adelantos a mineros</h3>
-          <p>Registra el dinero que adelantas o prestas a un minero. Sale de tu caja ahora, queda pendiente y se descuenta solo cuando le compras su oro.</p>
-        </div>
-        @if (prestamosPendientes().length) { <span class="liq-chip">Por cobrar: {{ dinero(totalPrestado()) }}</span> }
-      </div>
-      @if (saldoCaja() !== null) {
-        <p class="adelanto-saldos" [class.adelanto-sin-saldo]="prestamoSinSaldo()">Disponible en caja: <b class="activo">{{ dinero(saldoCaja() ?? 0) }}</b></p>
-      }
-      <form class="adelanto-form prestamo-form" [formGroup]="formPrestamo" (ngSubmit)="registrarPrestamo()">
-        <label class="adelanto-centro">Minero
-          <select formControlName="idMinero"><option [ngValue]="0">Seleccionar minero</option>
-            @for (minero of mineros(); track minero.idMinero) { <option [ngValue]="minero.idMinero">{{ minero.nombresApellidos }} · {{ minero.documentoIdentidad }}</option> }
-          </select>
-        </label>
-        <label class="adelanto-monto-ancho prestamo-monto">Monto (S/)<input type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" formControlName="montoPen" [attr.aria-invalid]="prestamoSinSaldo()" /></label>
-        <label class="adelanto-observacion">Observación (opcional)<input type="text" maxlength="200" placeholder="Ej.: para víveres, pasaje" formControlName="observacion" /></label>
-        <button mat-flat-button class="button-primary adelanto-boton" type="submit" [disabled]="guardandoPrestamo() || prestamoSinSaldo()">{{ guardandoPrestamo() ? 'Guardando…' : 'Registrar adelanto' }}</button>
-      </form>
-      @if (prestamoSinSaldo()) { <p class="feedback error" role="alert">No hay suficiente dinero en tu caja para este adelanto. Registra primero el ingreso en la página Caja.</p> }
-      @if (errorPrestamo()) { <p class="feedback error" role="alert">{{ errorPrestamo() }}</p> }
-      @if (mensajePrestamo()) { <p class="feedback" role="status">{{ mensajePrestamo() }}</p> }
-      @if (prestamosPendientes().length) {
-        <div class="table-wrap"><table>
-          <thead><tr><th>N.º</th><th>Fecha</th><th>Minero</th><th class="num">Monto</th><th>Observación</th><th></th></tr></thead>
-          <tbody>
-            @for (p of prestamosPendientes(); track p.idPrestamo) {
-              <tr>
-                <td>#{{ p.idPrestamo }}</td>
-                <td>{{ p.fecha | date: 'dd/MM/yyyy' }}</td>
-                <td><strong>{{ p.minero }}</strong><small>{{ p.documentoMinero }}</small></td>
-                <td class="num">{{ dinero(p.montoPen) }}</td>
-                <td>{{ p.observacion || '—' }}</td>
-                <td><button mat-stroked-button type="button" (click)="anularPrestamo(p)">Anular</button></td>
-              </tr>
-            }
-          </tbody>
-        </table></div>
-      } @else {
-        <p class="empty-state">No hay adelantos pendientes.</p>
-      }
-    </section>
     <section [hidden]="seccionActiva() !== 'reporte'" class="panel report-panel" aria-labelledby="report-title">
       <span class="panel-kicker">ENTREGAS REGISTRADAS</span>
       <h3 id="report-title">Reporte de entregas al mayorista</h3>

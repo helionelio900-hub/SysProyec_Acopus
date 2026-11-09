@@ -8,6 +8,7 @@ import { AbstractControl, FormArray, FormBuilder, FormControl, ReactiveFormsModu
 import { MatButtonModule } from '@angular/material/button';
 import { Minero } from './mineros/minero';
 import { MineroService } from './mineros/minero.service';
+import { RouterLink } from '@angular/router';
 import { EntregasRecibidas } from './entregas-recibidas';
 import { ComprobanteCompra } from './comprobante-compra';
 import {
@@ -22,7 +23,7 @@ import {
 
 @Component({
   selector: 'app-operaciones-acopio',
-  imports: [ReactiveFormsModule, DatePipe, MatButtonModule, EntregasRecibidas, ComprobanteCompra],
+  imports: [ReactiveFormsModule, DatePipe, MatButtonModule, RouterLink, EntregasRecibidas, ComprobanteCompra],
   templateUrl: './operaciones.html',
   styleUrls: ['./operaciones.css', './operaciones-confirmacion.css', './operaciones-compra.css'],
 })
@@ -60,7 +61,7 @@ export class OperacionesAcopio implements OnInit {
   }
   private readonly confirmacionEntrega = viewChild.required<ElementRef<HTMLDialogElement>>('confirmacionEntrega');
   private readonly confirmacionCompra = viewChild.required<ElementRef<HTMLDialogElement>>('confirmacionCompra');
-  protected readonly seccionActiva = signal<'recepcion' | 'entrega' | 'historial' | 'prestamos' | 'reporte'>('entrega');
+  protected readonly seccionActiva = signal<'recepcion' | 'entrega' | 'historial' | 'reporte'>('entrega');
   protected abrirCompraSolicitada(solicitud: EntregaMinero): void {
     if (this.guardando() || this.enviandoMayorista()) return;
     this.solicitudesAceptadas.update(items => [...items.filter(s => s.ID_SOLICITUD !== solicitud.ID_SOLICITUD), solicitud]);
@@ -82,7 +83,6 @@ export class OperacionesAcopio implements OnInit {
     { id: 'recepcion', nombre: 'Recepción de mineros' },
     { id: 'entrega', nombre: 'Preparar entrega' },
     { id: 'historial', nombre: 'Historial de compras' },
-    { id: 'prestamos', nombre: 'Adelantos a mineros' },
     { id: 'reporte', nombre: 'Reporte de entregas' },
   ] as const;
   protected readonly mineros = signal<Minero[]>([]);
@@ -245,66 +245,6 @@ export class OperacionesAcopio implements OnInit {
     });
   }
 
-  // ---- Sección "Préstamos a mineros" ----
-  protected readonly prestamosPendientes = signal<PrestamoMinero[]>([]);
-  protected readonly totalPrestado = computed(() => this.prestamosPendientes().reduce((s, p) => s + p.montoPen, 0));
-  protected readonly guardandoPrestamo = signal(false);
-  protected readonly mensajePrestamo = signal('');
-  protected readonly errorPrestamo = signal('');
-  /** Dinero en la caja del centro, para no adelantar más de lo que hay. */
-  protected readonly saldoCaja = signal<number | null>(null);
-  private readonly montoPrestamo = signal(0);
-  protected readonly prestamoSinSaldo = computed(() => {
-    const saldo = this.saldoCaja();
-    return saldo !== null && this.montoPrestamo() > saldo;
-  });
-  protected cargarSaldoCaja(): void {
-    this.servicio.cajaAcopio().subscribe({
-      next: (c) => this.saldoCaja.set(c.saldoPen),
-      error: () => this.saldoCaja.set(null),
-    });
-  }
-  protected readonly formPrestamo = this.fb.nonNullable.group({
-    idMinero: [0, [Validators.required, Validators.min(1)]],
-    montoPen: [null as number | null, [Validators.required, Validators.min(0.01), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
-    observacion: ['', Validators.maxLength(200)],
-  });
-  protected cargarPrestamosPendientes(): void {
-    this.servicio.prestamos(undefined, 'PENDIENTE').subscribe({
-      next: (lista) => this.prestamosPendientes.set(lista),
-      error: () => this.errorPrestamo.set('No se pudieron cargar los préstamos.'),
-    });
-  }
-  protected registrarPrestamo(): void {
-    this.mensajePrestamo.set(''); this.errorPrestamo.set('');
-    const v = this.formPrestamo.getRawValue();
-    if (this.formPrestamo.invalid || !v.montoPen) {
-      this.formPrestamo.markAllAsTouched();
-      this.errorPrestamo.set('Elige el minero y escribe un monto mayor que cero.');
-      return;
-    }
-    this.guardandoPrestamo.set(true);
-    this.servicio.registrarPrestamo({ idMinero: Number(v.idMinero), montoPen: Number(v.montoPen), observacion: v.observacion.trim() || undefined }).subscribe({
-      next: (p) => {
-        this.guardandoPrestamo.set(false);
-        this.mensajePrestamo.set(`Adelanto #${p.idPrestamo} de ${this.dinero(p.montoPen)} a ${p.minero}. Se descontará al pagarle su próxima compra.`);
-        this.formPrestamo.reset({ idMinero: 0, montoPen: null, observacion: '' });
-        this.formPrestamo.markAsUntouched();
-        this.cargarPrestamosPendientes();
-        this.cargarSaldoCaja();
-        if (Number(this.form.controls.idMinero.value) === p.idMinero) this.cargarPrestamosMinero(p.idMinero);
-      },
-      error: (e: HttpErrorResponse) => { this.guardandoPrestamo.set(false); this.errorPrestamo.set(e.error?.message ?? 'No se pudo registrar el adelanto.'); },
-    });
-  }
-  protected anularPrestamo(p: PrestamoMinero): void {
-    if (!confirm(`¿Anular el adelanto #${p.idPrestamo} de ${this.dinero(p.montoPen)} a ${p.minero}? El dinero vuelve a la caja.`)) return;
-    this.servicio.anularPrestamo(p.idPrestamo).subscribe({
-      next: () => { this.mensajePrestamo.set(`Adelanto #${p.idPrestamo} anulado. El dinero volvió a la caja.`); this.cargarPrestamosPendientes(); this.cargarSaldoCaja(); },
-      error: (e: HttpErrorResponse) => this.errorPrestamo.set(e.error?.message ?? 'No se pudo anular el préstamo.'),
-    });
-  }
-
   protected agregarPartida(): void {
     if (!this.guardando() && this.partidasCompra.length < 200) this.partidasCompra.push(this.crearPartida());
   }
@@ -317,10 +257,6 @@ export class OperacionesAcopio implements OnInit {
   ngOnInit(): void {
     this.descuentoManual.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((v) => this.valorDescuentoManual.set(Math.max(Number(v) || 0, 0)));
-    this.cargarPrestamosPendientes();
-    this.cargarSaldoCaja();
-    this.formPrestamo.controls.montoPen.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((v) => this.montoPrestamo.set(Number(v) || 0));
     this.form.controls.idMinero.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((idMinero) => {
       this.cargarPrestamosMinero(Number(idMinero));
       const solicitudes = this.solicitudesDelMinero();
@@ -446,8 +382,6 @@ export class OperacionesAcopio implements OnInit {
           this.comprobante.set(resultado);
           this.descuentoManual.reset(null);
           this.motivoDescuento.reset('');
-          this.cargarSaldoCaja();
-          this.cargarPrestamosPendientes();
           this.partidasCompra.clear();
           this.partidasCompra.push(this.crearPartida());
           this.form.reset({ idMinero: 0 });
