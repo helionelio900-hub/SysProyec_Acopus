@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>SITRA-ORO — Diagrama Relacional Completo de Base de Datos (Oracle 21c/23ai)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --gold: #f59e0b;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background: #090d16;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+    }
+    .brand span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-left: 1px solid var(--border);
+      padding-left: 12px;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    button, input {
+      background: #1e293b;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover { background: #334155; border-color: var(--primary); }
+    input { width: 220px; }
+    input:focus { outline: none; border-color: var(--primary); }
+    
+    .viewport {
+      flex: 1;
+      position: relative;
+      overflow: auto;
+      background: radial-gradient(#1e293b 1px, transparent 1px);
+      background-size: 24px 24px;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .diagram-container {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+      max-width: 1750px;
+      width: 100%;
+      transition: transform 0.2s ease-out;
+      transform-origin: top center;
+    }
+    .module-section {
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .module-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid;
+    }
+    .module-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .module-header .badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      font-weight: 600;
+    }
+    .tables-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .db-table {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .db-table:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .table-head {
+      padding: 10px 14px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .table-head h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: "Consolas", monospace;
+    }
+    .table-head small {
+      font-size: 0.72rem;
+      opacity: 0.85;
+    }
+    .table-cols {
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.82rem;
+    }
+    .col-row {
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 3px 4px;
+      border-radius: 4px;
+    }
+    .col-row:nth-child(even) {
+      background: rgba(255,255,255,0.02);
+    }
+    .key-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    .key-pk { background: #f59e0b; color: #000; }
+    .key-fk { background: #38bdf8; color: #000; }
+    .col-name {
+      font-family: "Consolas", monospace;
+      font-weight: 600;
+      color: #e2e8f0;
+      word-break: break-all;
+    }
+    .col-type {
+      font-family: "Consolas", monospace;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+    .relations-card {
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .relations-card h2 {
+      color: var(--gold);
+      margin-bottom: 16px;
+      font-size: 1.1rem;
+    }
+    .rel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+    .rel-item {
+      background: #1e293b;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 3px solid var(--primary);
+    }
+    .rel-item span.cardinal {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.72rem;
+    }
+    footer {
+      background: #090d16;
+      border-top: 1px solid var(--border);
+      padding: 10px 24px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>SITRA-ORO</h1>
+      <span>Diagrama Relacional Completo (Modelo Físico Oracle 21c/23ai)</span>
+    </div>
+    <div class="controls">
+      <input type="text" id="filterInput" placeholder="Buscar tabla o campo..." onkeyup="filterTables()">
+      <button onclick="zoomIn()">🔍+ Acercar</button>
+      <button onclick="zoomOut()">🔍- Alejar</button>
+      <button onclick="resetZoom()">⟲ 100%</button>
+      <button onclick="window.print()" style="background: #f59e0b; color: #000; font-weight: 700;">🖨️ Imprimir Diagrama</button>
+    </div>
+  </header>
+
+  <div class="viewport" id="viewport">
+    <div class="diagram-container" id="container">
+
+      <section class="module-section">
+        <div class="module-header" style="border-color: #1e3a8a;">
+          <h2 style="color: #1e3a8a;">MÓDULO SEGURIDAD Y PARÁMETROS</h2>
+          <span class="badge">3 Tablas</span>
+        </div>
+        <div class="tables-grid">
+
+          <div class="db-table" data-name="parametros_sistema">
+            <div class="table-head" style="background: #1e3a8a;">
+              <div>
+                <h3>PARAMETROS_SISTEMA</h3>
+                <small>Configuración global del sistema</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Identificador único">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_PARAMETRO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Código de parámetro">
+                <span></span>
+                <span class="col-name">CLAVE</span>
+                <span class="col-type">VARCHAR2(80)</span>
+              </div>
+
+              <div class="col-row" title="Valor configurado">
+                <span></span>
+                <span class="col-name">VALOR</span>
+                <span class="col-type">VARCHAR2(500)</span>
+              </div>
+
+              <div class="col-row" title="Detalle funcional">
+                <span></span>
+                <span class="col-name">DESCRIPCION</span>
+                <span class="col-type">VARCHAR2(250)</span>
+              </div>
+
+              <div class="col-row" title="Fecha último cambio">
+                <span></span>
+                <span class="col-name">FECHA_ACTUALIZACION</span>
+                <span class="col-type">TIMESTAMP</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="cuentas_acceso">
+            <div class="table-head" style="background: #1e3a8a;">
+              <div>
+                <h3>CUENTAS_ACCESO</h3>
+                <small>Credenciales y roles autenticados</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Identificador de cuenta">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_CUENTA</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> MINEROS(ID_MINERO)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_MINERO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Usuario único">
+                <span></span>
+                <span class="col-name">USERNAME</span>
+                <span class="col-type">VARCHAR2(100)</span>
+              </div>
+
+              <div class="col-row" title="Clave encriptada">
+                <span></span>
+                <span class="col-name">PASSWORD_HASH</span>
+                <span class="col-type">VARCHAR2(255)</span>
+              </div>
+
+              <div class="col-row" title="MINERO/ACOPIADOR/ADMIN">
+                <span></span>
+                <span class="col-name">ROL</span>
+                <span class="col-type">VARCHAR2(50)</span>
+              </div>
+
+              <div class="col-row" title="Estado 1=Activo, 0=Inactivo">
+                <span></span>
+                <span class="col-name">ACTIVO</span>
+                <span class="col-type">NUMBER(1)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="auditoria">
+            <div class="table-head" style="background: #1e3a8a;">
+              <div>
+                <h3>AUDITORIA</h3>
+                <small>Bitácora inmutable de eventos DML</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Secuencia de auditoría">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_AUDITORIA</span>
+                <span class="col-type">NUMBER(14)</span>
+              </div>
+
+              <div class="col-row" title="Nombre tabla auditada">
+                <span></span>
+                <span class="col-name">TABLA_AFECTADA</span>
+                <span class="col-type">VARCHAR2(50)</span>
+              </div>
+
+              <div class="col-row" title="INSERT/UPDATE/DELETE">
+                <span></span>
+                <span class="col-name">OPERACION</span>
+                <span class="col-type">VARCHAR2(10)</span>
+              </div>
+
+              <div class="col-row" title="Usuario de sesión">
+                <span></span>
+                <span class="col-name">USUARIO_BD</span>
+                <span class="col-type">VARCHAR2(100)</span>
+              </div>
+
+              <div class="col-row" title="Sello temporal exacto">
+                <span></span>
+                <span class="col-name">FECHA_EVENTO</span>
+                <span class="col-type">TIMESTAMP</span>
+              </div>
+
+              <div class="col-row" title="Estado previo (:OLD)">
+                <span></span>
+                <span class="col-name">VALOR_ANTERIOR</span>
+                <span class="col-type">VARCHAR2(4000)</span>
+              </div>
+
+              <div class="col-row" title="Estado nuevo (:NEW)">
+                <span></span>
+                <span class="col-name">VALOR_NUEVO</span>
+                <span class="col-type">VARCHAR2(4000)</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="module-section">
+        <div class="module-header" style="border-color: #065f46;">
+          <h2 style="color: #065f46;">MÓDULO PADRÓN MINERO Y SOLICITUDES</h2>
+          <span class="badge">4 Tablas</span>
+        </div>
+        <div class="tables-grid">
+
+          <div class="db-table" data-name="zonas_acopio">
+            <div class="table-head" style="background: #065f46;">
+              <div>
+                <h3>ZONAS_ACOPIO</h3>
+                <small>Zonas mineras (Rinconada, Ananea)</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Identificador de zona">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_ZONA</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Rinconada, Ananea, etc.">
+                <span></span>
+                <span class="col-name">NOMBRE_ZONA</span>
+                <span class="col-type">VARCHAR2(100)</span>
+              </div>
+
+              <div class="col-row" title="Puno">
+                <span></span>
+                <span class="col-name">DEPARTAMENTO</span>
+                <span class="col-type">VARCHAR2(50)</span>
+              </div>
+
+              <div class="col-row" title="ACTIVO/INACTIVO">
+                <span></span>
+                <span class="col-name">ESTADO</span>
+                <span class="col-type">VARCHAR2(20)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="mineros">
+            <div class="table-head" style="background: #065f46;">
+              <div>
+                <h3>MINEROS</h3>
+                <small>Padrón de productores mineros artesanales</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Código de minero (Particionado HASH)">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_MINERO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> ZONAS_ACOPIO(ID_ZONA)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_ZONA</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Documento de identidad">
+                <span></span>
+                <span class="col-name">DNI</span>
+                <span class="col-type">VARCHAR2(15)</span>
+              </div>
+
+              <div class="col-row" title="Nombres completos">
+                <span></span>
+                <span class="col-name">NOMBRES_APELLIDOS</span>
+                <span class="col-type">VARCHAR2(200)</span>
+              </div>
+
+              <div class="col-row" title="Número de contacto">
+                <span></span>
+                <span class="col-name">TELEFONO</span>
+                <span class="col-type">VARCHAR2(20)</span>
+              </div>
+
+              <div class="col-row" title="Registro formalización">
+                <span></span>
+                <span class="col-name">CODIGO_REINFO</span>
+                <span class="col-type">VARCHAR2(50)</span>
+              </div>
+
+              <div class="col-row" title="VIGENTE/SUSPENDIDO">
+                <span></span>
+                <span class="col-name">ESTADO_REINFO</span>
+                <span class="col-type">VARCHAR2(30)</span>
+              </div>
+
+              <div class="col-row" title="Fecha de empadronamiento">
+                <span></span>
+                <span class="col-name">FECHA_REGISTRO</span>
+                <span class="col-type">DATE</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="sol_entrega_minero">
+            <div class="table-head" style="background: #065f46;">
+              <div>
+                <h3>SOL_ENTREGA_MINERO</h3>
+                <small>Solicitudes previas de entrega de mineral</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Identificador de solicitud">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_SOLICITUD</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> MINEROS(ID_MINERO)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_MINERO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="SOL-2026-XXXX">
+                <span></span>
+                <span class="col-name">CODIGO_SOLICITUD</span>
+                <span class="col-type">VARCHAR2(30)</span>
+              </div>
+
+              <div class="col-row" title="Fecha y hora de envío">
+                <span></span>
+                <span class="col-name">FECHA_SOLICITUD</span>
+                <span class="col-type">TIMESTAMP</span>
+              </div>
+
+              <div class="col-row" title="PENDIENTE/ACEPTADA/RECHAZADA">
+                <span></span>
+                <span class="col-name">ESTADO</span>
+                <span class="col-type">VARCHAR2(20)</span>
+              </div>
+
+              <div class="col-row" title="Detalles del mineral">
+                <span></span>
+                <span class="col-name">OBSERVACION</span>
+                <span class="col-type">VARCHAR2(500)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="sol_entrega_partida">
+            <div class="table-head" style="background: #065f46;">
+              <div>
+                <h3>SOL_ENTREGA_PARTIDA</h3>
+                <small>Partidas estimadas de la solicitud</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Identificador de partida">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_PARTIDA_SOL</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> SOL_ENTREGA_MINERO(ID_SOLICITUD)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_SOLICITUD</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Partida 1, 2, 3...">
+                <span></span>
+                <span class="col-name">NUMERO_PARTIDA</span>
+                <span class="col-type">NUMBER(4)</span>
+              </div>
+
+              <div class="col-row" title="ROJO / VERDE">
+                <span></span>
+                <span class="col-name">COLOR</span>
+                <span class="col-type">VARCHAR2(10)</span>
+              </div>
+
+              <div class="col-row" title="Gramos estimados">
+                <span></span>
+                <span class="col-name">PESO_CRUDO_EST</span>
+                <span class="col-type">NUMBER(10,3)</span>
+              </div>
+
+              <div class="col-row" title="Gramos finos estimados">
+                <span></span>
+                <span class="col-name">PESO_ORO_EST</span>
+                <span class="col-type">NUMBER(10,3)</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="module-section">
+        <div class="module-header" style="border-color: #92400e;">
+          <h2 style="color: #92400e;">MÓDULO ACOPIADOR, CAJA CHICA Y COMPROBANTES</h2>
+          <span class="badge">6 Tablas</span>
+        </div>
+        <div class="tables-grid">
+
+          <div class="db-table" data-name="centros_acopio">
+            <div class="table-head" style="background: #92400e;">
+              <div>
+                <h3>CENTROS_ACOPIO</h3>
+                <small>Sedes operativas (Particionado LIST)</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Código de centro">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_CENTRO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> ZONAS_ACOPIO(ID_ZONA)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_ZONA</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Sede física">
+                <span></span>
+                <span class="col-name">NOMBRE_CENTRO</span>
+                <span class="col-type">VARCHAR2(120)</span>
+              </div>
+
+              <div class="col-row" title="Ubicación geográfica">
+                <span></span>
+                <span class="col-name">DIRECCION</span>
+                <span class="col-type">VARCHAR2(250)</span>
+              </div>
+
+              <div class="col-row" title="Clave de partición LIST">
+                <span></span>
+                <span class="col-name">ZONA_GEOGRAFICA</span>
+                <span class="col-type">VARCHAR2(50)</span>
+              </div>
+
+              <div class="col-row" title="Encargado de sede">
+                <span></span>
+                <span class="col-name">RESPONSABLE</span>
+                <span class="col-type">VARCHAR2(150)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="acopio_caja_movimientos">
+            <div class="table-head" style="background: #92400e;">
+              <div>
+                <h3>ACOPIO_CAJA_MOVIMIENTOS</h3>
+                <small>Flujo de caja chica en efectivo (Arqueo)</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Secuencia de caja">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_MOVIMIENTO</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="FK -> CENTROS_ACOPIO(ID_CENTRO)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_CENTRO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="APERTURA/PAGO_COMPRA/PRESTAMO">
+                <span></span>
+                <span class="col-name">TIPO_MOVIMIENTO</span>
+                <span class="col-type">VARCHAR2(30)</span>
+              </div>
+
+              <div class="col-row" title="Importe del movimiento">
+                <span></span>
+                <span class="col-name">MONTO_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="Saldo disponible tras op.">
+                <span></span>
+                <span class="col-name">SALDO_POSTERIOR_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="Momento de la operación">
+                <span></span>
+                <span class="col-name">FECHA_HORA</span>
+                <span class="col-type">TIMESTAMP</span>
+              </div>
+
+              <div class="col-row" title="Cajero/Operador">
+                <span></span>
+                <span class="col-name">RESPONSABLE</span>
+                <span class="col-type">VARCHAR2(100)</span>
+              </div>
+
+              <div class="col-row" title="Detalle de egreso/ingreso">
+                <span></span>
+                <span class="col-name">MOTIVO</span>
+                <span class="col-type">VARCHAR2(250)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="acopio_prestamos_minero">
+            <div class="table-head" style="background: #92400e;">
+              <div>
+                <h3>ACOPIO_PRESTAMOS_MINERO</h3>
+                <small>Préstamos de habilitación por descontar</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Código de préstamo">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_PRESTAMO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> CENTROS_ACOPIO(ID_CENTRO)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_CENTRO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> MINEROS(ID_MINERO)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_MINERO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Capital entregado">
+                <span></span>
+                <span class="col-name">MONTO_PRESTAMO_PEN</span>
+                <span class="col-type">NUMBER(12,2)</span>
+              </div>
+
+              <div class="col-row" title="Saldo adeudado">
+                <span></span>
+                <span class="col-name">SALDO_PENDIENTE_PEN</span>
+                <span class="col-type">NUMBER(12,2)</span>
+              </div>
+
+              <div class="col-row" title="Fecha de desembolso">
+                <span></span>
+                <span class="col-name">FECHA_PRESTAMO</span>
+                <span class="col-type">DATE</span>
+              </div>
+
+              <div class="col-row" title="PENDIENTE/DESCONTADO/ANULADO">
+                <span></span>
+                <span class="col-name">ESTADO</span>
+                <span class="col-type">VARCHAR2(20)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="compras_g2">
+            <div class="table-head" style="background: #92400e;">
+              <div>
+                <h3>COMPRAS_G2</h3>
+                <small>Compras directas al minero (COMPOSITE RANGE-HASH)</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Identificador de compra">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_COMPRA_G2</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="FK -> CENTROS_ACOPIO(ID_CENTRO)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_CENTRO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> MINEROS(ID_MINERO)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_MINERO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> SOL_ENTREGA_MINERO(ID_SOLICITUD)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_SOLICITUD</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Fecha compra (Rango Partición)">
+                <span></span>
+                <span class="col-name">FECHA_COMPRA</span>
+                <span class="col-type">DATE</span>
+              </div>
+
+              <div class="col-row" title="Valor total material">
+                <span></span>
+                <span class="col-name">TOTAL_BRUTO_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="Préstamos + manual">
+                <span></span>
+                <span class="col-name">DESCUENTO_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="Descuento manual">
+                <span></span>
+                <span class="col-name">DESCUENTO_MANUAL_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="Motivo impreso">
+                <span></span>
+                <span class="col-name">DESCUENTO_MOTIVO</span>
+                <span class="col-type">VARCHAR2(200)</span>
+              </div>
+
+              <div class="col-row" title="Neto pagado en mano">
+                <span></span>
+                <span class="col-name">TOTAL_PAGADO_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="Código ticket comprobante">
+                <span></span>
+                <span class="col-name">NUMERO_COMPROBANTE</span>
+                <span class="col-type">VARCHAR2(50)</span>
+              </div>
+
+              <div class="col-row" title="REGISTRADA/ANULADA">
+                <span></span>
+                <span class="col-name">ESTADO</span>
+                <span class="col-type">VARCHAR2(20)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="transacciones_g2">
+            <div class="table-head" style="background: #92400e;">
+              <div>
+                <h3>TRANSACCIONES_G2</h3>
+                <small>Detalle de partidas pesadas y fundidas</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Secuencia partida">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_TRANSACCION</span>
+                <span class="col-type">NUMBER(14)</span>
+              </div>
+
+              <div class="col-row" title="FK -> COMPRAS_G2(ID_COMPRA_G2)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_COMPRA_G2</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="Partida 1, 2...">
+                <span></span>
+                <span class="col-name">NUMERO_ITEM</span>
+                <span class="col-type">NUMBER(4)</span>
+              </div>
+
+              <div class="col-row" title="ROJO (90%) / VERDE (80%)">
+                <span></span>
+                <span class="col-name">COLOR</span>
+                <span class="col-type">VARCHAR2(10)</span>
+              </div>
+
+              <div class="col-row" title="Peso balanza recibido">
+                <span></span>
+                <span class="col-name">PESO_CRUDO_G</span>
+                <span class="col-type">NUMBER(10,3)</span>
+              </div>
+
+              <div class="col-row" title="Peso tras crisol">
+                <span></span>
+                <span class="col-name">PESO_FUNDIDO_NETO_G</span>
+                <span class="col-type">NUMBER(10,3)</span>
+              </div>
+
+              <div class="col-row" title="Crudo - Fundido">
+                <span></span>
+                <span class="col-name">MERMA_G</span>
+                <span class="col-type">NUMBER(10,3)</span>
+              </div>
+
+              <div class="col-row" title="Porcentaje de merma">
+                <span></span>
+                <span class="col-name">PCT_MERMA</span>
+                <span class="col-type">NUMBER(6,2)</span>
+              </div>
+
+              <div class="col-row" title="Cotización aplicada">
+                <span></span>
+                <span class="col-name">PRECIO_GRAMO_PEN</span>
+                <span class="col-type">NUMBER(10,2)</span>
+              </div>
+
+              <div class="col-row" title="Subtotal de partida">
+                <span></span>
+                <span class="col-name">TOTAL_PAGADO_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="ajustes_compra_g2">
+            <div class="table-head" style="background: #92400e;">
+              <div>
+                <h3>AJUSTES_COMPRA_G2</h3>
+                <small>Ajustes y excepciones de precio aprobadas</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Secuencia de ajuste">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_AJUSTE</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> COMPRAS_G2(ID_COMPRA_G2)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_COMPRA_G2</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="Fecha del cambio">
+                <span></span>
+                <span class="col-name">FECHA_AJUSTE</span>
+                <span class="col-type">TIMESTAMP</span>
+              </div>
+
+              <div class="col-row" title="Precio base">
+                <span></span>
+                <span class="col-name">PRECIO_ANTERIOR_PEN</span>
+                <span class="col-type">NUMBER(10,2)</span>
+              </div>
+
+              <div class="col-row" title="Precio ajustado">
+                <span></span>
+                <span class="col-name">PRECIO_NUEVO_PEN</span>
+                <span class="col-type">NUMBER(10,2)</span>
+              </div>
+
+              <div class="col-row" title="Justificación">
+                <span></span>
+                <span class="col-name">MOTIVO_AJUSTE</span>
+                <span class="col-type">VARCHAR2(250)</span>
+              </div>
+
+              <div class="col-row" title="Supervisor">
+                <span></span>
+                <span class="col-name">USUARIO_AUTORIZA</span>
+                <span class="col-type">VARCHAR2(100)</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="module-section">
+        <div class="module-header" style="border-color: #4c1d95;">
+          <h2 style="color: #4c1d95;">MÓDULO COTIZACIONES Y LEYES</h2>
+          <span class="badge">2 Tablas</span>
+        </div>
+        <div class="tables-grid">
+
+          <div class="db-table" data-name="cotizaciones_color">
+            <div class="table-head" style="background: #4c1d95;">
+              <div>
+                <h3>COTIZACIONES_COLOR</h3>
+                <small>Cotización oficial diaria por banda de color</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Código de cotización">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_COTIZACION</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="ROJO / VERDE">
+                <span></span>
+                <span class="col-name">COLOR</span>
+                <span class="col-type">VARCHAR2(10)</span>
+              </div>
+
+              <div class="col-row" title="Onza troy spot internacional">
+                <span></span>
+                <span class="col-name">ONZA_USD</span>
+                <span class="col-type">NUMBER(14,4)</span>
+              </div>
+
+              <div class="col-row" title="Tipo de cambio bancario">
+                <span></span>
+                <span class="col-name">DOLAR_PEN</span>
+                <span class="col-type">NUMBER(10,4)</span>
+              </div>
+
+              <div class="col-row" title="Descuento exportación">
+                <span></span>
+                <span class="col-name">EXPORTACION_PCT</span>
+                <span class="col-type">NUMBER(7,4)</span>
+              </div>
+
+              <div class="col-row" title="Pureza estimada (90% o 80%)">
+                <span></span>
+                <span class="col-name">LEY_PCT</span>
+                <span class="col-type">NUMBER(7,4)</span>
+              </div>
+
+              <div class="col-row" title="Precio final S/ por gramo">
+                <span></span>
+                <span class="col-name">PRECIO_GRAMO_PEN</span>
+                <span class="col-type">NUMBER(10,2)</span>
+              </div>
+
+              <div class="col-row" title="Momento de publicación">
+                <span></span>
+                <span class="col-name">FECHA_PUBLICACION</span>
+                <span class="col-type">TIMESTAMP</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="leyes_oro">
+            <div class="table-head" style="background: #4c1d95;">
+              <div>
+                <h3>LEYES_ORO</h3>
+                <small>Catálogo de purezas químicas ensayadas</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Código de ley">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_LEY</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Descripción (ej. Ley 90)">
+                <span></span>
+                <span class="col-name">NOMBRE</span>
+                <span class="col-type">VARCHAR2(100)</span>
+              </div>
+
+              <div class="col-row" title="Valor porcentual (ej. 90.0000)">
+                <span></span>
+                <span class="col-name">VALOR</span>
+                <span class="col-type">NUMBER(7,4)</span>
+              </div>
+
+              <div class="col-row" title="Fecha de registro">
+                <span></span>
+                <span class="col-name">FECHA_CREACION</span>
+                <span class="col-type">TIMESTAMP</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="module-section">
+        <div class="module-header" style="border-color: #9f1239;">
+          <h2 style="color: #9f1239;">MÓDULO MAYORISTA, ENSAYOS Y LIQUIDACIÓN</h2>
+          <span class="badge">5 Tablas</span>
+        </div>
+        <div class="tables-grid">
+
+          <div class="db-table" data-name="mayorista_recepciones">
+            <div class="table-head" style="background: #9f1239;">
+              <div>
+                <h3>MAYORISTA_RECEPCIONES</h3>
+                <small>Lotes recibidos de centros o compras directas</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Identificador de recepción">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_RECEPCION</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="FK -> CENTROS_ACOPIO(ID_CENTRO)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_CENTRO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> MINEROS(ID_MINERO)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_MINERO_DIRECTO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="1=Directo minero, 0=Centro">
+                <span></span>
+                <span class="col-name">COMPRA_DIRECTA</span>
+                <span class="col-type">NUMBER(1)</span>
+              </div>
+
+              <div class="col-row" title="Fecha de ingreso">
+                <span></span>
+                <span class="col-name">FECHA</span>
+                <span class="col-type">DATE</span>
+              </div>
+
+              <div class="col-row" title="Nombre proveedor">
+                <span></span>
+                <span class="col-name">NOMBRE_ACOPIADOR</span>
+                <span class="col-type">VARCHAR2(223)</span>
+              </div>
+
+              <div class="col-row" title="Versión de bloqueo concurrente">
+                <span></span>
+                <span class="col-name">REVISION_LEY</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="PEN (Soles) o USD (Dólares)">
+                <span></span>
+                <span class="col-name">MONEDA_PAGO</span>
+                <span class="col-type">VARCHAR2(3)</span>
+              </div>
+
+              <div class="col-row" title="TC aplicado al pago">
+                <span></span>
+                <span class="col-name">TIPO_CAMBIO_PAGO</span>
+                <span class="col-type">NUMBER(10,4)</span>
+              </div>
+
+              <div class="col-row" title="Total adelantos descontados">
+                <span></span>
+                <span class="col-name">DESCUENTO</span>
+                <span class="col-type">VARCHAR2(100)</span>
+              </div>
+
+              <div class="col-row" title="Total neto a pagar">
+                <span></span>
+                <span class="col-name">TOTAL</span>
+                <span class="col-type">VARCHAR2(100)</span>
+              </div>
+
+              <div class="col-row" title="Importe final liquidado">
+                <span></span>
+                <span class="col-name">TOTAL_PAGO_MONEDA</span>
+                <span class="col-type">NUMBER(18,2)</span>
+              </div>
+
+              <div class="col-row" title="Registro de auditoría">
+                <span></span>
+                <span class="col-name">FECHA_CREACION</span>
+                <span class="col-type">TIMESTAMP</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="recepcion_leyes">
+            <div class="table-head" style="background: #9f1239;">
+              <div>
+                <h3>RECEPCION_LEYES</h3>
+                <small>Tabla Asociativa N a N con cálculo congelado</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Secuencia de partida por ley">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_DETALLE</span>
+                <span class="col-type">NUMBER(14)</span>
+              </div>
+
+              <div class="col-row" title="FK -> MAYORISTA_RECEPCIONES">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_RECEPCION</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="FK -> LEYES_ORO">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_LEY</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Onza congelada en transacción">
+                <span></span>
+                <span class="col-name">ONZA_USD</span>
+                <span class="col-type">NUMBER(14,4)</span>
+              </div>
+
+              <div class="col-row" title="Porcentaje comercial exportador">
+                <span></span>
+                <span class="col-name">PORCENTAJE</span>
+                <span class="col-type">NUMBER(7,4)</span>
+              </div>
+
+              <div class="col-row" title="Tipo de cambio congelado">
+                <span></span>
+                <span class="col-name">TIPO_CAMBIO</span>
+                <span class="col-type">NUMBER(10,4)</span>
+              </div>
+
+              <div class="col-row" title="Peso bruto entregado">
+                <span></span>
+                <span class="col-name">PESO_SIN_FUNDIR_G</span>
+                <span class="col-type">NUMBER(10,3)</span>
+              </div>
+
+              <div class="col-row" title="Peso neto post-ensayo">
+                <span></span>
+                <span class="col-name">PESO_FUNDIDO_G</span>
+                <span class="col-type">NUMBER(10,3)</span>
+              </div>
+
+              <div class="col-row" title="Precio por gramo USD">
+                <span></span>
+                <span class="col-name">PRECIO_USD</span>
+                <span class="col-type">NUMBER(18,2)</span>
+              </div>
+
+              <div class="col-row" title="Precio por gramo PEN">
+                <span></span>
+                <span class="col-name">PRECIO_PEN</span>
+                <span class="col-type">NUMBER(18,2)</span>
+              </div>
+
+              <div class="col-row" title="Subtotal liquidado en Soles">
+                <span></span>
+                <span class="col-name">TOTAL_PEN</span>
+                <span class="col-type">NUMBER(24,2)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="mayorista_adelantos">
+            <div class="table-head" style="background: #9f1239;">
+              <div>
+                <h3>MAYORISTA_ADELANTOS</h3>
+                <small>Adelantos entregados al acopiador antes del ensayo</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Código de adelanto">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_ADELANTO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> CENTROS_ACOPIO(ID_CENTRO)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_CENTRO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Monto en Soles">
+                <span></span>
+                <span class="col-name">MONTO_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="Monto en Dólares">
+                <span></span>
+                <span class="col-name">MONTO_USD</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="Tipo de cambio">
+                <span></span>
+                <span class="col-name">TIPO_CAMBIO</span>
+                <span class="col-type">NUMBER(10,4)</span>
+              </div>
+
+              <div class="col-row" title="PEN / USD">
+                <span></span>
+                <span class="col-name">MONEDA</span>
+                <span class="col-type">VARCHAR2(3)</span>
+              </div>
+
+              <div class="col-row" title="Fecha desembolso">
+                <span></span>
+                <span class="col-name">FECHA</span>
+                <span class="col-type">DATE</span>
+              </div>
+
+              <div class="col-row" title="Detalle de garantía">
+                <span></span>
+                <span class="col-name">OBSERVACION</span>
+                <span class="col-type">VARCHAR2(250)</span>
+              </div>
+
+              <div class="col-row" title="VIGENTE/DESCONTADO/ANULADO">
+                <span></span>
+                <span class="col-name">ESTADO</span>
+                <span class="col-type">VARCHAR2(20)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="liquidaciones_g1">
+            <div class="table-head" style="background: #9f1239;">
+              <div>
+                <h3>LIQUIDACIONES_G1</h3>
+                <small>Liquidaciones históricas (Particionado RANGE)</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Código de liquidación">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_LIQUIDACION</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="FK -> MAYORISTA_RECEPCIONES">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_RECEPCION</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="Fecha (Clave de partición RANGE)">
+                <span></span>
+                <span class="col-name">FECHA_LIQUIDACION</span>
+                <span class="col-type">DATE</span>
+              </div>
+
+              <div class="col-row" title="Importe material">
+                <span></span>
+                <span class="col-name">SUB_TOTAL_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="Adelantos descontados">
+                <span></span>
+                <span class="col-name">DESCUENTOS_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="Neto desembolsado">
+                <span></span>
+                <span class="col-name">TOTAL_NETO_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="PEN o USD">
+                <span></span>
+                <span class="col-name">MONEDA_PAGO</span>
+                <span class="col-type">VARCHAR2(3)</span>
+              </div>
+
+              <div class="col-row" title="Comprobante impreso oficial">
+                <span></span>
+                <span class="col-name">NUMERO_TICKET</span>
+                <span class="col-type">VARCHAR2(50)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="detalle_liquidaciones_g1">
+            <div class="table-head" style="background: #9f1239;">
+              <div>
+                <h3>DETALLE_LIQUIDACIONES_G1</h3>
+                <small>Detalle de partidas de la liquidación</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Secuencia de línea">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_DETALLE_LIQ</span>
+                <span class="col-type">NUMBER(14)</span>
+              </div>
+
+              <div class="col-row" title="FK -> LIQUIDACIONES_G1">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_LIQUIDACION</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="Partida 1, 2...">
+                <span></span>
+                <span class="col-name">NUMERO_PARTIDA</span>
+                <span class="col-type">NUMBER(4)</span>
+              </div>
+
+              <div class="col-row" title="Gramos ensayados">
+                <span></span>
+                <span class="col-name">PESO_NETO_G</span>
+                <span class="col-type">NUMBER(10,3)</span>
+              </div>
+
+              <div class="col-row" title="Pureza química certificada">
+                <span></span>
+                <span class="col-name">LEY_APLICADA</span>
+                <span class="col-type">NUMBER(7,4)</span>
+              </div>
+
+              <div class="col-row" title="Precio por gramo">
+                <span></span>
+                <span class="col-name">PRECIO_UNIT_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+              <div class="col-row" title="Importe de la línea">
+                <span></span>
+                <span class="col-name">TOTAL_LINEA_PEN</span>
+                <span class="col-type">NUMBER(14,2)</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="module-section">
+        <div class="module-header" style="border-color: #1f2937;">
+          <h2 style="color: #1f2937;">MÓDULO EXPORTACIÓN, PONDERACIÓN Y TICKETS</h2>
+          <span class="badge">4 Tablas</span>
+        </div>
+        <div class="tables-grid">
+
+          <div class="db-table" data-name="lotes_exportacion">
+            <div class="table-head" style="background: #1f2937;">
+              <div>
+                <h3>LOTES_EXPORTACION</h3>
+                <small>Lotes consolidados para refinerías internacionales</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Identificador de lote de exportación">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_LOTE</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Código aduanero / precinto único">
+                <span></span>
+                <span class="col-name">CODIGO_LOTE</span>
+                <span class="col-type">VARCHAR2(50)</span>
+              </div>
+
+              <div class="col-row" title="Fecha de precintado">
+                <span></span>
+                <span class="col-name">FECHA_CONSOLIDACION</span>
+                <span class="col-type">DATE</span>
+              </div>
+
+              <div class="col-row" title="Total gramos finos del lote">
+                <span></span>
+                <span class="col-name">PESO_TOTAL_FUNDIDO_G</span>
+                <span class="col-type">NUMBER(12,3)</span>
+              </div>
+
+              <div class="col-row" title="Ley química promedio ponderada">
+                <span></span>
+                <span class="col-name">LEY_PONDERADA_EXPORTACION</span>
+                <span class="col-type">NUMBER(7,4)</span>
+              </div>
+
+              <div class="col-row" title="Sello inviolable de custodia">
+                <span></span>
+                <span class="col-name">PRECINTO_SEGURIDAD</span>
+                <span class="col-type">VARCHAR2(80)</span>
+              </div>
+
+              <div class="col-row" title="PREPARADO/CERRADO/EXPORTADO">
+                <span></span>
+                <span class="col-name">ESTADO</span>
+                <span class="col-type">VARCHAR2(30)</span>
+              </div>
+
+              <div class="col-row" title="Declaración aduanera / Ticket">
+                <span></span>
+                <span class="col-name">COMPROBANTE_EMBARQUE</span>
+                <span class="col-type">VARCHAR2(100)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="lote_recepciones">
+            <div class="table-head" style="background: #1f2937;">
+              <div>
+                <h3>LOTE_RECEPCIONES</h3>
+                <small>Asociación N a N de recepciones en cada exportación</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Secuencia de asociación">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_LOTE_REC</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="FK -> LOTES_EXPORTACION(ID_LOTE)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_LOTE</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> MAYORISTA_RECEPCIONES(ID_RECEPCION)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_RECEPCION</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="Fecha en que se anexó al lote">
+                <span></span>
+                <span class="col-name">FECHA_VINCULACION</span>
+                <span class="col-type">TIMESTAMP</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="reg_ponderacion">
+            <div class="table-head" style="background: #1f2937;">
+              <div>
+                <h3>REG_PONDERACION</h3>
+                <small>Cálculo y comprobante de impresión de ley ponderada</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Código de ponderación">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_REGISTRO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="FK -> LOTES_EXPORTACION(ID_LOTE)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_LOTE</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Momento del cálculo">
+                <span></span>
+                <span class="col-name">FECHA_REGISTRO</span>
+                <span class="col-type">TIMESTAMP</span>
+              </div>
+
+              <div class="col-row" title="Suma de pesos brutos">
+                <span></span>
+                <span class="col-name">PESO_BRUTO_TOTAL_G</span>
+                <span class="col-type">NUMBER(12,3)</span>
+              </div>
+
+              <div class="col-row" title="Suma de pesos netos">
+                <span></span>
+                <span class="col-name">PESO_FUNDIDO_TOTAL_G</span>
+                <span class="col-type">NUMBER(12,3)</span>
+              </div>
+
+              <div class="col-row" title="Promedio ponderado final">
+                <span></span>
+                <span class="col-name">PROMEDIO_PONDERADO_LEY</span>
+                <span class="col-type">NUMBER(7,4)</span>
+              </div>
+
+              <div class="col-row" title="1=Comprobante impreso">
+                <span></span>
+                <span class="col-name">IMPRESO_FLAG</span>
+                <span class="col-type">NUMBER(1)</span>
+              </div>
+
+              <div class="col-row" title="Identificador de comprobante físico">
+                <span></span>
+                <span class="col-name">TICKET_IMPRESION</span>
+                <span class="col-type">VARCHAR2(100)</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="db-table" data-name="reg_ponderacion_ley">
+            <div class="table-head" style="background: #1f2937;">
+              <div>
+                <h3>REG_PONDERACION_LEY</h3>
+                <small>Desglose por barra/ensayo para ponderación</small>
+              </div>
+            </div>
+            <div class="table-cols">
+
+              <div class="col-row" title="Secuencia de línea">
+                <span class="key-badge key-pk" title="Primary Key">PK</span>
+                <span class="col-name">ID_REG_LEY</span>
+                <span class="col-type">NUMBER(12)</span>
+              </div>
+
+              <div class="col-row" title="FK -> REG_PONDERACION(ID_REGISTRO)">
+                <span class="key-badge key-fk" title="Foreign Key">FK</span>
+                <span class="col-name">ID_REGISTRO</span>
+                <span class="col-type">NUMBER(10)</span>
+              </div>
+
+              <div class="col-row" title="Peso de la barra en gramos">
+                <span></span>
+                <span class="col-name">PESO_PARTIDA_G</span>
+                <span class="col-type">NUMBER(10,3)</span>
+              </div>
+
+              <div class="col-row" title="Pureza ensayada de la barra">
+                <span></span>
+                <span class="col-name">LEY_PARTIDA_PCT</span>
+                <span class="col-type">NUMBER(7,4)</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="relations-card">
+        <h2>Mapa de Relaciones e Integridad Referencial (24 Relaciones Declaradas)</h2>
+        <div class="rel-grid">
+
+          <div class="rel-item">
+            <div>
+              <strong>MINEROS</strong> ➔ <strong>CUENTAS_ACCESO</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_MINERO</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>ZONAS_ACOPIO</strong> ➔ <strong>MINEROS</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_ZONA</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>MINEROS</strong> ➔ <strong>SOL_ENTREGA_MINERO</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_MINERO</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>SOL_ENTREGA_MINERO</strong> ➔ <strong>SOL_ENTREGA_PARTIDA</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_SOLICITUD</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>ZONAS_ACOPIO</strong> ➔ <strong>CENTROS_ACOPIO</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_ZONA</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>CENTROS_ACOPIO</strong> ➔ <strong>ACOPIO_CAJA_MOVIMIENTOS</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_CENTRO</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>CENTROS_ACOPIO</strong> ➔ <strong>ACOPIO_PRESTAMOS_MINERO</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_CENTRO</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>MINEROS</strong> ➔ <strong>ACOPIO_PRESTAMOS_MINERO</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_MINERO</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>CENTROS_ACOPIO</strong> ➔ <strong>COMPRAS_G2</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_CENTRO</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>MINEROS</strong> ➔ <strong>COMPRAS_G2</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_MINERO</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>SOL_ENTREGA_MINERO</strong> ➔ <strong>COMPRAS_G2</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_SOLICITUD</div>
+            </div>
+            <span class="cardinal">1 a 1</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>COMPRAS_G2</strong> ➔ <strong>TRANSACCIONES_G2</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_COMPRA_G2</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>COMPRAS_G2</strong> ➔ <strong>AJUSTES_COMPRA_G2</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_COMPRA_G2</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>CENTROS_ACOPIO</strong> ➔ <strong>MAYORISTA_RECEPCIONES</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_CENTRO</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>MINEROS</strong> ➔ <strong>MAYORISTA_RECEPCIONES</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_MINERO_DIRECTO</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>CENTROS_ACOPIO</strong> ➔ <strong>MAYORISTA_ADELANTOS</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_CENTRO</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>MAYORISTA_RECEPCIONES</strong> ➔ <strong>RECEPCION_LEYES</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_RECEPCION</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>LEYES_ORO</strong> ➔ <strong>RECEPCION_LEYES</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_LEY</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>MAYORISTA_RECEPCIONES</strong> ➔ <strong>LIQUIDACIONES_G1</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_RECEPCION</div>
+            </div>
+            <span class="cardinal">1 a 1</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>LIQUIDACIONES_G1</strong> ➔ <strong>DETALLE_LIQUIDACIONES_G1</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_LIQUIDACION</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>LOTES_EXPORTACION</strong> ➔ <strong>LOTE_RECEPCIONES</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_LOTE</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>MAYORISTA_RECEPCIONES</strong> ➔ <strong>LOTE_RECEPCIONES</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_RECEPCION</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>LOTES_EXPORTACION</strong> ➔ <strong>REG_PONDERACION</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_LOTE</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+          <div class="rel-item">
+            <div>
+              <strong>REG_PONDERACION</strong> ➔ <strong>REG_PONDERACION_LEY</strong>
+              <div style="color: #94a3b8; font-size: 0.72rem; font-family: monospace;">ON ID_REGISTRO</div>
+            </div>
+            <span class="cardinal">1 a N</span>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    Universidad Peruana Unión (UPeU) — Facultad de Ingeniería y Arquitectura — Escuela Profesional de Ingeniería de Sistemas<br>
+    Asignatura: Administración de Base de Datos II | Docente: Ing. Eder Gutierrez Quispe | Estudiantes: Helio Paul Faijo Calisaya & Jhymel Nelio Figueroa Chambi
+  </footer>
+
+  <script>
+    let currentScale = 1.0;
+    const container = document.getElementById('container');
+    function zoomIn() {
+      currentScale += 0.15;
+      container.style.transform = `scale(${currentScale})`;
+    }
+    function zoomOut() {
+      if (currentScale > 0.4) {
+        currentScale -= 0.15;
+        container.style.transform = `scale(${currentScale})`;
+      }
+    }
+    function resetZoom() {
+      currentScale = 1.0;
+      container.style.transform = 'scale(1.0)';
+    }
+    function filterTables() {
+      const query = document.getElementById('filterInput').value.toLowerCase();
+      const tables = document.querySelectorAll('.db-table');
+      tables.forEach(t => {
+        const text = t.innerText.toLowerCase();
+        if (text.includes(query)) {
+          t.style.display = 'block';
+        } else {
+          t.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
