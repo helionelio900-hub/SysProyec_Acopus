@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sesión 6 - Integración y Sistemas Empresariales (Miro)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f1f5f9;
+      background-image: 
+        radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+      padding: 30px;
+      width: 2160px;
+      color: #1e293b;
+    }
+    .header-banner {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .tag-sesion {
+      color: #b91c1c;
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: 'Times New Roman', Georgia, serif;
+    }
+    .box-title {
+      border: 2px solid #2563eb;
+      padding: 6px 28px;
+      border-radius: 4px;
+      background: #ffffff;
+      color: #1e40af;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      font-family: 'Times New Roman', Georgia, serif;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+    }
+
+    .card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 28px 32px;
+      background: #ffffff;
+      box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #034b8c;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    /* ACL specific */
+    .acl-desc {
+      font-size: 13.5px;
+      line-height: 1.45;
+      color: #334155;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .acl-diagram {
+      display: flex;
+      gap: 12px;
+      background: #fafafa;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 16px 12px;
+    }
+    .domain-box {
+      flex: 1;
+      background: #eff6ff;
+      border: 2px solid #93c5fd;
+      border-radius: 10px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .domain-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #1d4ed8;
+      margin-bottom: 10px;
+    }
+    .domain-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 2px dashed #3b82f6;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .domain-pill {
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 10px;
+    }
+    .acl-core-box {
+      flex: 2;
+      background: #faf5ff;
+      border: 2px solid #c084fc;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .flow-card {
+      background: #ffffff;
+      border: 1px solid #d8b4fe;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 11px;
+    }
+    .external-box {
+      flex: 1.1;
+      background: #f0fdf4;
+      border: 2px solid #86efac;
+      border-radius: 10px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Circuit breaker specific */
+    .cb-card {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .cb-table {
+      flex: 1;
+      border-collapse: collapse;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: 12.5px;
+    }
+    .cb-table th {
+      background: #f1f5f9;
+      padding: 10px;
+      text-align: left;
+    }
+    .cb-table td {
+      padding: 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .badge-closed { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+    .badge-open { background: #ffedd5; color: #c2410c; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+    .badge-half { background: #ccfbf1; color: #0f766e; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+
+    /* Events & Saga specific */
+    .two-col-card {
+      display: flex;
+      gap: 24px;
+    }
+    .two-col-text {
+      flex: 1.1;
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: #334155;
+    }
+    .two-col-diagram {
+      flex: 1.25;
+      background: #fafafa;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-banner">
+    <div class="tag-sesion">SESION 6</div>
+    <div class="box-title">Integración y Sistemas Empresariales</div>
+  </div>
+
+  <div class="grid-container">
+    <!-- Card 1: ACL -->
+    <div class="card">
+      <div class="title">¿Qué es ACL?</div>
+      <div class="acl-desc">
+        Ahora tenemos otro problema: <strong>BomERP</strong> tiene su propia manera de guardar una venta, pero <strong>SUNAT</strong> exige formato <strong>UBL 2.1 XML</strong>.<br>
+        <strong>¿Cómo solucionamos esto?</strong>
+      </div>
+      <div class="acl-diagram">
+        <div class="domain-box">
+          <div class="domain-title">YOUR DOMAIN</div>
+          <div class="domain-circle">
+            <span class="domain-pill">Order Entity</span>
+            <span class="domain-pill">Order Status</span>
+            <span class="domain-pill">Price & Totals</span>
+            <span class="domain-pill">Repository</span>
+          </div>
+        </div>
+        <div class="acl-core-box">
+          <div style="font-size: 12px; font-weight: 800; color: #7e22ce; text-align: center;">ANTI-CORRUPTION LAYER (ACL)</div>
+          <div class="flow-card">
+            <strong>➔ REQUEST FLOW</strong><br>
+            <span style="color: #6b21a8; font-size: 10px;">TRANSLATOR: Translates OrderEntity to ExternalPaymentRequest</span>
+          </div>
+          <div class="flow-card">
+            <strong>➔ RESPONSE & WEBHOOK FLOW</strong><br>
+            <span style="color: #6b21a8; font-size: 10px;">TRANSLATOR: Translates GatewayResponse to Domain Entity</span>
+            <div style="font-size: 9px; color: #7e22ce; margin-top: 4px;">✓ Validates &nbsp; ✓ Transforms &nbsp; ✓ Discards Changes</div>
+          </div>
+        </div>
+        <div class="external-box">
+          <div style="font-size: 11px; font-weight: 800; color: #15803d; margin-bottom: 6px;">EXTERNAL API</div>
+          <div style="background: white; border: 1.5px solid #4ade80; border-radius: 12px; padding: 8px 12px; font-size: 11px; font-weight: bold; color: #166534; margin-bottom: 8px;">SUNAT / STRIPE</div>
+          <div style="font-family: monospace; font-size: 9px; color: #166534; background: white; padding: 6px; border-radius: 4px; border: 1px solid #bbf7d0;">
+            POST /invoices/ubl-xml<br>
+            {"status": "ACCEPTED"}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Circuit Breaker -->
+    <div class="card cb-card">
+      <div style="flex: 1;">
+        <h2 style="font-size: 18px; color: #034b8c; margin-bottom: 12px; font-weight: 800;">Circuit Breaker Pattern</h2>
+        <table class="cb-table">
+          <thead>
+            <tr><th>Estado</th><th>¿Qué significa?</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge-closed">CLOSED</span></td>
+              <td>Todo funciona normalmente.</td>
+            </tr>
+            <tr>
+              <td><span class="badge-open">OPEN</span></td>
+              <td>Se detectaron fallas y se dejan de enviar solicitudes temporalmente.</td>
+            </tr>
+            <tr>
+              <td><span class="badge-half">HALF_OPEN</span></td>
+              <td>Se realizan algunas pruebas para comprobar si el servicio ya funciona.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="flex: 1.2; background: #fafafa; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 10px;">
+        <svg viewBox="0 0 420 230" style="width: 100%; height: 230px;">
+          <defs>
+            <marker id="arr2" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
+            </marker>
+            <marker id="arr2-o" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ea580c" />
+            </marker>
+            <marker id="arr2-g" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0f766e" />
+            </marker>
+          </defs>
+          <g transform="translate(20, 15)">
+            <rect width="120" height="60" rx="8" fill="#0284c7" />
+            <text x="60" y="24" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Closed</text>
+            <text x="60" y="42" text-anchor="middle" fill="#e0f2fe" font-size="9">Healthy • Normal</text>
+          </g>
+          <path d="M 140 45 L 250 45" fill="none" stroke="#ea580c" stroke-width="2" marker-end="url(#arr2-o)" />
+          <text x="195" y="36" text-anchor="middle" fill="#ea580c" font-size="9" font-weight="bold">failures &gt; limit</text>
+          <g transform="translate(260, 15)">
+            <rect width="120" height="60" rx="8" fill="#ea580c" />
+            <text x="60" y="24" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Open</text>
+            <text x="60" y="42" text-anchor="middle" fill="#ffedd5" font-size="9">Failing fast • Blocked</text>
+          </g>
+          <path d="M 320 75 C 320 120, 260 140, 245 150" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arr2)" />
+          <g transform="translate(125, 145)">
+            <rect width="120" height="60" rx="8" fill="#0d9488" />
+            <text x="60" y="24" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">Half-Open</text>
+            <text x="60" y="42" text-anchor="middle" fill="#ccfbf1" font-size="9">Trial probe calls</text>
+          </g>
+          <path d="M 125 165 C 75 150, 75 100, 80 80" fill="none" stroke="#0f766e" stroke-width="2" marker-end="url(#arr2-g)" />
+          <text x="25" y="125" fill="#0f766e" font-size="9" font-weight="bold">probes pass</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Card 3: Domain Events -->
+    <div class="card two-col-card">
+      <div class="two-col-text">
+        <div style="font-size: 22px; font-weight: 800; color: #034b8c; margin-bottom: 8px;">¿Qué son los Domain Events?</div>
+        <p style="margin-bottom: 6px;">Imagina que <strong>BomERP</strong> registra una venta y comunica el evento: <strong>VentaRegistrada</strong>.</p>
+        <p style="margin-bottom: 4px;">El módulo de ventas anuncia por un altavoz:</p>
+        <ul style="margin-left: 16px; margin-bottom: 6px;">
+          <li><strong>Inventario</strong> actualiza las existencias.</li>
+          <li><strong>Reportes</strong> registra la operación.</li>
+          <li><strong>IA</strong> analiza las tendencias de venta.</li>
+        </ul>
+        <div style="background: #f8fafc; border-left: 3px solid #034b8c; padding: 6px 10px; border-radius: 4px; font-size: 11.5px; margin-top: 8px;">
+          <strong>Domain Event</strong> = un aviso que comunica que ocurrió algo importante en el sistema.
+        </div>
+      </div>
+      <div class="two-col-diagram">
+        <svg viewBox="0 0 380 240" style="width: 100%; height: 240px;">
+          <!-- Publishers -->
+          <rect x="20" y="5" width="150" height="34" rx="5" fill="#334155" />
+          <text x="95" y="24" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">Ventas (Order Placed)</text>
+          <rect x="210" y="5" width="150" height="34" rx="5" fill="#334155" />
+          <text x="285" y="24" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">Almacén (Restocked)</text>
+
+          <!-- Broker -->
+          <rect x="15" y="70" width="350" height="75" rx="6" fill="#1e293b" />
+          <text x="190" y="90" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="bold">Event Broker (Kafka / RabbitMQ)</text>
+          <rect x="30" y="100" width="95" height="32" rx="4" fill="#334155" />
+          <text x="77" y="120" text-anchor="middle" fill="#e2e8f0" font-size="9" font-weight="bold">OrderPlaced</text>
+          <rect x="142" y="100" width="95" height="32" rx="4" fill="#334155" />
+          <text x="189" y="120" text-anchor="middle" fill="#e2e8f0" font-size="9" font-weight="bold">ItemRestocked</text>
+          <rect x="255" y="100" width="95" height="32" rx="4" fill="#334155" />
+          <text x="302" y="120" text-anchor="middle" fill="#e2e8f0" font-size="9" font-weight="bold">PaymentTopic</text>
+
+          <!-- Consumers -->
+          <rect x="10" y="180" width="110" height="34" rx="5" fill="#334155" />
+          <text x="65" y="200" text-anchor="middle" fill="#fff" font-size="9.5" font-weight="bold">Inventario</text>
+          <rect x="135" y="180" width="110" height="34" rx="5" fill="#334155" />
+          <text x="190" y="200" text-anchor="middle" fill="#fff" font-size="9.5" font-weight="bold">Reportes</text>
+          <rect x="260" y="180" width="110" height="34" rx="5" fill="#334155" />
+          <text x="315" y="200" text-anchor="middle" fill="#fff" font-size="9.5" font-weight="bold">Inteligencia Art.</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Card 4: Saga -->
+    <div class="card two-col-card">
+      <div class="two-col-text">
+        <div style="font-size: 22px; font-weight: 800; color: #034b8c; margin-bottom: 8px;">¿Qué es Saga?</div>
+        <p style="margin-bottom: 6px;">BomERP envía un resumen de boletas diarias a SUNAT en varios pasos:</p>
+        <ol style="margin-left: 18px; margin-bottom: 8px; font-size: 11.5px;">
+          <li>Reúne boletas del día.</li>
+          <li>Envía resumen a SUNAT.</li>
+          <li>SUNAT devuelve ticket.</li>
+          <li>BomERP consulta ticket.</li>
+          <li>SUNAT responde aceptación/rechazo.</li>
+        </ol>
+        <div style="background: #fff7ed; border-left: 3px solid #ea580c; padding: 6px 10px; border-radius: 4px; font-size: 11px; color: #9a3412;">
+          <strong>¿Y si SUNAT rechaza?</strong> BomERP compensa y corrige. Para coordinar todo esto se usa <strong>Saga</strong>.
+        </div>
+      </div>
+      <div class="two-col-diagram">
+        <svg viewBox="0 0 440 220" style="width: 100%; height: 220px;">
+          <!-- Forward Steps -->
+          <g transform="translate(10, 20)">
+            <rect width="80" height="42" rx="4" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" />
+            <text x="40" y="20" text-anchor="middle" fill="#1e40af" font-size="8.5" font-weight="bold">Create Order</text>
+            <text x="40" y="32" text-anchor="middle" fill="#60a5fa" font-size="7.5">(Trans 1)</text>
+          </g>
+          <g transform="translate(105, 20)">
+            <rect width="80" height="42" rx="4" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" />
+            <text x="40" y="20" text-anchor="middle" fill="#1e40af" font-size="8.5" font-weight="bold">Payment</text>
+            <text x="40" y="32" text-anchor="middle" fill="#60a5fa" font-size="7.5">(Trans 2)</text>
+          </g>
+          <g transform="translate(200, 20)">
+            <rect width="80" height="42" rx="4" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" />
+            <text x="40" y="20" text-anchor="middle" fill="#1e40af" font-size="8.5" font-weight="bold">Inventory</text>
+            <text x="40" y="32" text-anchor="middle" fill="#60a5fa" font-size="7.5">(Trans 3)</text>
+          </g>
+          <g transform="translate(295, 20)">
+            <rect width="80" height="42" rx="4" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" />
+            <text x="40" y="20" text-anchor="middle" fill="#1e40af" font-size="8.5" font-weight="bold">Delivery</text>
+            <text x="40" y="32" text-anchor="middle" fill="#60a5fa" font-size="7.5">(Trans 4)</text>
+          </g>
+          <!-- Compensations -->
+          <g transform="translate(295, 110)">
+            <rect width="80" height="40" rx="4" fill="#fff7ed" stroke="#f97316" stroke-width="1.5" />
+            <text x="40" y="24" text-anchor="middle" fill="#9a3412" font-size="8" font-weight="bold">Cancel Delivery</text>
+          </g>
+          <g transform="translate(200, 110)">
+            <rect width="80" height="40" rx="4" fill="#fff7ed" stroke="#f97316" stroke-width="1.5" />
+            <text x="40" y="24" text-anchor="middle" fill="#9a3412" font-size="8" font-weight="bold">Rev Inventory</text>
+          </g>
+          <g transform="translate(105, 110)">
+            <rect width="80" height="40" rx="4" fill="#fff7ed" stroke="#f97316" stroke-width="1.5" />
+            <text x="40" y="24" text-anchor="middle" fill="#9a3412" font-size="8" font-weight="bold">Rev Payment</text>
+          </g>
+          <g transform="translate(10, 110)">
+            <rect width="80" height="40" rx="4" fill="#fff7ed" stroke="#f97316" stroke-width="1.5" />
+            <text x="40" y="24" text-anchor="middle" fill="#9a3412" font-size="8" font-weight="bold">Cancel Order</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

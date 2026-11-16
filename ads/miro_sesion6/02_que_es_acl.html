@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1280px; height: 720px; background: #ffffff;
+    font-family: 'Open Sans', -apple-system, sans-serif; color: #1e293b;
+    display: flex; flex-direction: column; position: relative; padding: 35px 50px;
+  }
+  h1 {
+    font-size: 38px; font-weight: 800; color: #0b3954; text-align: center;
+    margin-bottom: 20px;
+  }
+  .intro-text {
+    font-size: 19px; line-height: 1.5; color: #1e293b; margin-bottom: 12px;
+  }
+  .question-text {
+    font-size: 21px; font-weight: 700; color: #0b3954; margin-bottom: 24px; text-align: center;
+  }
+  .diagram-container {
+    border: 2px solid #0f172a; border-radius: 8px; padding: 18px;
+    display: grid; grid-template-columns: 1fr 1.35fr 1fr; gap: 16px;
+    background: #ffffff; flex: 1; align-items: stretch;
+  }
+  .col-domain {
+    background: #e0f2fe; border: 2px solid #38bdf8; border-radius: 8px;
+    padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  }
+  .col-acl {
+    background: #f3e8ff; border: 2px solid #c084fc; border-radius: 8px;
+    padding: 16px; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .col-external {
+    background: #dcfce7; border: 2px solid #4ade80; border-radius: 8px;
+    padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  }
+  .col-title {
+    font-size: 14px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .col-domain .col-title { color: #0369a1; }
+  .col-acl .col-title { color: #7e22ce; text-align: center; }
+  .col-external .col-title { color: #15803d; }
+
+  .bubble-group { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+  .bubble {
+    background: #ffffff; border: 1.5px solid #0284c7; border-radius: 20px;
+    padding: 8px 12px; text-align: center; font-size: 13px; font-weight: 600; color: #0369a1;
+  }
+  .flow-box {
+    background: #ffffff; border: 1.5px solid #a855f7; border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 8px;
+  }
+  .flow-title { font-size: 11px; font-weight: 800; color: #6b21a8; text-transform: uppercase; margin-bottom: 4px; }
+  .flow-desc { font-size: 12.5px; color: #334155; line-height: 1.4; }
+  .acl-bullets {
+    margin-top: 6px; font-size: 12px; color: #581c87; font-weight: 600; line-height: 1.4;
+  }
+  .ext-box {
+    background: #ffffff; border: 1.5px solid #22c55e; border-radius: 8px;
+    padding: 12px; width: 100%; font-size: 13px; color: #166534; line-height: 1.45; text-align: center;
+  }
+  .miro-tag {
+    position: absolute; bottom: 12px; right: 25px; font-size: 14px; color: #94a3b8; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <h1>¿Qué es ACL?</h1>
+  <div class="intro-text">
+    Ahora tenemos otro problema. <strong>SITRA-ORO</strong> tiene su propia manera de gestionar lotes y pesajes de oro, pero <strong>SUNAT</strong> exige que la liquidación de compra tenga un formato tributario específico llamado <strong>UBL 2.1 XML</strong>.
+  </div>
+  <div class="question-text">¿Cómo solucionamos esto?</div>
+
+  <div class="diagram-container">
+    <!-- YOUR DOMAIN -->
+    <div class="col-domain">
+      <div class="col-title">DOMINIO SITRA-ORO</div>
+      <div class="bubble-group">
+        <div class="bubble">LoteOro Entity</div>
+        <div class="bubble">Pesaje y Ley Fina</div>
+        <div class="bubble">IPagoLiquidacion Port</div>
+        <div class="bubble">MonedaPEN VO</div>
+      </div>
+      <div style="font-size: 11.5px; color: #0284c7; font-weight: 700; margin-top: 8px;">Modelo Puro de Minería</div>
+    </div>
+
+    <!-- ACL -->
+    <div class="col-acl">
+      <div class="col-title">ANTI-CORRUPTION LAYER (ACL)</div>
+      <div class="flow-box">
+        <div class="flow-title">➔ Flujo de Envío (Request Flow)</div>
+        <div class="flow-desc"><strong>Traductor Adaptador:</strong> Convierte las entidades de pesaje y ley a la estructura oficial UBL 2.1 XML exigida.</div>
+      </div>
+      <div class="flow-box">
+        <div class="flow-title">➔ Flujo de Respuesta (Response Flow)</div>
+        <div class="flow-desc"><strong>Recepción de CDR:</strong> Traduce la constancia firmada de SUNAT al estado <em>Liquidado</em> dentro del sistema.</div>
+      </div>
+      <div class="acl-bullets">
+        • <strong>Isolate:</strong> Aísla el negocio aurífero de normas fiscales.<br>
+        • <strong>Translate:</strong> Traduce objetos de dominio a esquemas XML.<br>
+        • <strong>Absorb Changes:</strong> Si SUNAT cambia reglas, solo cambia el adaptador.
+      </div>
+    </div>
+
+    <!-- EXTERNAL API -->
+    <div class="col-external">
+      <div class="col-title">API EXTERNA (SUNAT / OSE)</div>
+      <div class="ext-box">
+        <strong>Esquema Fiscal UBL 2.1</strong><br><br>
+        • Comprobante de Retención<br>
+        • Liquidación de Compra Electrónica<br>
+        • Firma Digital y Validación OSE<br>
+        • Constancia de Recepción (CDR)
+      </div>
+      <div style="font-size: 11.5px; color: #166534; font-weight: 700; margin-top: 8px;">Servicio Tributario Nacional</div>
+    </div>
+  </div>
+
+  <div class="miro-tag">miro</div>
+</body>
+</html>

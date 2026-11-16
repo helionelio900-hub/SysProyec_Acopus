@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1280px; height: 720px; background: #ffffff;
+    font-family: 'Open Sans', -apple-system, sans-serif; color: #1e293b;
+    display: flex; flex-direction: column; justify-content: center; position: relative; padding: 35px 50px;
+  }
+  h1 {
+    font-size: 38px; font-weight: 800; color: #0b3954; text-align: center;
+    margin-bottom: 22px;
+  }
+  .content-grid {
+    display: grid; grid-template-columns: 1.15fr 1fr; gap: 35px; align-items: center;
+  }
+  .story-text {
+    font-size: 16.5px; line-height: 1.55; color: #1e293b;
+  }
+  .story-text p { margin-bottom: 10px; }
+  .story-text ol { margin-left: 20px; margin-bottom: 12px; }
+  .story-text li { margin-bottom: 4px; font-size: 16px; }
+  .question-box {
+    background: #fef2f2; border-left: 4px solid #ef4444; padding: 10px 14px;
+    border-radius: 4px; margin-top: 10px;
+  }
+  .question-title { font-weight: 800; color: #991b1b; font-size: 16.5px; margin-bottom: 4px; }
+  .question-desc { font-size: 15px; color: #7f1d1d; }
+
+  /* SAGA DIAGRAM */
+  .saga-container {
+    display: flex; flex-direction: column; gap: 16px; width: 100%; align-items: center;
+  }
+  .step-flow {
+    display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center;
+  }
+  .step-box {
+    background: #e0f2fe; border: 1.5px solid #0284c7; border-radius: 6px;
+    padding: 8px 10px; font-size: 11px; font-weight: 700; color: #0369a1; text-align: center;
+    flex: 1; min-height: 52px; display: flex; align-items: center; justify-content: center;
+  }
+  .arrow-step { color: #0284c7; font-weight: 800; font-size: 14px; }
+
+  .compensating-flow {
+    display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center;
+  }
+  .comp-box {
+    background: #fef3c7; border: 1.5px solid #f59e0b; border-radius: 6px;
+    padding: 8px 10px; font-size: 11px; font-weight: 700; color: #b45309; text-align: center;
+    flex: 1; min-height: 52px; display: flex; align-items: center; justify-content: center;
+  }
+  .arrow-comp { color: #d97706; font-weight: 800; font-size: 14px; }
+
+  .legend-row {
+    display: flex; gap: 20px; margin-top: 10px; font-size: 12px; font-weight: 700;
+  }
+  .leg-item { display: flex; align-items: center; gap: 6px; }
+  .leg-box-blue { width: 14px; height: 14px; background: #e0f2fe; border: 1.5px solid #0284c7; border-radius: 3px; }
+  .leg-box-orange { width: 14px; height: 14px; background: #fef3c7; border: 1.5px solid #f59e0b; border-radius: 3px; }
+
+  .miro-tag {
+    position: absolute; bottom: 15px; right: 25px; font-size: 14px; color: #94a3b8; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <h1>¿Qué es Saga?</h1>
+
+  <div class="content-grid">
+    <div class="story-text">
+      <p>Imagina que el mayorista cierra la liquidación de varios lotes de mineral con mineros artesanales. SITRA-ORO necesita enviar y validar las retenciones y liquidaciones electrónicas ante SUNAT y bancos.</p>
+      <p>Pero este proceso no termina con un solo paso. Puede suceder lo siguiente:</p>
+      <ol>
+        <li>SITRA-ORO reúne las compras pendientes del centro de acopio.</li>
+        <li>Bloquea el stock físico de oro en la bóveda.</li>
+        <li>Ordena la transferencia bancaria al minero.</li>
+        <li>Envía la liquidación electrónica a SUNAT.</li>
+        <li>SUNAT responde si el lote fue aceptado o rechazado.</li>
+      </ol>
+
+      <div class="question-box">
+        <div class="question-title">¿Y qué sucede si el banco o SUNAT rechaza la operación?</div>
+        <div class="question-desc">
+          SITRA-ORO debe revisar el problema, desbloquear los gramos de oro en bóveda y anular la orden.<br>
+          <strong>Para coordinar todos estos pasos y sus transacciones de compensación se utiliza Saga.</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAGRAM -->
+    <div class="saga-container">
+      <div style="font-size: 12px; font-weight: 800; color: #0369a1; text-transform: uppercase;">➔ Transacciones Hacia Adelante</div>
+      <div class="step-flow">
+        <div class="step-box">1. Registrar<br>Liquidación</div>
+        <div class="arrow-step">➔</div>
+        <div class="step-box">2. Bloquear<br>Stock Bóveda</div>
+        <div class="arrow-step">➔</div>
+        <div class="step-box">3. Transferencia<br>Bancaria</div>
+        <div class="arrow-step">➔</div>
+        <div class="step-box">4. Envío<br>SUNAT</div>
+      </div>
+
+      <div style="font-size: 12px; font-weight: 800; color: #b45309; text-transform: uppercase; margin-top: 8px;">➔ Transacciones Compensatorias (Rollback de Negocio)</div>
+      <div class="compensating-flow">
+        <div class="comp-box">Cancelar<br>Liquidación</div>
+        <div class="arrow-comp">←</div>
+        <div class="comp-box">Restaurar<br>Stock Bóveda</div>
+        <div class="arrow-comp">←</div>
+        <div class="comp-box">Revertir<br>Transferencia</div>
+        <div class="arrow-comp">←</div>
+        <div class="comp-box">Anular Ticket<br>SUNAT</div>
+      </div>
+
+      <div class="legend-row">
+        <div class="leg-item"><div class="leg-box-blue"></div> Transacción Directa</div>
+        <div class="leg-item"><div class="leg-box-orange"></div> Compensación por Fallo</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="miro-tag">miro</div>
+</body>
+</html>

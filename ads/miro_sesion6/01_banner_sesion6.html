@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1280px; height: 720px;
+    background: #ffffff;
+    font-family: 'Open Sans', -apple-system, sans-serif;
+    color: #1e293b;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    position: relative; padding: 40px;
+  }
+  .badge {
+    background: #e0f2fe; color: #0369a1; font-weight: 800; font-size: 16px;
+    padding: 8px 22px; border-radius: 50px; text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 20px;
+  }
+  h1 {
+    font-size: 44px; font-weight: 800; color: #0b3954; text-align: center;
+    line-height: 1.25; margin-bottom: 12px;
+  }
+  h2 {
+    font-size: 22px; font-weight: 600; color: #64748b; text-align: center;
+    margin-bottom: 40px;
+  }
+  .grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; max-width: 1160px;
+  }
+  .card {
+    background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 14px;
+    padding: 24px 20px; text-align: center; display: flex; flex-direction: column; align-items: center;
+  }
+  .card-num {
+    width: 36px; height: 36px; border-radius: 50%; background: #0b3954; color: #ffffff;
+    font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .card-title { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+  .card-desc { font-size: 13.5px; color: #475569; line-height: 1.45; }
+  .miro-tag {
+    position: absolute; bottom: 20px; right: 30px; font-size: 14px; color: #94a3b8; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <div class="badge">Sesión 06 · Arquitectura de Software</div>
+  <h1>Integración y Patrones Distribuidos en SITRA-ORO</h1>
+  <h2>Patrones de diseño arquitectural aplicados a la trazabilidad y comercialización de oro</h2>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-num">1</div>
+      <div class="card-title">Anti-Corruption Layer</div>
+      <div class="card-desc">Aísla el modelo puro del negocio aurífero de los formatos XML UBL 2.1 exigidos por SUNAT.</div>
+    </div>
+    <div class="card">
+      <div class="card-num">2</div>
+      <div class="card-title">Circuit Breaker</div>
+      <div class="card-desc">Protege la ventanilla ante fallas de red en La Rinconada y caídas de la API spot de oro.</div>
+    </div>
+    <div class="card">
+      <div class="card-num">3</div>
+      <div class="card-title">Domain Events</div>
+      <div class="card-desc">Comunica asíncronamente las compras de mineral con bóveda, mayorista y reportes.</div>
+    </div>
+    <div class="card">
+      <div class="card-num">4</div>
+      <div class="card-title">Patrón Saga</div>
+      <div class="card-desc">Coordina transacciones distribuidas y pasos de compensación en la liquidación final.</div>
+    </div>
+  </div>
+
+  <div class="miro-tag">miro</div>
+</body>
+</html>

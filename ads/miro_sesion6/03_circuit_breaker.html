@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1280px; height: 720px; background: #ffffff;
+    font-family: 'Open Sans', -apple-system, sans-serif; color: #1e293b;
+    display: flex; flex-direction: column; justify-content: center; position: relative; padding: 40px 50px;
+  }
+  .content-grid {
+    display: grid; grid-template-columns: 1.15fr 1fr; gap: 40px; align-items: center;
+  }
+  /* TABLE STYLES */
+  table {
+    width: 100%; border-collapse: collapse; border: 2px solid #cbd5e1;
+  }
+  th {
+    background: #e2e8f0; color: #0f172a; font-size: 20px; font-weight: 800;
+    padding: 16px 20px; border: 1.5px solid #94a3b8; text-align: left;
+  }
+  td {
+    padding: 20px; border: 1.5px solid #cbd5e1; font-size: 18px; line-height: 1.45;
+  }
+  .td-state {
+    font-weight: 800; color: #0b3954; font-size: 19px; width: 140px; vertical-align: middle;
+  }
+
+  /* DIAGRAM STYLES */
+  .diagram-col {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .diag-title {
+    font-size: 26px; font-weight: 900; color: #000000; letter-spacing: 0.5px;
+    margin-bottom: 24px; text-transform: uppercase; text-align: center;
+  }
+  .state-row-top {
+    display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 30px;
+  }
+  .state-pill {
+    padding: 12px 28px; border-radius: 40px; font-size: 20px; font-weight: 800; color: #ffffff;
+    text-align: center; min-width: 130px;
+  }
+  .pill-closed { background: #0284c7; }
+  .pill-open { background: #f97316; }
+  .pill-half { background: #0d9488; }
+
+  .arrow-top {
+    flex: 1; display: flex; flex-direction: column; align-items: center; margin: 0 10px;
+  }
+  .arrow-line { width: 100%; height: 2px; background: #000000; position: relative; }
+  .arrow-line::after {
+    content: ''; position: absolute; right: 0; top: -4px;
+    border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid #000000;
+  }
+  .arrow-label { font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px; }
+
+  .diag-details {
+    font-size: 11.5px; color: #475569; margin-top: 6px; line-height: 1.35;
+  }
+
+  .state-row-bot {
+    display: flex; flex-direction: column; align-items: center; width: 100%;
+  }
+  .arrow-down-label {
+    font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px;
+  }
+
+  .miro-tag {
+    position: absolute; bottom: 15px; right: 25px; font-size: 14px; color: #94a3b8; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <div class="content-grid">
+    <!-- TABLE -->
+    <table>
+      <thead>
+        <tr>
+          <th>Estado</th>
+          <th>¿Qué significa?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-state">CLOSED</td>
+          <td>Todo funciona normalmente. SITRA-ORO consulta en vivo la cotización spot internacional y las APIs externas.</td>
+        </tr>
+        <tr>
+          <td class="td-state">OPEN</td>
+          <td>Se detectaron fallas repetidas de conexión en La Rinconada y se dejan de enviar solicitudes temporalmente para no colgar la ventanilla.</td>
+        </tr>
+        <tr>
+          <td class="td-state">HALF_OPEN</td>
+          <td>Se realizan algunas pruebas automáticas para comprobar si el servicio de internet o la API externa ya responde.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- DIAGRAM -->
+    <div class="diagram-col">
+      <div class="diag-title">Circuit Breaker Pattern</div>
+
+      <div class="state-row-top">
+        <div>
+          <div class="state-pill pill-closed">Closed</div>
+          <div class="diag-details">
+            • Servicio saludable<br>
+            • Peticiones normales<br>
+            • Reseteo tras éxito
+          </div>
+        </div>
+
+        <div class="arrow-top">
+          <div class="arrow-label">errorRate &gt; umbral</div>
+          <div class="arrow-line"></div>
+        </div>
+
+        <div>
+          <div class="state-pill pill-open">Open</div>
+          <div class="diag-details">
+            • Falla rápido (Fallback)<br>
+            • Peticiones cortadas<br>
+            • Tiempo de espera activo
+          </div>
+        </div>
+      </div>
+
+      <div class="state-row-bot">
+        <div class="arrow-down-label">espera (coolDownPeriod)</div>
+        <div class="state-pill pill-half">Half-Open</div>
+        <div class="diag-details" style="text-align: center;">
+          • Periodo de prueba con llamadas limitadas<br>
+          • Éxito: retorna a <strong>Closed</strong> / Fallo: regresa a <strong>Open</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="miro-tag">miro</div>
+</body>
+</html>

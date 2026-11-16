@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sesión 6 - Integración y Sistemas Empresariales en SITRA-ORO</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #f1f5f9;
+      background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .poster {
+      width: 1420px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      padding: 36px 44px;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    /* HEADER */
+    .header-section {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .badge-sesion {
+      color: #b91c1c;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .main-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 12.5px;
+      color: #475569;
+      max-width: 900px;
+      margin: 0 auto 12px auto;
+      line-height: 1.45;
+    }
+    .case-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #eff6ff;
+      border: 1.5px solid #bfdbfe;
+      border-radius: 24px;
+      padding: 6px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e40af;
+    }
+
+    /* 2x2 GRID OF DIAGRAM CARDS (ZERO CODE) */
+    .grid-2x2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .card {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 22px 24px;
+      background: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #034b8c;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-narrative {
+      font-size: 11.5px;
+      color: #334155;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .card-narrative strong {
+      color: #0f172a;
+    }
+
+    .callout-box {
+      background: #f8fafc;
+      border-left: 3.5px solid #034b8c;
+      padding: 7px 12px;
+      font-size: 11px;
+      color: #0f172a;
+      border-radius: 3px;
+      margin-top: 8px;
+    }
+
+    .callout-orange {
+      background: #fff7ed;
+      border-left: 3.5px solid #ea580c;
+      color: #9a3412;
+    }
+
+    /* DIAGRAM BOX CONTAINERS */
+    .diagram-surface {
+      background: #fafafa;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 8px;
+    }
+
+    /* CARD 1: ACL LAYOUT */
+    .acl-layout {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .acl-col-domain {
+      flex: 1;
+      background: #eff6ff;
+      border: 1.5px solid #93c5fd;
+      border-radius: 8px;
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .acl-col-core {
+      flex: 1.8;
+      background: #faf5ff;
+      border: 1.5px solid #c084fc;
+      border-radius: 8px;
+      padding: 10px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .acl-col-ext {
+      flex: 1.1;
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 8px;
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .pill-item {
+      background: #ffffff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 3px 8px;
+      font-size: 9px;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 4px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* CARD 2: CIRCUIT BREAKER TABLE & FLOW */
+    .cb-split {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    .cb-table {
+      flex: 1;
+      border-collapse: collapse;
+      font-size: 10.5px;
+    }
+    .cb-table th {
+      background: #f1f5f9;
+      padding: 6px 8px;
+      text-align: left;
+      font-weight: 800;
+      color: #0f172a;
+      border-bottom: 1.5px solid #cbd5e1;
+    }
+    .cb-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+    }
+    .badge-closed { background: #dbeafe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: 800; font-size: 9px; }
+    .badge-open { background: #ffedd5; color: #c2410c; padding: 2px 6px; border-radius: 4px; font-weight: 800; font-size: 9px; }
+    .badge-half { background: #ccfbf1; color: #0f766e; padding: 2px 6px; border-radius: 4px; font-weight: 800; font-size: 9px; }
+
+    /* FOOTER */
+    .footer-banner {
+      margin-top: 22px;
+      background: #fef9c3;
+      border: 2px solid #ca8a04;
+      border-radius: 8px;
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 800;
+      color: #713f12;
+      letter-spacing: 0.5px;
+    }
+
+    .miro-watermark {
+      position: absolute;
+      bottom: 12px;
+      right: 24px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="poster">
+    <!-- HEADER -->
+    <div class="header-section">
+      <div class="badge-sesion">SESIÓN 6</div>
+      <h1 class="main-title">Integración y Sistemas Empresariales en SITRA-ORO</h1>
+      <p class="subtitle">
+        Diseño de integración mediante patrones arquitectónicos: Anti-Corruption Layer (ACL), Circuit Breaker, Arquitectura Orientada a Eventos de Dominio y Patrón Saga para transacciones distribuidas.
+      </p>
+      <div class="case-pill">
+        <span>💎</span>
+        <span><strong>Caso Práctico:</strong> BomERP SITRA-ORO emite liquidaciones electrónicas a SUNAT, consulta cotizaciones spot de oro y distribuye eventos a los módulos sin bloqueo.</span>
+      </div>
+    </div>
+
+    <!-- 2x2 GRID OF PURE ARCHITECTURAL DIAGRAMS (ZERO CODE) -->
+    <div class="grid-2x2">
+
+      <!-- TARJETA 1: ¿QUÉ ES ACL? -->
+      <div class="card">
+        <div>
+          <div class="card-title">1. ¿Qué es ACL? (Anti-Corruption Layer)</div>
+          <div class="card-narrative">
+            <strong>BomERP</strong> maneja su propia estructura de negocio para guardar liquidaciones y pesajes de oro, pero <strong>SUNAT</strong> exige un estándar tributario estricto: <strong>UBL 2.1 XML</strong>.<br>
+            <strong>¿Cómo solucionamos esto?</strong> Con una capa anticorrupción que traduce y aísla ambos mundos.
+          </div>
+        </div>
+
+        <div class="diagram-surface">
+          <div class="acl-layout">
+            <!-- Dominio Propio -->
+            <div class="acl-col-domain">
+              <div style="font-size: 10px; font-weight: 800; color: #1e40af; margin-bottom: 8px;">YOUR DOMAIN</div>
+              <div class="pill-item">Liquidacion Entity</div>
+              <div class="pill-item">Pesaje & Ley</div>
+              <div class="pill-item">Precios & Totales</div>
+              <div class="pill-item">Dominio Puro</div>
+            </div>
+
+            <!-- Capa ACL -->
+            <div class="acl-col-core">
+              <div style="font-size: 10px; font-weight: 800; color: #7e22ce; text-align: center;">ANTI-CORRUPTION LAYER (ACL)</div>
+              
+              <div style="background: white; border: 1px solid #d8b4fe; border-radius: 5px; padding: 6px 8px;">
+                <div style="font-size: 9px; font-weight: bold; color: #6b21a8;">➔ REQUEST FLOW</div>
+                <div style="font-size: 8.5px; color: #4c1d95;"><strong>TRANSLATOR:</strong> Traduce entidad de dominio a solicitud oficial XML.</div>
+              </div>
+
+              <div style="background: white; border: 1px solid #d8b4fe; border-radius: 5px; padding: 6px 8px;">
+                <div style="font-size: 9px; font-weight: bold; color: #6b21a8;">➔ RESPONSE FLOW</div>
+                <div style="font-size: 8.5px; color: #4c1d95;"><strong>TRANSLATOR:</strong> Traduce ticket/CDR de SUNAT a estado de dominio.</div>
+                <div style="font-size: 8px; color: #7e22ce; margin-top: 2px;">✓ Valida &nbsp; ✓ Transforma &nbsp; ✓ Aísla cambios</div>
+              </div>
+            </div>
+
+            <!-- API Externa -->
+            <div class="acl-col-ext">
+              <div style="font-size: 10px; font-weight: 800; color: #166534; margin-bottom: 6px;">EXTERNAL API</div>
+              <div style="background: white; border: 1.5px solid #4ade80; border-radius: 8px; padding: 6px 8px; text-align: center; width: 100%; margin-bottom: 6px;">
+                <div style="font-size: 10px; font-weight: 800; color: #15803d;">SUNAT / OSE</div>
+                <div style="font-size: 8px; color: #16a34a;">UBL 2.1 XML</div>
+              </div>
+              <div style="font-size: 7.5px; color: #15803d; text-align: center; background: white; padding: 4px; border-radius: 4px; width: 100%; border: 1px solid #bbf7d0;">
+                Envío Boletas / CDR
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout-box">
+          <strong>Beneficio:</strong> Cambios en las normativas fiscales de SUNAT no modifican el código de dominio de SITRA-ORO.
+        </div>
+      </div>
+
+      <!-- TARJETA 2: CIRCUIT BREAKER PATTERN -->
+      <div class="card">
+        <div>
+          <div class="card-title">2. Circuit Breaker Pattern</div>
+          <div class="card-narrative">
+            Protege a SITRA-ORO contra caídas de servicios externos (API DNI RENIEC o API Cotización Spot). Evita hilos colgados y fallos en cascada cortando llamadas temporalmente.
+          </div>
+        </div>
+
+        <div class="diagram-surface">
+          <div class="cb-split">
+            <!-- Tabla de Estados -->
+            <table class="cb-table">
+              <thead>
+                <tr>
+                  <th style="width: 32%;">Estado</th>
+                  <th>¿Qué significa?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge-closed">CLOSED</span></td>
+                  <td>Todo funciona normalmente. Solicitudes fluyen.</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-open">OPEN</span></td>
+                  <td>Fallas reiteradas. Se cortan peticiones y se responde con caché.</td>
+                </tr>
+                <tr>
+                  <td><span class="badge-half">HALF_OPEN</span></td>
+                  <td>Pruebas de sondeo para comprobar si el servicio ya revivió.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Diagrama SVG de Transición de Estados -->
+            <div style="flex: 1.1;">
+              <svg viewBox="0 0 290 160" style="width: 100%; height: 135px;">
+                <!-- CLOSED -->
+                <g transform="translate(10, 10)">
+                  <rect width="85" height="42" rx="6" fill="#0284c7" />
+                  <text x="42" y="22" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">Closed</text>
+                  <text x="42" y="34" fill="#e0f2fe" font-size="7.5" text-anchor="middle">Normal / Sano</text>
+                </g>
+
+                <!-- FLECHA CLOSED -> OPEN -->
+                <path d="M 95 31 L 185 31" stroke="#ea580c" stroke-width="1.8" />
+                <polygon points="185,31 178,28 178,34" fill="#ea580c" />
+                <text x="140" y="24" fill="#ea580c" font-size="7" font-weight="bold" text-anchor="middle">fallas &gt; umbral</text>
+
+                <!-- OPEN -->
+                <g transform="translate(190, 10)">
+                  <rect width="85" height="42" rx="6" fill="#ea580c" />
+                  <text x="42" y="22" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">Open</text>
+                  <text x="42" y="34" fill="#ffedd5" font-size="7.5" text-anchor="middle">Falla Rápida / Corta</text>
+                </g>
+
+                <!-- FLECHA OPEN -> HALF-OPEN -->
+                <path d="M 232 52 C 232 95, 175 110, 155 118" stroke="#64748b" stroke-width="1.5" />
+                <polygon points="155,118 162,114 163,120" fill="#64748b" />
+                <text x="236" y="88" fill="#64748b" font-size="7">timeout espera</text>
+
+                <!-- HALF-OPEN -->
+                <g transform="translate(65, 105)">
+                  <rect width="85" height="42" rx="6" fill="#0d9488" />
+                  <text x="42" y="22" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">Half-Open</text>
+                  <text x="42" y="34" fill="#ccfbf1" font-size="7.5" text-anchor="middle">Sondeo de prueba</text>
+                </g>
+
+                <!-- FLECHA HALF-OPEN -> CLOSED -->
+                <path d="M 65 120 C 25 105, 25 70, 32 55" stroke="#0f766e" stroke-width="1.8" />
+                <polygon points="32,55 26,60 32,63" fill="#0f766e" />
+                <text x="10" y="85" fill="#0f766e" font-size="7" font-weight="bold">prueba OK</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout-box">
+          <strong>Resiliencia:</strong> Si cae el proveedor Spot, el sistema entrega la última cotización guardada en Redis en menos de 5 ms.
+        </div>
+      </div>
+
+      <!-- TARJETA 3: ¿QUÉ SON LOS DOMAIN EVENTS? -->
+      <div class="card">
+        <div>
+          <div class="card-title">3. ¿Qué son los Domain Events?</div>
+          <div class="card-narrative">
+            Imagina que SITRA-ORO registra una venta de oro. El módulo de ventas anuncia por un <strong>altavoz</strong>: <em>«¡Se acaba de registrar una venta!»</em>.
+            <ul style="margin: 4px 0 6px 18px; font-size: 11px;">
+              <li><strong>Inventario / Bóveda:</strong> Actualiza las existencias de oro.</li>
+              <li><strong>Reportes y Trazabilidad:</strong> Registra la operación.</li>
+              <li><strong>Inteligencia Artificial:</strong> Analiza las tendencias de precio.</li>
+            </ul>
+            El módulo emisor no necesita conocer quién escucha el anuncio.
+          </div>
+        </div>
+
+        <div class="diagram-surface">
+          <svg viewBox="0 0 540 160" style="width: 100%; height: 140px;">
+            <!-- Publicadores -->
+            <rect x="20" y="8" width="180" height="30" rx="5" fill="#334155" />
+            <text x="110" y="27" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">Módulo Ventas (VentaRegistrada)</text>
+
+            <rect x="340" y="8" width="180" height="30" rx="5" fill="#334155" />
+            <text x="430" y="27" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">Módulo Acopio (LoteRecibido)</text>
+
+            <!-- Flechas a Broker -->
+            <path d="M 110 38 L 110 60" stroke="#2563eb" stroke-width="2" />
+            <polygon points="110,60 107,53 113,53" fill="#2563eb" />
+            <path d="M 430 38 L 430 60" stroke="#2563eb" stroke-width="2" />
+            <polygon points="430,60 427,53 433,53" fill="#2563eb" />
+
+            <!-- Event Broker -->
+            <rect x="15" y="62" width="510" height="42" rx="6" fill="#1e293b" />
+            <text x="270" y="78" fill="#38bdf8" font-size="10" font-weight="bold" text-anchor="middle">EVENT BROKER (Kafka / RabbitMQ / Spring Events)</text>
+            
+            <rect x="30" y="83" width="135" height="17" rx="3" fill="#475569" />
+            <text x="97" y="95" fill="#fff" font-size="8" text-anchor="middle">VentaRegistrada Topic</text>
+
+            <rect x="200" y="83" width="135" height="17" rx="3" fill="#475569" />
+            <text x="267" y="95" fill="#fff" font-size="8" text-anchor="middle">LoteValorizado Topic</text>
+
+            <rect x="365" y="83" width="145" height="17" rx="3" fill="#475569" />
+            <text x="437" y="95" fill="#fff" font-size="8" text-anchor="middle">LiquidacionAprobada Topic</text>
+
+            <!-- Suscriptores -->
+            <rect x="10" y="122" width="150" height="30" rx="5" fill="#0f766e" />
+            <text x="85" y="141" fill="#fff" font-size="9.5" font-weight="bold" text-anchor="middle">Bóveda / Inventario</text>
+
+            <rect x="195" y="122" width="150" height="30" rx="5" fill="#0f766e" />
+            <text x="270" y="141" fill="#fff" font-size="9.5" font-weight="bold" text-anchor="middle">Trazabilidad & Kardex</text>
+
+            <rect x="380" y="122" width="150" height="30" rx="5" fill="#0f766e" />
+            <text x="455" y="141" fill="#fff" font-size="9.5" font-weight="bold" text-anchor="middle">Inteligencia Artificial</text>
+          </svg>
+        </div>
+
+        <div class="callout-box">
+          <strong>Domain Event:</strong> Un aviso que comunica que ocurrió un hecho trascendente en el sistema.
+        </div>
+      </div>
+
+      <!-- TARJETA 4: ¿QUÉ ES SAGA? -->
+      <div class="card">
+        <div>
+          <div class="card-title">4. ¿Qué es Saga?</div>
+          <div class="card-narrative">
+            BomERP liquida compras de oro y las envía a SUNAT en varios pasos coordinados:
+            <ol style="margin: 4px 0 6px 18px; font-size: 11px;">
+              <li>Reúne las boletas / liquidaciones del día.</li>
+              <li>Envía el resumen a SUNAT y recibe número de ticket.</li>
+              <li>Consulta estado del ticket y SUNAT responde aceptación o rechazo.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="diagram-surface">
+          <svg viewBox="0 0 540 145" style="width: 100%; height: 140px;">
+            <!-- Start -->
+            <circle cx="20" cy="30" r="10" fill="#3b82f6" />
+            <text x="20" y="33" fill="#fff" font-size="7.5" font-weight="bold" text-anchor="middle">Inicio</text>
+
+            <!-- T1 -->
+            <g transform="translate(42, 12)">
+              <rect width="95" height="36" rx="5" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.3" />
+              <text x="47" y="18" fill="#1e40af" font-size="8.5" font-weight="bold" text-anchor="middle">1. Bloquear Lote</text>
+              <text x="47" y="29" fill="#60a5fa" font-size="7.5" text-anchor="middle">(Bóveda Oro)</text>
+            </g>
+            <path d="M 137 30 L 157 30" stroke="#2563eb" stroke-width="1.5" />
+
+            <!-- T2 -->
+            <g transform="translate(160, 12)">
+              <rect width="95" height="36" rx="5" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.3" />
+              <text x="47" y="18" fill="#1e40af" font-size="8.5" font-weight="bold" text-anchor="middle">2. Liquidación</text>
+              <text x="47" y="29" fill="#60a5fa" font-size="7.5" text-anchor="middle">(Cálculo Monto)</text>
+            </g>
+            <path d="M 255 30 L 275 30" stroke="#2563eb" stroke-width="1.5" />
+
+            <!-- T3 -->
+            <g transform="translate(278, 12)">
+              <rect width="105" height="36" rx="5" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.3" />
+              <text x="52" y="18" fill="#1e40af" font-size="8.5" font-weight="bold" text-anchor="middle">3. Enviar a SUNAT</text>
+              <text x="52" y="29" fill="#60a5fa" font-size="7.5" text-anchor="middle">(Vía Capa ACL)</text>
+            </g>
+            <path d="M 383 30 L 403 30" stroke="#2563eb" stroke-width="1.5" />
+
+            <!-- T4 Exito -->
+            <g transform="translate(406, 12)">
+              <rect width="110" height="36" rx="5" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5" />
+              <text x="55" y="18" fill="#065f46" font-size="8.5" font-weight="bold" text-anchor="middle">4. Confirmar Pago</text>
+              <text x="55" y="29" fill="#059669" font-size="7.5" text-anchor="middle">(Domain Event)</text>
+            </g>
+
+            <!-- Compensación -->
+            <path d="M 330 48 L 330 75" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="3,2" />
+            <text x="345" y="66" fill="#ea580c" font-size="7.5" font-weight="bold">¿SUNAT rechaza?</text>
+
+            <!-- C2 -->
+            <g transform="translate(220, 80)">
+              <rect width="115" height="38" rx="5" fill="#fff7ed" stroke="#f97316" stroke-width="1.3" />
+              <text x="57" y="18" fill="#9a3412" font-size="8" font-weight="bold" text-anchor="middle">Compensación 2</text>
+              <text x="57" y="30" fill="#c2410c" font-size="7.5" text-anchor="middle">Anular Liquidación</text>
+            </g>
+            <path d="M 220 99 L 195 99" stroke="#ea580c" stroke-width="1.5" />
+
+            <!-- C1 -->
+            <g transform="translate(75, 80)">
+              <rect width="115" height="38" rx="5" fill="#fff7ed" stroke="#f97316" stroke-width="1.3" />
+              <text x="57" y="18" fill="#9a3412" font-size="8" font-weight="bold" text-anchor="middle">Compensación 1</text>
+              <text x="57" y="30" fill="#c2410c" font-size="7.5" text-anchor="middle">Desbloquear Lote</text>
+            </g>
+
+            <rect x="15" y="124" width="10" height="10" fill="#eff6ff" stroke="#3b82f6" />
+            <text x="30" y="132" fill="#64748b" font-size="7.5">Transacción Positiva</text>
+            <rect x="130" y="124" width="10" height="10" fill="#fff7ed" stroke="#f97316" />
+            <text x="145" y="132" fill="#64748b" font-size="7.5">Transacción Compensatoria (Rollback Distribuido)</text>
+          </svg>
+        </div>
+
+        <div class="callout-box callout-orange">
+          <strong>¿Y si SUNAT rechaza?</strong> BomERP ejecuta transacciones compensatorias para anular la liquidación y liberar el oro. Para coordinar esto se usa <strong>Saga</strong>.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER BANNER -->
+    <div class="footer-banner">
+      ACL Y CIRCUIT BREAKER PROTEGEN NUESTRAS FRONTERAS; EVENTOS Y SAGA ASEGURAN LA CONSISTENCIA DISTRIBUIDA
+    </div>
+
+    <div class="miro-watermark">
+      <span>100%</span>
+      <span style="font-weight: 800; color: #eab308;">|||</span>
+      <span>miro</span>
+    </div>
+  </div>
+
+</body>
+</html>

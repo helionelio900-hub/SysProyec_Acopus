@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1280px; height: 720px; background: #ffffff;
+    font-family: 'Open Sans', -apple-system, sans-serif; color: #1e293b;
+    display: flex; flex-direction: column; justify-content: center; position: relative; padding: 35px 50px;
+  }
+  h1 {
+    font-size: 38px; font-weight: 800; color: #0b3954; text-align: center;
+    margin-bottom: 25px;
+  }
+  .content-grid {
+    display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: center;
+  }
+  .story-text {
+    font-size: 17.5px; line-height: 1.6; color: #1e293b;
+  }
+  .story-text p { margin-bottom: 12px; }
+  .story-text ul { margin-left: 20px; margin-bottom: 12px; }
+  .story-text li { margin-bottom: 6px; }
+  .highlight-def {
+    font-size: 18.5px; font-weight: 800; color: #0b3954; margin-top: 14px;
+    background: #f1f5f9; padding: 10px 16px; border-left: 4px solid #0b3954; border-radius: 4px;
+  }
+
+  /* DIAGRAM STYLES */
+  .diagram-box {
+    display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%;
+  }
+  .service-card {
+    background: #1e293b; color: #ffffff; border-radius: 6px; padding: 10px 20px;
+    font-size: 13.5px; font-weight: 700; text-align: center; width: 180px;
+  }
+  .broker-box {
+    background: #334155; color: #ffffff; border-radius: 8px; padding: 14px 20px;
+    width: 100%; display: flex; flex-direction: column; align-items: center;
+  }
+  .broker-title { font-size: 13px; font-weight: 800; margin-bottom: 10px; color: #cbd5e1; }
+  .topic-row { display: flex; gap: 10px; width: 100%; justify-content: center; }
+  .topic-badge {
+    background: #475569; padding: 6px 12px; border-radius: 4px; font-size: 11.5px; font-weight: 600;
+  }
+  .sub-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%;
+  }
+  .sub-card {
+    background: #1e293b; color: #ffffff; border-radius: 6px; padding: 8px;
+    text-align: center; font-size: 11.5px; font-weight: 600;
+  }
+  .sub-action { font-size: 10.5px; color: #94a3b8; margin-top: 4px; }
+  .features-list {
+    font-size: 11px; color: #64748b; line-height: 1.4; margin-top: 8px; width: 100%; text-align: left;
+  }
+  .miro-tag {
+    position: absolute; bottom: 15px; right: 25px; font-size: 14px; color: #94a3b8; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <h1>¿Qué son los Domain Events?</h1>
+
+  <div class="content-grid">
+    <div class="story-text">
+      <p>Imagina que <strong>SITRA-ORO</strong> registra una compra de mineral en ventanilla. El módulo de acopio necesita comunicar a otros módulos que ocurrió algo importante. ¿Cómo lo hace? Generando un evento llamado: <strong>CompraOroRegistrada</strong>.</p>
+      <p>Imagina que el módulo de acopio anuncia por un altavoz: <em>«¡Se acaba de registrar una compra de oro!»</em>. Entonces:</p>
+      <ul>
+        <li><strong>Bóveda</strong> escucha el anuncio y actualiza las existencias de oro físico.</li>
+        <li><strong>Liquidación</strong> escucha el anuncio y agrupa el lote para fundición.</li>
+        <li><strong>Reportes</strong> escucha el anuncio y registra la operación en el libro contable.</li>
+      </ul>
+      <p>Lo interesante es que el módulo de acopio no necesita conocer todos los módulos que reciben el anuncio.</p>
+
+      <div class="highlight-def">
+        Domain Event = un aviso que comunica que ocurrió algo importante en el sistema.
+      </div>
+    </div>
+
+    <!-- DIAGRAM -->
+    <div class="diagram-box">
+      <div style="display: flex; gap: 20px;">
+        <div class="service-card">
+          Módulo Acopio<br><span style="font-size: 11px; font-weight: 400; color: #94a3b8;">(Ventanilla G2)</span>
+        </div>
+      </div>
+      <div style="font-size: 11.5px; font-weight: 700; color: #0284c7;">↓ Publica: CompraOroRegistrada</div>
+
+      <div class="broker-box">
+        <div class="broker-title">Event Broker (Kafka / RabbitMQ / Spring Events)</div>
+        <div class="topic-row">
+          <div class="topic-badge">CompraOro Topic</div>
+          <div class="topic-badge">StockBoveda Topic</div>
+          <div class="topic-badge">Liquidacion Topic</div>
+        </div>
+      </div>
+      <div style="font-size: 11.5px; font-weight: 700; color: #059669;">↓ Suscripción asíncrona</div>
+
+      <div class="sub-grid">
+        <div class="sub-card">
+          Módulo Bóveda
+          <div class="sub-action">Actualiza stock físico</div>
+        </div>
+        <div class="sub-card">
+          Módulo Liquidación
+          <div class="sub-action">Agrupa lote mayorista</div>
+        </div>
+        <div class="sub-card">
+          Reportes y SUNAT
+          <div class="sub-action">Genera libro contable</div>
+        </div>
+      </div>
+
+      <div class="features-list">
+        <strong>Características clave:</strong><br>
+        • Comunicación asíncrona (no bloquea al cajero)<br>
+        • Desacoplamiento temporal entre módulos<br>
+        • Múltiples consumidores independientes
+      </div>
+    </div>
+  </div>
+
+  <div class="miro-tag">miro</div>
+</body>
+</html>
