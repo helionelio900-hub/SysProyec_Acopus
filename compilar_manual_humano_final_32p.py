@@ -500,15 +500,22 @@ html_indice = """
     </div>
   </div>
 
-  <div style="background: linear-gradient(135deg, #0f2744 0%, #1e3a5f 100%); border: 1.5px solid #f59e0b; border-radius: 6px; padding: 5px 12px; margin-top: 4px; color: #ffffff; display: flex; align-items: center; justify-content: space-between;">
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <span style="background: #f59e0b; color: #0f2744; font-size: 10pt; font-weight: 900; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">▶</span>
-      <div>
-        <div style="font-size: 7.6pt; font-weight: 800; color: #f59e0b; letter-spacing: 0.2px;">VIDEO PITCH Y RECORRIDO OFICIAL DEL SISTEMA (1080p · 4m 28s)</div>
-        <div style="font-size: 6.7pt; color: #cbd5e1;">Recorrido integral por los 15 pasos con voz clonada del autor <strong>Helio Paul Calisaya</strong>. Alojado en <code>docs/video/</code> del repositorio.</div>
+  <div style="background: linear-gradient(135deg, #091728 0%, #152e4d 100%); border: 1.5px solid #f59e0b; border-radius: 6px; padding: 6px 12px; margin-top: 4px; color: #ffffff;">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="background: #f59e0b; color: #0f2744; font-size: 9pt; font-weight: 900; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">▶</span>
+        <span style="font-size: 7.6pt; font-weight: 800; color: #f59e0b; letter-spacing: 0.2px;">VIDEO PITCH Y RECORRIDO OFICIAL DEL SISTEMA (1080p · 4m 28s)</span>
       </div>
+      <a href="https://github.com/helionelio900-hub/SysProyec_Acopus/blob/feat/s14-mayorista-dashboard-adelantos/docs/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4" target="_blank" style="background: #f59e0b; color: #0f2744; text-decoration: none; font-size: 6.8pt; font-weight: 800; padding: 3px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+        ▶ Ver Video en GitHub ↗
+      </a>
     </div>
-    <span style="background: #f59e0b; color: #0f2744; font-size: 6.8pt; font-weight: 800; padding: 2px 7px; border-radius: 4px; white-space: nowrap;">MP4 Oficial</span>
+    <div style="font-size: 6.6pt; color: #cbd5e1; line-height: 1.35; margin-left: 28px; margin-top: 2px;">
+      Recorrido integral por los 15 pasos con voz del autor <strong>Helio Paul Calisaya</strong>.
+      <br>
+      <strong style="color: #f1f5f9;">Enlace web directo (clic para reproducir):</strong> 
+      <a href="https://github.com/helionelio900-hub/SysProyec_Acopus/blob/feat/s14-mayorista-dashboard-adelantos/docs/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4" target="_blank" style="color: #93c5fd; text-decoration: underline; font-weight: 600;">https://github.com/helionelio900-hub/SysProyec_Acopus/blob/feat/s14-mayorista-dashboard-adelantos/docs/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4</a>
+    </div>
   </div>
 </div>
 """
