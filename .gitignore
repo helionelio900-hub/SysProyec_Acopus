@@ -35,6 +35,7 @@ Thumbs.db
 *.avi
 *.mov
 !docs/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4
+!docs/video/SITRA_ORO_VIDEO_SUBTITULADO.mp4
 
 # Local scratch / test payloads
 sample_mayorista.json

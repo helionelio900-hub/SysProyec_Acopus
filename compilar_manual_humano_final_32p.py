@@ -504,7 +504,7 @@ html_indice = """
     <div style="display: flex; align-items: center; justify-content: space-between;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <span style="background: #f59e0b; color: #0f2744; font-size: 9pt; font-weight: 900; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">▶</span>
-        <span style="font-size: 7.6pt; font-weight: 800; color: #f59e0b; letter-spacing: 0.2px;">VIDEO PITCH Y RECORRIDO OFICIAL DEL SISTEMA (1080p · 4m 28s)</span>
+        <span style="font-size: 7.6pt; font-weight: 800; color: #f59e0b; letter-spacing: 0.2px;">VIDEO MANUAL Y RECORRIDO DEL SISTEMA (1080p · 4m 28s)</span>
       </div>
       <a href="https://helionelio900-hub.github.io/SysProyec_Acopus/video/" target="_blank" style="background: #f59e0b; color: #0f2744; text-decoration: none; font-size: 6.8pt; font-weight: 800; padding: 3px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
         ▶ Reproducir Video Online ↗
@@ -513,8 +513,11 @@ html_indice = """
     <div style="font-size: 6.6pt; color: #cbd5e1; line-height: 1.35; margin-left: 28px; margin-top: 2px;">
       Recorrido integral por los 15 pasos con voz del autor <strong>Helio Paul Calisaya</strong>.
       <br>
-      <strong style="color: #f1f5f9;">Reproductor web oficial (streaming en vivo):</strong> 
+      <strong style="color: #f1f5f9;">Video Manual (15 Pasos):</strong> 
       <a href="https://helionelio900-hub.github.io/SysProyec_Acopus/video/" target="_blank" style="color: #93c5fd; text-decoration: underline; font-weight: 700;">https://helionelio900-hub.github.io/SysProyec_Acopus/video/</a>
+      &nbsp;·&nbsp;
+      <strong style="color: #f1f5f9;">Video Pitch (Subtitulado):</strong> 
+      <a href="https://helionelio900-hub.github.io/SysProyec_Acopus/pitch/" target="_blank" style="color: #f59e0b; text-decoration: underline; font-weight: 700;">https://helionelio900-hub.github.io/SysProyec_Acopus/pitch/</a>
     </div>
   </div>
 </div>

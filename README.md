@@ -6,18 +6,28 @@
 
 ---
 
-## 🎥 Video Pitch Oficial y Recorrido del Sistema (1080p Full HD)
+## 🎥 Catálogo Multimedia Oficial de SITRA-ORO
 
-> **Demostración oficial de los 15 pasos operativos del sistema con voz real clonada del autor Helio Paul Calisaya.**  
+El proyecto cuenta con dos producciones audiovisuales oficiales de alta definición (1080p):
+
+### 1. 🚀 Video Pitch Oficial del Proyecto (Subtitulado · 1m 32s)
+> **Presentación ejecutiva, propuesta de valor y modelo de negocio de SITRA-ORO.**  
+> Duración: **1m 32s** · Resolución: **1920×1080 Full HD** · Subtítulos sincronizados integrados.  
+> 🎬 **[▶️ REPRODUCIR PITCH ONLINE (Streaming)](https://helionelio900-hub.github.io/SysProyec_Acopus/pitch/)** · 🔗 **[Ver en Repositorio Git](https://github.com/helionelio900-hub/SysProyec_Acopus/blob/feat/s14-mayorista-dashboard-adelantos/docs/video/SITRA_ORO_VIDEO_SUBTITULADO.mp4)** · ⬇️ **[Descargar MP4 (18.3 MB)](https://helionelio900-hub.github.io/SysProyec_Acopus/manual/video/SITRA_ORO_VIDEO_SUBTITULADO.mp4)**
+
+---
+
+### 2. 🎬 Video Manual de Usuario y Recorrido del Sistema (15 Pasos · 4m 28s)
+> **Recorrido técnico exhaustivo por los 15 pasos del software con voz clonada del autor Helio Paul Calisaya.**  
 > Duración: **4m 28s** (8,040 frames) · Resolución: **1920×1080 (16:9 Widescreen)** · Audio: **AAC Stereo 48 kHz**  
-> 🎬 **[▶️ REPRODUCIR VIDEO ONLINE (Web Player 1080p)](https://helionelio900-hub.github.io/SysProyec_Acopus/video/)** · ⬇️ **[Descargar MP4 Directo](https://helionelio900-hub.github.io/SysProyec_Acopus/manual/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4)**
+> 🎬 **[▶️ REPRODUCIR MANUAL ONLINE (Web Player 1080p)](https://helionelio900-hub.github.io/SysProyec_Acopus/video/)** · 🔗 **[Ver en Repositorio Git](https://github.com/helionelio900-hub/SysProyec_Acopus/blob/feat/s14-mayorista-dashboard-adelantos/docs/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4)** · ⬇️ **[Descargar MP4 (31.2 MB)](https://helionelio900-hub.github.io/SysProyec_Acopus/manual/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4)**
 
 <p align="center">
   <a href="https://helionelio900-hub.github.io/SysProyec_Acopus/video/" target="_blank">
-    <img src="docs/video/poster_video_pitch.png" alt="SITRA-ORO Video Pitch Oficial" width="850" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <img src="docs/video/poster_video_pitch.png" alt="SITRA-ORO Video Manual y Pitch Oficial" width="850" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
   </a>
   <br>
-  <em>Haz clic sobre la imagen para reproducir el Video Pitch Oficial en el reproductor web en vivo.</em>
+  <em>Haz clic sobre la imagen para abrir el reproductor web interactivo en vivo.</em>
 </p>
 
 ---
