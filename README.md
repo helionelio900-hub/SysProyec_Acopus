@@ -10,24 +10,24 @@
 
 > **Demostración oficial de los 15 pasos operativos del sistema con voz real clonada del autor Helio Paul Calisaya.**  
 > Duración: **4m 28s** (8,040 frames) · Resolución: **1920×1080 (16:9 Widescreen)** · Audio: **AAC Stereo 48 kHz**  
-> 🔗 **[▶️ Ver y Descargar Video Pitch Oficial (MP4 · 31.2 MB)](docs/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4)**
+> 🎬 **[▶️ REPRODUCIR VIDEO ONLINE (Web Player 1080p)](https://helionelio900-hub.github.io/SysProyec_Acopus/video/)** · ⬇️ **[Descargar MP4 Directo](https://helionelio900-hub.github.io/SysProyec_Acopus/manual/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4)**
 
 <p align="center">
-  <a href="docs/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4">
+  <a href="https://helionelio900-hub.github.io/SysProyec_Acopus/video/" target="_blank">
     <img src="docs/video/poster_video_pitch.png" alt="SITRA-ORO Video Pitch Oficial" width="850" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
   </a>
   <br>
-  <em>Haz clic sobre la imagen para reproducir o descargar el Video Pitch Oficial en alta definición.</em>
+  <em>Haz clic sobre la imagen para reproducir el Video Pitch Oficial en el reproductor web en vivo.</em>
 </p>
 
 ---
 
 ## 📖 Manual de Usuario y Documentación Técnica
 
-- 📄 **[Descargar Manual de Usuario Profesional en PDF (32 Páginas A4)](docs/SITRA-ORO_Manual_de_Usuario_Profesional.pdf)**  
-  Documento normativo con capturas reales de la interfaz Angular, tablas de elementos operacionales, reglas de metrología y actas de conformidad firmadas.
-- 🌐 **[Acceder al Manual Web Interactivo con Video Embebido](docs/index.html)**  
+- 🌐 **[Acceder al Manual Web Interactivo con Video Embebido](https://helionelio900-hub.github.io/SysProyec_Acopus/manual/)**  
   Portal web responsivo con reproductor HTML5 integrado, catálogo de módulos y guía rápida de operación.
+- 📄 **[Descargar Manual de Usuario Profesional en PDF (32 Páginas A4)](https://helionelio900-hub.github.io/SysProyec_Acopus/manual/SITRA-ORO_Manual_de_Usuario_Profesional.pdf)**  
+  Documento normativo con capturas reales de la interfaz Angular, tablas de elementos operacionales, reglas de metrología y actas de conformidad firmadas.
 
 ---
 
