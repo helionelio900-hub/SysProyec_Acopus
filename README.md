@@ -18,7 +18,7 @@ El proyecto cuenta con dos producciones audiovisuales oficiales de alta definici
 ---
 
 ### 2. 🎬 Video Manual de Usuario y Recorrido del Sistema (15 Pasos · 4m 28s)
-> **Recorrido técnico exhaustivo por los 15 pasos del software con voz clonada del autor Helio Paul Calisaya.**  
+> **Recorrido técnico exhaustivo por los 15 pasos del software con locución del autor Helio Paul Calisaya.**  
 > Duración: **4m 28s** (8,040 frames) · Resolución: **1920×1080 (16:9 Widescreen)** · Audio: **AAC Stereo 48 kHz**  
 > 🎬 **[▶️ REPRODUCIR MANUAL ONLINE (Web Player 1080p)](https://helionelio900-hub.github.io/SysProyec_Acopus/video/)** · 🔗 **[Ver en Repositorio Git](https://github.com/helionelio900-hub/SysProyec_Acopus/blob/feat/s14-mayorista-dashboard-adelantos/docs/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4)** · ⬇️ **[Descargar MP4 (31.2 MB)](https://helionelio900-hub.github.io/SysProyec_Acopus/manual/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4)**
 
