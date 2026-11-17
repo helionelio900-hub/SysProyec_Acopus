@@ -1,6 +1,35 @@
 # SITRA-ORO (`sitra-oro`)
 
-**Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro**
+**Sistema de Información, Trazabilidad y Liquidación en Acopio de Oro**  
+*Universidad Peruana Unión (UPeU 2026) · Quilate Bullion S.A.C.*  
+*Autor: **Faijo Calisaya Helio Paul** · Docente: **Mg. Nélida Huamán Paco***
+
+---
+
+## 🎥 Video Pitch Oficial y Recorrido del Sistema (1080p Full HD)
+
+> **Demostración oficial de los 15 pasos operativos del sistema con voz real clonada del autor Helio Paul Calisaya.**  
+> Duración: **4m 28s** (8,040 frames) · Resolución: **1920×1080 (16:9 Widescreen)** · Audio: **AAC Stereo 48 kHz**  
+> 🔗 **[▶️ Ver y Descargar Video Pitch Oficial (MP4 · 31.2 MB)](docs/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4)**
+
+<p align="center">
+  <a href="docs/video/SITRA-ORO_Pitch_Master_Oficial_Helio.mp4">
+    <img src="docs/video/poster_video_pitch.png" alt="SITRA-ORO Video Pitch Oficial" width="850" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  </a>
+  <br>
+  <em>Haz clic sobre la imagen para reproducir o descargar el Video Pitch Oficial en alta definición.</em>
+</p>
+
+---
+
+## 📖 Manual de Usuario y Documentación Técnica
+
+- 📄 **[Descargar Manual de Usuario Profesional en PDF (32 Páginas A4)](docs/SITRA-ORO_Manual_de_Usuario_Profesional.pdf)**  
+  Documento normativo con capturas reales de la interfaz Angular, tablas de elementos operacionales, reglas de metrología y actas de conformidad firmadas.
+- 🌐 **[Acceder al Manual Web Interactivo con Video Embebido](docs/index.html)**  
+  Portal web responsivo con reproductor HTML5 integrado, catálogo de módulos y guía rápida de operación.
+
+---
 
 **SITRA-ORO** (`sitra-oro`) es el proyecto integrador del grupo para gestionar la trazabilidad, cotización y liquidación financiera en el proceso de acopio de oro artesanal.
 
